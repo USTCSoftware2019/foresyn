@@ -8,9 +8,6 @@ class CobraMetabolite(models.Model):
     name = models.CharField(max_length=50)
     compartment = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.id + ' ' + self.name
-
     def build(self):
         return cobra.Metabolite(
             self.base, formula=self.formula, name=self.name,
@@ -25,10 +22,7 @@ class CobraReaction(models.Model):
     upper_bound = models.IntegerField(default=1000)
     metabolites = models.ManyToManyField(CobraMetabolite)
     coefficients = models.CharField(max_length=255)
-    genes = models.models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.id + ' ' + self.name
+    gene_reaction_rule = models.CharField(max_length=255)
 
     def build(self):
         cobra_reaction = cobra.Reaction(self.base)
@@ -38,11 +32,14 @@ class CobraReaction(models.Model):
         cobra_reaction.upper_bound = self.upper_bound
         cobra_reaction.add_metabolites(dict(
             zip(
-                [metabolite.build() for metabolite in self.metabolites],
-                self.coefficients.split()
+                [metabolite.build() for metabolite in self.metabolites.all()],
+                [
+                    float(coefficient)
+                    for coefficient in self.coefficients.split()
+                ]
             )
         ))
-        cobra_reaction.gene_reaction_rule = self.genes
+        cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
         return cobra_reaction
 
 
@@ -51,12 +48,9 @@ class CobraModel(models.Model):
     reactions = models.ManyToManyField(CobraReaction)
     objective = models.CharField(max_length=50)
 
-    def __str__(self):
-        return self.id + ' ' + self.base
-
     def build(self):
         cobra_model = cobra.Model(self.base)
         cobra_model.add_reactions(
-            [reaction.build() for reaction in self.reactions])
+            [reaction.build() for reaction in self.reactions.all()])
         cobra_model.objective = self.objective
         return cobra_model
