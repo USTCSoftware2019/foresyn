@@ -1,2 +1,4 @@
 Django>=2.2.3
 cobra>=0.15.3
+python-libsbml>=5.18.0
+lxml>=4.3.4
