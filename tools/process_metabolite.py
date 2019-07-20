@@ -16,8 +16,11 @@ for file in os.listdir(root):
     if os.path.isdir(file):
         continue
     with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
-        content = json.loads(f.read())
-        
+        try:
+            content = json.loads(f.read())
+        except json.decoder.JSONDecodeError:
+            print(file)
+
         bigg_id = content['bigg_id']
         name = content['name']
         formulae = content['formulae']
@@ -26,7 +29,7 @@ for file in os.listdir(root):
         except IndexError as e:
             charges = None
         database_links = content['database_links']
-        
+
         Metabolite.objects.create(
             bigg_id=bigg_id, name=name, formulae=formulae,
             charges=charges, database_links=database_links)
