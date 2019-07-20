@@ -33,7 +33,7 @@ class Model(_models.Model):
 
 class Reaction(_models.Model):
     bigg_id = _models.CharField(max_length=127, unique=True, db_index=True)
-    name = _models.CharField(max_length=127)
+    name = _models.CharField(max_length=127, blank=True)
     models = _models.ManyToManyField(
         Model, through='ModelReaction', through_fields=('reaction', 'model'))
 
@@ -53,7 +53,7 @@ class Metabolite(_models.Model):
         Model, through='ModelMetabolite', through_fields=('metabolite', 'model'))
 
     formulae = _models.CharField(max_length=127)
-    charges = _models.IntegerField()
+    charges = _models.IntegerField(blank=True, null=True)
 
     database_links = JSONField()
 
