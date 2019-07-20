@@ -52,7 +52,6 @@ class CobraModelApi(View):
             dmodel_base = CobraModel.objects.get(base=dmodel_base)
             dmodel_base.delete()
             return JsonResponse({'code': 200, 'message': 'success'})
-            # HTTP 状态码不要放到 body 里，应当这样
         except ObjectDoesNotExist as error:
             return JsonResponse({
                 'code': 200021,
@@ -234,3 +233,20 @@ class CobraMetaboliteApi(View):
             }, status=400)
         metabolite.save()
         return JsonResponse({'id': metabolite.id}, status=200)
+
+
+class CobraComputeApi(View):
+    def get(self, request, method):
+        try:
+            model_id = request.GET['id'][0]
+        except AttributeError as error:
+            return JsonResponse({'code': 300001, 'message': error.args}, status=400)
+        try:
+            model = CobraModel.objects.get(id=model_id)
+        except ObjectDoesNotExist as error:
+            return JsonResponse({'code': 300002, 'message': error.args}, status=400)
+        try:
+            cobra_model = model.build()
+        except Exception as error:
+            return JsonResponse({'code': 300003, 'message': error.args}, status=400)
+        cobra_model  # todo
