@@ -20,24 +20,24 @@ class CobraModelApi(View):
                 for reaction_id in params['reactions']
             ]
             model = CobraModel(**get_required_params(params, [
-                'base', 'objective'
+                'identifier', 'objective'
             ]))
             model.full_clean()
         except ObjectDoesNotExist as error:
             return JsonResponse({
                 'code': 200021,
-                'message': error.message.pop()
-            })
+                'message': error.messages
+            }, status=400)
         except AttributeError as error:
             return JsonResponse({
                 'code': 200011,
-                'message': error.args.pop()
-            })
+                'message': error.args
+            }, status=400)
         except ValidationError as error:
             return JsonResponse({
                 'code': 200001,
-                'message': error.messages.pop()
-            })
+                'message': error.messages
+            }, status=400)
         model.save()
         model.reactions.set(reactions)
         model.save()
@@ -57,7 +57,7 @@ class CobraReactionApi(View):
             ]
             reaction = CobraReaction(
                 **get_required_params(params, [
-                    'base', 'name', 'subsystem', 'lower_bound', 'upper_bound',
+                    'identifier', 'name', 'subsystem', 'lower_bound', 'upper_bound',
                     'coefficients', 'gene_reaction_rule'
                 ])
             )
@@ -65,18 +65,18 @@ class CobraReactionApi(View):
         except AttributeError as error:
             return JsonResponse({
                 'code': 200022,
-                'message': error.args.pop()
-            })
+                'message': error.args
+            }, status=400)
         except ObjectDoesNotExist as error:
             return JsonResponse({
                 'code': 200012,
-                'message': error.message.pop()
-            })
+                'message': error.messages
+            }, status=400)
         except ValidationError as error:
             return JsonResponse({
                 'code': 200002,
-                'message': error.messages.pop()
-            })
+                'message': error.messages
+            }, status=400)
         reaction.save()
         reaction.metabolites.set(metabolites)
         reaction.save()
@@ -92,20 +92,20 @@ class CobraMetaboliteApi(View):
         try:
             metabolite = CobraMetabolite(
                 **get_required_params(params, [
-                    'base', 'formula', 'name', 'compartment'
+                    'identifier', 'formula', 'name', 'compartment'
                 ])
             )
             metabolite.full_clean()
         except AttributeError as error:
             return JsonResponse({
                 'code': 200013,
-                'message': error.args.pop()
-            })
+                'message': error.args
+            }, status=400)
         except ValidationError as error:
             return JsonResponse({
                 'code': 200003,
-                'message': error.messages.pop()
-            })
+                'message': error.messages
+            }, status=400)
         metabolite.save()
         return JsonResponse({'id': metabolite.id}, status=201)
 
