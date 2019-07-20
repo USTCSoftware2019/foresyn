@@ -4,97 +4,110 @@ from django.views import View
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
-from . import models as cobra_models
+from .models import CobraModel, CobraReaction, CobraMetabolite
 
 
-def get_params_from_request(request, param_list):
-    return {param: json.loads(request.body)[param] for param in param_list}
+def get_required_params(params, required_params):
+    return {param: params[param] for param in required_params}
 
 
-class ModelView(View):
+class CobraModelApi(View):
     def post(self, request):
+        params = json.loads(request.body)
         try:
             reactions = [
-                cobra_models.CobraReaction.objects.get(id=reaction_id)
-                for reaction_id in dict(
-                    get_params_from_request(request, ['reactions'])
-                )['reactions']
+                CobraReaction.objects.get(id=reaction_id)
+                for reaction_id in params['reactions']
             ]
+            model = CobraModel(**get_required_params(params, [
+                'base', 'objective'
+            ]))
+            model.full_clean()
         except ObjectDoesNotExist as error:
             return JsonResponse({
-                'code': 200011,
+                'code': 200021,
                 'message': error.message.pop()
             })
-        cobra_model = cobra_models.CobraModel(
-            **get_params_from_request(request, ['base', 'objective']))
-        try:
-            cobra_model.full_clean()
+        except AttributeError as error:
+            return JsonResponse({
+                'code': 200011,
+                'message': error.args.pop()
+            })
         except ValidationError as error:
             return JsonResponse({
                 'code': 200001,
                 'message': error.messages.pop()
             })
-        cobra_model.save()
-        cobra_model.reactions.set(reactions)
-        cobra_model.save()
-        return JsonResponse({'id': cobra_model.id}, status=201)
+        model.save()
+        model.reactions.set(reactions)
+        model.save()
+        return JsonResponse({'id': model.id}, status=201)
 
     def get(self, request):
         pass
 
 
-class ReactionView(View):
+class CobraReactionApi(View):
     def post(self, request):
+        params = json.loads(request.body)
         try:
             metabolites = [
-                cobra_models.CobraMetabolite.objects.get(id=metabolite_id)
-                for metabolite_id in dict(
-                    get_params_from_request(request, ['metabolites'])
-                )['metabolites']
+                CobraMetabolite.objects.get(id=metabolite_id)
+                for metabolite_id in params['metabolites']
             ]
+            reaction = CobraReaction(
+                **get_required_params(params, [
+                    'base', 'name', 'subsystem', 'lower_bound', 'upper_bound',
+                    'coefficients', 'gene_reaction_rule'
+                ])
+            )
+            reaction.full_clean()
+        except AttributeError as error:
+            return JsonResponse({
+                'code': 200022,
+                'message': error.args.pop()
+            })
         except ObjectDoesNotExist as error:
             return JsonResponse({
                 'code': 200012,
                 'message': error.message.pop()
             })
-        cobra_reaction = cobra_models.CobraReaction(
-            **get_params_from_request(request, [
-                'base', 'name', 'subsystem', 'lower_bound', 'upper_bound',
-                'coefficients', 'gene_reaction_rule'
-            ])
-        )
-        try:
-            cobra_reaction.full_clean()
         except ValidationError as error:
             return JsonResponse({
                 'code': 200002,
                 'message': error.messages.pop()
             })
-        cobra_reaction.save()
-        cobra_reaction.metabolites.set(metabolites)
-        cobra_reaction.save()
-        return JsonResponse({'id': cobra_reaction.id}, status=201)
+        reaction.save()
+        reaction.metabolites.set(metabolites)
+        reaction.save()
+        return JsonResponse({'id': reaction.id}, status=201)
 
     def get(self, request):
         pass
 
 
-class MetaboliteView(View):
+class CobraMetaboliteApi(View):
     def post(self, request):
-        cobra_metabolite = cobra_models.CobraMetabolite(
-            **get_params_from_request(request, [
-                'base', 'formula', 'name', 'compartment'
-            ])
-        )
+        params = json.loads(request.body)
         try:
-            cobra_metabolite.full_clean()
+            metabolite = CobraMetabolite(
+                **get_required_params(params, [
+                    'base', 'formula', 'name', 'compartment'
+                ])
+            )
+            metabolite.full_clean()
+        except AttributeError as error:
+            return JsonResponse({
+                'code': 200013,
+                'message': error.args.pop()
+            })
         except ValidationError as error:
             return JsonResponse({
                 'code': 200003,
                 'message': error.messages.pop()
             })
-        cobra_metabolite.save()
-        return JsonResponse({'id': cobra_metabolite.id}, status=201)
+        metabolite.save()
+        return JsonResponse({'id': metabolite.id}, status=201)
 
     def get(self, request):
         pass
