@@ -1,6 +1,6 @@
 from django.db import models as _models
 
-import jsonfield
+from .fields import JSONField
 
 
 class Model(_models.Model):
@@ -42,7 +42,7 @@ class Reaction(_models.Model):
     reaction_string = _models.CharField(max_length=1023)
     pseudoreaction = _models.BooleanField()
 
-    database_links = jsonfield.JSONField()
+    database_links = JSONField()
 
 
 class Metabolite(_models.Model):
@@ -57,7 +57,7 @@ class Metabolite(_models.Model):
     formulae = _models.CharField(max_length=127)
     charges = _models.IntegerField()
 
-    database_links = jsonfield.JSONField()
+    database_links = JSONField()
 
 
 class Gene(_models.Model):
