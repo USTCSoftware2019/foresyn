@@ -8,4 +8,5 @@ exclude =
     __pycache__/,
     env/,
     venv/
-max-line-length = 79
+# according to Django Coding Style
+max-line-length = 119
