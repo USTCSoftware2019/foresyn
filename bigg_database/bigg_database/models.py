@@ -27,7 +27,7 @@ class Model(_models.Model):
         ('cm', 'cytosolic membrane'),
         ('i', 'i'))
 
-    compartments = jsonfield.JSONField()
+    compartments = JSONField()
     version = _models.CharField(max_length=127)
 
 
