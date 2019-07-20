@@ -46,6 +46,19 @@ class CobraModelApi(View):
     def get(self, request):
         pass
 
+    def delete(request):  # Class-based views 的用法可以参见
+        # https://docs.djangoproject.com/en/2.2/ref/class-based-views/
+        dreaction_base = request.POST['dreaction_base']
+        try:
+            dreaction = CobraReaction.get(base=dreaction_base)
+            dreaction.delete()
+            return JsonResponse({'code': 200, 'message': 'success'})
+            # HTTP 状态码不要放到 body 里，应当这样
+        except:
+            # Do not use bare 'except' 用 except 时一定要明确指出想要
+            # except 的 exception
+            return JsonResponse({'code': 403, 'message': "can't find CobraReaction"})
+
 
 class CobraReactionApi(View):
     def post(self, request):
@@ -85,6 +98,15 @@ class CobraReactionApi(View):
     def get(self, request):
         pass
 
+    def delete(request):
+        dmetabolite_base = request.POST['dmetabolite_base']
+        try:
+            dmetabolite = CobraMetabolite.get(base=dmetabolite_base)
+            dmetabolite.delete()
+            return JsonResponse({'status': 'success'})
+        except:
+            return JsonResponse({'code': 403, 'message': "can't find CobraMetabolite"})
+
 
 class CobraMetaboliteApi(View):
     def post(self, request):
@@ -111,3 +133,12 @@ class CobraMetaboliteApi(View):
 
     def get(self, request):
         pass
+
+    def delete(request):
+        dmodel_base = request.POST['dmodel_base']
+        try:
+            dmodel = CobraModel.get(base=dmodel_base)
+            dmodel.delete()
+            return JsonResponse({'code': 200, 'status': 'success'})
+        except:
+            return JsonResponse({'code': 403, 'message': "can't find CobraModel"})
