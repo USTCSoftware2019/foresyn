@@ -2,6 +2,9 @@ language: python
 python: "3.6"
 dist: xenial
 
+git:
+  depth: 3
+
 install:
   - pip3 install --upgrade -r requirements.txt
 
@@ -11,11 +14,10 @@ script:
   - python3 manage.py test
 
 before_cache:
-  - rm -rf $HOME/.cache/pip/http
-  - rm -rf $HOME/.cache/pip/log
+  - rm -rf $HOME/.cache/pip/http $HOME/.cache/pip/log
 cache:
   directories:
-    - $HOME/virtualenv/pythoj3.6.*
+    - $HOME/virtualenv/python3.6.*
     - $HOME/.cache/pip
 
 branches:
