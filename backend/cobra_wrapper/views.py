@@ -111,7 +111,7 @@ def delete_model(request):
 
 
 def delete_metabolite(request):
-    dmodel_metabolite = request.POST['dmodel_metabolite']
+    dmetabolite_base = request.POST['dmetabolite_base']
     try:
         dmetabolite = cobra_models.Metabolite.get(base=dmetabolite_base)
         dmetabolite.delete()
