@@ -1,11 +1,25 @@
+
 import json
-from bigg_database.models import ModelMetabolite, Model, Metabolite
+import django
 import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bigg_database.settings')
 
-for root, _, files in os.walk('D:\\Code\\iGEM\\models'):
-    with open(os.path.join(root, files), 'r', encoding='utf-8') as f:
-        content = json.loads(f.read())
+django.setup()
 
+# 防止在格式化代码时将这个放在django初始化之前
+if True:
+    from bigg_database.models import Metabolite, Model, ModelMetabolite
+
+root = 'D:\\Code\\iGEM\\models'  # for windows
+# root = '/mnt/d/Code/iGEM/models'
+for file in os.listdir(root):
+    if os.path.isdir(file):
+        continue
+    with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+        try:
+            content = json.loads(f.read())
+        except json.decoder.JSONDecodeError:
+            print(file)
         model_bigg_id = content['id']
         model_instance = Model.objects.get(bigg_id=model_bigg_id)
         for meta in content['metabolites']:
@@ -14,23 +28,25 @@ for root, _, files in os.walk('D:\\Code\\iGEM\\models'):
             ModelMetabolite.objects.create(
                 model=model_instance, metabolite=meta_instance)  # 还有organism没有加入
 
-for root, _, files in os.walk('D:\\Code\\iGEM\\metabolite'):
-    with open(os.path.join(root, files), 'r', encoding='utf-8') as f:
+root = 'D:\\Code\\iGEM\\bigg_data\\data\\metabolites'  # for windows
+# root = '/mnt/d/Code/iGEM/models'
+for file in os.listdir(root):
+    if os.path.isdir(file):
+        continue
+    with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
         content = json.loads(f.read())
 
         meta_bigg_id_without_compartments = content['bigg_id']
 
-        for compartments in content['compartments_in_models']:
+        for compartment in content['compartments_in_models']:
             meta_bigg_id = meta_bigg_id_without_compartments + '_' + \
-                compartments['bigg_id']
+                compartment['bigg_id']
             meta_instance = Metabolite.objects.get(bigg_id=meta_bigg_id)
             model_instance = Model.objects.get(
                 bigg_id=model_bigg_id)
 
-            organism = compartments['organism']
-
             mm = ModelMetabolite.objects.get(
                 metabolite=meta_instance, model=model_instance)
 
-            mm.organism = organism
+            mm.organism = compartment['organism']
             mm.save()
