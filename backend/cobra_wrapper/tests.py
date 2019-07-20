@@ -129,7 +129,7 @@ class CobraWrapperTest(TestCase):
                 metabolite_0_id, metabolite_1_id, metabolite_2_id,
                 metabolite_3_id, metabolite_4_id, metabolite_5_id
             ],
-            coefficients='-1.0 -1.0 -1.0 1.0 1.0 1.0',
+            coefficients=[-1.0, -1.0, -1.0, 1.0, 1.0, 1.0],
             gene_reaction_rule='( STM2378 or STM1197 )'
         ), content_type='application/json')
         self.assertEqual(reaction_response.status_code, 201)
@@ -200,7 +200,7 @@ class CobraWrapperTest(TestCase):
                 metabolite_0_id, metabolite_1_id, metabolite_2_id,
                 metabolite_3_id, metabolite_4_id, metabolite_5_id
             ],
-            coefficients='-1.0 -1.0 -1.0 1.0 1.0 1.0',
+            coefficients=[-1.0, -1.0, -1.0, 1.0, 1.0, 1.0],
             gene_reaction_rule='( STM2378 or STM1197 )'
         ), content_type='application/json')
         reaction_id = json.loads(reaction_response.content)['id']
