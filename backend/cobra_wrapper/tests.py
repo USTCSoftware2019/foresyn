@@ -150,3 +150,97 @@ class CobraWrapperTest(TestCase):
             ]
         )
         self.assertEqual(str(cobra_model.objective.direction), 'max')
+
+    def test_cobra_url_get(self):
+        # Prepare objects
+        metabolite_0_response = self.client.post('/cobra/metabolites/', dict(
+            base='ACP_c',
+            formula='C11H21N2O7PRS',
+            name='acyl-carrier-protein',
+            compartment='c'
+        ), content_type='application/json')
+        metabolite_0_id = json.loads(metabolite_0_response.content)['id']
+        metabolite_1_response = self.client.post('/cobra/metabolites/', dict(
+            base='3omrsACP_c',
+            formula='C25H45N2O9PRS',
+            name='3-Oxotetradecanoyl-acyl-carrier-protein',
+            compartment='c'
+        ), content_type='application/json')
+        metabolite_1_id = json.loads(metabolite_1_response.content)['id']
+        metabolite_2_response = self.client.post('/cobra/metabolites/', dict(
+            base='co2_c', formula='CO2', name='CO2', compartment='c'
+        ), content_type='application/json')
+        metabolite_2_id = json.loads(metabolite_2_response.content)['id']
+        metabolite_3_response = self.client.post('/cobra/metabolites/', dict(
+            base='malACP_c',
+            formula='C14H22N2O10PRS',
+            name='Malonyl-acyl-carrier-protein',
+            compartment='c'
+        ), content_type='application/json')
+        metabolite_3_id = json.loads(metabolite_3_response.content)['id']
+        metabolite_4_response = self.client.post('/cobra/metabolites/', dict(
+            base='h_c', formula='H', name='H', compartment='c'
+        ), content_type='application/json')
+        metabolite_4_id = json.loads(metabolite_4_response.content)['id']
+        metabolite_5_response = self.client.post('/cobra/metabolites/', dict(
+            base='ddcaACP_c',
+            formula='C23H43N2O8PRS',
+            name='Dodecanoyl-ACP-n-C120ACP',
+            compartment='c'
+        ), content_type='application/json')
+        metabolite_5_id = json.loads(metabolite_5_response.content)['id']
+        reaction_response = self.client.post('/cobra/reactions/', dict(
+            base='3OAS140',
+            name='3 oxoacyl acyl carrier protein synthase n C140 ',
+            subsystem='Cell Envelope Biosynthesis',
+            lower_bound=0,
+            upper_bound=1000,
+            metabolites=[
+                metabolite_0_id, metabolite_1_id, metabolite_2_id,
+                metabolite_3_id, metabolite_4_id, metabolite_5_id
+            ],
+            coefficients='-1.0 -1.0 -1.0 1.0 1.0 1.0',
+            gene_reaction_rule='( STM2378 or STM1197 )'
+        ), content_type='application/json')
+        reaction_id = json.loads(reaction_response.content)['id']
+        model_response = self.client.post('/cobra/models/', dict(
+            base='example_model',
+            objective='3OAS140',
+            reactions=[reaction_id]
+        ), content_type='application/json')
+        model_id = json.loads(model_response.content)['id']
+        # The same as self.test_cobra_url_post() but leaves some objects
+        # to be taken use of
+        model_response = self.client.get('/cobra/models/', dict(
+            id=model_id
+        ), content_type='application/json')
+        self.assertEqual(model_response.status_code, 200)
+        self.assertEqual(
+            json.loads(model_response.content)['base'], 'example_model')
+        models_response = self.client.get(
+            '/cobra/models/', content_type='application/json')
+        self.assertEqual(models_response.status_code, 200)
+        self.assertEqual(
+            len(json.loads(models_response.content)['models']), 1)
+        reaction_response = self.client.get('/cobra/reactions/', dict(
+            id=reaction_id
+        ), content_type='application/json')
+        self.assertEqual(reaction_response.status_code, 200)
+        self.assertEqual(
+            json.loads(reaction_response.content)['base'], '3OAS140')
+        reactions_response = self.client.get(
+            '/cobra/reactions/', content_type='application/json')
+        self.assertEqual(reactions_response.status_code, 200)
+        self.assertEqual(
+            len(json.loads(reactions_response.content)['reactions']), 1)
+        metabolite_response = self.client.get('/cobra/metabolites/', dict(
+            id=metabolite_0_id
+        ), content_type='application/json')
+        self.assertEqual(metabolite_response.status_code, 200)
+        self.assertEqual(
+            json.loads(metabolite_response.content)['base'], 'ACP_c')
+        metabolites_response = self.client.get(
+            '/cobra/metabolites/', content_type='application/json')
+        self.assertEqual(metabolites_response.status_code, 200)
+        self.assertEqual(
+            len(json.loads(metabolites_response.content)['metabolites']), 6)
