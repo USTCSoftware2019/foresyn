@@ -161,16 +161,31 @@ class CobraWrapperTest(TestCase):
             'objective': 'test'
         }, content_type='application/json')
         self.assertEqual(model_response.status_code, 200)
-        reaction_response = self.client.patch('/cobra/models/', {
+        reaction_response = self.client.patch('/cobra/reactions/', {
             'id': info['reactions'][0].id,
             'coefficients': [1, 1, 1, 1, 1, 1]
         }, content_type='application/json')
         self.assertEqual(reaction_response.status_code, 200)
-        metabolite_response = self.client.patch('/cobra/models/', {
+        metabolite_response = self.client.patch('/cobra/metabolites/', {
             'id': info['metabolites'][0].id,
             'name': 'test'
         }, content_type='application/json')
         self.assertEqual(metabolite_response.status_code, 200)
+
+    def test_cobra_url_delete(self):
+        info = self._create_model()
+        model_response = self.client.delete('/cobra/models/', {
+            'id': info['models'][0].id,
+        }, content_type='application/json')
+        self.assertEqual(model_response.status_code, 204)
+        reaction_response = self.client.delete('/cobra/reactions/', {
+            'id': info['reactions'][0].id,
+        }, content_type='application/json')
+        self.assertEqual(reaction_response.status_code, 204)
+        metabolite_response = self.client.delete('/cobra/metabolites/', {
+            'id': info['metabolites'][0].id,
+        }, content_type='application/json')
+        self.assertEqual(metabolite_response.status_code, 204)
 
     '''
     def test_cobra_url_get(self):
