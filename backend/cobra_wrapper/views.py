@@ -48,10 +48,10 @@ class CobraModelApi(View):
 
     def delete(self,request):  # Class-based views 的用法可以参见
         # https://docs.djangoproject.com/en/2.2/ref/class-based-views/
-        dreaction_base = 
+        dmodel_base = request.POST.get("dmodel_base")
         try:
-            dreaction = CobraReaction.get(base=dreaction_base)
-            dreaction.delete()
+            dmodel_base = CobraModel.get(base=dmodel_base)
+            dmodel_base.delete()
             return JsonResponse({'code': 200, 'message': 'success'})
             # HTTP 状态码不要放到 body 里，应当这样
         except ObjectDoesNotExist as error:
@@ -99,12 +99,12 @@ class CobraReactionApi(View):
     def get(self, request):
         pass
 
-    def delete(request):
-        dmetabolite_base = request.POST['dmetabolite_base']
+    def delete(self,request):
+        dreaction_base = request.POST.get("dreation_base")
         try:
-            dmetabolite = CobraMetabolite.get(base=dmetabolite_base)
-            dmetabolite.delete()
-            return JsonResponse({'status': 'success'})
+            dreaction = CobraReaction.objects.get(base=dreaction_base)
+            dreaction.delete()
+            return JsonResponse({'code': 200, 'status': 'success'})
         except ObjectDoesNotExist as error:
             return JsonResponse({
                 'code': 200021,
@@ -138,12 +138,12 @@ class CobraMetaboliteApi(View):
     def get(self, request):
         pass
 
-    def delete(request):
-        dmodel_base = request.POST['dmodel_base']
+    def delete(self,request):
+        dmetabolite_base = request.POST.get("dmetabolite_base")
         try:
-            dmodel = CobraModel.get(base=dmodel_base)
-            dmodel.delete()
-            return JsonResponse({'code': 200, 'status': 'success'})
+            dmetabolite = CobraMetabolite.objects.get(base=dmetabolite_base)
+            dmetabolite.delete()
+            return JsonResponse({'status': 'success'})
         except ObjectDoesNotExist as error:
             return JsonResponse({
                 'code': 200021,
