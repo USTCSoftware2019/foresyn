@@ -46,11 +46,10 @@ class CobraModelApi(View):
     def get(self, request):
         pass
 
-    def delete(self,request):  # Class-based views 的用法可以参见
-        # https://docs.djangoproject.com/en/2.2/ref/class-based-views/
-        dmodel_base = request.POST.get("dmodel_base")
+    def delete(self,request):
+        dmodel_base = request.POST.get['dmodel_base']
         try:
-            dmodel_base = CobraModel.get(base=dmodel_base)
+            dmodel_base = CobraModel.objects.get(base=dmodel_base)
             dmodel_base.delete()
             return JsonResponse({'code': 200, 'message': 'success'})
             # HTTP 状态码不要放到 body 里，应当这样
@@ -69,12 +68,12 @@ class CobraReactionApi(View):
                 CobraMetabolite.objects.get(id=metabolite_id)
                 for metabolite_id in params['metabolites']
             ]
-            reaction = CobraReaction(
-                **get_required_params(params, [
-                    'identifier', 'name', 'subsystem', 'lower_bound', 'upper_bound',
-                    'coefficients', 'gene_reaction_rule'
-                ])
-            )
+            reaction = CobraReaction(**get_required_params(params, [
+                'identifier', 'name', 'subsystem', 'lower_bound',
+                'upper_bound', 'gene_reaction_rule'
+            ]))
+            reaction.coefficients = ' '.join(
+                map(lambda num: str(num), params['coefficients']))
             reaction.full_clean()
         except AttributeError as error:
             return JsonResponse({
@@ -116,11 +115,9 @@ class CobraMetaboliteApi(View):
     def post(self, request):
         params = json.loads(request.body)
         try:
-            metabolite = CobraMetabolite(
-                **get_required_params(params, [
-                    'identifier', 'formula', 'name', 'compartment'
-                ])
-            )
+            metabolite = CobraMetabolite(**get_required_params(params, [
+                'identifier', 'formula', 'name', 'compartment'
+            ]))
             metabolite.full_clean()
         except AttributeError as error:
             return JsonResponse({
