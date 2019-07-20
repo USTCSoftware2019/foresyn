@@ -9,8 +9,8 @@ django.setup()
 if True:
     from bigg_database.models import Model
 
-# root = 'D:\\Code\\iGEM\\models' # for windows
-root = '/mnt/d/Code/iGEM/models'
+root = 'D:\\Code\\iGEM\\models' # for windows
+# root = '/mnt/d/Code/iGEM/models'
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue
