@@ -18,10 +18,10 @@ for file in os.listdir(root):
     with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
         try:
             content = json.loads(f.read())
-        except json.decoder.JSONDecodeError:
-            print(file)
+        except json.decoder.JSONDecodeError as e:
+            print(e, 'File:', file)
 
-        bigg_id = content['bigg_id']
+        bigg_id_without_compartment = content['bigg_id']
         name = content['name']
         formulae = content['formulae']
         try:
@@ -30,6 +30,9 @@ for file in os.listdir(root):
             charges = None
         database_links = content['database_links']
 
-        Metabolite.objects.create(
-            bigg_id=bigg_id, name=name, formulae=formulae,
-            charges=charges, database_links=database_links)
+        for compartment_id in set([compartment['bigg_id'] for compartment in content['compartments_in_models']]):
+            bigg_id = bigg_id_without_compartment + \
+                '_' + compartment_id
+            Metabolite.objects.create(
+                bigg_id=bigg_id, name=name, formulae=formulae,
+                charges=charges, database_links=database_links)
