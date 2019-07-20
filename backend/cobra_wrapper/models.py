@@ -9,16 +9,11 @@ class CobraMetabolite(models.Model):
     identifier = models.CharField(max_length=50)
     formula = models.CharField(max_length=50, blank=True, default='')
     name = models.CharField(max_length=50, blank=True, default='')
-    charge = models.CharField(
-        max_length=50, blank=True, null=True, default=None)
-    compartment = models.CharField(
-        max_length=50, blank=True, null=True, default=None)
+    charge = models.CharField(max_length=50, blank=True, null=True, default=None)
+    compartment = models.CharField(max_length=50, blank=True, null=True, default=None)
 
     def build(self):
-        return cobra.Metabolite(
-            self.identifier, self.formula, self.name, self.charge,
-            self.compartment
-        )
+        return cobra.Metabolite(self.identifier, self.formula, self.name, self.charge, self.compartment)
 
     # ! 这是我之前写的方法，你们可以视需求启用 <myl7>
     # def json(self):
@@ -40,9 +35,7 @@ class CobraReaction(models.Model):
 
     def build(self):
         cobra_reaction = cobra.Reaction(
-            self.identifier, self.name, self.subsystem, self.lower_bound,
-            self.upper_bound, self.objective_coefficient
-        )
+            self.identifier, self.name, self.subsystem, self.lower_bound, self.upper_bound, self.objective_coefficient)
         cobra_reaction.add_metabolites(dict(zip(
             [metabolite.build() for metabolite in self.metabolites.all()],
             [float(coefficient) for coefficient in self.coefficients.split()]
@@ -67,8 +60,7 @@ class CobraModel(models.Model):
 
     def build(self):
         cobra_model = cobra.Model(self.identifier, self.name)
-        cobra_model.add_reactions(
-            [reaction.build() for reaction in self.reactions.all()])
+        cobra_model.add_reactions([reaction.build() for reaction in self.reactions.all()])
         cobra_model.objective = self.objective
         return cobra_model
 
