@@ -5,7 +5,6 @@ import jsonfield
 
 class Model(_models.Model):
     bigg_id = _models.CharField(unique=True, max_length=127)
-    name = _models.CharField(max_length=127)
 
     COMPARTMENTS_CHOICES = (
         ('c',  'cytosol'),
@@ -28,8 +27,7 @@ class Model(_models.Model):
         ('cm', 'cytosolic membrane'),
         ('i', 'i'))
 
-    compartments = _models.CharField(
-        choices=COMPARTMENTS_CHOICES, max_length=127)
+    compartments = jsonfield.JSONField()
     version = _models.CharField(max_length=127)
 
 
