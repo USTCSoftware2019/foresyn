@@ -25,7 +25,7 @@ for root, _, files in os.walk('D:\\Code\\iGEM\\metabolite'):
                 compartments['bigg_id']
             meta_instance = Metabolite.objects.get(bigg_id=meta_bigg_id)
             model_instance = Model.objects.get(
-                bigg_id=content['model_bigg_id'])
+                bigg_id=compartments['model_bigg_id'])
 
             organism = compartments['organism']
 
