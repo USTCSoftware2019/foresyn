@@ -1,0 +1,25 @@
+language: python
+python: "3.6"
+dist: xenial
+
+git:
+  depth: 3
+
+install:
+  - pip3 install --upgrade -r requirements.txt
+
+before_script: cd backend
+script:
+  - flake8
+  - python3 manage.py test
+
+before_cache:
+  - rm -rf $HOME/.cache/pip/http $HOME/.cache/pip/log
+cache:
+  directories:
+    - $HOME/virtualenv/python3.6.*
+    - $HOME/.cache/pip
+
+branches:
+  only:
+    - master
