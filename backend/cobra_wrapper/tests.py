@@ -7,6 +7,9 @@ from . import models as cobra_models
 
 class CobraWrapperTest(TestCase):
     def test_model_build(self):
+        self._create_model()
+
+    def _create_model(self):
         """Example on cobra doc to build a model"""
         test_metabolite_0 = cobra_models.CobraMetabolite(
             identifier='ACP_c',
@@ -66,14 +69,14 @@ class CobraWrapperTest(TestCase):
         test_model.save()
         test_model.reactions.set([test_reaction])
         test_model.save()
-        test_cobra_model = test_model.build()
-        self.assertTrue(
-            str(test_cobra_model.objective.expression) in [
-                '-1.0*3OAS140_reverse_65ddc + 1.0*3OAS140',
-                '1.0*3OAS140 - 1.0*3OAS140_reverse_65ddc'
+        return {
+            'models': [test_model],
+            'reactions': [test_reaction],
+            'metabolites': [
+                test_metabolite_0, test_metabolite_1, test_metabolite_2,
+                test_metabolite_3, test_metabolite_4, test_metabolite_5
             ]
-        )
-        self.assertEqual(str(test_cobra_model.objective.direction), 'max')
+        }
 
     def test_cobra_url_post(self):
         """Still example on cobra doc to build a model, but using web API"""
@@ -150,6 +153,24 @@ class CobraWrapperTest(TestCase):
             ]
         )
         self.assertEqual(str(cobra_model.objective.direction), 'max')
+
+    def test_cobra_url_patch(self):
+        info = self._create_model()
+        model_response = self.client.patch('/cobra/models/', {
+            'id': info['models'][0].id,
+            'objective': 'test'
+        }, content_type='application/json')
+        self.assertEqual(model_response.status_code, 200)
+        reaction_response = self.client.patch('/cobra/models/', {
+            'id': info['reactions'][0].id,
+            'coefficients': [1, 1, 1, 1, 1, 1]
+        }, content_type='application/json')
+        self.assertEqual(reaction_response.status_code, 200)
+        metabolite_response = self.client.patch('/cobra/models/', {
+            'id': info['metabolites'][0].id,
+            'name': 'test'
+        }, content_type='application/json')
+        self.assertEqual(metabolite_response.status_code, 200)
 
     '''
     def test_cobra_url_get(self):
