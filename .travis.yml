@@ -1,0 +1,23 @@
+language: python
+python: "3.6"
+dist: xenial
+
+install:
+  - pip3 install --upgrade -r requirements.txt
+
+before_script: cd backend
+script:
+  - flake8
+  - python3 manage.py test
+
+before_cache:
+  - rm -rf $HOME/.cache/pip/http
+  - rm -rf $HOME/.cache/pip/log
+cache:
+  directories:
+    - $HOME/virtualenv/pythoj3.6.*
+    - $HOME/.cache/pip
+
+branches:
+  only:
+    - master
