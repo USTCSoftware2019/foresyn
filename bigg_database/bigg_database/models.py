@@ -4,7 +4,7 @@ from .fields import JSONField
 
 
 class Model(_models.Model):
-    bigg_id = _models.CharField(unique=True, max_length=127)
+    bigg_id = _models.CharField(unique=True, max_length=127, db_index=True)
 
     COMPARTMENTS_CHOICES = (
         ('c',  'cytosol'),
@@ -32,7 +32,7 @@ class Model(_models.Model):
 
 
 class Reaction(_models.Model):
-    bigg_id = _models.CharField(max_length=127, unique=True)
+    bigg_id = _models.CharField(max_length=127, unique=True, db_index=True)
     name = _models.CharField(max_length=127)
     models = _models.ManyToManyField(
         Model, through='ModelReaction', through_fields=('reaction', 'model'))
@@ -44,7 +44,7 @@ class Reaction(_models.Model):
 
 
 class Metabolite(_models.Model):
-    bigg_id = _models.CharField(unique=True, max_length=127)
+    bigg_id = _models.CharField(unique=True, max_length=127, db_index=True)
     name = _models.CharField(max_length=127)
 
     reactions = _models.ManyToManyField(
@@ -59,7 +59,7 @@ class Metabolite(_models.Model):
 
 
 class Gene(_models.Model):
-    bigg_id = _models.CharField(unique=True, max_length=127)
+    bigg_id = _models.CharField(unique=True, max_length=127, db_index=True)
     name = _models.CharField(max_length=127)
 
     models = _models.ManyToManyField(Model)
