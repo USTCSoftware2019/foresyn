@@ -47,16 +47,17 @@ class CobraModelApi(View):
         pass
 
     def delete(self, request):
-        dreaction_base = request.POST['dreaction_base']
+        dmodel_base = request.POST.get['dmodel_base']
         try:
-            dreaction = CobraReaction.get(base=dreaction_base)
-            dreaction.delete()
+            dmodel_base = CobraModel.objects.get(base=dmodel_base)
+            dmodel_base.delete()
             return JsonResponse({'code': 200, 'message': 'success'})
             # HTTP 状态码不要放到 body 里，应当这样
-        except:
-            # Do not use bare 'except' 用 except 时一定要明确指出想要
-            # except 的 exception
-            return JsonResponse({'code': 403, 'message': "can't find CobraReaction"})
+        except ObjectDoesNotExist as error:
+            return JsonResponse({
+                'code': 200021,
+                'message': error.messages
+            }, status=400)
 
     def patch(self, request):
         params = json.loads(request.body)
@@ -128,13 +129,16 @@ class CobraReactionApi(View):
         pass
 
     def delete(self, request):
-        dmetabolite_base = request.POST['dmetabolite_base']
+        dreaction_base = request.POST.get("dreation_base")
         try:
-            dmetabolite = CobraMetabolite.get(base=dmetabolite_base)
-            dmetabolite.delete()
-            return JsonResponse({'status': 'success'})
-        except:
-            return JsonResponse({'code': 403, 'message': "can't find CobraMetabolite"})
+            dreaction = CobraReaction.objects.get(base=dreaction_base)
+            dreaction.delete()
+            return JsonResponse({'code': 200, 'status': 'success'})
+        except ObjectDoesNotExist as error:
+            return JsonResponse({
+                'code': 200021,
+                'message': error.messages
+            }, status=400)
 
     def patch(self, request):
         params = json.loads(request.body)
@@ -196,13 +200,16 @@ class CobraMetaboliteApi(View):
         pass
 
     def delete(self, request):
-        dmodel_base = request.POST['dmodel_base']
+        dmetabolite_base = request.POST.get("dmetabolite_base")
         try:
-            dmodel = CobraModel.get(base=dmodel_base)
-            dmodel.delete()
-            return JsonResponse({'code': 200, 'status': 'success'})
-        except:
-            return JsonResponse({'code': 403, 'message': "can't find CobraModel"})
+            dmetabolite = CobraMetabolite.objects.get(base=dmetabolite_base)
+            dmetabolite.delete()
+            return JsonResponse({'status': 'success'})
+        except ObjectDoesNotExist as error:
+            return JsonResponse({
+                'code': 200021,
+                'message': error.messages
+            }, status=400)
 
     def patch(self, request):
         params = json.loads(request.body)
