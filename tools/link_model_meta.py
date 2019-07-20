@@ -20,8 +20,8 @@ for root, _, files in os.walk('D:\\Code\\iGEM\\metabolite'):
 
         meta_bigg_id_without_compartments = content['bigg_id']
 
-        for compartments in content['metabolites']:
-            meta_bigg_id = meta_bigg_id_without_compartments + \
+        for compartments in content['compartments_in_models']:
+            meta_bigg_id = meta_bigg_id_without_compartments + '_' + \
                 compartments['bigg_id']
             meta_instance = Metabolite.objects.get(bigg_id=meta_bigg_id)
             model_instance = Model.objects.get(
