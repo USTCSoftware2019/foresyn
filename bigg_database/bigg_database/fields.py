@@ -8,6 +8,11 @@ class JSONField(models.TextField):
 
     description = "JSON"
 
+    def from_db_value(self, value, expression, connection):
+        if value is None:
+            return value
+        return json.loads(value)
+
     def to_python(self, value):
         if value is None or not isinstance(value, str):
             return value
