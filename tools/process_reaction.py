@@ -1,3 +1,4 @@
+import sys
 import json
 import django
 import os
@@ -9,8 +10,7 @@ django.setup()
 if True:
     from bigg_database.models import Reaction, Model
 
-# root = 'D:\\Code\\iGEM\\bigg_data\\data\\reactions'
-root = '/home/elsa/data/data/reactions'
+root = sys.argv[1]
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue
