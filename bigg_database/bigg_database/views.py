@@ -1,10 +1,10 @@
 import json
-#from fuzzywuzzy import fuzz
 
-from django.http import JsonResponse
-from django.views import View
-from django.utils.translation import gettext as _
 import django.core.exceptions
+from django.http import JsonResponse
+from django.utils.translation import gettext as _
+from django.views import View
+from fuzzywuzzy import fuzz
 
 from .models import Metabolite, Model, Reaction
 
@@ -56,7 +56,7 @@ class GetReactionFromId(View):
             "pseudoreaction": reaction_instance.pseudoreaction,
             "database_links": reaction_instance.database_links,
         }
-        return JsonResponse({'code': 200, 'content': json.dumps(reac_ins)})
+        return JsonResponse({'code': 200, 'content': reac_ins})
 
 
 class GetMetaboliteFromId(View):
@@ -80,7 +80,21 @@ class GetMetaboliteFromId(View):
             "charges": metabolite_instance.charges,
             "database_links": metabolite_instance.database_links,
         }
-        return JsonResponse({'code': 200, 'content': json.dumps(meta_ins)})
+        return JsonResponse({'code': 200, 'content': meta_ins})
+
+
+MATCH_RATIO = 80  # 相似率大于多少时返回
+
+
+def fuzzy_search(query_set, request_name, request_data):
+    ret_list = []
+    # TODO
+    # 提高效率
+    for instance in query_set:
+        if fuzz.ratio(getattr(instance, request_name), request_data) >= MATCH_RATIO:
+            ret_list.append(instance)
+
+    return ret_list
 
 
 class GetReactionFromName(View):
@@ -95,16 +109,21 @@ class GetReactionFromName(View):
                 'content': _('name_Required')
             })
 
-        reaction_instance = Reaction.objects.get(name=name)
+        match_list = fuzzy_search(Reaction.objects.all(), 'name', name)
 
-        reac_ins = {
-            "bigg_id": reaction_instance.bigg_id,
-            "name": reaction_instance.name,
-            "reaction_string": reaction_instance.reaction_string,
-            "pseudoreaction": reaction_instance.pseudoreaction,
-            "database_links": reaction_instance.database_links,
+        ret_content = [{
+            "bigg_id": model_instance.bigg_id,
+            "name": model_instance.name,
+            "compartments": model_instance.compartments,
+            "version": model_instance.version
         }
-        return JsonResponse({'code': 200, 'content': json.dumps(reac_ins)})
+            for model_instance in match_list
+        ]
+
+        return JsonResponse({
+            'code': 200,
+            'content': ret_content
+        })
 
 
 class GetMetaboliteFromName(View):
@@ -119,14 +138,19 @@ class GetMetaboliteFromName(View):
                 'content': _('name_Required')
             })
 
-        metabolite_instance = Metabolite.objects.get(name=name)
+        match_list = fuzzy_search(Model.objects.all(), 'name', name)
 
-        meta_ins = {
+        ret_content = [{
             "bigg_id": metabolite_instance.bigg_id,
             "name": metabolite_instance.name,
             "formulae": metabolite_instance.formulae,
             "charges": metabolite_instance.charges,
             "database_links": metabolite_instance.database_links,
         }
+            for metabolite_instance in match_list
+        ]
 
-        return JsonResponse({'code': 200, 'content': json.dumps(meta_ins)})
+        return JsonResponse({
+            'code': 200,
+            'content': ret_content
+        })
