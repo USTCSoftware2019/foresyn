@@ -3,3 +3,4 @@ cobra>=0.15.3
 python-libsbml>=5.18.0
 lxml>=4.3.4
 flake8~=3.6.0
+pandas>=0.24.2

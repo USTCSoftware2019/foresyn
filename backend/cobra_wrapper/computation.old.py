@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, division
-
-import logging
+import cobra
 from operator import attrgetter
 
 import pandas as pd
@@ -14,11 +10,7 @@ from cobra.util.solver import linear_reaction_coefficients
 from cobra.util.util import format_long_string
 
 
-LOGGER = logging.getLogger(__name__)
-
-
-def metabolite_summary(model, met_str, solution=None, threshold=0.01, fva=None,
-                       names=False):
+def metabolite_summary(model, met_str, solution=None, threshold=0.01, fva=None, names=False):
     """
     Quote from official documents.
     Return the values instead of print them.
@@ -39,10 +31,10 @@ def metabolite_summary(model, met_str, solution=None, threshold=0.01, fva=None,
     reaction = list()
     for rxn in rxns:
         rxn_id.append(rxn.id)
-        rxn_name.append(emit(rxn))  #remove format_long_string
+        rxn_name.append(emit(rxn))  # remove format_long_string
         flux.append(solution[rxn.id] * rxn.metabolites[met])
         txt = rxn.build_reaction_string(use_metabolite_names=names)
-        reaction.append(txt)  #remove format_long_string
+        reaction.append(txt)  # remove format_long_string
 
     flux_summary = pd.DataFrame({
         "id": rxn_name,
@@ -96,12 +88,12 @@ def metabolite_summary(model, met_str, solution=None, threshold=0.01, fva=None,
                                                   flux_summary.loc[ids, 'id'],
                                                   flux_summary.loc[ids, 'reaction']))
             else:
-                CONSUMING_REACTIONS_TALBE.append((flux_summary.loc[ids, 'percent'],
+                CONSUMING_REACTIONS_TABLE.append((flux_summary.loc[ids, 'percent'],
                                                   flux_summary.loc[ids, 'flux'],
                                                   flux_summary.loc[ids, 'fva_fmt'],
                                                   flux_summary.loc[ids, 'id'],
                                                   flux_summary.loc[ids, 'reaction']))
-        #Return as a list of tuple, tuple(PERCENTAGE, FLUX, RANGE, RXN_ID, REACTION)
+        # Return as a list of tuple, tuple(PERCENTAGE, FLUX, RANGE, RXN_ID, REACTION)
     else:
         for ids in flux_summary.index:
             if flux_summary.loc[ids, 'is_input']:
@@ -114,12 +106,12 @@ def metabolite_summary(model, met_str, solution=None, threshold=0.01, fva=None,
                                                   flux_summary.loc[ids, 'flux'],
                                                   flux_summary.loc[ids, 'id'],
                                                   flux_summary.loc[ids, 'reaction']))
-        #Return as a list of tuple, tuple(PERCENTAGE, FLUX, RXN_ID, REACTION)
-    
+        # Return as a list of tuple, tuple(PERCENTAGE, FLUX, RXN_ID, REACTION)
+
     met_tag = "{0} ({1})".format(met.name, met.id)
     name_and_rxn = [met_tag, PRODUCING_REACTIONS_TABLE, CONSUMING_REACTIONS_TABLE]
     return name_and_rxn
-    
+
 
 def model_summary(model, solution=None, threshold=0.01, fva=None, names=False):
     """
@@ -140,16 +132,16 @@ def model_summary(model, solution=None, threshold=0.01, fva=None, names=False):
 
     # Create a dataframe of objective fluxes
     obj_fluxes = pd.DataFrame({key: solution[key.id] * value for key,
-                               value in objective_reactions.items()},  #change iteritems to .items()
+                               value in objective_reactions.items()},  # change iteritems to .items()
                               index=['flux']).T
     obj_fluxes['id'] = obj_fluxes.apply(
-        lambda x: x.name.id, 1)  #remove format_long_string
+        lambda x: x.name.id, 1)  # remove format_long_string
 
     # Build a dictionary of metabolite production from the boundary reactions
     metabolites = {m for r in boundary_reactions for m in r.metabolites}
     index = sorted(metabolites, key=attrgetter('id'))
     metabolite_fluxes = pd.DataFrame({
-        'id': [emit(m) for m in index],  #remove format_long_string
+        'id': [emit(m) for m in index],  # remove format_long_string
         'flux': zeros(len(index), dtype=float)
     }, index=[m.id for m in index])
     for rxn in boundary_reactions:
@@ -158,10 +150,10 @@ def model_summary(model, solution=None, threshold=0.01, fva=None, names=False):
 
     # Calculate FVA results if requested
     if fva is not None:
-        if len(index) != len(boundary_reactions):
-            LOGGER.warning(
-                "There exists more than one boundary reaction per metabolite. "
-                "Please be careful when evaluating flux ranges.")
+        # if len(index) != len(boundary_reactions):
+        #     LOGGER.warning(
+        #         "There exists more than one boundary reaction per metabolite. "
+        #         "Please be careful when evaluating flux ranges.")
         metabolite_fluxes['fmin'] = zeros(len(index), dtype=float)
         metabolite_fluxes['fmax'] = zeros(len(index), dtype=float)
         if hasattr(fva, 'columns'):
@@ -200,7 +192,7 @@ def model_summary(model, solution=None, threshold=0.01, fva=None, names=False):
                 OUT_FLUXES_TABLE.append((metabolite_fluxes.loc[ids, 'id'],
                                          metabolite_fluxes.loc[ids, 'flux'],
                                          metabolite_fluxes.loc[ids, 'fva_fmt']))
-        #Return as a list of tuple, tuple(ID, FLUX, RANGE)
+        # Return as a list of tuple, tuple(ID, FLUX, RANGE)
     else:
         for ids in metabolite_fluxes.index:
             if metabolite_fluxes.loc[ids, 'is_input']:
@@ -209,11 +201,11 @@ def model_summary(model, solution=None, threshold=0.01, fva=None, names=False):
             else:
                 OUT_FLUXES_TABLE.append((metabolite_fluxes.loc[ids, 'id'],
                                          metabolite_fluxes.loc[ids, 'flux']))
-        #Return as a list of tuple, tuple(ID, FLUX)
+        # Return as a list of tuple, tuple(ID, FLUX)
     for ids in obj_fluxes.index:
         OBJ_TABLE.append((obj_fluxes.loc[ids, 'id'],
                           obj_fluxes.loc[ids, 'flux']))
-        
+
     return [IN_FLUXES_TABLE, OUT_FLUXES_TABLE, OBJ_TABLE]
 
 
@@ -230,10 +222,9 @@ def _process_flux_dataframe(flux_dataframe, fva, threshold):
             abs_flux >= flux_threshold, :].copy()
     else:
         flux_dataframe = flux_dataframe.loc[
-            (abs_flux >= flux_threshold) |
-            (flux_dataframe['fmin'].abs() >= flux_threshold) |
-            (flux_dataframe['fmax'].abs() >= flux_threshold), :].copy()
-
+            (abs_flux >= flux_threshold) | (flux_dataframe['fmin'].abs() >= flux_threshold) | (
+                flux_dataframe['fmax'].abs() >= flux_threshold), :
+        ].copy()
         # Why set to zero? If included show true value?
         # flux_dataframe.loc[
         #     flux_dataframe['flux'].abs() < flux_threshold, 'flux'] = 0
@@ -244,24 +235,24 @@ def _process_flux_dataframe(flux_dataframe, fva, threshold):
         flux_dataframe['flux'] = flux_dataframe['flux'].abs()
     else:
 
-        def get_direction(flux, fmin, fmax):
+        def get_direction(x):
             """ decide whether or not to reverse a flux to make it positive """
 
-            if flux < 0:
+            if x.flux < 0:
                 return -1
-            elif flux > 0:
+            elif x.flux > 0:
                 return 1
-            elif (fmax > 0) & (fmin <= 0):
+            elif (x.fmax > 0) & (x.fmin <= 0):
                 return 1
-            elif (fmax < 0) & (fmin >= 0):
+            elif (x.fmax < 0) & (x.fmin >= 0):
                 return -1
-            elif ((fmax + fmin) / 2) < 0:
+            elif ((x.fmax + x.fmin) / 2) < 0:
                 return -1
             else:
                 return 1
 
-        sign = flux_dataframe.apply(
-            lambda x: get_direction(x.flux, x.fmin, x.fmax), 1)
+        # Anoning lint error. Consider to disable IDE lint for this part
+        sign = flux_dataframe.apply(get_direction, 1)
 
         flux_dataframe['is_input'] = sign == 1
 
@@ -269,9 +260,11 @@ def _process_flux_dataframe(flux_dataframe, fva, threshold):
             flux_dataframe.loc[:, ['flux', 'fmin', 'fmax']].multiply(
                 sign, 0).astype('float').round(6)
 
+        def _(x):
+            return x if abs(x) > 1E-6 else 0
+
         flux_dataframe.loc[:, ['flux', 'fmin', 'fmax']] = \
-            flux_dataframe.loc[:, ['flux', 'fmin', 'fmax']].applymap(
-                lambda x: x if abs(x) > 1E-6 else 0)
+            flux_dataframe.loc[:, ['flux', 'fmin', 'fmax']].applymap(_)
 
     if fva is not None:
         flux_dataframe['fva_fmt'] = flux_dataframe.apply(
@@ -287,7 +280,8 @@ def _process_flux_dataframe(flux_dataframe, fva, threshold):
 
     return flux_dataframe
 
-def Growth_media_change(model, media, change):
+
+def growth_media_change(model, media, change):
     if media in model.medium.keys():
         with model:
             medium = model.medium
@@ -297,17 +291,10 @@ def Growth_media_change(model, media, change):
     else:
         raise "Your metabolite must be in the boundary reactions"
 
-#test
-import cobra
-from cobra.test import create_test_model
-model = create_test_model('textbook')
 
-#a = metabolite_summary(model, 'atp_c')
-#print(a)
-#b = model_summary(model)
-#print(b)
-print(Growth_media_change(model, 'EX_nh4_e', 10))
-#flux_variability_analysis(model, model.reactions[:10], fraction_of_optimum = 0.9)
-
-
-#if gaven a fvp value, error: broken pipe!!! 调用flux_variability_analysis函数时会报错
+# a = metabolite_summary(model, 'atp_c')
+# print(a)
+# b = model_summary(model)
+# print(b)
+# print(growth_media_change(model, 'EX_nh4_e', 10))
+# flux_variability_analysis(model, model.reactions[:10], fraction_of_optimum = 0.9)

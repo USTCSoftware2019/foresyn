@@ -1,5 +1,6 @@
 from django.db import models
 import cobra
+from cobra.flux_analysis import flux_variability_analysis
 
 
 class CobraMetabolite(models.Model):
@@ -18,6 +19,26 @@ class CobraMetabolite(models.Model):
     def json(self):
         return dict(**{field: getattr(self, field) for field in [
             'identifier', 'formula', 'name', 'charge', 'compartment']})
+
+    def fba(self, verbose=False):
+        cobra_model = self.build()
+        if verbose:
+            solution = cobra_model.optimize()
+            return {
+                'objective_value': solution.objective_value,
+                'status': solution.status,
+                'fluxes': solution.fluxes.to_json(),
+                'shadow_prices': solution.shadow_prices.to_json()
+            }
+        else:
+            pass  # todo
+
+    def fva(self, verbose=False, **kwarg):
+        cobra_model = self.build()
+        if verbose:
+            return flux_variability_analysis(cobra_model, **kwarg).to_json()
+        else:
+            pass  # todo
 
 
 class CobraReaction(models.Model):
