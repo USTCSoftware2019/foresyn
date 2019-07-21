@@ -6,11 +6,12 @@ class IdSearchTests(TestCase):
 
     def test_id_model(self):
 
-        self.client = Client()
+        client = Client()
         data = {
         "bigg_id":"iAF692"}
-        resp = self.client.post('',data) #未填写url
-        mod_ins = json.loads(resp.content)
+        resp = client.post('search/model/id',data) 
+        print(resp.content)
+        mod_ins = json.loads(resp.content)['content']
 
         self.assertEqual(mod_ins['compartments'],
         {"c":"cytosol","e":"extracellular space"})
@@ -19,7 +20,7 @@ class IdSearchTests(TestCase):
 
         data = {
         "bigg_id":"iAPECO1_1312"}
-        resp = self.client.post('',data) #未填写url
+        resp = client.post('search/model/id',data) 
         mod_ins = json.loads(resp.content)
 
         self.assertEqual(mod_ins['compartments'],
@@ -30,9 +31,10 @@ class IdSearchTests(TestCase):
 
     def test_id_reaction(TestCase):
 
+        client = Client()
         data = {
         "bigg_id":"1a25DHVITD3TRn"}
-        resp = self.client.post('',data) #未填写url
+        resp = client.post('search/reaction/id',data) 
         reac_ins = json.loads(resp.content)
 
         self.assertEqual(reac_ins['name'],
@@ -45,7 +47,7 @@ class IdSearchTests(TestCase):
 
         data = {
         "bigg_id":"1AGPEAT1819Z1835Z9Z12Z"}
-        resp = self.client.post('',data) #未填写url
+        resp = client.post('search/reaction/id',data) 
         reac_ins = json.loads(resp.content)
 
         self.assertEqual(reac_ins['name'],
@@ -57,9 +59,10 @@ class IdSearchTests(TestCase):
 
     def test_id_metabolite(TestCase):
 
+        client = Client()
         data = {
         "bigg_id":"1a2425thvitd3"}
-        resp = self.client.post('',data) #未填写url
+        resp = client.post('search/metabolite/id',data) 
         meta_ins = json.loads(resp.content)
 
         self.assertEqual(meta_ins['name'],
@@ -72,7 +75,7 @@ class IdSearchTests(TestCase):
 
         data = {
         "bigg_id":"1agpc_SC"}
-        resp = self.client.post('',data) #未填写url
+        resp = client.post('search/metabolite/id',data) 
         meta_ins = json.loads(resp.content)
 
         self.assertEqual(meta_ins['name'],
@@ -86,9 +89,10 @@ class NameSearchTests(TestCase):
 
     def test_name_reaction(TestCase):
 
+        client = Client()
         data = {
         "name":"1-alpha,24R,25-Vitamin D-hydroxylase (D2)"}
-        resp = self.client.post('',data) #未填写url
+        resp = client.post('search/reaction/name',data) 
         reac_ins = json.loads(resp.content)
 
         self.assertEqual(reac_ins['bigg_id'],
@@ -101,7 +105,7 @@ class NameSearchTests(TestCase):
 
         data = {
         "name":"1-Aminocyclopropane-1-carboxylate transport, mitochondria"}
-        resp = self.client.post('',data) #未填写url
+        resp = client.post('search/reaction/name',data) 
         reac_ins = json.loads(resp.content)
 
         self.assertEqual(reac_ins['bigg_id'],
@@ -111,11 +115,12 @@ class NameSearchTests(TestCase):
         self.assertEqual(reac_ins['pseudoreaction'],
         false)
 
-    def test_id_metabolite(TestCase):
+    def test_name_metabolite(TestCase):
 
+        client = Client()
         data = {
         "name":"Sulfate"}
-        resp = self.client.post('',data) #未填写url
+        resp = client.post('search/metabolite/name',data) 
         meta_ins = json.loads(resp.content)
 
         self.assertEqual(meta_ins['bigg_id'],
@@ -130,7 +135,7 @@ class NameSearchTests(TestCase):
 
         data = {
         "name":"1-14:0-2-lysophosphatidylcholine"}
-        resp = self.client.post('',data) #未填写url
+        resp = client.post('search/metabolite/name',data) 
         meta_ins = json.loads(resp.content)
 
         self.assertEqual(meta_ins['bigg_id'],

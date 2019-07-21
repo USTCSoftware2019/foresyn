@@ -1,9 +1,10 @@
 import json
-from fuzzywuzzy import fuzz
+#from fuzzywuzzy import fuzz
 
 from django.http import JsonResponse
 from django.views import View
 from django.utils.translation import gettext as _
+import django.core.exceptions 
 
 from .models import Metabolite, Model, Reaction
 
@@ -23,12 +24,16 @@ class GetModelFromId(View):
         model_instance = Model.objects.get(bigg_id=bigg_id)
 
         mod_ins = {
-            "bigg_id":model_instance.bigg_id,
-            "compartments":model_instance.compartments,
-            "version":model_instance.version,
+            'bigg_id':model_instance.bigg_id,
+            'compartments':model_instance.compartments,
+            'version':model_instance.version,
+        }
+        resp ={
+            'code': 200,
+            'content': mod_ins,
         }
 
-        return JsonResponse({'code': 200, 'content': json.dumps(mod_ins)})
+        return JsonResponse(resp)
 
 
 class GetReactionFromId(View):
@@ -80,7 +85,7 @@ class GetMetaboliteFromId(View):
 
 
 
-class GetReactionByName(View):
+class GetReactionFromName(View):
     http_method_names = ['post']
 
     def post(self,request):
@@ -104,7 +109,7 @@ class GetReactionByName(View):
         return JsonResponse({'code': 200, 'content': json.dumps(reac_ins)})
 
 
-class GetMetaboliteByName(View):
+class GetMetaboliteFromName(View):
     http_method_names = ['post']
 
     def post(self,reqeust):
