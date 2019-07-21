@@ -10,7 +10,9 @@ django.setup()
 if True:
     from bigg_database.models import Metabolite, Model, ModelMetabolite
 
-root = 'D:\\Code\\iGEM\\models'  # for windows
+print('models')
+
+root = '/home/elsa/models/models'  # for windows
 # root = '/mnt/d/Code/iGEM/models'
 for file in os.listdir(root):
     if os.path.isdir(file):
@@ -28,8 +30,10 @@ for file in os.listdir(root):
             ModelMetabolite.objects.create(
                 model=model_instance, metabolite=meta_instance)  # 还有organism没有加入
 
-root = 'D:\\Code\\iGEM\\bigg_data\\data\\metabolites'  # for windows
-# root = '/mnt/d/Code/iGEM/models'
+print('meta')
+
+# root = 'D:\\Code\\iGEM\\bigg_data\\data\\metabolites'  # for windows
+root = '/home/elsa/data/data/metabolites'
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue

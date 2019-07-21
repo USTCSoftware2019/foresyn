@@ -10,8 +10,8 @@ django.setup()
 if True:
     from bigg_database.models import Metabolite
 
-root = 'D:\\Code\\iGEM\\bigg_data\\data\\metabolites'  # for windows
-# root = '/mnt/d/Code/iGEM/models'
+# root = 'D:\\Code\\iGEM\\bigg_data\\data\\metabolites'  # for windows
+root = '/home/elsa/data/data/metabolites'
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue
@@ -19,11 +19,15 @@ for file in os.listdir(root):
         try:
             content = json.loads(f.read())
         except json.decoder.JSONDecodeError as e:
-            print(e, 'File:', file)
-
-        bigg_id_without_compartment = content['bigg_id']
-        name = content['name']
-        formulae = content['formulae']
+            print(e, file)
+            continue
+        try:
+            bigg_id_without_compartment = content['bigg_id']
+            name = content['name'] or ''
+            formulae = content['formulae']
+        except KeyError as e:
+            print(e, file)
+            continue
         try:
             charges = content['charges'][0]
         except IndexError as e:
