@@ -1,5 +1,5 @@
 import json
-import fuzzywuzzy
+from fuzzywuzzy import fuzz
 
 from django.http import JsonResponse
 from django.views import View
@@ -14,7 +14,7 @@ class GetModelFromId(View):
     def post(self, request):
         try:
             bigg_id = request.POST['bigg_id']
-        except ValueError:
+        except KeyError:
             return JsonResponse({
                 'code': 400,
                 'content': _('bigg_id_Required')
@@ -37,7 +37,7 @@ class GetReactionFromId(View):
     def post(self, request):
         try:
             bigg_id = request.POST['bigg_id']
-        except ValueError:
+        except KeyError:
             return JsonResponse({
                 'code': 400,
                 'content': _('bigg_id_Required')
@@ -61,7 +61,7 @@ class GetMetaboliteFromId(View):
     def post(self, request):
         try:
             bigg_id = request.POST['bigg_id']
-        except ValueError:
+        except KeyError:
             return JsonResponse({
                 'code': 400,
                 'content': _('bigg_id_Required')
@@ -76,4 +76,77 @@ class GetMetaboliteFromId(View):
             "charges": metabolite_instance.charges,
             "database_links": metabolite_instance.database_links,
         }
-        return JsonResponse(json.dumps(meta_ins))
+        return JsonResponse({'code': 200, 'content': json.dumps(meta_ins)})
+
+
+MATCH_RATIO = 80  # 相似率大于多少时返回
+
+
+def fuzzy_search(query_set, request_name, request_data):
+    ret_list = []
+    # TODO
+    # 提高效率
+    for instance in query_set:
+        if fuzz.ratio(getattr(instance, request_name), request_data) > MATCH_RATIO:
+            ret_list.append(instance)
+
+    return ret_list
+
+
+class GetReactionFromName(View):
+    http_method_names = ['post']
+
+    def post(self, request):
+        try:
+            name = request.POST['name']
+        except KeyError:
+            return JsonResponse({
+                'code': 400,
+                'content': _('name_Required')
+            })
+
+        match_list = fuzzy_search(Reaction.objects.all(), 'name', name)
+
+        ret_content = [{
+            "bigg_id": model_instance.bigg_id,
+            "name": model_instance.name,
+            "compartments": model_instance.compartments,
+            "version": model_instance.version
+        }
+            for model_instance in match_list
+        ]
+
+        return JsonResponse({
+            'code': 200,
+            'content': ret_content
+        })
+
+
+class GetMetaboliteFromName(View):
+    http_method_names = ['post']
+
+    def post(self, request):
+        try:
+            name = request.POST['name']
+        except KeyError:
+            return JsonResponse({
+                'code': 400,
+                'content': _('name_Required')
+            })
+
+        match_list = fuzzy_search(Model.objects.all(), 'name', name)
+
+        ret_content = [{
+            "bigg_id": metabolite_instance.bigg_id,
+            "name": metabolite_instance.name,
+            "formulae": metabolite_instance.formulae,
+            "charges": metabolite_instance.charges,
+            "database_links": metabolite_instance.database_links,
+        }
+            for metabolite_instance in match_list
+        ]
+
+        return JsonResponse({
+            'code': 200,
+            'content': ret_content
+        })
