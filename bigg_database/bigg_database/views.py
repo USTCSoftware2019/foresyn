@@ -76,38 +76,21 @@ class GetMetaboliteFromId(View):
             "charges":metabolite_instance.charges,
             "database_links":metabolite_instance.database_links,
         }
-        return JsonResponse(json.dumps(meta_ins))
-
-    def get(self,request):
-        pass
+        return JsonResponse({'code': 200, 'content': json.dumps(meta_ins)})
 
 
-"""class GetModelByName(View):
-    def post(self,request):
-        try:
-            name = request.POST.get('name')
-        except ValueError:
-            pass
-        
-        model_instance = Model.objects.get(name=name)
-
-        mod_ins = {
-            "bigg_id":bigg_id,
-            "compartments":model_instance.compartments,
-            "version",model_instance.version,
-        }
-
-        return JsonResponse(json.dumps(mod_ins))
-    
-    def get(self,request):
-        pass""" # model不含name
 
 class GetReactionByName(View):
+    http_method_names = ['post']
+
     def post(self,request):
         try:
             name = request.POST.get('name')
-        except ValueError:
-            pass
+        except KeyError:
+            return JsonResponse({
+                'code': 400,
+                'content': _('name_Required')
+            })
 
         reaction_instance = Reaction.objects.get(name=name)
 
@@ -118,17 +101,20 @@ class GetReactionByName(View):
             "pseudoreaction":reaction_instance.pseudoreaction,
             "database_links":reaction_instance.database_links,
         }
-        return JsonResponse(json.dumps(reac_ins))
+        return JsonResponse({'code': 200, 'content': json.dumps(reac_ins)})
 
-    def get(self,request):
-        pass
 
 class GetMetaboliteByName(View):
+    http_method_names = ['post']
+
     def post(self,reqeust):
         try:
             name = request.POST.get('name')
-        except ValueError:
-            pass
+        except KeyError:
+            return JsonResponse({
+                'code': 400,
+                'content': _('name_Required')
+            })
 
         metabolite_instance = Metabolite.objects.get(name=name)
 
@@ -139,10 +125,5 @@ class GetMetaboliteByName(View):
             "charges":metabolite_instance.charges,
             "database_links":metabolite_instance.database_links,
         }
-            for metabolite_instance in match_list
-        ]
 
-        return JsonResponse({
-            'code': 200,
-            'content': ret_content
-        })
+        return JsonResponse({'code': 200, 'content': json.dumps(meta_ins)})
