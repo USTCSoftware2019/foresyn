@@ -1,4 +1,5 @@
 import json
+import fuzzywuzzy
 
 from django.http import JsonResponse
 from django.views import View
@@ -12,7 +13,7 @@ class GetModelFromId(View):
 
     def post(self, request):
         try:
-            bigg_id = request.POST.get('bigg_id')
+            bigg_id = request.POST['bigg_id']
         except ValueError:
             return JsonResponse({
                 'code': 400,
@@ -35,7 +36,7 @@ class GetReactionFromId(View):
 
     def post(self, request):
         try:
-            bigg_id = request.POST.get('bigg_id')
+            bigg_id = request.POST['bigg_id']
         except ValueError:
             return JsonResponse({
                 'code': 400,
@@ -57,9 +58,9 @@ class GetReactionFromId(View):
 class GetMetaboliteFromId(View):
     http_method_names = ['post']
 
-    def post(self, reqeust):
+    def post(self, request):
         try:
-            bigg_id = request.POST.get('bigg_id')
+            bigg_id = request.POST['bigg_id']
         except ValueError:
             return JsonResponse({
                 'code': 400,
