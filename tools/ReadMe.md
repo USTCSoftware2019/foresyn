@@ -4,7 +4,9 @@
 
 ### 使用方式
 
-> python ../bigg_database/manage.py shell < process_*.py
+```bash
+python ../bigg_database/manage.py shell < process_*.py
+```
 
 ## link_*_*.py
 
@@ -12,7 +14,9 @@
 
 ### 使用方式
 
-> python ../bigg_database/manage.py shell < link_*_*.py
+```bash
+python ../bigg_database/manage.py shell < link_*_*.py
+```
 
 ## clean_up.sh (*deprecated*)
 
