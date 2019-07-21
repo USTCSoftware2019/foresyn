@@ -30,7 +30,13 @@ class CobraModelApi(View):
         return JsonResponse({'id': model.id}, status=201)
 
     def get(self, request):
-        pass
+        if 'id' in request.GET.keys():
+            try:
+                return JsonResponse(CobraModel.objects.get(id=request.GET['id'][0]).json(), status=200)
+            except ObjectDoesNotExist:
+                return JsonResponse({}, status=404)
+        else:
+            return JsonResponse({'models': list([model.json() for model in CobraModel.objects.all()])}, status=200)
 
     def delete(self, request):
         try:
@@ -85,7 +91,14 @@ class CobraReactionApi(View):
         return JsonResponse({'id': reaction.id}, status=201)
 
     def get(self, request):
-        pass
+        if 'id' in request.GET.keys():
+            try:
+                return JsonResponse(CobraReaction.objects.get(id=request.GET['id'][0]).json(), status=200)
+            except ObjectDoesNotExist:
+                return JsonResponse({}, status=404)
+        else:
+            return JsonResponse(
+                {'reactions': list([reaction.json() for reaction in CobraReaction.objects.all()])}, status=200)
 
     def delete(self, request):
         try:
@@ -137,7 +150,14 @@ class CobraMetaboliteApi(View):
         return JsonResponse({'id': metabolite.id}, status=201)
 
     def get(self, request):
-        pass
+        if 'id' in request.GET.keys():
+            try:
+                return JsonResponse(CobraMetabolite.objects.get(id=request.GET['id'][0]).json(), status=200)
+            except ObjectDoesNotExist:
+                return JsonResponse({}, status=404)
+        else:
+            return JsonResponse(
+                {'metabolites': list([metabolite.json() for metabolite in CobraMetabolite.objects.all()])}, status=200)
 
     def delete(self, request):
         try:

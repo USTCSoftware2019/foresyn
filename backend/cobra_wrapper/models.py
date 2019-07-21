@@ -15,11 +15,9 @@ class CobraMetabolite(models.Model):
     def build(self):
         return cobra.Metabolite(self.identifier, self.formula, self.name, self.charge, self.compartment)
 
-    # ! 这是我之前写的方法，你们可以视需求启用 <myl7>
-    # def json(self):
-    #     return dict(**{field: getattr(self, field) for field in [
-    #         'identifier', 'formula', 'name', 'compartment'
-    #     ]})
+    def json(self):
+        return dict(**{field: getattr(self, field) for field in [
+            'identifier', 'formula', 'name', 'charge', 'compartment']})
 
 
 class CobraReaction(models.Model):
@@ -43,13 +41,15 @@ class CobraReaction(models.Model):
         cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
         return cobra_reaction
 
-    # def json(self):
-    #     metabolite_list = list(
-    #         [metabolite.id for metabolite in self.metabolites.all()])
-    #     return dict(**{field: getattr(self, field) for field in [
-    #         'identifier', 'name', 'subsystem', 'lower_bound', 'upper_bound',
-    #         'gene_reaction_rule'
-    #     ]}, metabolites=metabolite_list)
+    def json(self):
+        return dict(
+            **{field: getattr(self, field) for field in [
+                'identifier', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient',
+                'gene_reaction_rule'
+            ]},
+            metabolites=list([metabolite.id for metabolite in self.metabolites.all()]),
+            coefficients=list([float(coefficient) for coefficient in self.coefficients.split()])
+        )
 
 
 class CobraModel(models.Model):
@@ -64,9 +64,8 @@ class CobraModel(models.Model):
         cobra_model.objective = self.objective
         return cobra_model
 
-    # def json(self):
-    #     reaction_list = list(
-    #         [reaction.id for reaction in self.reactions.all()])
-    #     return dict(**{field: getattr(self, field) for field in [
-    #         'identifier', 'objective'
-    #     ]}, reactions=reaction_list)
+    def json(self):
+        return dict(
+            **{field: getattr(self, field) for field in ['identifier', 'name', 'objective']},
+            reactions=list([reaction.id for reaction in self.reactions.all()])
+        )
