@@ -1,9 +1,10 @@
 import json
-from fuzzywuzzy import fuzz
+#from fuzzywuzzy import fuzz
 
 from django.http import JsonResponse
 from django.views import View
 from django.utils.translation import gettext as _
+import django.core.exceptions
 
 from .models import Metabolite, Model, Reaction
 
@@ -28,7 +29,10 @@ class GetModelFromId(View):
             "version": model_instance.version,
         }
 
-        return JsonResponse({'code': 200, 'content': json.dumps(mod_ins)})
+        return JsonResponse({
+            'code': 200,
+            'content': mod_ins
+        })
 
 
 class GetReactionFromId(View):
