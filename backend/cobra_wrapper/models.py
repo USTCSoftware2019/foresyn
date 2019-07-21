@@ -33,7 +33,7 @@ class CobraReaction(models.Model):
 
     def build(self):
         cobra_reaction = cobra.Reaction(
-            self.identifier, self.name, self.subsystem, self.lower_bound, self.upper_bound, self.objective_coefficient)
+            self.identifier, self.name, self.subsystem, self.lower_bound, self.upper_bound)
         cobra_reaction.add_metabolites(dict(zip(
             [metabolite.build() for metabolite in self.metabolites.all()],
             [float(coefficient) for coefficient in self.coefficients.split()]
@@ -60,7 +60,10 @@ class CobraModel(models.Model):
 
     def build(self):
         cobra_model = cobra.Model(self.identifier, self.name)
-        cobra_model.add_reactions([reaction.build() for reaction in self.reactions.all()])
+        for reaction in self.reactions.all():
+            cobra_reaction = reaction.build()
+            cobra_model.add_reaction(cobra_reaction)
+            cobra_reaction.objective_coefficient = reaction.objective_coefficient
         cobra_model.objective = self.objective
         return cobra_model
 
