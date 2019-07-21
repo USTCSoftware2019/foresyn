@@ -9,21 +9,27 @@ django.setup()
 if True:
     from bigg_database.models import Reaction, Model
 
-root = 'D:\\Code\\iGEM\\bigg_data\\data\\reactions'
-# root = '/mnt/d/Code/iGEM/bigg_data/data/reactions'
+# root = 'D:\\Code\\iGEM\\bigg_data\\data\\reactions'
+root = '/home/elsa/data/data/reactions'
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue
     with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
-        content = json.loads(f.read())
+        try:
+            content = json.loads(f.read())
+        except json.decoder.JSONDecodeError as e:
+            print(e, file)
+            continue
+        try:
+            bigg_id = content['bigg_id']
+            name = content['name'] or ''
 
-        bigg_id = content['bigg_id']
-        name = content['name']
-
-        database_links = content['database_links']
-        pseudoreaction = content['pseudoreaction']
-        reaction_string = content['reaction_string']
-
+            database_links = content['database_links']
+            pseudoreaction = content['pseudoreaction']
+            reaction_string = content['reaction_string']
+        except KeyError as e:
+            print(e, file)
+            continue
         try:
             reaction = Reaction.objects.create(bigg_id=bigg_id, name=name, reaction_string=reaction_string,
                                                pseudoreaction=pseudoreaction, database_links=database_links)

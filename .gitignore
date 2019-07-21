@@ -1,3 +1,4 @@
 *.sqlite3
 *.pyc
 .vscode
+bigg_database/db.sqlite3.bak
