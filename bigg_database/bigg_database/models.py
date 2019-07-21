@@ -61,8 +61,30 @@ class Metabolite(_models.Model):
 class Gene(_models.Model):
     bigg_id = _models.CharField(unique=True, max_length=127, db_index=True)
     name = _models.CharField(max_length=127)
+    rightpos = _models.IntegerField()
+    leftpos = _models.IntegerField()
+    chromosome_ncbi_accession = _models.CharField(default='', max_length=127)
+    mapped_to_genbank = _models.BooleanField()
 
+    strand = _models.CharField(max_length=127)
+    protein_sequence = _models.TextField()
+    dna_sequence = _models.TextField()
+
+    genome_name = _models.CharField(max_length=127)
+    genome_ref_string = _models.CharField(max_length=127)
+
+    database_links = JSONField()
+
+    reactions = _models.ManyToManyField(
+        Reaction, through='ReactionGene', through_fields=('gene', 'reaction'))
     models = _models.ManyToManyField(Model)
+
+
+class ReactionGene(_models.Model):
+    gene_reaction_rule = _models.CharField(max_length=127)
+
+    reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)
+    gene = _models.ForeignKey(Gene, on_delete=_models.CASCADE)
 
 
 class ReactionMetabolite(_models.Model):
