@@ -52,7 +52,7 @@ class Metabolite(_models.Model):
     models = _models.ManyToManyField(
         Model, through='ModelMetabolite', through_fields=('metabolite', 'model'))
 
-    formulae = _models.CharField(max_length=127)
+    formulae = JSONField(max_length=127)
     charges = _models.IntegerField(blank=True, null=True)
 
     database_links = JSONField()
