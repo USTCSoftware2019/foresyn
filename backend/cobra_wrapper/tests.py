@@ -3,6 +3,23 @@ import json
 from django.test import TestCase
 
 from . import models as cobra_models
+from . import computation as cp
+from cobra.test import create_test_model
+from cobra.flux_analysis import flux_variability_analysis
+
+import sys
+
+
+class __redirection__:
+    def __init__(self):   
+        self.buff=''   
+        self.__console__=sys.stdout   
+    def write(self, output_stream):   
+        self.buff+=output_stream   
+    def out(self):  
+        return self.buff
+    def to_console(self):
+        sys.stdout = self.__console__
 
 
 class CobraWrapperTest(TestCase):
@@ -210,3 +227,33 @@ class CobraWrapperTest(TestCase):
         metabolites_response = self.client.get('/cobra/metabolites/', content_type='application/json')
         self.assertEqual(metabolites_response.status_code, 200)
         self.assertEqual(len(json.loads(metabolites_response.content)['metabolites']), 6)
+
+    def test_computation(self):
+        model = create_test_model('textbook')
+        solution_val = model.optimize().objective_value
+        solution_list_fmt = cp.model_summary(model)
+        test_val = solution_list_fmt[2][0][1]
+        self.assertEqual(solution_val, test_val)
+        """
+        r_obj=__redirection__()   
+        sys.stdout=r_obj
+        model.summary(fva = 0.9)
+        solution_val_str = r_obj.out()
+        r_obj.to_console()
+        out_data = solution_val_str.split('\n')
+        solution_val = [out_data[4][19:21], out_data[4][23:27]]
+        solution_list_fmt = cp.model_summary(model, fva = 0.9)
+        test_val = solution_list_fmt[0][0][2]
+        self.assertEqual(solution_val, test_val)
+        """
+        r_obj=__redirection__()   
+        sys.stdout=r_obj
+        model.metabolites.atp_c.summary()
+        solution_val_str = r_obj.out()
+        r_obj.to_console()
+        out_data = solution_val_str.split('\n')
+        solution_val = out_data[4][-50:]
+        solution_list_fmt = cp.metabolite_summary(model, 'atp_c')
+        test_val = solution_list_fmt[1][0][3]
+        self.assertEqual(solution_val, test_val)
+        
