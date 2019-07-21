@@ -189,7 +189,8 @@ class CobraWrapperTest(TestCase):
 
     def test_cobra_url_get(self):
         info = self._create_model()
-        model_response = self.client.get('/cobra/models/', dict(id=info['models'][0].id), content_type='application/json')
+        model_response = self.client.get(
+            '/cobra/models/', dict(id=info['models'][0].id), content_type='application/json')
         self.assertEqual(model_response.status_code, 200)
         self.assertEqual(json.loads(model_response.content)['identifier'], 'example_model')
         models_response = self.client.get('/cobra/models/', content_type='application/json')
