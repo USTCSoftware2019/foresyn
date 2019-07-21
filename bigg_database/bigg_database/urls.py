@@ -26,7 +26,7 @@ urlpatterns = [
     path('search/model/id', views.GetModelFromId.as_view(),
          name='search_model_by_id'),
     path('search/reaction/name', views.GetReactionFromName.as_view(),
-         name='search_reaction_by_name')
+         name='search_reaction_by_name'),
     path('search/metabolite/name', views.GetMetaboliteFromName.as_view(),
          name='search_metabolite_by_name')
 ]
