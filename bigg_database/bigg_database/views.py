@@ -80,7 +80,7 @@ class GetMetaboliteFromId(View):
 
 
 
-class GetReactionByName(View):
+class GetReactionFromName(View):
     http_method_names = ['post']
 
     def post(self,request):
@@ -104,7 +104,7 @@ class GetReactionByName(View):
         return JsonResponse({'code': 200, 'content': json.dumps(reac_ins)})
 
 
-class GetMetaboliteByName(View):
+class GetMetaboliteFromName(View):
     http_method_names = ['post']
 
     def post(self,reqeust):
