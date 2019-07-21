@@ -1,4 +1,5 @@
 
+import sys
 import json
 import django
 import os
@@ -10,8 +11,7 @@ django.setup()
 if True:
     from bigg_database.models import Gene, Reaction, ReactionGene
 
-root = 'D:\\Code\\iGEM\\bigg_data\\data\\gene'  # for windows
-# root = '/mnt/d/Code/iGEM/models'
+root = sys.argv[1]
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue
@@ -23,7 +23,7 @@ for file in os.listdir(root):
 
         gene_bigg_id = content['bigg_id']
         gene_instance = Gene.objects.get(bigg_id=gene_bigg_id)
-        
+
         for reaction in content['reactions']:
             reaction_bigg_id = reaction['bigg_id']
             reaction_instance = Reaction.objects.get(bigg_id=reaction_bigg_id)

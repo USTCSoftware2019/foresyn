@@ -1,7 +1,10 @@
 
 import json
-import django
 import os
+import sys
+
+import django
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bigg_database.settings')
 
 django.setup()
@@ -18,7 +21,7 @@ def get_from_content(content, *argv):
     }
 
 
-root = '~/genes/    '
+root = sys.argv[1]
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue

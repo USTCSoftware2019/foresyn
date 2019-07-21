@@ -1,4 +1,5 @@
 
+import sys
 import json
 import django
 import os
@@ -10,8 +11,7 @@ django.setup()
 if True:
     from bigg_database.models import Metabolite, Model, ModelMetabolite
 
-root = 'D:\\Code\\iGEM\\bigg_data\\data\\reactions'  # for windows
-# root = '/mnt/d/Code/iGEM/models'
+root = sys.argv[1]
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue

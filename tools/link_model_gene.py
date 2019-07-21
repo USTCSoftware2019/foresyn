@@ -10,8 +10,7 @@ django.setup()
 if True:
     from bigg_database.models import Gene, Model
 
-root = 'D:\\Code\\iGEM\\bigg_data\\data\\gene'  # for windows
-# root = '/mnt/d/Code/iGEM/models'
+root = sys.argv[1]
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue

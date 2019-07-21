@@ -1,4 +1,5 @@
 
+import sys
 import json
 import django
 import os
@@ -11,9 +12,7 @@ if True:
     from bigg_database.models import Metabolite, Model, ModelMetabolite
 
 print('models')
-
-root = '/home/elsa/models/models'  # for windows
-# root = '/mnt/d/Code/iGEM/models'
+root = sys.argv[1]
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue
@@ -32,8 +31,7 @@ for file in os.listdir(root):
 
 print('meta')
 
-# root = 'D:\\Code\\iGEM\\bigg_data\\data\\metabolites'  # for windows
-root = '/home/elsa/data/data/metabolites'
+root = sys.argv[2]
 for file in os.listdir(root):
     if os.path.isdir(file):
         continue
