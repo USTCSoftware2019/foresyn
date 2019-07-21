@@ -85,7 +85,7 @@ class ModelReaction(_models.Model):
     lower_bound = _models.FloatField()
     upper_bound = _models.FloatField()
 
-    subsystem = _models.CharField(max_length=127)
+    subsystem = _models.CharField(max_length=127, blank=True, null=True)
 
     gene_reaction_rule = _models.CharField(max_length=127)
 

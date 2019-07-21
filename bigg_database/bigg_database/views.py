@@ -134,7 +134,7 @@ class GetMetaboliteFromName(View):
                 'content': _('name_Required')
             })
 
-        match_list = fuzzy_search(Model.objects.all(), 'name', name)
+        match_list = fuzzy_search(Metabolite.objects.all(), 'name', name)
 
         ret_content = [{
             "bigg_id": metabolite_instance.bigg_id,
