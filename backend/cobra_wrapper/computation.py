@@ -304,9 +304,9 @@ model = create_test_model('textbook')
 
 #a = metabolite_summary(model, 'atp_c')
 #print(a)
-#b = model_summary(model)
-#print(b)
-print(Growth_media_change(model, 'EX_nh4_e', 10))
+b = model_summary(model)
+print(b)
+#print(Growth_media_change(model, 'EX_nh4_e', 10))
 #flux_variability_analysis(model, model.reactions[:10], fraction_of_optimum = 0.9)
 
 
