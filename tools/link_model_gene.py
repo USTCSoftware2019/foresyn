@@ -1,10 +1,21 @@
+
 import json
-from bigg_database.models import Model, Gene
+import django
 import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bigg_database.settings')
 
+django.setup()
 
-for root, _, files in os.walk('D:\\Code\\iGEM\\models'):
-    with open(os.path.join(root, files), 'r', encoding='utf-8') as f:
+# 防止在格式化代码时将这个放在django初始化之前
+if True:
+    from bigg_database.models import Gene, Model
+
+root = 'D:\\Code\\iGEM\\bigg_data\\data\\gene'  # for windows
+# root = '/mnt/d/Code/iGEM/models'
+for file in os.listdir(root):
+    if os.path.isdir(file):
+        continue
+    with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
         content = json.loads(f.read())
 
         model_bigg_id = content['id']
