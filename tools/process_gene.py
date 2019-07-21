@@ -1,13 +1,42 @@
 
 import json
-from bigg_database.models import Gene
+import django
 import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bigg_database.settings')
 
-for root, _, files in os.walk('D:\\Code\\iGEM\\models'):
-    with open(os.path.join(root, files), 'r', encoding='utf-8') as f:
-        genes = json.loads(f.read())['genes']
+django.setup()
 
-        for gene in genes:
-            bigg_id = gene['id']
-            name = gene['name']
-            Gene.objects.create(bigg_id=bigg_id, name=name)
+# 防止在格式化代码时将这个放在django初始化之前
+if True:
+    from bigg_database.models import Gene
+
+
+def get_from_content(content, *argv):
+    return {
+        key: getattr(content, key)
+        for key in argv
+    }
+
+
+root = '~/genes/    '
+for file in os.listdir(root):
+    if os.path.isdir(file):
+        continue
+    with open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+        try:
+            content = json.loads(f.read())
+        except json.decoder.JSONDecodeError as e:
+            print(e, file)
+            continue
+
+        try:
+            stuff = get_from_content(content,
+                                     'rightpos', 'name', 'chromosome_ncbi_accession',
+                                     'mapped_to_genbank', 'leftpos', 'database_links',
+                                     'strand', 'protein_sequence', 'genome_name',
+                                     'dna_sequence', 'bigg_id', 'genome_ref_string')
+        except KeyError as e:
+            print(e, file)
+            continue
+
+        Gene.objects.create(**stuff)
