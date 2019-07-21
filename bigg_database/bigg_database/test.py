@@ -2,7 +2,7 @@ import json
 from django.test import TestCase,Client
 from .models import Model,Reaction,Metabolite
 
-class ModelTests(TestCase):
+class IdSearchTests(TestCase):
 
     def test_id_model(self):
 
@@ -82,3 +82,60 @@ class ModelTests(TestCase):
         self.assertEqual(meta_ins['charges'],
         [0])
 
+class NameSearchTests(TestCase):
+
+    def test_name_reaction(TestCase):
+
+        data = {
+        "name":"1-alpha,24R,25-Vitamin D-hydroxylase (D2)"}
+        resp = self.client.post('',data) #未填写url
+        reac_ins = json.loads(resp.content)
+
+        self.assertEqual(reac_ins['bigg_id'],
+        "1a_25VITD2Hm")
+        self.assertEqual(reac_ins['reaction_string'],
+        "h_m + nadph_m + o2_m + 1a25dhvitd2_m &#8652; h2o_m + nadp_m + 1a2425thvitd2_m")
+        self.assertEqual(reac_ins['pseudoreaction'],
+        false)
+
+
+        data = {
+        "name":"1-Aminocyclopropane-1-carboxylate transport, mitochondria"}
+        resp = self.client.post('',data) #未填写url
+        reac_ins = json.loads(resp.content)
+
+        self.assertEqual(reac_ins['bigg_id'],
+        "1ACPCtm")
+        self.assertEqual(reac_ins['reaction_string'],
+        "1acpc_c &#8652; 1acpc_m")
+        self.assertEqual(reac_ins['pseudoreaction'],
+        false)
+
+    def test_id_metabolite(TestCase):
+
+        data = {
+        "name":"Sulfate"}
+        resp = self.client.post('',data) #未填写url
+        meta_ins = json.loads(resp.content)
+
+        self.assertEqual(meta_ins['bigg_id'],
+        "so4")
+        self.assertEqual(meta_ins['formulae'],
+            [
+            "SO4",
+            "O4S"])
+        self.assertEqual(meta_ins['charges'],
+        [-2])
+
+
+        data = {
+        "name":"1-14:0-2-lysophosphatidylcholine"}
+        resp = self.client.post('',data) #未填写url
+        meta_ins = json.loads(resp.content)
+
+        self.assertEqual(meta_ins['bigg_id'],
+        "1agpc140")
+        self.assertEqual(meta_ins['formulae'],
+        ["C22H46NO7P"])
+        self.assertEqual(meta_ins['charges'],
+        [0])

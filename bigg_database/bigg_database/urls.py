@@ -16,9 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('id_model',views.GetModelById.as_view(),name='id_model'),
-    path('id_reaction',views.GetReactionById.as_view(),name='id_reaction'),
-    path('id_metabolite',views.GetMetaboliteById.as_view(),name='id_metabolite')
+    path('search/reaction/id', views.GetReactionFromId.as_view(),
+         name='search_reaction_by_id'),
+    path('search/metabolite/id', views.GetMetaboliteFromId.as_view(),
+         name='search_metabolite_by_id'),
+    path('search/model/id', views.GetModelFromId.as_view(),
+         name='search_model_by_id'),
+    path('search/reaction/name', views.GetReactionFromName.as_view(),
+         name='search_reaction_by_name'),
+    path('search/metabolite/name', views.GetMetaboliteFromName.as_view(),
+         name='search_metabolite_by_name')
 ]
