@@ -2,24 +2,24 @@ import json
 
 from django.test import TestCase
 
-from . import models as cobra_models
-from . import computation as cp
-from cobra.test import create_test_model
-from cobra.flux_analysis import flux_variability_analysis
+from .models import CobraModel, CobraReaction, CobraMetabolite
+# from . import computation as cp
+# from cobra.test import create_test_model
+# from cobra.flux_analysis import flux_variability_analysis
 
 import sys
 
 
-class __redirection__:
-    def __init__(self):   
-        self.buff=''   
-        self.__console__=sys.stdout   
-    def write(self, output_stream):   
-        self.buff+=output_stream   
-    def out(self):  
-        return self.buff
-    def to_console(self):
-        sys.stdout = self.__console__
+# class __redirection__:
+#     def __init__(self):
+#         self.buff=''
+#         self.__console__=sys.stdout
+#     def write(self, output_stream):
+#         self.buff+=output_stream
+#     def out(self):
+#         return self.buff
+#     def to_console(self):
+#         sys.stdout = self.__console__
 
 
 class CobraWrapperTest(TestCase):
@@ -28,31 +28,31 @@ class CobraWrapperTest(TestCase):
 
     def _create_model(self):
         """Example on cobra doc to build a model"""
-        test_metabolite_0 = cobra_models.CobraMetabolite(
+        test_metabolite_0 = CobraMetabolite(
             identifier='ACP_c',
             formula='C11H21N2O7PRS',
             name='acyl-carrier-protein',
             compartment='c'
         )
-        test_metabolite_1 = cobra_models.CobraMetabolite(
+        test_metabolite_1 = CobraMetabolite(
             identifier='3omrsACP_c',
             formula='C25H45N2O9PRS',
             name='3-Oxotetradecanoyl-acyl-carrier-protein',
             compartment='c'
         )
-        test_metabolite_2 = cobra_models.CobraMetabolite(
+        test_metabolite_2 = CobraMetabolite(
             identifier='co2_c', formula='CO2', name='CO2', compartment='c'
         )
-        test_metabolite_3 = cobra_models.CobraMetabolite(
+        test_metabolite_3 = CobraMetabolite(
             identifier='malACP_c',
             formula='C14H22N2O10PRS',
             name='Malonyl-acyl-carrier-protein',
             compartment='c'
         )
-        test_metabolite_4 = cobra_models.CobraMetabolite(
+        test_metabolite_4 = CobraMetabolite(
             identifier='h_c', formula='H', name='H', compartment='c'
         )
-        test_metabolite_5 = cobra_models.CobraMetabolite(
+        test_metabolite_5 = CobraMetabolite(
             identifier='ddcaACP_c',
             formula='C23H43N2O8PRS',
             name='Dodecanoyl-ACP-n-C120ACP',
@@ -64,7 +64,7 @@ class CobraWrapperTest(TestCase):
         test_metabolite_3.save()
         test_metabolite_4.save()
         test_metabolite_5.save()
-        test_reaction = cobra_models.CobraReaction(
+        test_reaction = CobraReaction(
             identifier='3OAS140',
             name='3 oxoacyl acyl carrier protein synthase n C140 ',
             subsystem='Cell Envelope Biosynthesis',
@@ -79,7 +79,7 @@ class CobraWrapperTest(TestCase):
             test_metabolite_3, test_metabolite_4, test_metabolite_5
         ])
         test_reaction.save()
-        test_model = cobra_models.CobraModel(
+        test_model = CobraModel(
             identifier='example_model',
             objective='3OAS140'
         )
@@ -161,7 +161,7 @@ class CobraWrapperTest(TestCase):
         ), content_type='application/json')
         self.assertEqual(model_response.status_code, 201)
         model_id = json.loads(model_response.content)['id']
-        model = cobra_models.CobraModel.objects.get(id=model_id)
+        model = CobraModel.objects.get(id=model_id)
         cobra_model = model.build()
         self.assertTrue(
             str(cobra_model.objective.expression) in [
@@ -228,32 +228,48 @@ class CobraWrapperTest(TestCase):
         self.assertEqual(metabolites_response.status_code, 200)
         self.assertEqual(len(json.loads(metabolites_response.content)['metabolites']), 6)
 
+    def test_cobra_compute_url_post(self):
+        info = self._create_model()
+        fba_v_response = self.client.post(
+            '/cobra/models/{}/fba/'.format(info['models'][0].id), {'verbose': True}, content_type='application/json')
+        fva_v_response = self.client.post('/cobra/models/{}/fva/'.format(info['models'][0].id), {
+            'verbose': True,
+            'reaction_list': [info['reactions'][0].id]
+        }, content_type='application/json')
+        self.assertEqual(json.loads(fba_v_response.content), {
+            "objective_value": 0.0,
+            "status": "optimal",
+            "fluxes": {"3OAS140": 0.0},
+            "shadow_prices": {
+                "ACP_c": -1.0, "3omrsACP_c": 0.0, "co2_c": 0.0, "malACP_c": 0.0, "h_c": 0.0, "ddcaACP_c": 0.0}
+        })
+        self.assertEqual(json.loads(fva_v_response.content), {
+            "minimum": {"3OAS140": 0.0}, "maximum": {"3OAS140": 0.0}})
+
     def test_computation(self):
-        model = create_test_model('textbook')
-        solution_val = model.optimize().objective_value
-        solution_list_fmt = cp.model_summary(model)
-        test_val = solution_list_fmt[2][0][1]
-        self.assertEqual(solution_val, test_val)
-        """
-        r_obj=__redirection__()   
-        sys.stdout=r_obj
-        model.summary(fva = 0.9)
-        solution_val_str = r_obj.out()
-        r_obj.to_console()
-        out_data = solution_val_str.split('\n')
-        solution_val = [out_data[4][19:21], out_data[4][23:27]]
-        solution_list_fmt = cp.model_summary(model, fva = 0.9)
-        test_val = solution_list_fmt[0][0][2]
-        self.assertEqual(solution_val, test_val)
-        """
-        r_obj=__redirection__()   
-        sys.stdout=r_obj
-        model.metabolites.atp_c.summary()
-        solution_val_str = r_obj.out()
-        r_obj.to_console()
-        out_data = solution_val_str.split('\n')
-        solution_val = out_data[4][-50:]
-        solution_list_fmt = cp.metabolite_summary(model, 'atp_c')
-        test_val = solution_list_fmt[1][0][3]
-        self.assertEqual(solution_val, test_val)
-        
+        # model = create_test_model('textbook')
+        # solution_val = model.optimize().objective_value
+        # solution_list_fmt = cp.model_summary(model)
+        # test_val = solution_list_fmt[2][0][1]
+        # self.assertEqual(solution_val, test_val)
+        # r_obj=__redirection__()
+        # sys.stdout=r_obj
+        # model.summary(fva = 0.9)
+        # solution_val_str = r_obj.out()
+        # r_obj.to_console()
+        # out_data = solution_val_str.split('\n')
+        # solution_val = [out_data[4][19:21], out_data[4][23:27]]
+        # solution_list_fmt = cp.model_summary(model, fva = 0.9)
+        # test_val = solution_list_fmt[0][0][2]
+        # self.assertEqual(solution_val, test_val)
+        # r_obj = __redirection__()
+        # sys.stdout = r_obj
+        # model.metabolites.atp_c.summary()
+        # solution_val_str = r_obj.out()
+        # r_obj.to_console()
+        # out_data = solution_val_str.split('\n')
+        # solution_val = out_data[4][-50:]
+        # solution_list_fmt = cp.metabolite_summary(model, 'atp_c')
+        # test_val = solution_list_fmt[1][0][3]
+        # self.assertEqual(solution_val, test_val)
+        pass
