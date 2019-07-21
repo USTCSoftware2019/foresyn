@@ -1,20 +1,16 @@
 import json
 import os
-import sys
+
 import django
+from django.core.management.base import BaseCommand
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bigg_database.settings')
-
-django.setup()
-
-if True:
-    from bigg_database.models import Model, Reaction, ModelReaction
+from bigg_database.models import Model, ModelReaction, Reaction
 
 
 def parse_all_files_in_dir(path):
     objects = {}
 
-    for root, dirs, files in os.walk(path):
+    for root, _, files in os.walk(path):
         for file in files:
             with open(os.path.join(root, file), 'r') as json_file:
                 objects[file[:-5]] = json.load(json_file)
@@ -53,14 +49,7 @@ def organism_lookup(reaction, model, reactions):
     return result_model['organism']
 
 
-def main():
-    if len(sys.argv) < 3:
-        print("Usage: model_reaction.py path_to_models path_to_reactions")
-        return
-
-    models_dirname = sys.argv[1]
-    reactions_dirname = sys.argv[2]
-
+def main(models_dirname, reactions_dirname):
     model_jsons = parse_all_files_in_dir(models_dirname)
     reaction_jsons = parse_all_files_in_dir(reactions_dirname)
 
@@ -89,10 +78,17 @@ def main():
                     print('No such reaction named ' + reaction['id'])
                     exit()
 
-            reaction['organism'] = organism_lookup(reaction['id'], model_id, reaction_jsons)
+            reaction['organism'] = organism_lookup(
+                reaction['id'], model_id, reaction_jsons)
             link(model_id, reaction['id'], reaction)
 
 
-if __name__ == '__main__':
-    main()
+class Command(BaseCommand):
+    help = 'Link model and reaction from json'
 
+    def add_arguments(self, parser):
+        parser.add_argument('model_path', type=str)
+        parser.add_argument('reaction_path', type=str)
+
+    def handle(self, **kwargs):
+        main(kwargs['model_path'], kwargs['reaction_path'])
