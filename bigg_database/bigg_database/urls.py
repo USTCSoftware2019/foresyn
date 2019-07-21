@@ -18,4 +18,7 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('id_model',views.GetModelById.as_view(),name='id_model'),
+    path('id_reaction',views.GetReactionById.as_view(),name='id_reaction'),
+    path('id_metabolite',views.GetMetaboliteById.as_view(),name='id_metabolite')
 ]

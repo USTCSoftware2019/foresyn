@@ -2,7 +2,7 @@ from django.views import View
 from django.http import JsonResponse
 from .models import Model,Reaction,Metabolite
 
-class GetIdModel(View):
+class GetModelById(View):
     def post(self,request):
         try:
             bigg_id = request.POST.get('bigg_id')
@@ -22,7 +22,7 @@ class GetIdModel(View):
     def get(self,request):
         pass
 
-class GetIdReaction(View):
+class GetReactionById(View):
     def post(self,request):
         try:
             bigg_id = request.POST.get('bigg_id')
@@ -43,7 +43,7 @@ class GetIdReaction(View):
     def get(self,request):
         pass
 
-class GetIdMetabolite(View):
+class GetMetaboliteById(View):
     def post(self,reqeust):
         try:
             bigg_id = request.POST.get('bigg_id')
