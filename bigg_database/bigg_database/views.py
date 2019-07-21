@@ -85,7 +85,7 @@ class GetReactionFromName(View):
 
     def post(self,request):
         try:
-            name = request.POST.get('name')
+            name = request.POST['name']
         except KeyError:
             return JsonResponse({
                 'code': 400,
@@ -107,9 +107,9 @@ class GetReactionFromName(View):
 class GetMetaboliteFromName(View):
     http_method_names = ['post']
 
-    def post(self,reqeust):
+    def post(self,request):
         try:
-            name = request.POST.get('name')
+            name = request.POST['name']
         except KeyError:
             return JsonResponse({
                 'code': 400,
