@@ -8,9 +8,12 @@ from .models import Metabolite, Model, Reaction
 from urllib.parse import urlencode
 
 
-def build_url(*args, **kwargs):
+def build_url(viewname, *args, **kwargs):
     get = kwargs.pop('get', {})
-    url = reverse(*args, **kwargs)
+    # FIXME: reverse() requires "app_name:url_name"
+    viewname = "bigg_database:" + viewname
+
+    url = reverse(viewname=viewname, *args, **kwargs)
     if get:
         url += '?' + urlencode(get)
     return url

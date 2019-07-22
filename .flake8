@@ -7,6 +7,7 @@ exclude =
     .idea,
     __pycache__/,
     env/,
-    venv/
+    venv/,
+    migrations
 # according to Django Coding Style
 max-line-length = 119

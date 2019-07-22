@@ -60,7 +60,7 @@ def main(models_dirname, reactions_dirname):
             if reaction['id'] not in reaction_jsons:
                 """
                 try:
-                    reaction['id'] = next(original_id 
+                    reaction['id'] = next(original_id
                                           for original_id in reaction['notes']['original_bigg_ids']
                                           if original_id in reaction_jsons)
                 except StopIteration:

@@ -24,7 +24,7 @@ def main(model_path):
             except KeyError as e:
                 print(e, file)
                 continue
-                
+
             for gene in content['genes']:
                 gene_bigg_id = gene['id']
 
