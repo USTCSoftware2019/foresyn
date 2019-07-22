@@ -4,6 +4,7 @@ from .models import Model, Reaction, Metabolite
 
 
 class IdSearchTests(TestCase):
+    fixtures = ['bigg_database/test_data']
 
     def test_id_model(self):
 
