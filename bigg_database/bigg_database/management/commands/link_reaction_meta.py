@@ -12,9 +12,18 @@ def main(reaction_path):
         if os.path.isdir(file):
             continue
         with open(os.path.join(reaction_path, file), 'r', encoding='utf-8') as f:
-            content = json.loads(f.read())
+            try:
+                content = json.loads(f.read())
+            except json.decoder.JSONDecodeError as e:
+                print(e, file)
+                continue
 
-            reaction_bigg_id = content['bigg_id']
+            try:
+                reaction_bigg_id = content['bigg_id']
+            except KeyError as e:
+                print(e, file)
+                continue
+
             reaction_instance = Reaction.objects.get(bigg_id=reaction_bigg_id)
             for meta in content['metabolites']:
                 meta_bigg_id = meta['bigg_id'] + \
@@ -22,7 +31,7 @@ def main(reaction_path):
                 meta_stoichiometry = meta['stoichiometry']
                 meta_instance = Metabolite.objects.get(bigg_id=meta_bigg_id)
                 ReactionMetabolite.objects.create(
-                    reaction=model_instance, metabolite=meta_instance, stoichiometry=meta_stoichiometry)
+                    reaction=reaction_instance, metabolite=meta_instance, stoichiometry=meta_stoichiometry)
 
 
 class Command(BaseCommand):

@@ -16,7 +16,11 @@ def main(gene_path):
             except json.decoder.JSONDecodeError as e:
                 print(e, file)
 
-            gene_bigg_id = content['bigg_id']
+            try:
+                gene_bigg_id = content['bigg_id']
+            except KeyError as e:
+                print(e, file)
+                
             gene_instance = Gene.objects.get(bigg_id=gene_bigg_id)
 
             for reaction in content['reactions']:

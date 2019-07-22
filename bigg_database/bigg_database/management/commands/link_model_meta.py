@@ -11,16 +11,23 @@ def main(meta_path):
         if os.path.isdir(file):
             continue
         with open(os.path.join(meta_path, file), 'r', encoding='utf-8') as f:
-            content = json.loads(f.read())
+            try:
+                content = json.loads(f.read())
+            except json.decoder.JSONDecodeError as e:
+                print(e, file)
 
-            meta_bigg_id_without_compartments = content['bigg_id']
+            try:
+                meta_bigg_id_without_compartments = content['bigg_id']
+            except KeyError as e:
+                print(e, file)
+                continue
 
             for compartment in content['compartments_in_models']:
                 meta_bigg_id = meta_bigg_id_without_compartments + '_' + \
                     compartment['bigg_id']
                 meta_instance = Metabolite.objects.get(bigg_id=meta_bigg_id)
                 model_instance = Model.objects.get(
-                    bigg_id=model_bigg_id)
+                    bigg_id=compartment['model_bigg_id'])
 
                 mm = ModelMetabolite.objects.get(
                     metabolite=meta_instance, model=model_instance)
