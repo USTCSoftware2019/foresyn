@@ -17,16 +17,14 @@ from django.contrib import admin
 from django.urls import path
 
 from . import views
+
+app_name = 'bigg_database'
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('search/reaction/id', views.GetReactionFromId.as_view(),
-         name='search_reaction_by_id'),
-    path('search/metabolite/id', views.GetMetaboliteFromId.as_view(),
-         name='search_metabolite_by_id'),
-    path('search/model/id', views.GetModelFromId.as_view(),
-         name='search_model_by_id'),
-    path('search/reaction/name', views.GetReactionFromName.as_view(),
-         name='search_reaction_by_name'),
-    path('search/metabolite/name', views.GetMetaboliteFromName.as_view(),
-         name='search_metabolite_by_name')
+    path('search/reaction', views.ReactionSearchView.as_view(),
+         name='search_reaction'),
+    path('search/metabolite', views.MetaboliteSearchView.as_view(),
+         name='search_metabolite'),
+    path('search/model', views.ModelSearchView.as_view(),
+         name='search_model'),
 ]
