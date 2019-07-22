@@ -27,6 +27,8 @@ urlpatterns = [
          name='search_metabolite'),
     path('search/model', views.ModelSearchView.as_view(),
          name='search_model'),
+    path('search/gene', views.GeneSearchView.as_view(),
+         name='search_gene'),
     path('model/<int:pk>', views.ModelDetailView.as_view(),
          name='model_detail'),
     path('reaction/<int:pk>', views.ReactionDetailView.as_view(),
