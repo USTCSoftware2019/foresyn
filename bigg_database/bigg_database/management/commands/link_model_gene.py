@@ -13,11 +13,18 @@ def main(model_path):
         if os.path.isdir(file):
             continue
         with open(os.path.join(model_path, file), 'r', encoding='utf-8') as f:
-            content = json.loads(f.read())
+            try:
+                content = json.loads(f.read())
+            except json.decoder.JSONDecodeError as e:
+                print(e, file)
 
-            model_bigg_id = content['id']
-            model_instance = Model.objects.get(bigg_id=model_bigg_id)
-
+            try:
+                model_bigg_id = content['id']
+                model_instance = Model.objects.get(bigg_id=model_bigg_id)
+            except KeyError as e:
+                print(e, file)
+                continue
+                
             for gene in content['genes']:
                 gene_bigg_id = gene['id']
 
