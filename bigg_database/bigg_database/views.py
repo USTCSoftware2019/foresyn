@@ -17,7 +17,7 @@ def fuzzy_search(query_set, request_name, request_data):
     return [
         instance
         for instance in query_set
-        if fuzz.ratio(getattr(instance, request_name).lower(), request_data) >= MATCH_RATIO
+        if fuzz.partial_ratio(getattr(instance, request_name).lower(), request_data) >= MATCH_RATIO
     ]
 
 
