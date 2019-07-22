@@ -1,7 +1,7 @@
 import json
 
 import django.core.exceptions
-from django.forms.models import model_to_dict
+from django.forms.models import model_to_dict as origin_model_to_dict
 from django.http import JsonResponse
 from django.utils.translation import gettext as _
 from django.views.generic import View
@@ -21,20 +21,14 @@ def fuzzy_search(query_set, request_name, request_data):
     ]
 
 
-def search_from_id(model, bigg_id, fields):
-    fuzzy_search_result = fuzzy_search(model.objects.all(), 'bigg_id', bigg_id)
-    return [
-        model_to_dict(instance, fields=fields)
-        for instance in fuzzy_search_result
-    ]
-
-
-def search_from_name(model, name, fields):
-    fuzzy_search_result = fuzzy_search(model.objects.all(), 'name', name)
-    return [
-        model_to_dict(instance, fields=fields)
-        for instance in fuzzy_search_result
-    ]
+def model_to_dict(instance, fields=None, count_number_fields=None, exclude=None):
+    ret_dict = origin_model_to_dict(instance, fields=fields, exclude=exclude)
+    if fields:
+        ret_dict.update({
+            field+'_count': getattr(instance, field).count()
+            for field in fields
+        })
+    return ret_dict
 
 
 class SearchView(View):
@@ -42,6 +36,7 @@ class SearchView(View):
     model = None
     by = ['bigg_id', 'name']
     fields = None
+    count_number_fields = None
 
     def get(self, request):
         if self.model is None or self.fields is None:
@@ -50,9 +45,17 @@ class SearchView(View):
         bigg_id = request.GET.get('bigg_id')
         name = request.GET.get('name')
         if bigg_id is not None and 'bigg_id' in self.by:
-            return JsonResponse({'result': search_from_id(self.model, bigg_id, self.fields)})
+            return JsonResponse({'result': [
+                model_to_dict(instance, fields=self.fields,
+                              count_number_fields=self.count_number_fields)
+                for instance in fuzzy_search(self.model.objects.all(), 'bigg_id', bigg_id)
+            ]})
         elif name is not None and 'name' in self.by:
-            return JsonResponse({'result': search_from_name(self.model, name, self.fields)})
+            return JsonResponse({'result': [
+                model_to_dict(instance, fields=self.fields,
+                              count_number_fields=self.count_number_fields)
+                for instance in fuzzy_search(self.model.objects.all(), 'name', name)
+            ]})
         else:
             return JsonResponse({'result': []})
 
@@ -60,20 +63,23 @@ class SearchView(View):
 class ModelSearchView(SearchView):
     model = Model
     by = ['bigg_id']
-    fields = ['bigg_id', 'compartments', 'pk']
+    fields = ['bigg_id', 'compartments', 'id']
+    count_number_fields = ['reaction_set', 'metabolite_set', 'gene_set']
 
 
 class MetaboliteSearchView(SearchView):
     model = Metabolite
     by = ['bigg_id', 'name']
-    fields = ['bigg_id', 'name', 'formulae', 'charges', 'database_links', 'pk']
+    fields = ['bigg_id', 'name', 'formulae', 'charges', 'database_links', 'id']
+    count_number_fields = ['reactions', 'models']
 
 
 class ReactionSearchView(SearchView):
     model = Reaction
     by = ['bigg_id', 'name']
     fields = ['bigg_id', 'name', 'reaction_string',
-              'pseudoreaction', 'database_links', 'pk']
+              'pseudoreaction', 'database_links', 'id']
+    count_number_fields = ['models', 'metabolite_set', 'gene_set']
 
 
 class GeneSearchView(SearchView):
@@ -82,4 +88,5 @@ class GeneSearchView(SearchView):
     fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
               'mapped_to_genbank', 'strand', 'protein_sequence',
               'dna_sequence', 'genome_name', 'genome_ref_string',
-              'database_links', 'pk']
+              'database_links', 'id']
+    count_number_fields = ['reactions', 'models']
