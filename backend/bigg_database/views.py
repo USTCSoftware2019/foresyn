@@ -15,6 +15,7 @@ MATCH_RATIO = 80
 
 def fuzzy_search(query_set, request_name, request_data):
     request_name = request_name.lower()
+    request_data = request_data.lower()
     return [
         instance
         for instance in query_set
