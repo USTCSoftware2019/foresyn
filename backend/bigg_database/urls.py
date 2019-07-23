@@ -22,11 +22,11 @@ urlpatterns = [
          name='gene_detail'),
     path('model/<int:pk>/genes', views.GenesInModel.as_view(),
          name='genes_in_model'),
-    path('model/<int:pk>/metabolites', views.MetaboliteInModel.as_view(),
+    path('model/<int:pk>/metabolites', views.MetabolitesInModel.as_view(),
          name='metabolites_in_model'),
     path('model/<int:pk>/reactions', views.ReactionsInModel.as_view(),
          name='reactions_in'),
-    path('reaction/<int:pk>/metabolites', views.MetaboliteInReaction.as_view(),
+    path('reaction/<int:pk>/metabolites', views.MetabolitesInReaction.as_view(),
          name='metabolites_in_reaction'),
     path('reaction/<int:pk>/genes', views.GenesInReaction.as_view(),
          name='genes_in_reaction')

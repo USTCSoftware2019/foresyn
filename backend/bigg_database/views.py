@@ -196,7 +196,7 @@ class GenesInModel(CustomListView):
     to_model = 'gene'
 
 
-class MetaboliteInModel(CustomListView):
+class MetabolitesInModel(CustomListView):
     fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
     from_model = Model
     to_model = 'metabolite'
@@ -208,7 +208,7 @@ class ReactionsInModel(CustomListView):
     to_model = 'reaction'
 
 
-class MetaboliteInReaction(CustomListView):
+class MetabolitesInReaction(CustomListView):
     fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
     from_model = Reaction
     to_model = 'metabolite'
