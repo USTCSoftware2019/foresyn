@@ -96,7 +96,7 @@ class GeneSearchView(SearchView):
 
 class CustomDetailView(View):
     http_method_names = ['get']
-    fields = []  # Don't include foreign key in this. Override get_context_data instead.
+    fields = None  # Don't include foreign key in this. Override get_context_data instead.
     model = None
 
     def __init__(self):
