@@ -274,3 +274,10 @@ class DetailTests(TestCase):
         }
 
         self.assertJSONEqual(resp.content, expect)
+
+
+class RelationshipTests(TestCase):
+    """
+    this will test GenesInModel, GenesInReaction, MetabolitesInModel, ...
+    """
+    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data', 'bigg_database/test_relashionship_data']
