@@ -182,7 +182,7 @@ class NameSearchTests(TestCase):
 
 
 class DetailTests(TestCase):
-    fixtures = ['bigg_database/test_data']
+    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data']
 
     def test_model_detail(self):
         client = Client()
@@ -235,6 +235,42 @@ class DetailTests(TestCase):
             ]},
             "reaction_count": 0,
             "model_count": 0
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_gene_detail(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:gene_detail', args=(20,)))
+
+        expect = {
+            "id": 20,
+            "rightpos": 3906248,
+            "leftpos": 3905316, 
+            "chromosome_ncbi_accession": "AE006468.1", 
+            "mapped_to_genbank": True, 
+            "strand": "+", 
+            "protein_sequence": "MIIVTGGAGFIGSNIVKALNDKGITDILVVDNLKDGTKFVNLVDLNIADYMDKEDFLIQIMSGEELGDIEAIFHE"
+                "GACSSTTEWDGKYMMDNNYQYSKELLHYCLEREIPFLYASSAATYGGRTSDFIESREYEKPLNVYGYSKFLFDEYVRQILPEANSQIVGFR"
+                "YFNVYGPREGHKGSMASVAFHLNTQLNNGESPKLFEGSENFKRDFVYVGDVAAVNLWFLESGKSGIFNLGTGRAESFQAVADATLAYHKKG"
+                "SIEYIPFPDKLKGRYQAFTQADLTNLRNAGYDKPFKTVAEGVTEYMAWLNRDA",
+            "dna_sequence": "ATGATCATCGTTACCGGCGGCGCGGGCTTTATCGGCAGCAATATCGTTAAGGCCCTGAATGATAAAGGTATCACCGATA"
+                "TTCTGGTGGTGGATAACCTGAAAGACGGCACCAAGTTTGTAAACCTGGTGGATCTGAACATTGCTGACTATATGGATAAGGAAGATTTCCT"
+                "GATCCAGATTATGTCCGGAGAAGAGCTCGGCGATATCGAAGCTATTTTCCATGAAGGCGCCTGCTCTTCCACCACCGAGTGGGACGGCAAG"
+                "TATATGATGGATAATAACTATCAATACTCCAAAGAGCTGCTGCACTATTGTCTTGAGCGCGAAATCCCGTTCCTCTACGCCTCTTCTGCCG"
+                "CCACCTATGGCGGTCGCACGTCTGATTTCATCGAATCGCGCGAATACGAAAAACCGCTTAACGTTTATGGCTATTCTAAATTCCTGTTTGA"
+                "TGAATATGTGCGCCAGATCCTGCCAGAAGCGAACTCGCAGATTGTCGGTTTCCGCTATTTCAACGTCTATGGACCACGTGAAGGCCATAAA"
+                "GGCAGCATGGCAAGCGTGGCATTTCATCTGAATACACAGTTAAACAACGGCGAAAGCCCGAAACTGTTTGAAGGCAGCGAAAACTTCAAGC"
+                "GCGACTTCGTTTACGTGGGCGATGTGGCCGCCGTTAACCTGTGGTTCCTGGAAAGCGGCAAGTCCGGCATCTTTAACCTGGGCACAGGCCG"
+                "TGCGGAATCTTTCCAGGCCGTCGCCGACGCGACGCTGGCATACCATAAAAAAGGTAGCATTGAATACATTCCGTTCCCGGATAAGCTGAAA"
+                "GGTCGCTATCAGGCGTTTACGCAGGCGGATTTAACCAATCTGCGCAACGCGGGCTACGACAAACCCTTTAAGACCGTCGCCGAAGGCGTCA"
+                "CGGAGTATATGGCCTGGCTGAACCGCGACGCGTAA", 
+            "genome_name": "AE006468.1", 
+            "genome_ref_string": "ncbi_accession:AE006468.1", 
+            "database_links": {"NCBI GI": [{"link": "http://identifiers.org/ncbigi/gi:16422277", "id": "16422277"}]}, 
+            "model_count": 0, 
+            "reaction_count": 0
         }
 
         self.assertJSONEqual(resp.content, expect)
