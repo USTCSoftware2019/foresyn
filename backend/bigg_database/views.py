@@ -2,7 +2,7 @@ import json
 
 from django.core.exceptions import ObjectDoesNotExist
 import django.core.exceptions
-from django.forms.models import model_to_dict as origin_model_to_dict
+from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.utils.translation import gettext as _
 from django.views.generic import View
@@ -23,8 +23,8 @@ def fuzzy_search(query_set, request_name, request_data):
     ]
 
 
-def model_to_dict(instance, fields=None, count_number_fields=None, exclude=None):
-    ret_dict = origin_model_to_dict(instance, fields=fields, exclude=exclude)
+def custom_model_to_dict(instance, fields=None, count_number_fields=None, exclude=None):
+    ret_dict = model_to_dict(instance, fields=fields, exclude=exclude)
     if count_number_fields:
         ret_dict.update({
             field + '_count': getattr(instance, field).count()
@@ -48,14 +48,14 @@ class SearchView(View):
         name = request.GET.get('name')
         if bigg_id is not None and 'bigg_id' in self.by:
             return JsonResponse({'result': [
-                model_to_dict(instance, fields=self.fields,
-                              count_number_fields=self.count_number_fields)
+                custom_model_to_dict(instance, fields=self.fields,
+                                     count_number_fields=self.count_number_fields)
                 for instance in fuzzy_search(self.model.objects.all(), 'bigg_id', bigg_id)
             ]})
         elif name is not None and 'name' in self.by:
             return JsonResponse({'result': [
-                model_to_dict(instance, fields=self.fields,
-                              count_number_fields=self.count_number_fields)
+                custom_model_to_dict(instance, fields=self.fields,
+                                     count_number_fields=self.count_number_fields)
                 for instance in fuzzy_search(self.model.objects.all(), 'name', name)
             ]})
         else:
@@ -106,7 +106,7 @@ class CustomDetailView(View):
     def get_context_data(self, pk):
         result = self.model.objects.get(pk=pk)
         self.context_object = result
-        return origin_model_to_dict(result, fields=self.fields)
+        return model_to_dict(result, fields=self.fields)
 
     def get(self, request, pk):
         try:
@@ -160,3 +160,64 @@ class GeneDetailView(CustomDetailView):
         context['model_count'] = self.context_object.models.count()
         context['reaction_count'] = self.context_object.reactions.count()
         return context
+
+
+class CustomListView(View):
+    fields = None
+    from_model = None  # 查找哪个model下的reaction/metabolite/gene
+    to_model = None  # 查找reaction、metabolite还是gene
+
+    def get_query_set(self):
+        return getattr(self.from_model_instance, self.to_model + '_set').all()
+
+    def __init__(self):
+        if not self.fields or not self.from_model or not self.to_model:
+            raise RuntimeError('"fileds" and "from_model" needs to be set')
+
+    def get(self, request, pk):
+        try:
+            self.from_model_instance = self.from_model.objects.get(id=pk)
+        except ObjectDoesNotExist:
+            return JsonResponse({}, status=404)
+        return JsonResponse({
+            'result': [
+                model_to_dict(instance, fields=self.fields)
+                for instance in self.get_query_set()
+            ]
+        })
+
+
+class GenesInModel(CustomListView):
+    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
+              'mapped_to_genbank', 'strand', 'protein_sequence',
+              'dna_sequence', 'genome_name', 'genome_ref_string',
+              'database_links', 'id']
+    from_model = Model
+    to_model = 'gene'
+
+
+class MetabolitesInModel(CustomListView):
+    fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
+    from_model = Model
+    to_model = 'metabolite'
+
+
+class ReactionsInModel(CustomListView):
+    fields = ['id', 'bigg_id', 'name', 'reaction_string', 'pseudoreaction', 'database_links']
+    from_model = Model
+    to_model = 'reaction'
+
+
+class MetabolitesInReaction(CustomListView):
+    fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
+    from_model = Reaction
+    to_model = 'metabolite'
+
+
+class GenesInReaction(CustomListView):
+    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
+              'mapped_to_genbank', 'strand', 'protein_sequence',
+              'dna_sequence', 'genome_name', 'genome_ref_string',
+              'database_links', 'id']
+    from_model = Reaction
+    to_model = 'gene'
