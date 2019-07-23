@@ -122,6 +122,33 @@ class IdSearchTests(TestCase):
             "models_count": 0
         })
 
+    def test_search_with_no_id_name(self):
+
+        client = Client()
+        resp = client.get(build_url('search_metabolite'))
+        resp = json.loads(resp.content)
+
+        metabolites = resp['result']
+
+        # should be empty
+        self.assertEqual(metabolites, [])
+
+    def test_search_with_id_and_name(self):
+
+        client = Client()
+        data = {
+            'bigg_id': 'Iaf',
+            'name': "It doesn't matter",
+        }
+        resp = client.get(build_url('search_model', get=data))
+        resp = json.loads(resp.content)
+
+        models = {model['bigg_id'] for model in resp['result']}
+        expect = {'iAF987', 'iAF1260b', 'iAF1260', 'iAF692'}
+
+        # test list equal
+        self.assertSetEqual(models, expect)
+
 
 class NameSearchTests(TestCase):
     fixtures = ['bigg_database/test_data']
@@ -152,3 +179,62 @@ class NameSearchTests(TestCase):
         expect = {1, 2, 3, 4}
 
         self.assertSetEqual(metabolites, expect)
+
+
+class DetailTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_model_detail(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:model_detail', args=(20,)))
+
+        expect = {
+            "id": 20,
+            "bigg_id": "iJO1366",
+            "compartments": ["c", "e", "p"],
+            "version": "1",
+            "reaction_count": 0,
+            "metabolite_count": 0
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_reaction_detail(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:reaction_detail', args=(20,)))
+
+        expect = {
+            "id": 20,
+            "bigg_id": "LCAT36e",
+            "name": "Lecithin-Cholesterol Acyltransferase, "
+                    "Formation of 1-Docosatetraenoylglycerophosphocholine (Delta 7, 10, 13, 16)",
+            "reaction_string": "chsterol_e + pchol_hs_e &#8652; xolest2_hs_e + pcholn224_hs_e",
+            "pseudoreaction": False,
+            "database_links": {},
+            "model_count": 0,
+            "metabolite_count": 0
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_metabolite_detail(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:metabolite_detail', args=(20,)))
+
+        expect = {
+            "id": 20,
+            "bigg_id": "cs_b_deg1_l",
+            "name": "Chondroitin sulfate B / dermatan sulfate (IdoA2S-GalNAc4S), degradation product 1",
+            "formulae": ["C45H67N2O46S3"],
+            "charges": -5,
+            "database_links": {"MetaNetX (MNX) Chemical": [
+                {"link": "http://identifiers.org/metanetx.chemical/MNXM10941", "id": "MNXM10941"}
+            ]},
+            "reaction_count": 0,
+            "model_count": 0
+        }
+
+        self.assertJSONEqual(resp.content, expect)

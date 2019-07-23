@@ -49,13 +49,13 @@ class SearchView(View):
         if bigg_id is not None and 'bigg_id' in self.by:
             return JsonResponse({'result': [
                 custom_model_to_dict(instance, fields=self.fields,
-                              count_number_fields=self.count_number_fields)
+                                     count_number_fields=self.count_number_fields)
                 for instance in fuzzy_search(self.model.objects.all(), 'bigg_id', bigg_id)
             ]})
         elif name is not None and 'name' in self.by:
             return JsonResponse({'result': [
                 custom_model_to_dict(instance, fields=self.fields,
-                              count_number_fields=self.count_number_fields)
+                                     count_number_fields=self.count_number_fields)
                 for instance in fuzzy_search(self.model.objects.all(), 'name', name)
             ]})
         else:
@@ -96,7 +96,7 @@ class GeneSearchView(SearchView):
 
 class CustomDetailView(View):
     http_method_names = ['get']
-    fields = []  # Don't include foreign key in this. Override get_context_data instead.
+    fields = None  # Don't include foreign key in this. Override get_context_data instead.
     model = None
 
     def __init__(self):
@@ -123,6 +123,7 @@ class ModelDetailView(CustomDetailView):
         context = super().get_context_data(pk)
         context['reaction_count'] = self.context_object.reaction_set.count()
         context['metabolite_count'] = self.context_object.metabolite_set.count()
+        return context
 
 
 class MetaboliteDetailView(CustomDetailView):
@@ -133,6 +134,7 @@ class MetaboliteDetailView(CustomDetailView):
         context = super().get_context_data(pk)
         context['reaction_count'] = self.context_object.reactions.count()
         context['model_count'] = self.context_object.models.count()
+        return context
 
 
 class ReactionDetailView(CustomDetailView):
@@ -143,6 +145,21 @@ class ReactionDetailView(CustomDetailView):
         context = super().get_context_data(pk)
         context['model_count'] = self.context_object.models.count()
         context['metabolite_count'] = self.context_object.metabolite_set.count()
+        return context
+
+
+class GeneDetailView(CustomDetailView):
+    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
+              'mapped_to_genbank', 'strand', 'protein_sequence',
+              'dna_sequence', 'genome_name', 'genome_ref_string',
+              'database_links', 'id']
+    model = Gene
+
+    def get_context_data(self, pk):
+        context = super().get_context_data(pk)
+        context['model_count'] = self.context_object.models.count()
+        context['reaction_count'] = self.context_object.reactions.count()
+        return context
 
 
 class CustomListView(View):
@@ -158,9 +175,8 @@ class CustomListView(View):
             raise RuntimeError('"fileds" and "from_model" needs to be set')
 
     def get(self, request, pk):
-        self.pk = pk
         try:
-            self.from_model_instance = self.from_model.objects.get(id=self.pk)
+            self.from_model_instance = self.from_model.objects.get(id=pk)
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
         return JsonResponse({
