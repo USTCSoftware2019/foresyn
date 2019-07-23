@@ -4,6 +4,8 @@ from django.db import models
 import cobra
 from cobra.flux_analysis import flux_variability_analysis
 
+from .utils import get_required_fields
+
 
 class CobraMetabolite(models.Model):
     identifier = models.CharField(max_length=50)
@@ -11,13 +13,13 @@ class CobraMetabolite(models.Model):
     name = models.CharField(max_length=50, blank=True, default='')
     charge = models.CharField(max_length=50, blank=True, null=True, default=None)
     compartment = models.CharField(max_length=50, blank=True, null=True, default=None)
+    plain_fields = ['identifier', 'formula', 'name', 'charge', 'compartment']
 
     def build(self):
-        return cobra.Metabolite(self.identifier, self.formula, self.name, self.charge, self.compartment)
+        return cobra.Metabolite(self.identifier, **get_required_fields(self, self.plain_fields[1:]))
 
     def json(self):
-        return dict(**{field: getattr(self, field) for field in [
-            'identifier', 'formula', 'name', 'charge', 'compartment']})
+        return get_required_fields(self, self.plain_fields)
 
 
 class CobraReaction(models.Model):
@@ -30,10 +32,12 @@ class CobraReaction(models.Model):
     metabolites = models.ManyToManyField(CobraMetabolite)
     coefficients = models.CharField(max_length=255, blank=True, default='')
     gene_reaction_rule = models.CharField(max_length=255, blank=True, default='')
+    plain_fields = [
+        'identifier', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'gene_reaction_rule'
+    ]
 
     def build(self):
-        cobra_reaction = cobra.Reaction(
-            self.identifier, self.name, self.subsystem, self.lower_bound, self.upper_bound)
+        cobra_reaction = cobra.Reaction(self.identifier, **get_required_fields(self, self.plain_fields[1:-2]))
         cobra_reaction.add_metabolites(dict(zip(
             [metabolite.build() for metabolite in self.metabolites.all()],
             [float(coefficient) for coefficient in self.coefficients.split()]
@@ -43,12 +47,9 @@ class CobraReaction(models.Model):
 
     def json(self):
         return dict(
-            **{field: getattr(self, field) for field in [
-                'identifier', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient',
-                'gene_reaction_rule'
-            ]},
-            metabolites=list([metabolite.id for metabolite in self.metabolites.all()]),
-            coefficients=list([float(coefficient) for coefficient in self.coefficients.split()])
+            **get_required_fields(self, self.plain_fields),
+            metabolites=[metabolite.id for metabolite in self.metabolites.all()],
+            coefficients=[float(coefficient) for coefficient in self.coefficients.split()]
         )
 
 
@@ -56,10 +57,11 @@ class CobraModel(models.Model):
     identifier = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
     reactions = models.ManyToManyField(CobraReaction)
-    objective = models.CharField(max_length=50)
+    objective = models.CharField(max_length=50, default='')
+    plain_fields = ['identifier', 'name', 'objective']
 
     def build(self):
-        cobra_model = cobra.Model(self.identifier, self.name)
+        cobra_model = cobra.Model(self.identifier, **get_required_fields(self, self.plain_fields[1:-1]))
         for reaction in self.reactions.all():
             cobra_reaction = reaction.build()
             cobra_model.add_reaction(cobra_reaction)
@@ -69,7 +71,7 @@ class CobraModel(models.Model):
 
     def json(self):
         return dict(
-            **{field: getattr(self, field) for field in ['identifier', 'name', 'objective']},
+            **get_required_fields(self, self.plain_fields),
             reactions=list([reaction.id for reaction in self.reactions.all()])
         )
 
