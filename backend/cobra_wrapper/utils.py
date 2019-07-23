@@ -6,8 +6,8 @@ def get_required_params(params, required_params):
     return {param: params[param] for param in required_params}
 
 
-def get_posiable_params(params, posiable_params):
-    return {param: params[param] for param in posiable_params if param in params.keys()}
+def get_possible_params(params, possible_params):
+    return {param: params[param] for param in possible_params if param in params.keys()}
 
 
 @contextmanager

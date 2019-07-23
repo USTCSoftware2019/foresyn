@@ -26,7 +26,8 @@ def main(meta_path):
                 continue
             try:
                 charges = content['charges'][0]
-            except IndexError as e:
+            # except IndexError as e:
+            except IndexError:
                 charges = None
             database_links = content['database_links']
 

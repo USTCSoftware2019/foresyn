@@ -6,9 +6,6 @@ from cobra.flux_analysis import flux_variability_analysis
 
 
 class CobraMetabolite(models.Model):
-    """
-    @see cobra.Metabolite
-    """
     identifier = models.CharField(max_length=50)
     formula = models.CharField(max_length=50, blank=True, default='')
     name = models.CharField(max_length=50, blank=True, default='')
@@ -76,22 +73,14 @@ class CobraModel(models.Model):
             reactions=list([reaction.id for reaction in self.reactions.all()])
         )
 
-    def fba(self, verbose=False):
-        cobra_model = self.build()
-        if verbose:
-            solution = cobra_model.optimize()
-            return {
-                'objective_value': solution.objective_value,
-                'status': solution.status,
-                'fluxes': json.loads(solution.fluxes.to_json()),
-                'shadow_prices': json.loads(solution.shadow_prices.to_json())
-            }
-        else:
-            pass  # todo
+    def fba(self):
+        solution = self.build().optimize()
+        return {
+            'objective_value': solution.objective_value,
+            'status': solution.status,
+            'fluxes': json.loads(solution.fluxes.to_json()),
+            'shadow_prices': json.loads(solution.shadow_prices.to_json())
+        }
 
-    def fva(self, verbose=False, **kwarg):
-        cobra_model = self.build()
-        if verbose:
-            return json.loads(flux_variability_analysis(cobra_model, **kwarg).to_json())
-        else:
-            pass  # todo
+    def fva(self, **kwarg):  # Param checking is done by views
+        return json.loads(flux_variability_analysis(self.build(), **kwarg).to_json())

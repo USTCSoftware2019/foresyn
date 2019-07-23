@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from cobra.exceptions import OptimizationError
 
 from .models import CobraModel, CobraReaction, CobraMetabolite
-from .utils import get_required_params, get_posiable_params
+from .utils import get_required_params, get_possible_params
 
 
 class CobraModelApi(View):
@@ -185,16 +185,15 @@ class CobraComputeApi(View):
         params = json.loads(request.body)
         try:
             model = CobraModel.objects.get(id=model_id)
-            verbose = False if 'verbose' in params.keys() and not params['verbose'] else True
             if method == 'fba':
-                return JsonResponse(model.fba(verbose=verbose), status=200)
+                return JsonResponse(model.fba(), status=200)
             elif method == 'fva':
-                fva_params = get_posiable_params(params, [
+                fva_params = get_possible_params(params, [
                     'loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
                 params['reaction_list'] = list(
                     [model.reactions.get(id=reaction_id).identifier for reaction_id in params['reaction_list']])
                 return JsonResponse(
-                    model.fva(reaction_list=params['reaction_list'], verbose=verbose, **fva_params), status=200)
+                    model.fva(reaction_list=params['reaction_list'], **fva_params), status=200)
             else:
                 return JsonResponse({'code': 100000, 'message': ''}, status=404)
         except ObjectDoesNotExist as error:
