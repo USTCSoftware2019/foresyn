@@ -18,4 +18,14 @@ urlpatterns = [
          name='reaction_detail'),
     path('metabolite/<int:pk>', views.MetaboliteDetailView.as_view(),
          name='metabolite_detail'),
+    path('model/<int:pk>/genes', views.GenesInModel.as_view(),
+         name='genes_in_model'),
+    path('model/<int:pk>/metabolites', views.MetaboliteInModel.as_view(),
+         name='metabolites_in_model'),
+    path('model/<int:pk>/reactions', views.ReactionsInModel.as_view(),
+         name='reactions_in'),
+    path('reaction/<int:pk>/metabolites', views.MetaboliteInReaction.as_view(),
+         name='metabolites_in_reaction'),
+    path('reaction/<int:pk>/genes', views.GenesInReaction.as_view(),
+         name='genes_in_reaction')
 ]
