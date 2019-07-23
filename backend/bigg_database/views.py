@@ -123,6 +123,7 @@ class ModelDetailView(CustomDetailView):
         context = super().get_context_data(pk)
         context['reaction_count'] = self.context_object.reaction_set.count()
         context['metabolite_count'] = self.context_object.metabolite_set.count()
+        return context
 
 
 class MetaboliteDetailView(CustomDetailView):
@@ -133,6 +134,7 @@ class MetaboliteDetailView(CustomDetailView):
         context = super().get_context_data(pk)
         context['reaction_count'] = self.context_object.reactions.count()
         context['model_count'] = self.context_object.models.count()
+        return context
 
 
 class ReactionDetailView(CustomDetailView):
@@ -143,6 +145,7 @@ class ReactionDetailView(CustomDetailView):
         context = super().get_context_data(pk)
         context['model_count'] = self.context_object.models.count()
         context['metabolite_count'] = self.context_object.metabolite_set.count()
+        return context
 
 
 class GeneDetailView(CustomDetailView):
@@ -156,3 +159,4 @@ class GeneDetailView(CustomDetailView):
         context = super().get_context_data(pk)
         context['model_count'] = self.context_object.models.count()
         context['reaction_count'] = self.context_object.reactions.count()
+        return context
