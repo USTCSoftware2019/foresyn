@@ -26,113 +26,129 @@ class IdSearchTests(TestCase):
 
         client = Client()
         data = {
-            "bigg_id": "iAF692"
+            "bigg_id": "Iaf"
         }
         resp = client.get(build_url('search_model', get=data))
-        mod_ins = json.loads(resp.content)['content']
+        resp = json.loads(resp.content)
 
-        self.assertEqual(mod_ins['compartments'], ["c", "e"])
-        self.assertEqual(mod_ins['version'], "1")
+        models = {model['bigg_id'] for model in resp['result']}
+        expect = {'iAF987', 'iAF1260b', 'iAF1260', 'iAF692'}
 
-        data = {
-            "bigg_id": "iAPECO1_1312",
-        }
-        resp = client.get(build_url('search_model', get=data))
-        mod_ins = json.loads(resp.content)
+        # test list equal
+        self.assertSetEqual(models, expect)
 
-        self.assertEqual(mod_ins['compartments'], {"c", "e", "p"})
-        self.assertEqual(mod_ins['version'], "1")
+        model_ins = next(model for model in resp['result'] if model['id'] == 1)
+        # test elements information
+        self.assertDictEqual(model_ins, {
+            "id": 1,
+            "bigg_id": "iAF987",
+            "compartments": ["c", "e", "p"],
+            "reaction_set_count": 0,
+            "metabolite_set_count": 0,
+            "gene_set_count": 0
+        })
 
     def test_id_reaction(self):
 
         client = Client()
         data = {
-            "bigg_id": "PLDAGAT_MYRS_EPA_MYRS_PC_3_c"
+            "bigg_id": "PLDAGAT_MARS"
         }
         resp = client.get(build_url('search_reaction', get=data))
-        reac_ins = json.loads(resp.content)
+        resp = json.loads(resp.content)
 
-        self.assertEqual(reac_ins['name'],
-                         "Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)")
-        self.assertEqual(reac_ins['reaction_string'],
-                         "12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c")
-        self.assertEqual(reac_ins['pseudoreaction'], False)
+        reactions = {reaction['bigg_id'] for reaction in resp['result']}
+        expect = {'PLDAGAT_MYRS_EPA_MYRS_PC_3_c'}
 
-        data = {"bigg_id": "ACACT1m"}
-        resp = client.get(build_url('search_reaction', get=data))
-        reac_ins = json.loads(resp.content)
+        # test list equal
+        self.assertSetEqual(reactions, expect)
 
-        self.assertEqual(reac_ins['name'],
-                         "Acetyl CoA C acetyltransferase  mitochondrial")
-        self.assertEqual(reac_ins['reaction_string'],
-                         "2.0 accoa_m &#8652; aacoa_m + coa_m")
-        self.assertEqual(reac_ins['pseudoreaction'], False)
+        reaction_ins = next(reaction for reaction in resp['result'] if reaction['id'] == 1)
+
+        # test elements information
+        self.assertDictEqual(reaction_ins, {
+            "id": 1,
+            "bigg_id": "PLDAGAT_MYRS_EPA_MYRS_PC_3_c",
+            "name": "Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)",
+            "reaction_string": "12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c",
+            "pseudoreaction": False,
+            "database_links": {},
+            "models_count": 0,
+            "metabolite_set_count": 0,
+            "gene_set_count": 0
+        })
 
     def test_id_metabolite(self):
 
         client = Client()
         data = {"bigg_id": "nac_e"}
         resp = client.get(build_url('search_metabolite', get=data))
-        meta_ins = json.loads(resp.content)
+        resp = json.loads(resp.content)
 
-        self.assertEqual(meta_ins['name'],
-                         "Nicotinate")
-        self.assertEqual(meta_ins['formulae'], ["C6H4NO2"])
-        self.assertEqual(meta_ins['charges'], -1)
+        metabolites = {meta['bigg_id'] for meta in resp['result']}
+        expect = {'nac_e', 'nac_m', 'nac_p', 'nac_c'}
 
-        data = {"bigg_id": "prephthcoa_c"}
-        resp = client.get(build_url('search_metabolite', get=data))
-        meta_ins = json.loads(resp.content)
+        # test list equal
+        self.assertSetEqual(metabolites, expect)
 
-        self.assertEqual(meta_ins['name'],
-                         "Phthiocerol precursor bound coenzyme A")
-        self.assertEqual(meta_ins['formulae'],
-                         ["C53H92N7O20P3S"])
-        self.assertEqual(meta_ins['charges'], 0)
+        meta_ins = next(meta for meta in resp['result'] if meta['id'] == 1)
+
+        # test elements information
+        self.assertDictEqual(meta_ins, {
+            "id": 1,
+            "bigg_id": "nac_e",
+            "name": "Nicotinate",
+            "formulae": ["C6H4NO2"],
+            "charges": -1,
+            "database_links": {
+                "KEGG Compound": [{"link": "http://identifiers.org/kegg.compound/C00253", "id": "C00253"}],
+                "CHEBI": [{"link": "http://identifiers.org/chebi/CHEBI:14650", "id": "CHEBI:14650"},
+                          {"link": "http://identifiers.org/chebi/CHEBI:15940", "id": "CHEBI:15940"},
+                          {"link": "http://identifiers.org/chebi/CHEBI:22851", "id": "CHEBI:22851"},
+                          {"link": "http://identifiers.org/chebi/CHEBI:25530", "id": "CHEBI:25530"},
+                          {"link": "http://identifiers.org/chebi/CHEBI:25538", "id": "CHEBI:25538"},
+                          {"link": "http://identifiers.org/chebi/CHEBI:32544", "id": "CHEBI:32544"},
+                          {"link": "http://identifiers.org/chebi/CHEBI:44319", "id": "CHEBI:44319"},
+                          {"link": "http://identifiers.org/chebi/CHEBI:7559", "id": "CHEBI:7559"}],
+                "BioCyc": [{"link": "http://identifiers.org/biocyc/META:NIACINE", "id": "META:NIACINE"}],
+                "Human Metabolome Database": [{"link": "http://identifiers.org/hmdb/HMDB01488", "id": "HMDB01488"}],
+                "Reactome": [{"link": "http://www.reactome.org/content/detail/R-ALL-197230", "id": "197230"},
+                             {"link": "http://www.reactome.org/content/detail/R-ALL-8869604", "id": "8869604"}],
+                "MetaNetX (MNX) Chemical": [
+                    {"link": "http://identifiers.org/metanetx.chemical/MNXM274", "id": "MNXM274"}],
+                "SEED Compound": [{"link": "http://identifiers.org/seed.compound/cpd00218", "id": "cpd00218"}],
+                "KEGG Drug": [{"link": "http://identifiers.org/kegg.drug/D00049", "id": "D00049"}]},
+            "reactions_count": 0,
+            "models_count": 0
+        })
 
 
 class NameSearchTests(TestCase):
+    fixtures = ['bigg_database/test_data']
 
     def test_name_reaction(self):
 
         client = Client()
-        data = {"name": "1-alpha,24R,25-Vitamin D-hydroxylase (D2)"}
+        data = {"name": "diacylgycero"}  # typo: diacylglycerol -> diacylgycero, this is deliberate
+
         resp = client.get(build_url('search_reaction', get=data))
-        reac_ins = json.loads(resp.content)
+        resp = json.loads(resp.content)
 
-        self.assertEqual(reac_ins['bigg_id'], "1a_25VITD2Hm")
-        self.assertEqual(reac_ins['reaction_string'],
-                         "h_m + nadph_m + o2_m + 1a25dhvitd2_m &#8652; h2o_m + nadp_m + 1a2425thvitd2_m")
-        self.assertEqual(reac_ins['pseudoreaction'], False)
+        reactions = {reaction['id'] for reaction in resp['result']}
+        expect = {1, 3, 5, 6, 14, 26, 28, 33, 68, 87}
 
-        data = {
-            "name": "1-Aminocyclopropane-1-carboxylate transport, mitochondria"
-        }
-        resp = client.get(build_url('search_reaction', get=data))
-        reac_ins = json.loads(resp.content)
-
-        self.assertEqual(reac_ins['bigg_id'], "1ACPCtm")
-        self.assertEqual(reac_ins['reaction_string'],
-                         "1acpc_c &#8652; 1acpc_m")
-        self.assertEqual(reac_ins['pseudoreaction'], False)
+        self.assertSetEqual(reactions, expect)
 
     def test_name_metabolite(self):
 
         client = Client()
         data = {
-            "name": "Sulfate"
+            "name": "nictina"  # typo: nicotina -> nictina
         }
         resp = client.get(build_url('search_metabolite', get=data))
-        meta_ins = json.loads(resp.content)
+        resp = json.loads(resp.content)
 
-        self.assertEqual(meta_ins['bigg_id'], "so4")
-        self.assertEqual(meta_ins['formulae'], ["SO4", "O4S"])
-        self.assertEqual(meta_ins['charges'], -2)
+        metabolites = {meta['id'] for meta in resp['result']}
+        expect = {1, 2, 3, 4}
 
-        data = {"name": "1-14:0-2-lysophosphatidylcholine"}
-        resp = client.post('search/metabolite/name', data)
-        meta_ins = json.loads(resp.content)
-
-        self.assertEqual(meta_ins['bigg_id'], "1agpc140")
-        self.assertEqual(meta_ins['formulae'], ["C22H46NO7P"])
-        self.assertEqual(meta_ins['charges'], 0)
+        self.assertSetEqual(metabolites, expect)
