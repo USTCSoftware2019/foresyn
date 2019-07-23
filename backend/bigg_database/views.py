@@ -24,10 +24,10 @@ def fuzzy_search(query_set, request_name, request_data):
 
 def model_to_dict(instance, fields=None, count_number_fields=None, exclude=None):
     ret_dict = origin_model_to_dict(instance, fields=fields, exclude=exclude)
-    if fields:
+    if count_number_fields:
         ret_dict.update({
             field + '_count': getattr(instance, field).count()
-            for field in fields
+            for field in count_number_fields
         })
     return ret_dict
 
