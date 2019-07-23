@@ -143,3 +143,16 @@ class ReactionDetailView(CustomDetailView):
         context = super().get_context_data(pk)
         context['model_count'] = self.context_object.models.count()
         context['metabolite_count'] = self.context_object.metabolite_set.count()
+
+
+class GeneDetailView(CustomDetailView):
+    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
+              'mapped_to_genbank', 'strand', 'protein_sequence',
+              'dna_sequence', 'genome_name', 'genome_ref_string',
+              'database_links', 'id']
+    model = Gene
+
+    def get_context_data(self, pk):
+        context = super().get_context_data(pk)
+        context['model_count'] = self.context_object.models.count()
+        context['reaction_count'] = self.context_object.reactions.count()

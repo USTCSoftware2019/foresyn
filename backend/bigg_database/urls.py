@@ -18,4 +18,6 @@ urlpatterns = [
          name='reaction_detail'),
     path('metabolite/<int:pk>', views.MetaboliteDetailView.as_view(),
          name='metabolite_detail'),
+    path('gene/<int:pk>', views.GeneDetailView.as_view(),
+         name='gene_detail'),
 ]
