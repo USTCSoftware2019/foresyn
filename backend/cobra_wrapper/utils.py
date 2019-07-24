@@ -10,6 +10,10 @@ def get_possible_params(params, possible_params):
     return {param: params[param] for param in possible_params if param in params.keys()}
 
 
+def get_required_fields(obj, fields):
+    return {field: getattr(obj, field) for field in fields}
+
+
 @contextmanager
 def redirect_stdout(out):
     stdout = sys.stdout
