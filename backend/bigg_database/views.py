@@ -163,9 +163,23 @@ class GeneDetailView(CustomDetailView):
 
 
 class CustomListView(View):
+    '''
+    A custom ListView
+
+    This ListView returns json data, in format: {'result': ```list_data```}
+    The class inheriting it needs to overwrite 'fields', 'from_model' and 
+    'to_model' to make it work correctly.
+
+    As for 'from_model' and 'to_model', this parent class will implement 
+    ```getattr(self.from_model.objects.get(id=pk), self.to_model).all()``` to
+    get the list to be returned.
+
+    So, be careful about whether to add '_set' as the suffix to the 'to_model'
+    variable
+    '''
     fields = None
-    from_model = None  # 查找哪个model下的reaction/metabolite/gene
-    to_model = None  # 查找reaction、metabolite还是gene
+    from_model = None
+    to_model = None
 
     def get_query_set(self):
         # In order to reuse this view in 'reverse lookup' views,
@@ -193,6 +207,9 @@ class CustomListView(View):
 
 
 class GenesInModel(CustomListView):
+    '''
+    Lookup which genes are related to a model
+    '''
     fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
               'mapped_to_genbank', 'strand', 'protein_sequence',
               'dna_sequence', 'genome_name', 'genome_ref_string',
@@ -202,27 +219,84 @@ class GenesInModel(CustomListView):
 
 
 class MetabolitesInModel(CustomListView):
+    '''
+    Lookup which metabolites are in a model
+    '''
     fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
     from_model = Model
     to_model = 'metabolite_set'
 
 
 class ReactionsInModel(CustomListView):
+    '''
+    Lookup which reactions are in a model
+    '''
     fields = ['id', 'bigg_id', 'name', 'reaction_string', 'pseudoreaction', 'database_links']
     from_model = Model
     to_model = 'reaction_set'
 
 
 class MetabolitesInReaction(CustomListView):
+    '''
+    Lookup which metabolites are in a reaction
+    '''
     fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
     from_model = Reaction
     to_model = 'metabolite_set'
 
 
 class GenesInReaction(CustomListView):
+    '''
+    Lookup which genes are related to reaction
+    '''
     fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
               'mapped_to_genbank', 'strand', 'protein_sequence',
               'dna_sequence', 'genome_name', 'genome_ref_string',
               'database_links', 'id']
     from_model = Reaction
     to_model = 'gene_set'
+
+
+class GeneFromModels(CustomListView):
+    '''
+    Reverse lookup which models contain a certain gene
+    '''
+    fields = ['bigg_id', 'compartments', 'id']
+    from_model = Gene
+    to_model = 'models'
+
+
+class MetaboliteFromModels(CustomListView):
+    '''
+    Reverse lookup which models contain a certain metabolite
+    '''
+    fields = ['bigg_id', 'compartments', 'id']
+    from_model = Metabolite
+    to_model = 'models'
+
+
+class ReactionFromModels(CustomListView):
+    '''
+    Reverse lookup which models contain a certain reaction
+    '''
+    fields = ['bigg_id', 'compartments', 'id']
+    from_model = Reaction
+    to_model = 'models'
+
+
+class GeneFromReactions(CustomListView):
+    '''
+    Reverse lookup which reactions contain a certain gene
+    '''
+    fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
+    from_model = Gene
+    to_model = 'reactions'
+
+
+class MetaboliteFromReactions(CustomListView):
+    '''
+    Reverse lookup which reactions contain a certain metabolite
+    '''
+    fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
+    from_model = Metabolite
+    to_model = 'reactions'
