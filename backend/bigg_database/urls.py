@@ -29,5 +29,15 @@ urlpatterns = [
     path('reaction/<int:pk>/metabolites', views.MetabolitesInReaction.as_view(),
          name='metabolites_in_reaction'),
     path('reaction/<int:pk>/genes', views.GenesInReaction.as_view(),
-         name='genes_in_reaction')
+         name='genes_in_reaction'),
+    path('gene/<int:pk>/models', views.GeneFromModels.as_view(),
+         name='gene_from_models'),
+    path('metabolite/<int:pk>/models', views.MetaboliteFromModels.as_view(),
+         name='metabolite_from_models'),
+    path('reaction/<int:pk>/models', views.ReactionFromModels.as_view(),
+         name='reaction_from_models'),
+    path('gene/<int:pk>/reactions', views.GeneFromReactions.as_view(),
+         name='gene_from_reactions'),
+    path('metabolite/<int:pk>/reactions', views.MetaboliteFromReactions.as_view(),
+         name='metabolite_from_reactions'),
 ]
