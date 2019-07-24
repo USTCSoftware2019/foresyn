@@ -276,8 +276,283 @@ class DetailTests(TestCase):
         self.assertJSONEqual(resp.content, expect)
 
 
-class RelationshipTests(TestCase):
+class RelationshipViewTests(TestCase):
     """
     this will test GenesInModel, GenesInReaction, MetabolitesInModel, ...
     """
-    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data', 'bigg_database/test_relashionship_data']
+    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data', 'bigg_database/test_relationship_data']
+
+    def test_genes_in_model(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:genes_in_model', args=(1,)))
+
+        expect = {
+            "result": [{
+                "id": 1, 
+                "rightpos": 0, 
+                "leftpos": 0, 
+                "chromosome_ncbi_accession": "", 
+                "mapped_to_genbank": True, 
+                "strand": "", 
+                "protein_sequence": "", 
+                "dna_sequence": "", 
+                "genome_name": "", 
+                "genome_ref_string": 
+                "None:None", 
+                "database_links": {}
+            }]
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_metabolites_in_model(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:metabolites_in_model', args=(1,)))
+
+        expect = {
+            "result": [
+                {
+                    "id": 1,
+                    "bigg_id": "nac_e",
+                    "name": "Nicotinate",
+                    "formulae": [
+                        "C6H4NO2"
+                    ],
+                    "charges": -1,
+                    "database_links": {
+                        "KEGG Compound": [
+                            {
+                                "link": "http://identifiers.org/kegg.compound/C00253",
+                                "id": "C00253"
+                            }
+                        ],
+                        "CHEBI": [
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:14650",
+                                "id": "CHEBI:14650"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:15940",
+                                "id": "CHEBI:15940"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:22851",
+                                "id": "CHEBI:22851"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:25530",
+                                "id": "CHEBI:25530"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:25538",
+                                "id": "CHEBI:25538"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:32544",
+                                "id": "CHEBI:32544"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:44319",
+                                "id": "CHEBI:44319"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:7559",
+                                "id": "CHEBI:7559"
+                            }
+                        ],
+                        "BioCyc": [
+                            {
+                                "link": "http://identifiers.org/biocyc/META:NIACINE",
+                                "id": "META:NIACINE"
+                            }
+                        ],
+                        "Human Metabolome Database": [
+                            {
+                                "link": "http://identifiers.org/hmdb/HMDB01488",
+                                "id": "HMDB01488"
+                            }
+                        ],
+                        "Reactome": [
+                            {
+                                "link": "http://www.reactome.org/content/detail/R-ALL-197230",
+                                "id": "197230"
+                            },
+                            {
+                                "link": "http://www.reactome.org/content/detail/R-ALL-8869604",
+                                "id": "8869604"
+                            }
+                        ],
+                        "MetaNetX (MNX) Chemical": [
+                            {
+                                "link": "http://identifiers.org/metanetx.chemical/MNXM274",
+                                "id": "MNXM274"
+                            }
+                        ],
+                        "SEED Compound": [
+                            {
+                                "link": "http://identifiers.org/seed.compound/cpd00218",
+                                "id": "cpd00218"
+                            }
+                        ],
+                        "KEGG Drug": [
+                            {
+                                "link": "http://identifiers.org/kegg.drug/D00049",
+                                "id": "D00049"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_reactions_in_model(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:reactions_in', args=(1,)))
+
+        expect = {
+            "result": [
+                {
+                    "id": 1,
+                    "bigg_id": "PLDAGAT_MYRS_EPA_MYRS_PC_3_c",
+                    "name": "Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)",
+                    "reaction_string": "12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c",
+                    "pseudoreaction": False,
+                    "database_links": {}
+                }
+            ]
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_metabolites_in_reaction(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:metabolites_in_reaction', args=(1,)))
+
+        expect = {
+            "result": [
+                {
+                    "id": 1,
+                    "bigg_id": "nac_e",
+                    "name": "Nicotinate",
+                    "formulae": [
+                        "C6H4NO2"
+                    ],
+                    "charges": -1,
+                    "database_links": {
+                        "KEGG Compound": [
+                            {
+                                "link": "http://identifiers.org/kegg.compound/C00253",
+                                "id": "C00253"
+                            }
+                        ],
+                        "CHEBI": [
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:14650",
+                                "id": "CHEBI:14650"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:15940",
+                                "id": "CHEBI:15940"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:22851",
+                                "id": "CHEBI:22851"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:25530",
+                                "id": "CHEBI:25530"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:25538",
+                                "id": "CHEBI:25538"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:32544",
+                                "id": "CHEBI:32544"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:44319",
+                                "id": "CHEBI:44319"
+                            },
+                            {
+                                "link": "http://identifiers.org/chebi/CHEBI:7559",
+                                "id": "CHEBI:7559"
+                            }
+                        ],
+                        "BioCyc": [
+                            {
+                                "link": "http://identifiers.org/biocyc/META:NIACINE",
+                                "id": "META:NIACINE"
+                            }
+                        ],
+                        "Human Metabolome Database": [
+                            {
+                                "link": "http://identifiers.org/hmdb/HMDB01488",
+                                "id": "HMDB01488"
+                            }
+                        ],
+                        "Reactome": [
+                            {
+                                "link": "http://www.reactome.org/content/detail/R-ALL-197230",
+                                "id": "197230"
+                            },
+                            {
+                                "link": "http://www.reactome.org/content/detail/R-ALL-8869604",
+                                "id": "8869604"
+                            }
+                        ],
+                        "MetaNetX (MNX) Chemical": [
+                            {
+                                "link": "http://identifiers.org/metanetx.chemical/MNXM274",
+                                "id": "MNXM274"
+                            }
+                        ],
+                        "SEED Compound": [
+                            {
+                                "link": "http://identifiers.org/seed.compound/cpd00218",
+                                "id": "cpd00218"
+                            }
+                        ],
+                        "KEGG Drug": [
+                            {
+                                "link": "http://identifiers.org/kegg.drug/D00049",
+                                "id": "D00049"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_genes_in_reaction(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:genes_in_reaction', args=(1,)))
+
+        expect = {
+            "result": [
+                {
+                    "id": 1,
+                    "rightpos": 0,
+                    "leftpos": 0,
+                    "chromosome_ncbi_accession": "",
+                    "mapped_to_genbank": True,
+                    "strand": "",
+                    "protein_sequence": "",
+                    "dna_sequence": "",
+                    "genome_name": "",
+                    "genome_ref_string": "None:None",
+                    "database_links": {}
+                }
+            ]
+        }
+
+        self.assertJSONEqual(resp.content, expect)
