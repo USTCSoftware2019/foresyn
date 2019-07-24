@@ -3,7 +3,7 @@ import json
 from django.shortcuts import reverse
 from django.test import Client, TestCase
 
-from .models import Metabolite, Model, Reaction
+from .models import Metabolite, Model, Reaction, Gene
 
 from urllib.parse import urlencode
 
@@ -274,6 +274,58 @@ class DetailTests(TestCase):
         }
 
         self.assertJSONEqual(resp.content, expect)
+
+
+class RelationshipTests(TestCase):
+    """
+    this will test and show how to do manytomanyfield lookup and reverse lookup
+    """
+    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data', 'bigg_database/test_relationship_data']
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.model = Model.objects.get(pk=1)
+        cls.gene = Gene.objects.get(pk=1)
+        cls.reaction = Reaction.objects.get(pk=1)
+        cls.metabolite = Metabolite.objects.get(pk=1)
+    
+    def test_model_gene(self):
+        model_in_gene = self.gene.models.get(pk=1)
+        self.assertEqual(self.model, model_in_gene)
+
+        gene_in_model = self.model.gene_set.get(pk=1)
+        self.assertEqual(self.gene, gene_in_model)
+
+    def test_reaction_gene(self):
+        reaction_in_gene = self.gene.reactions.get(pk=1)
+        self.assertEqual(self.reaction, reaction_in_gene)
+
+        gene_in_reaction = self.reaction.gene_set.get(pk=1)
+        self.assertEqual(self.gene, gene_in_reaction)
+
+    def test_model_reaction(self):
+        model_in_reaction = self.reaction.models.get(pk=1)
+        self.assertEqual(self.model, model_in_reaction)
+
+        reaction_in_model = self.model.reaction_set.get(pk=1)
+        self.assertEqual(self.reaction, reaction_in_model)
+
+    def test_model_metabolite(self):
+        model_in_metabolite = self.metabolite.models.get(pk=1)
+        self.assertEqual(self.model, model_in_metabolite)
+
+        metabolite_in_model = self.model.metabolite_set.get(pk=1)
+        self.assertEqual(self.metabolite, metabolite_in_model)
+
+    def test_metabolite_reaction(self):
+        reaction_in_metabolite = self.metabolite.reactions.get(pk=1)
+        self.assertEqual(self.reaction, reaction_in_metabolite)
+
+        metabolite_in_reaction = self.reaction.metabolite_set.get(pk=1)
+        self.assertEqual(self.metabolite, metabolite_in_reaction)
+
+
 
 
 class RelationshipViewTests(TestCase):
