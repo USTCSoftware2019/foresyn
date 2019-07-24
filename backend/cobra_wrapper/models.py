@@ -3,7 +3,6 @@ import json
 from django.db import models
 from django.contrib.auth.models import User
 import cobra
-from cobra.flux_analysis import flux_variability_analysis
 
 from .utils import get_required_fields
 
@@ -89,4 +88,4 @@ class CobraModel(models.Model):
         }
 
     def fva(self, **kwarg):  # Param checking is done by views
-        return json.loads(flux_variability_analysis(self.build(), **kwarg).to_json())
+        return json.loads(cobra.flux_variability_analysis(self.build(), **kwarg).to_json())
