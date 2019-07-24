@@ -168,7 +168,12 @@ class CustomListView(View):
     to_model = None  # 查找reaction、metabolite还是gene
 
     def get_query_set(self):
-        return getattr(self.from_model_instance, self.to_model + '_set').all()
+        # In order to reuse this view in 'reverse lookup' views,
+        # delete the '_set'. To use 'forward lookup' views, please
+        # add '_set' as suffix to their to_model variables.
+        # Instead, it is not necessary to add '_set' to their to_model
+        # variables when using 'reverse lookup' views
+        return getattr(self.from_model_instance, self.to_model).all()
 
     def __init__(self):
         if not self.fields or not self.from_model or not self.to_model:
@@ -193,25 +198,25 @@ class GenesInModel(CustomListView):
               'dna_sequence', 'genome_name', 'genome_ref_string',
               'database_links', 'id']
     from_model = Model
-    to_model = 'gene'
+    to_model = 'gene_set'
 
 
 class MetabolitesInModel(CustomListView):
     fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
     from_model = Model
-    to_model = 'metabolite'
+    to_model = 'metabolite_set'
 
 
 class ReactionsInModel(CustomListView):
     fields = ['id', 'bigg_id', 'name', 'reaction_string', 'pseudoreaction', 'database_links']
     from_model = Model
-    to_model = 'reaction'
+    to_model = 'reaction_set'
 
 
 class MetabolitesInReaction(CustomListView):
     fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
     from_model = Reaction
-    to_model = 'metabolite'
+    to_model = 'metabolite_set'
 
 
 class GenesInReaction(CustomListView):
@@ -220,4 +225,4 @@ class GenesInReaction(CustomListView):
               'dna_sequence', 'genome_name', 'genome_ref_string',
               'database_links', 'id']
     from_model = Reaction
-    to_model = 'gene'
+    to_model = 'gene_set'
