@@ -7,7 +7,7 @@ from .models import CobraModel, CobraReaction, CobraMetabolite
 
 class CobraWrapperTests(TestCase):
     def create_models(self):
-        """Example on cobra doc to build a model"""
+        """Examples in cobra doc to build a model"""
         test_metabolites = [
             CobraMetabolite(
                 identifier='ACP_c',
