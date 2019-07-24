@@ -247,29 +247,31 @@ class DetailTests(TestCase):
         expect = {
             "id": 20,
             "rightpos": 3906248,
-            "leftpos": 3905316, 
-            "chromosome_ncbi_accession": "AE006468.1", 
-            "mapped_to_genbank": True, 
-            "strand": "+", 
+            "leftpos": 3905316,
+            "chromosome_ncbi_accession": "AE006468.1",
+            "mapped_to_genbank": True,
+            "strand": "+",
             "protein_sequence": "MIIVTGGAGFIGSNIVKALNDKGITDILVVDNLKDGTKFVNLVDLNIADYMDKEDFLIQIMSGEELGDIEAIFHE"
-                "GACSSTTEWDGKYMMDNNYQYSKELLHYCLEREIPFLYASSAATYGGRTSDFIESREYEKPLNVYGYSKFLFDEYVRQILPEANSQIVGFR"
-                "YFNVYGPREGHKGSMASVAFHLNTQLNNGESPKLFEGSENFKRDFVYVGDVAAVNLWFLESGKSGIFNLGTGRAESFQAVADATLAYHKKG"
-                "SIEYIPFPDKLKGRYQAFTQADLTNLRNAGYDKPFKTVAEGVTEYMAWLNRDA",
+                                "GACSSTTEWDGKYMMDNNYQYSKELLHYCLEREIPFLYASSAATYGGRTSDFIESREYEKPLNVYGYSKFLFDEY"
+                                "VRQILPEANSQIVGFRYFNVYGPREGHKGSMASVAFHLNTQLNNGESPKLFEGSENFKRDFVYVGDVAAVNLWFL"
+                                "ESGKSGIFNLGTGRAESFQAVADATLAYHKKGSIEYIPFPDKLKGRYQAFTQADLTNLRNAGYDKPFKTVAEGVT"
+                                "EYMAWLNRDA",
             "dna_sequence": "ATGATCATCGTTACCGGCGGCGCGGGCTTTATCGGCAGCAATATCGTTAAGGCCCTGAATGATAAAGGTATCACCGATA"
-                "TTCTGGTGGTGGATAACCTGAAAGACGGCACCAAGTTTGTAAACCTGGTGGATCTGAACATTGCTGACTATATGGATAAGGAAGATTTCCT"
-                "GATCCAGATTATGTCCGGAGAAGAGCTCGGCGATATCGAAGCTATTTTCCATGAAGGCGCCTGCTCTTCCACCACCGAGTGGGACGGCAAG"
-                "TATATGATGGATAATAACTATCAATACTCCAAAGAGCTGCTGCACTATTGTCTTGAGCGCGAAATCCCGTTCCTCTACGCCTCTTCTGCCG"
-                "CCACCTATGGCGGTCGCACGTCTGATTTCATCGAATCGCGCGAATACGAAAAACCGCTTAACGTTTATGGCTATTCTAAATTCCTGTTTGA"
-                "TGAATATGTGCGCCAGATCCTGCCAGAAGCGAACTCGCAGATTGTCGGTTTCCGCTATTTCAACGTCTATGGACCACGTGAAGGCCATAAA"
-                "GGCAGCATGGCAAGCGTGGCATTTCATCTGAATACACAGTTAAACAACGGCGAAAGCCCGAAACTGTTTGAAGGCAGCGAAAACTTCAAGC"
-                "GCGACTTCGTTTACGTGGGCGATGTGGCCGCCGTTAACCTGTGGTTCCTGGAAAGCGGCAAGTCCGGCATCTTTAACCTGGGCACAGGCCG"
-                "TGCGGAATCTTTCCAGGCCGTCGCCGACGCGACGCTGGCATACCATAAAAAAGGTAGCATTGAATACATTCCGTTCCCGGATAAGCTGAAA"
-                "GGTCGCTATCAGGCGTTTACGCAGGCGGATTTAACCAATCTGCGCAACGCGGGCTACGACAAACCCTTTAAGACCGTCGCCGAAGGCGTCA"
-                "CGGAGTATATGGCCTGGCTGAACCGCGACGCGTAA", 
-            "genome_name": "AE006468.1", 
-            "genome_ref_string": "ncbi_accession:AE006468.1", 
-            "database_links": {"NCBI GI": [{"link": "http://identifiers.org/ncbigi/gi:16422277", "id": "16422277"}]}, 
-            "model_count": 0, 
+                            "TTCTGGTGGTGGATAACCTGAAAGACGGCACCAAGTTTGTAAACCTGGTGGATCTGAACATTGCTGACTATATGGATAA"
+                            "GGAAGATTTCCTGATCCAGATTATGTCCGGAGAAGAGCTCGGCGATATCGAAGCTATTTTCCATGAAGGCGCCTGCTCT"
+                            "TCCACCACCGAGTGGGACGGCAAGTATATGATGGATAATAACTATCAATACTCCAAAGAGCTGCTGCACTATTGTCTTG"
+                            "AGCGCGAAATCCCGTTCCTCTACGCCTCTTCTGCCGCCACCTATGGCGGTCGCACGTCTGATTTCATCGAATCGCGCGA"
+                            "ATACGAAAAACCGCTTAACGTTTATGGCTATTCTAAATTCCTGTTTGATGAATATGTGCGCCAGATCCTGCCAGAAGCG"
+                            "AACTCGCAGATTGTCGGTTTCCGCTATTTCAACGTCTATGGACCACGTGAAGGCCATAAAGGCAGCATGGCAAGCGTGG"
+                            "CATTTCATCTGAATACACAGTTAAACAACGGCGAAAGCCCGAAACTGTTTGAAGGCAGCGAAAACTTCAAGCGCGACTT"
+                            "CGTTTACGTGGGCGATGTGGCCGCCGTTAACCTGTGGTTCCTGGAAAGCGGCAAGTCCGGCATCTTTAACCTGGGCACA"
+                            "GGCCGTGCGGAATCTTTCCAGGCCGTCGCCGACGCGACGCTGGCATACCATAAAAAAGGTAGCATTGAATACATTCCGT"
+                            "TCCCGGATAAGCTGAAAGGTCGCTATCAGGCGTTTACGCAGGCGGATTTAACCAATCTGCGCAACGCGGGCTACGACAA"
+                            "ACCCTTTAAGACCGTCGCCGAAGGCGTCACGGAGTATATGGCCTGGCTGAACCGCGACGCGTAA",
+            "genome_name": "AE006468.1",
+            "genome_ref_string": "ncbi_accession:AE006468.1",
+            "database_links": {"NCBI GI": [{"link": "http://identifiers.org/ncbigi/gi:16422277", "id": "16422277"}]},
+            "model_count": 0,
             "reaction_count": 0
         }
 
@@ -289,7 +291,7 @@ class RelationshipTests(TestCase):
         cls.gene = Gene.objects.get(pk=1)
         cls.reaction = Reaction.objects.get(pk=1)
         cls.metabolite = Metabolite.objects.get(pk=1)
-    
+
     def test_model_gene(self):
         model_in_gene = self.gene.models.get(pk=1)
         self.assertEqual(self.model, model_in_gene)
@@ -326,8 +328,6 @@ class RelationshipTests(TestCase):
         self.assertEqual(self.metabolite, metabolite_in_reaction)
 
 
-
-
 class RelationshipViewTests(TestCase):
     """
     this will test GenesInModel, GenesInReaction, MetabolitesInModel, ...
@@ -341,17 +341,17 @@ class RelationshipViewTests(TestCase):
 
         expect = {
             "result": [{
-                "id": 1, 
-                "rightpos": 0, 
-                "leftpos": 0, 
-                "chromosome_ncbi_accession": "", 
-                "mapped_to_genbank": True, 
-                "strand": "", 
-                "protein_sequence": "", 
-                "dna_sequence": "", 
-                "genome_name": "", 
-                "genome_ref_string": 
-                "None:None", 
+                "id": 1,
+                "rightpos": 0,
+                "leftpos": 0,
+                "chromosome_ncbi_accession": "",
+                "mapped_to_genbank": True,
+                "strand": "",
+                "protein_sequence": "",
+                "dna_sequence": "",
+                "genome_name": "",
+                "genome_ref_string":
+                "None:None",
                 "database_links": {}
             }]
         }
