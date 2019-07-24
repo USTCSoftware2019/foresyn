@@ -3,22 +3,28 @@ import json
 from django.views import View
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.contrib.auth.mixins import LoginRequiredMixin
 from cobra.exceptions import OptimizationError
 
 from .models import CobraModel, CobraReaction, CobraMetabolite
 from .utils import get_possible_params
 
 
-class CobraModelApi(View):
+class CobraModelApi(LoginRequiredMixin, View):
+    raise_exception = True
+
     def post(self, request):
         params = json.loads(request.body)
         try:
-            reactions = [CobraReaction.objects.get(id=reaction_id) for reaction_id in params['reactions']]
+            reactions = [
+                CobraReaction.objects.get(user=request.user, id=reaction_id)
+                for reaction_id in params['reactions']
+            ]
         except AttributeError:
             reactions = []
         except ObjectDoesNotExist as error:
             return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        model = CobraModel(**get_possible_params(params, CobraModel.plain_fields))
+        model = CobraModel(**get_possible_params(params, CobraModel.plain_fields), user=request.user)
         try:
             model.full_clean()
         except ValidationError as error:
@@ -31,15 +37,17 @@ class CobraModelApi(View):
     def get(self, request):
         if 'id' in request.GET.keys():
             try:
-                return JsonResponse(CobraModel.objects.get(id=request.GET['id'][0]).json(), status=200)
+                return JsonResponse(
+                    CobraModel.objects.get(user=request.user, id=request.GET['id'][0]).json(), status=200)
             except ObjectDoesNotExist:
                 return JsonResponse({}, status=404)
         else:
-            return JsonResponse({'models': [model.json() for model in CobraModel.objects.all()]}, status=200)
+            return JsonResponse(
+                {'models': [model.json() for model in CobraModel.objects.filter(user=request.user)]}, status=200)
 
     def delete(self, request):
         try:
-            model = CobraModel.objects.get(id=json.loads(request.body)['id'])
+            model = CobraModel.objects.get(user=request.user, id=json.loads(request.body)['id'])
         except AttributeError as error:
             return JsonResponse({'code': 100101, 'message': error.args[0]}, status=400)
         except ObjectDoesNotExist:
@@ -50,12 +58,15 @@ class CobraModelApi(View):
     def patch(self, request):
         params = json.loads(request.body)
         try:
-            model = CobraModel.objects.get(id=params['id'])
+            model = CobraModel.objects.get(user=request.user, id=params['id'])
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
         try:
             if 'reactions' in params.keys():
-                reactions = [CobraReaction.objects.get(id=reaction_id) for reaction_id in params['reactions']]
+                reactions = [
+                    CobraReaction.objects.get(user=request.user, id=reaction_id)
+                    for reaction_id in params['reactions']
+                ]
                 model.reactions.set(reactions)
         except ObjectDoesNotExist as error:
             return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
@@ -70,16 +81,21 @@ class CobraModelApi(View):
         return JsonResponse({'id': model.id}, status=200)
 
 
-class CobraReactionApi(View):
+class CobraReactionApi(LoginRequiredMixin, View):
+    raise_exception = True
+
     def post(self, request):
         params = json.loads(request.body)
         try:
-            metabolites = [CobraMetabolite.objects.get(id=metabolite_id) for metabolite_id in params['metabolites']]
+            metabolites = [
+                CobraMetabolite.objects.get(user=request.user, id=metabolite_id)
+                for metabolite_id in params['metabolites']
+            ]
         except AttributeError:
             metabolites = []
         except ObjectDoesNotExist as error:
             return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        reaction = CobraReaction(**get_possible_params(params, CobraReaction.plain_fields))
+        reaction = CobraReaction(**get_possible_params(params, CobraReaction.plain_fields), user=request.user)
         if 'coefficients' in params.keys():
             reaction.coefficients = ' '.join(map(lambda num: str(num), params['coefficients']))
         try:
@@ -94,16 +110,19 @@ class CobraReactionApi(View):
     def get(self, request):
         if 'id' in request.GET.keys():
             try:
-                return JsonResponse(CobraReaction.objects.get(id=request.GET['id'][0]).json(), status=200)
+                return JsonResponse(
+                    CobraReaction.objects.get(user=request.user, id=request.GET['id'][0]).json(), status=200)
             except ObjectDoesNotExist:
                 return JsonResponse({}, status=404)
         else:
             return JsonResponse(
-                {'reactions': list([reaction.json() for reaction in CobraReaction.objects.all()])}, status=200)
+                {'reactions': list([reaction.json() for reaction in CobraReaction.objects.filter(user=request.user)])},
+                status=200
+            )
 
     def delete(self, request):
         try:
-            reaction = CobraReaction.objects.get(id=json.loads(request.body)['id'])
+            reaction = CobraReaction.objects.get(user=request.user, id=json.loads(request.body)['id'])
         except AttributeError as error:
             return JsonResponse({'code': 100101, 'message': error.args[0]}, status=400)
         except ObjectDoesNotExist:
@@ -114,13 +133,14 @@ class CobraReactionApi(View):
     def patch(self, request):
         params = json.loads(request.body)
         try:
-            reaction = CobraReaction.objects.get(id=params['id'])
+            reaction = CobraReaction.objects.get(user=request.user, id=params['id'])
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
         try:
             if 'metabolites' in params.keys():
                 metabolites = [
-                    CobraMetabolite.objects.get(id=metabolite_id) for metabolite_id in params['metabolites']
+                    CobraMetabolite.objects.get(user=request.user, id=metabolite_id)
+                    for metabolite_id in params['metabolites']
                 ]
                 reaction.metabolites.set(metabolites)
         except ObjectDoesNotExist as error:
@@ -138,10 +158,12 @@ class CobraReactionApi(View):
         return JsonResponse({'id': reaction.id}, status=200)
 
 
-class CobraMetaboliteApi(View):
+class CobraMetaboliteApi(LoginRequiredMixin, View):
+    raise_exception = True
+
     def post(self, request):
         params = json.loads(request.body)
-        metabolite = CobraMetabolite(**get_possible_params(params, CobraMetabolite.plain_fields))
+        metabolite = CobraMetabolite(**get_possible_params(params, CobraMetabolite.plain_fields), user=request.user)
         try:
             metabolite.full_clean()
         except ValidationError as error:
@@ -152,16 +174,22 @@ class CobraMetaboliteApi(View):
     def get(self, request):
         if 'id' in request.GET.keys():
             try:
-                return JsonResponse(CobraMetabolite.objects.get(id=request.GET['id'][0]).json(), status=200)
+                return JsonResponse(
+                    CobraMetabolite.objects.get(user=request.user, id=request.GET['id'][0]).json(), status=200)
             except ObjectDoesNotExist:
                 return JsonResponse({}, status=404)
         else:
             return JsonResponse(
-                {'metabolites': list([metabolite.json() for metabolite in CobraMetabolite.objects.all()])}, status=200)
+                {
+                    'metabolites': [
+                        metabolite.json() for metabolite in CobraMetabolite.objects.filter(user=request.user)
+                    ]
+                }, status=200
+            )
 
     def delete(self, request):
         try:
-            metabolite = CobraMetabolite.objects.get(id=json.loads(request.body)['id'])
+            metabolite = CobraMetabolite.objects.get(user=request.user, id=json.loads(request.body)['id'])
         except AttributeError as error:
             return JsonResponse({'code': 100101, 'message': error.args[0]}, status=400)
         except ObjectDoesNotExist:
@@ -172,7 +200,7 @@ class CobraMetaboliteApi(View):
     def patch(self, request):
         params = json.loads(request.body)
         try:
-            metabolite = CobraMetabolite.objects.get(id=params['id'])
+            metabolite = CobraMetabolite.objects.get(user=request.user, id=params['id'])
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
         for field in CobraModel.plain_fields:
@@ -186,11 +214,13 @@ class CobraMetaboliteApi(View):
         return JsonResponse({'id': metabolite.id}, status=200)
 
 
-class CobraComputeApi(View):
+class CobraComputeApi(LoginRequiredMixin, View):
+    raise_exception = True
+
     def post(self, request, model_id, method):
         params = json.loads(request.body)
         try:
-            model = CobraModel.objects.get(id=model_id)
+            model = CobraModel.objects.get(user=request.user, id=model_id)
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
         try:

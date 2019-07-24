@@ -1,6 +1,7 @@
 import json
 
 from django.db import models
+from django.contrib.auth.models import User
 import cobra
 from cobra.flux_analysis import flux_variability_analysis
 
@@ -8,6 +9,7 @@ from .utils import get_required_fields
 
 
 class CobraMetabolite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=50)
     formula = models.CharField(max_length=50, blank=True, default='')
     name = models.CharField(max_length=50, blank=True, default='')
@@ -23,6 +25,7 @@ class CobraMetabolite(models.Model):
 
 
 class CobraReaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
     subsystem = models.CharField(max_length=50, blank=True, default='')
@@ -54,6 +57,7 @@ class CobraReaction(models.Model):
 
 
 class CobraModel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
     reactions = models.ManyToManyField(CobraReaction)
