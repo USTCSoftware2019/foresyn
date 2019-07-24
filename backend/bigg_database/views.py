@@ -168,10 +168,10 @@ class CustomListView(View):
     A custom ListView
 
     This ListView returns json data, in format: {'result': ```list_data```}
-    The class inheriting it needs to overwrite 'fields', 'from_model' and 
+    The class inheriting it needs to overwrite 'fields', 'from_model' and
     'to_model' to make it work correctly.
 
-    As for 'from_model' and 'to_model', this parent class will implement 
+    As for 'from_model' and 'to_model', this parent class will implement
     ```getattr(self.from_model.objects.get(id=pk), self.to_model).all()``` to
     get the list to be returned.
 
