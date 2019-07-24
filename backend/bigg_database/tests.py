@@ -454,7 +454,8 @@ class RelationshipViewTests(TestCase):
                                 "id": "D00049"
                             }
                         ]
-                    }
+                    },
+                    "organism": "Human"
                 }
             ]
         }
@@ -474,7 +475,12 @@ class RelationshipViewTests(TestCase):
                     "name": "Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)",
                     "reaction_string": "12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c",
                     "pseudoreaction": False,
-                    "database_links": {}
+                    "database_links": {},
+                    "organism": "Human",
+                    "lower_bound": -1000.0,
+                    "upper_bound": 1000.0,
+                    "subsystem": "xxx",
+                    "gene_reaction_rule": "xxx"
                 }
             ]
         }
@@ -577,7 +583,8 @@ class RelationshipViewTests(TestCase):
                                 "id": "D00049"
                             }
                         ]
-                    }
+                    },
+                    "stoichiometry": 1
                 }
             ]
         }
@@ -602,7 +609,109 @@ class RelationshipViewTests(TestCase):
                     "dna_sequence": "",
                     "genome_name": "",
                     "genome_ref_string": "None:None",
-                    "database_links": {}
+                    "database_links": {},
+                    "gene_reaction_rule": "xxx"
+                }
+            ]
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_gene_from_models(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:gene_from_models', args=(1,)))
+
+        expect = {
+            "result": [
+                {
+                    "id": 1,
+                    "bigg_id": "iAF987",
+                    "compartments": ["c", "e", "p"]
+                }
+            ]
+        }
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_metabolite_from_models(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:metabolite_from_models', args=(1,)))
+
+        expect = {
+            "result": [
+                {
+                    "id": 1,
+                    "bigg_id": "iAF987",
+                    "compartments": ["c", "e", "p"],
+                    "organism": "Human"
+                }
+            ]
+        }
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_reaction_from_models(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:reaction_from_models', args=(1,)))
+
+        expect = {
+            "result": [
+                {
+                    "id": 1,
+                    "bigg_id": "iAF987",
+                    "compartments": [
+                        "c",
+                        "e",
+                        "p"
+                    ],
+                    "organism": "Human",
+                    "lower_bound": -1000.0,
+                    "upper_bound": 1000.0,
+                    "subsystem": "xxx",
+                    "gene_reaction_rule": "xxx"
+                }
+            ]
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_gene_from_reactions(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:gene_from_reactions', args=(1,)))
+
+        expect = {
+            "result": [
+                {
+                    "id": 1,
+                    "bigg_id": "PLDAGAT_MYRS_EPA_MYRS_PC_3_c",
+                    "name": "Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)",
+                    "reaction_string": "12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c",
+                    "pseudoreaction": False,
+                    "database_links": {},
+                    "gene_reaction_rule": "xxx"
+                }
+            ]
+        }
+
+        self.assertJSONEqual(resp.content, expect)
+
+    def test_metabolite_from_reactions(self):
+        client = Client()
+
+        resp = client.get(reverse('bigg_database:metabolite_from_reactions', args=(1,)))
+
+        expect = {
+            "result": [
+                {
+                    "id": 1,
+                    "bigg_id": "PLDAGAT_MYRS_EPA_MYRS_PC_3_c",
+                    "name": "Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)",
+                    "reaction_string": "12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c",
+                    "pseudoreaction": False,
+                    "database_links": {},
+                    "stoichiometry": 1
                 }
             ]
         }
