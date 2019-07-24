@@ -25,7 +25,7 @@ urlpatterns = [
     path('model/<int:pk>/metabolites', views.MetabolitesInModel.as_view(),
          name='metabolites_in_model'),
     path('model/<int:pk>/reactions', views.ReactionsInModel.as_view(),
-         name='reactions_in'),
+         name='reactions_in_model'),
     path('reaction/<int:pk>/metabolites', views.MetabolitesInReaction.as_view(),
          name='metabolites_in_reaction'),
     path('reaction/<int:pk>/genes', views.GenesInReaction.as_view(),

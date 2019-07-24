@@ -464,7 +464,7 @@ class RelationshipViewTests(TestCase):
     def test_reactions_in_model(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:reactions_in', args=(1,)))
+        resp = client.get(reverse('bigg_database:reactions_in_model', args=(1,)))
 
         expect = {
             "result": [
