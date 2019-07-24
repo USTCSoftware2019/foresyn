@@ -88,4 +88,4 @@ class CobraModel(models.Model):
         }
 
     def fva(self, **kwarg):  # Param checking is done by views
-        return json.loads(cobra.flux_variability_analysis(self.build(), **kwarg).to_json())
+        return json.loads(cobra.flux_analysis.flux_variability_analysis(self.build(), **kwarg).to_json())
