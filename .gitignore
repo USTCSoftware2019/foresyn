@@ -1,5 +1,20 @@
+# Python Cache
 __pycache__/
 *.pyc
+
+# Development Database
 *.sqlite3
-.env
+
+# Editors & IDEs
 .vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Virtual environments
+.env
+venv/
+
+# Bigg Database
+bigg_database/db.sqlite3.bak

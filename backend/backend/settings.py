@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'cobra_wrapper.apps.CobraWrapperConfig',
+    'bigg_database.apps.BiggDatabaseConfig',
     'accounts.apps.AccountsConfig',
     'django.contrib.admin',
     'django.contrib.auth',

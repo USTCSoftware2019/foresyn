@@ -20,4 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('cobra/', include('cobra_wrapper.urls')),
+    path('bigg_database/', include('bigg_database.urls')),
 ]

@@ -1,0 +1,13 @@
+[flake8]
+# https://lintlyci.github.io/Flake8Rules
+ignore =
+    F401
+exclude =
+    .git,
+    .idea,
+    __pycache__/,
+    env/,
+    venv/,
+    migrations
+# according to Django Coding Style
+max-line-length = 119
