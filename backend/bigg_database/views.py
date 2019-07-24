@@ -1,14 +1,15 @@
 import json
 
-from django.core.exceptions import ObjectDoesNotExist
 import django.core.exceptions
+from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.utils.translation import gettext as _
 from django.views.generic import View
 from fuzzywuzzy import fuzz
 
-from .models import Gene, Metabolite, Model, Reaction
+from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
+                     Reaction, ReactionGene, ReactionMetabolite)
 
 MATCH_RATIO = 80
 
@@ -181,6 +182,9 @@ class CustomListView(View):
     from_model = None
     to_model = None
 
+    def get_context_data(self, instance, fields):
+        return model_to_dict(instance, fields=fields)
+
     def get_query_set(self):
         # In order to reuse this view in 'reverse lookup' views,
         # delete the '_set'. To use 'forward lookup' views, please
@@ -200,7 +204,7 @@ class CustomListView(View):
             return JsonResponse({}, status=404)
         return JsonResponse({
             'result': [
-                model_to_dict(instance, fields=self.fields)
+                self.get_context_data(instance, fields=self.fields)
                 for instance in self.get_query_set()
             ]
         })
@@ -226,6 +230,12 @@ class MetabolitesInModel(CustomListView):
     from_model = Model
     to_model = 'metabolite_set'
 
+    def get_context_data(self, instance, fields):
+        context = super().get_context_data(instance, fields)
+        mm = ModelMetabolite.objects.get(model=self.from_model_instance, metabolite=instance)
+        context['organism'] = mm.organism
+        return context
+
 
 class ReactionsInModel(CustomListView):
     '''
@@ -235,6 +245,16 @@ class ReactionsInModel(CustomListView):
     from_model = Model
     to_model = 'reaction_set'
 
+    def get_context_data(self, instance, fields):
+        context = super().get_context_data(instance, fields)
+        mr = ModelReaction.objects.get(model=self.from_model_instance, reaction=instance)
+        context['organism'] = mr.organism
+        context['lower_bound'] = mr.lower_bound
+        context['upper_bound'] = mr.upper_bound
+        context['subsystem'] = mr.subsystem
+        context['gene_reaction_rule'] = mr.gene_reaction_rule
+        return context
+
 
 class MetabolitesInReaction(CustomListView):
     '''
@@ -243,6 +263,12 @@ class MetabolitesInReaction(CustomListView):
     fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
     from_model = Reaction
     to_model = 'metabolite_set'
+
+    def get_context_data(self, instance, fields):
+        context = super().get_context_data(instance, fields)
+        rm = ReactionMetabolite.objects.get(metabolite=instance, reaction=self.from_model_instance)
+        context['stoichiometry'] = rm.stoichiometry
+        return context
 
 
 class GenesInReaction(CustomListView):
@@ -255,6 +281,13 @@ class GenesInReaction(CustomListView):
               'database_links', 'id']
     from_model = Reaction
     to_model = 'gene_set'
+
+    def get_context_data(self, instance, fields):
+        context = super().get_context_data(instance, fields)
+        rg = ReactionGene.objects.get(gene=instance, reaction=self.from_model_instance)
+        context['gene_reaction_rule'] = rg.gene_reaction_rule
+
+        return context
 
 
 class GeneFromModels(CustomListView):
@@ -274,6 +307,12 @@ class MetaboliteFromModels(CustomListView):
     from_model = Metabolite
     to_model = 'models'
 
+    def get_context_data(self, instance, fields):
+        context = super().get_context_data(instance, fields)
+        mm = ModelMetabolite.objects.get(model=instance, metabolite=self.from_model_instance)
+        context['organism'] = mm.organism
+        return context
+
 
 class ReactionFromModels(CustomListView):
     '''
@@ -283,20 +322,43 @@ class ReactionFromModels(CustomListView):
     from_model = Reaction
     to_model = 'models'
 
+    def get_context_data(self, instance, fields):
+        context = super().get_context_data(instance, fields)
+        mr = ModelReaction.objects.get(model=instance, reaction=self.from_model_instance)
+        context['organism'] = mr.organism
+        context['lower_bound'] = mr.lower_bound
+        context['upper_bound'] = mr.upper_bound
+        context['subsystem'] = mr.subsystem
+        context['gene_reaction_rule'] = mr.gene_reaction_rule
+        return context
+
 
 class GeneFromReactions(CustomListView):
     '''
     Reverse lookup which reactions contain a certain gene
     '''
-    fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
+    fields = ['id', 'bigg_id', 'name', 'reaction_string', 'pseudoreaction', 'database_links']
     from_model = Gene
     to_model = 'reactions'
+
+    def get_context_data(self, instance, fields):
+        context = super().get_context_data(instance, fields)
+        rg = ReactionGene.objects.get(gene=self.from_model_instance, reaction=instance)
+        context['gene_reaction_rule'] = rg.gene_reaction_rule
+
+        return context
 
 
 class MetaboliteFromReactions(CustomListView):
     '''
     Reverse lookup which reactions contain a certain metabolite
     '''
-    fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
+    fields = ['id', 'bigg_id', 'name', 'reaction_string', 'pseudoreaction', 'database_links']
     from_model = Metabolite
     to_model = 'reactions'
+
+    def get_context_data(self, instance, fields):
+        context = super().get_context_data(instance, fields)
+        rm = ReactionMetabolite.objects.get(metabolite=self.from_model_instance, reaction=instance)
+        context['stoichiometry'] = rm.stoichiometry
+        return context
