@@ -3,7 +3,7 @@ import json
 from django.shortcuts import reverse
 from django.test import Client, TestCase
 
-from .models import Metabolite, Model, Reaction, Gene
+from .models import Metabolite, Model, Reaction, Gene, ModelReaction, ModelMetabolite, ReactionGene, ReactionMetabolite
 
 from urllib.parse import urlencode
 
@@ -280,7 +280,7 @@ class DetailTests(TestCase):
 
 class RelationshipTests(TestCase):
     """
-    this will test and show how to do manytomanyfield lookup and reverse lookup
+    this will test and show how to do manytomanyfield lookup, reverse lookup, and fetch through fields
     """
     fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data', 'bigg_database/test_relationship_data']
 
@@ -291,6 +291,10 @@ class RelationshipTests(TestCase):
         cls.gene = Gene.objects.get(pk=1)
         cls.reaction = Reaction.objects.get(pk=1)
         cls.metabolite = Metabolite.objects.get(pk=1)
+        cls.reaction_gene = ReactionGene.objects.get(reaction=cls.reaction, gene=cls.gene)
+        cls.model_metabolite = ModelMetabolite.objects.get(model=cls.model, metabolite=cls.metabolite)
+        cls.model_reaction = ModelReaction.objects.get(model=cls.model, reaction=cls.reaction)
+        cls.reaction_metabolite = ReactionMetabolite.objects.get(reaction=cls.reaction, metabolite=cls.metabolite)
 
     def test_model_gene(self):
         model_in_gene = self.gene.models.get(pk=1)
@@ -306,12 +310,26 @@ class RelationshipTests(TestCase):
         gene_in_reaction = self.reaction.gene_set.get(pk=1)
         self.assertEqual(self.gene, gene_in_reaction)
 
+        through = self.gene.reactiongene_set.get(reaction=reaction_in_gene)
+        self.assertEqual(self.reaction_gene, through)
+
+        self.assertEqual(through.gene_reaction_rule, 'xxx')
+
     def test_model_reaction(self):
         model_in_reaction = self.reaction.models.get(pk=1)
         self.assertEqual(self.model, model_in_reaction)
 
         reaction_in_model = self.model.reaction_set.get(pk=1)
         self.assertEqual(self.reaction, reaction_in_model)
+
+        through = self.reaction.modelreaction_set.get(model=model_in_reaction)
+        self.assertEqual(self.model_reaction, through)
+
+        self.assertEqual(through.organism, 'Human')
+        self.assertEqual(through.lower_bound, -1000.0)
+        self.assertEqual(through.upper_bound, 1000.0)
+        self.assertEqual(through.subsystem, 'xxx')
+        self.assertEqual(through.gene_reaction_rule, 'xxx')
 
     def test_model_metabolite(self):
         model_in_metabolite = self.metabolite.models.get(pk=1)
@@ -320,12 +338,22 @@ class RelationshipTests(TestCase):
         metabolite_in_model = self.model.metabolite_set.get(pk=1)
         self.assertEqual(self.metabolite, metabolite_in_model)
 
+        through = self.metabolite.modelmetabolite_set.get(model=model_in_metabolite)
+        self.assertEqual(self.model_metabolite, through)
+
+        self.assertEqual(through.organism, 'Human')
+
     def test_metabolite_reaction(self):
         reaction_in_metabolite = self.metabolite.reactions.get(pk=1)
         self.assertEqual(self.reaction, reaction_in_metabolite)
 
         metabolite_in_reaction = self.reaction.metabolite_set.get(pk=1)
         self.assertEqual(self.metabolite, metabolite_in_reaction)
+
+        through = self.reaction.reactionmetabolite_set.get(pk=1)
+        self.assertEqual(self.reaction_metabolite, through)
+
+        self.assertEqual(through.stoichiometry, 1)
 
 
 class RelationshipViewTests(TestCase):
