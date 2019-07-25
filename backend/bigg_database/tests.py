@@ -246,6 +246,8 @@ class DetailTests(TestCase):
 
         expect = {
             "id": 20,
+            "bigg_id": "STM3710",
+            "name": "rfaD",
             "rightpos": 3906248,
             "leftpos": 3905316,
             "chromosome_ncbi_accession": "AE006468.1",
@@ -628,6 +630,8 @@ class RelationshipViewTests(TestCase):
             "result": [
                 {
                     "id": 1,
+                    "bigg_id": 'CRv4_Au5_s2_g9116_t1',
+                    "name": "",
                     "rightpos": 0,
                     "leftpos": 0,
                     "chromosome_ncbi_accession": "",
