@@ -9,3 +9,5 @@ fuzzywuzzy==0.17.0
 pytz==2019.1
 sqlparse==0.3.0
 python-Levenshtein
+
+django-cors-headers==3.0.2
