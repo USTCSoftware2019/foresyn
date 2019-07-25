@@ -4,42 +4,50 @@ from django.db import models
 from django.contrib.auth.models import User
 import cobra
 
-from .utils import get_required_fields
+
+def get_fields(obj, fields):
+    return {field: getattr(obj, field) for field in fields}
 
 
 class CobraMetabolite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=50)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
     formula = models.CharField(max_length=50, blank=True, default='')
-    name = models.CharField(max_length=50, blank=True, default='')
     charge = models.CharField(max_length=50, blank=True, null=True, default=None)
     compartment = models.CharField(max_length=50, blank=True, null=True, default=None)
-    plain_fields = ['identifier', 'formula', 'name', 'charge', 'compartment']
-
-    def build(self):
-        return cobra.Metabolite(self.identifier, **get_required_fields(self, self.plain_fields[1:]))
 
     def json(self):
-        return get_required_fields(self, self.plain_fields)
+        return get_fields(self, ['id', 'name', 'formula', 'charge', 'compartment'])
+
+    def build(self):
+        return cobra.Metabolite(**self.json())
 
 
 class CobraReaction(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=50)
-    name = models.CharField(max_length=50, blank=True, default='')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
     subsystem = models.CharField(max_length=50, blank=True, default='')
     lower_bound = models.FloatField(default=0.0)
     upper_bound = models.FloatField(blank=True, null=True, default=None)
     objective_coefficient = models.FloatField(default=0.0)
     metabolites = models.ManyToManyField(CobraMetabolite)
-    coefficients = models.CharField(max_length=255, blank=True, default='')
-    gene_reaction_rule = models.CharField(max_length=255, blank=True, default='')
-    plain_fields = [
-        'identifier', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'gene_reaction_rule'
-    ]
+    coefficients = models.TextField()
+    gene_reaction_rule = models.TextField()
+
+    def json(self):
+        return dict(
+            **get_fields(self, [
+                'id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'gene_reaction_rule'
+            ]),
+            metabolites=[metabolite.id for metabolite in self.metabolites.all()],
+            coefficients=[float(coefficient) for coefficient in self.coefficients.split()]
+        )
 
     def build(self):
-        cobra_reaction = cobra.Reaction(self.identifier, **get_required_fields(self, self.plain_fields[1:-2]))
+        reaction_init = self.json()
+        for field in ['metabolites', 'coefficients', 'objective_coefficient', 'gene_reaction_rule']:
+            reaction_init.pop(field)
+        cobra_reaction = cobra.Reaction(**reaction_init)
         cobra_reaction.add_metabolites(dict(zip(
             [metabolite.build() for metabolite in self.metabolites.all()],
             [float(coefficient) for coefficient in self.coefficients.split()]
@@ -47,36 +55,29 @@ class CobraReaction(models.Model):
         cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
         return cobra_reaction
 
-    def json(self):
-        return dict(
-            **get_required_fields(self, self.plain_fields),
-            metabolites=[metabolite.id for metabolite in self.metabolites.all()],
-            coefficients=[float(coefficient) for coefficient in self.coefficients.split()]
-        )
-
 
 class CobraModel(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=50)
-    name = models.CharField(max_length=50, blank=True, default='')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
     reactions = models.ManyToManyField(CobraReaction)
     objective = models.CharField(max_length=50, default='')
-    plain_fields = ['identifier', 'name', 'objective']
+
+    def json(self):
+        return dict(
+            **get_fields(self, ['id', 'name', 'objective']),
+            reactions=[reaction.id for reaction in self.reactions.all()]
+        )
 
     def build(self):
-        cobra_model = cobra.Model(self.identifier, **get_required_fields(self, self.plain_fields[1:-1]))
+        model_init = self.json()
+        model_init.pop('reactions')
+        cobra_model = cobra.Model(model_init)
         for reaction in self.reactions.all():
             cobra_reaction = reaction.build()
             cobra_model.add_reaction(cobra_reaction)
             cobra_reaction.objective_coefficient = reaction.objective_coefficient
         cobra_model.objective = self.objective
         return cobra_model
-
-    def json(self):
-        return dict(
-            **get_required_fields(self, self.plain_fields),
-            reactions=list([reaction.id for reaction in self.reactions.all()])
-        )
 
     def fba(self):
         solution = self.build().optimize()
