@@ -93,7 +93,7 @@ class CobraWrapperTests(TestCase):
         self._create_user_and_login()
         metabolite_response = self.client.post('/cobra/metabolites/', dict(
             identifier='test',
-            formula='test'*13,
+            formula='test' * 13,
             name='test',
             compartment='test'
         ), content_type='application/json')
@@ -157,7 +157,7 @@ class CobraWrapperTests(TestCase):
         self.assertEqual(json.loads(reaction_response.content)['code'], 100101)
         reaction_response = self.client.post('/cobra/reactions/', dict(
             identifier='test',
-            name='test'*13,
+            name='test' * 13,
             subsystem='test',
             lower_bound=0,
             upper_bound=0,
@@ -216,7 +216,7 @@ class CobraWrapperTests(TestCase):
         self.assertEqual(json.loads(model_response.content)['code'], 100101)
         model_response = self.client.patch('/cobra/models/', {
             'id': info['models'][0].id,
-            'objective': 'test'*13
+            'objective': 'test' * 13
         }, content_type='application/json')
         self.assertEqual(model_response.status_code, 400)
         self.assertEqual(json.loads(model_response.content)['code'], 100102)
@@ -238,7 +238,7 @@ class CobraWrapperTests(TestCase):
         self.assertEqual(json.loads(reaction_response.content)['code'], 100101)
         reaction_response = self.client.patch('/cobra/reactions/', {
             'id': info['models'][0].id,
-            'coefficients': 'test'*64
+            'coefficients': 'test' * 64
         }, content_type='application/json')
         self.assertEqual(reaction_response.status_code, 400)
         self.assertEqual(json.loads(reaction_response.content)['code'], 100102)
@@ -260,7 +260,7 @@ class CobraWrapperTests(TestCase):
         self.assertEqual(json.loads(metabolite_response.content)['code'], 100101)
         metabolite_response = self.client.patch('/cobra/metabolites/', {
             'id': info['models'][0].id,
-            'name': 'test'*13
+            'name': 'test' * 13
         }, content_type='application/json')
         self.assertEqual(metabolite_response.status_code, 400)
         self.assertEqual(json.loads(metabolite_response.content)['code'], 100102)

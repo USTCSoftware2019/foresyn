@@ -22,7 +22,7 @@ class CobraModelApi(LoginRequiredMixin, View):
             ]
         except KeyError:
             reactions = []
-        except ObjectDoesNotExist as error:  
+        except ObjectDoesNotExist as error:
             return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
         model = CobraModel(**get_possible_params(params, CobraModel.plain_fields), user=request.user)
         try:
@@ -100,9 +100,9 @@ class CobraReactionApi(LoginRequiredMixin, View):
             ]
         except KeyError:
             metabolites = []
-        except ObjectDoesNotExist as error:
-            #return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-            return JsonResponse({'code': 100101, 'message': ''}, status=400) 
+        except ObjectDoesNotExist:
+            # return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
+            return JsonResponse({'code': 100101, 'message': ''}, status=400)
         reaction = CobraReaction(**get_possible_params(params, CobraReaction.plain_fields), user=request.user)
         if 'coefficients' in params.keys():
             reaction.coefficients = ' '.join(map(lambda num: str(num), params['coefficients']))
@@ -226,7 +226,7 @@ class CobraMetaboliteApi(LoginRequiredMixin, View):
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
         except KeyError:
-            return JsonResponse({'code': 100101, 'message': 'must provide an id'}, status = 400)
+            return JsonResponse({'code': 100101, 'message': 'must provide an id'}, status=400)
         for field in CobraModel.plain_fields:
             if field in params.keys():
                 setattr(metabolite, field, params[field])
