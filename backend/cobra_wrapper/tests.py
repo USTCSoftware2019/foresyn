@@ -7,7 +7,14 @@ from .models import CobraModel, CobraReaction, CobraMetabolite
 
 
 class CobraWrapperTests(TestCase):
-    def create_models(self, user):
+    def _create_user_and_login(self):
+        test_user_info = {'username': 'test', 'password': 'testtest123'}
+        test_user = User.objects.create_user(**test_user_info)
+        self.client = Client()
+        self.client.login(**test_user_info)
+        return test_user
+
+    def _create_models(self, user):
         """Examples in cobra doc to build a model"""
         test_metabolites = [
             CobraMetabolite(
@@ -83,9 +90,7 @@ class CobraWrapperTests(TestCase):
         }
 
     def test_cobra_url_post(self):
-        User.objects.create_user(**{'username': 'test', 'password': 'testtest123'})
-        self.client = Client()
-        self.client.login(**{'username': 'test', 'password': 'testtest123'})
+        self._create_user_and_login()
         metabolite_0_response = self.client.post('/cobra/metabolites/', dict(
             identifier='ACP_c',
             formula='C11H21N2O7PRS',
@@ -160,10 +165,8 @@ class CobraWrapperTests(TestCase):
         self.assertEqual(str(cobra_model.objective.direction), 'max')
 
     def test_cobra_url_patch(self):
-        user = User.objects.create_user(**{'username': 'test', 'password': 'testtest123'})
-        self.client = Client()
-        self.client.login(**{'username': 'test', 'password': 'testtest123'})
-        info = self.create_models(user)
+        user = self._create_user_and_login()
+        info = self._create_models(user)
         model_response = self.client.patch('/cobra/models/', {
             'id': info['models'][0].id,
             'objective': 'test'
@@ -181,10 +184,8 @@ class CobraWrapperTests(TestCase):
         self.assertEqual(metabolite_response.status_code, 200)
 
     def test_cobra_url_delete(self):
-        user = User.objects.create_user(**{'username': 'test', 'password': 'testtest123'})
-        self.client = Client()
-        self.client.login(**{'username': 'test', 'password': 'testtest123'})
-        info = self.create_models(user)
+        user = self._create_user_and_login()
+        info = self._create_models(user)
         model_response = self.client.delete('/cobra/models/', {
             'id': info['models'][0].id,
         }, content_type='application/json')
@@ -199,10 +200,8 @@ class CobraWrapperTests(TestCase):
         self.assertEqual(metabolite_response.status_code, 204)
 
     def test_cobra_url_get(self):
-        user = User.objects.create_user(**{'username': 'test', 'password': 'testtest123'})
-        self.client = Client()
-        self.client.login(**{'username': 'test', 'password': 'testtest123'})
-        info = self.create_models(user)
+        user = self._create_user_and_login()
+        info = self._create_models(user)
         model_response = self.client.get(
             '/cobra/models/', dict(id=info['models'][0].id), content_type='application/json')
         self.assertEqual(model_response.status_code, 200)
@@ -226,10 +225,8 @@ class CobraWrapperTests(TestCase):
         self.assertEqual(len(json.loads(metabolites_response.content)['metabolites']), 6)
 
     def test_cobra_compute_url_post(self):
-        user = User.objects.create_user(**{'username': 'test', 'password': 'testtest123'})
-        self.client = Client()
-        self.client.login(**{'username': 'test', 'password': 'testtest123'})
-        info = self.create_models(user)
+        user = self._create_user_and_login()
+        info = self._create_models(user)
         fba_v_response = self.client.post(
             '/cobra/models/{}/fba/'.format(info['models'][0].id), {}, content_type='application/json')
         fva_v_response = self.client.post('/cobra/models/{}/fva/'.format(info['models'][0].id), {
