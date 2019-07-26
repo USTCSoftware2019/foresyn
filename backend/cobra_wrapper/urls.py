@@ -4,8 +4,15 @@ from . import views
 
 app_name = 'cobra'
 urlpatterns = [
-    path('models/', views.CobraModelApi.as_view(), name='models'),
-    path('reactions/', views.CobraReactionApi.as_view(), name='reactions'),
-    path('metabolites/', views.CobraMetaboliteApi.as_view(), name='metabolites'),
-    path('models/<int:model_id>/<str:method>/', views.CobraComputeApi.as_view(), name='compute')
+    path('metabolites/', views.CobraMetaboliteSetApi.as_view(), name='metabolite_set'),
+    path('metabolites/<int:metabolite_id>/', views.CobraMetaboliteObjectApi.as_view(), name='metabolite_object'),
+    path('reactions/', views.CobraReactionSetApi.as_view(), name='reaction_set'),
+    path('reactions/<int:reaction_id>/', views.CobraReactionObjectApi.as_view(), name='reaction_object'),
+    path('models/', views.CobraModelSetApi.as_view(), name='model_set'),
+    path('models/<int:model_id>/', views.CobraModelObjectApi.as_view(), name='model_object'),
+    path(
+        'models/<int:model_id>/<str:method>/',
+        views.CobraModelObjectComputeApi.as_view(),
+        name='model_object_computation'
+    ),
 ]
