@@ -31,7 +31,7 @@ def reaction_string_to_metabolites(reaction_string):
     return metabolites, coefficients
 
 
-def data_metabolite_to_cobra_metabolite(key,value):
+def data_metabolite_to_cobra_metabolite(key, value):
     try:
         data_metabolite_object = DataMetabolite.objects.get(key=value)
     except ObjectDoesNotExist:
