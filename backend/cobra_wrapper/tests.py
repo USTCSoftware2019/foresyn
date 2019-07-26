@@ -226,6 +226,7 @@ class CobraWrapperViewTests(TestCase):
         self.assertEqual(metabolite_response.status_code, 200)
 
     def test_object_patch_failure(self):
+        pass
 
     def test_object_delete_ok(self):
         user = self._create_user_and_login()
