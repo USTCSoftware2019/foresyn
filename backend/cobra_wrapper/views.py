@@ -34,6 +34,7 @@ def get_validation_error_content(error):
 
 
 class SetMixin:
+    raise_exception = True
     http_method_names = ['get', 'post']
 
     model = None
@@ -82,97 +83,23 @@ class CobraModelSetApi(LoginRequiredMixin, SetMixin, View):
     related_field = {'name': 'reactions', 'to': CobraReaction}
 
 
-class CobraMetaboliteObjectApi(LoginRequiredMixin, View):
+class ObjectMixin:
     raise_exception = True
+    http_method_names = ['get', 'delete', 'patch']
 
-    def get(self, request, metabolite_id):
-        try:
-            return JsonResponse(CobraMetabolite.objects.get(owner=request.user, id=metabolite_id).json(), status=200)
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-
-    def delete(self, request, metabolite_id):
-        try:
-            CobraMetabolite.objects.get(owner=request.user, id=metabolite_id).delete()
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-        return JsonResponse({}, status=204)
-
-    def patch(self, request, metabolite_id):
-        content = json.loads(request.body)
-        try:
-            metabolite = CobraMetabolite.objects.get(owner=request.user, id=metabolite_id)
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-
-        for field in ['cobra_id', 'name', 'formula', 'charge', 'compartment']:
-            if field in content.keys():
-                setattr(metabolite, field, content[field])
-
-        try:
-            metabolite.save()
-        except ValidationError as error:
-            return JsonResponse({
-                'type': 'validation_error',
-                'content': get_validation_error_content(error)
-            }, status=400)
-        return JsonResponse({}, status=200)
-
-
-class CobraReactionObjectApi(LoginRequiredMixin, View):
-    raise_exception = True
-
-    def get(self, request, reaction_id):
-        try:
-            return JsonResponse(CobraReaction.objects.get(owner=request.user, id=reaction_id).json(), status=200)
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-
-    def delete(self, request, reaction_id):
-        try:
-            CobraReaction.objects.get(owner=request.user, id=reaction_id).delete()
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-        return JsonResponse({}, status=204)
-
-    def patch(self, request, reaction_id):
-        content = json.loads(request.body)
-        try:
-            reaction = CobraReaction.objects.get(owner=request.user, id=reaction_id)
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-
-        for field in [
-            'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
-            'gene_reaction_rule'
-        ]:
-            if field in content.keys():
-                setattr(reaction, field, content[field])
-
-        try:
-            reaction.save()
-            if 'metabolites' in content.keys():
-                reaction.metabolites.set(get_models_by_id(CobraMetabolite, content['metabolites'], request.user))
-        except ValidationError as error:
-            return JsonResponse({
-                'type': 'validation_error',
-                'content': get_validation_error_content(error)
-            }, status=400)
-        return JsonResponse({}, status=200)
-
-
-class CobraModelObjectApi(LoginRequiredMixin, View):
-    raise_exception = True
+    model = None
+    fields = []
+    related_fields = {'name': None, 'to': None}
 
     def get(self, request, model_id):
         try:
-            return JsonResponse(CobraModel.objects.get(owner=request.user, id=model_id).json(), status=200)
+            return JsonResponse(self.model.objects.get(owner=request.user, id=model_id).json(), status=200)
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
 
     def delete(self, request, model_id):
         try:
-            CobraModel.objects.get(owner=request.user, id=model_id).delete()
+            self.model.objects.get(owner=request.user, id=model_id).delete()
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
         return JsonResponse({}, status=204)
@@ -180,24 +107,46 @@ class CobraModelObjectApi(LoginRequiredMixin, View):
     def patch(self, request, model_id):
         content = json.loads(request.body)
         try:
-            model = CobraModel.objects.get(owner=request.user, id=model_id)
+            model = self.model.objects.get(owner=request.user, id=model_id)
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
 
-        for field in ['cobra_id', 'name', 'objective']:
+        for field in self.fields:
             if field in content.keys():
                 setattr(model, field, content[field])
 
         try:
-            if 'reactions' in content.keys():
-                model.reactions.set(get_models_by_id(CobraReaction, content['reactions'], request.user))
             model.save()
+            if self.related_fields and self.related_fields['name'] in content.keys():
+                getattr(model, self.related_fields['name']).set(
+                    get_models_by_id(self.related_fields['to'], content[self.related_fields['name']], request.user))
         except ValidationError as error:
             return JsonResponse({
                 'type': 'validation_error',
                 'content': get_validation_error_content(error)
             }, status=400)
         return JsonResponse({}, status=200)
+
+
+class CobraMetaboliteObjectApi(LoginRequiredMixin, ObjectMixin, View):
+    model = CobraMetabolite
+    fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
+    related_field = None
+
+
+class CobraReactionObjectApi(LoginRequiredMixin, ObjectMixin, View):
+    model = CobraReaction
+    fields = [
+        'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
+        'gene_reaction_rule'
+    ]
+    related_field = {'name': 'metabolites', 'to': CobraMetabolite}
+
+
+class CobraModelObjectApi(LoginRequiredMixin, ObjectMixin, View):
+    model = CobraModel
+    fields = ['cobra_id', 'name', 'objective']
+    related_field = {'name': 'reactions', 'to': CobraReaction}
 
 
 class CobraModelObjectComputeApi(LoginRequiredMixin, View):
