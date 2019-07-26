@@ -226,6 +226,23 @@ class CobraWrapperViewTests(TestCase):
         self.assertEqual(metabolite_response.status_code, 200)
 
     def test_object_patch_failure(self):
+        user = self._create_user_and_login()
+        info = self._create_models(user)
+
+        model_response = self.client.patch('/cobra/models/{}/'.format('7777777'), {
+            'objective': 'test'
+        }, content_type='application/json')
+        self.assertEqual(model_response.status_code, 404)
+
+        reaction_response = self.client.patch('/cobra/reactions/{}/'.format('7777777'), {
+            'coefficients': [1, 1, 1, 1, 1, 1]
+        }, content_type='application/json')
+        self.assertEqual(reaction_response.status_code, 404)
+
+        metabolite_response = self.client.patch('/cobra/metabolites/{}/'.format('7777777'), {
+            'name': 'test'
+        }, content_type='application/json')
+        self.assertEqual(metabolite_response.status_code, 404)
 
     def test_object_delete_ok(self):
         user = self._create_user_and_login()
