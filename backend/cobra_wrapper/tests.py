@@ -225,6 +225,8 @@ class CobraWrapperViewTests(TestCase):
         }, content_type='application/json')
         self.assertEqual(metabolite_response.status_code, 200)
 
+    def test_object_patch_failure(self):
+
     def test_object_delete_ok(self):
         user = self._create_user_and_login()
         info = self._create_models(user)
@@ -298,3 +300,21 @@ class CobraWrapperViewTests(TestCase):
         #     '/cobra/models/{}/test/'.format(info['models'][0].id), {}, content_type='application/json')
         # self.assertEqual(test_v_response.status_code, 404)
         # self.assertEqual(json.loads(test_v_response.content)['code'], 100103)
+
+    def test_not_login_get_or_post(self):
+        self.client = Client()
+
+        get_model = self.client.get('/cobra/models/', content_type='application/json')
+        self.assertEqual(get_model.status_code, 403)
+        post_model = self.client.post('/cobra/models/', content_type='application/json')
+        self.assertEqual(post_model.status_code, 403)
+
+        get_reaction = self.client.get('/cobra/reactions/', content_type='application/json')
+        self.assertEqual(get_reaction.status_code, 403)
+        post_reaction = self.client.post('/cobra/reactions/', content_type='application/json')
+        self.assertEqual(post_reaction.status_code, 403)
+
+        get_metabolite = self.client.get('/cobra/metabolites/', content_type='application/json')
+        self.assertEqual(get_metabolite.status_code, 403)
+        post_metabolite = self.client.post('/cobra/metabolites/', content_type='application/json')
+        self.assertEqual(post_metabolite.status_code, 403)
