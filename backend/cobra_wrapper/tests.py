@@ -243,10 +243,11 @@ class CobraWrapperViewTests(TestCase):
             'coefficients': [1, 1, 1, 1, 1, 1]
         }, content_type='application/json')
         self.assertEqual(reaction_response.status_code, 404)
-        # reaction_response = self.client.patch('/cobra/reactions/{}/'.format(info['reactions'][0].id), {
-        #     'coefficients': # todo
-        # }, content_type='application/json')
-        # self.assertEqual(reaction_response.status_code, 400)
+        reaction_response = self.client.patch('/cobra/reactions/{}/'.format(info['reactions'][0].id), {
+            'coefficients': {}
+        }, content_type='application/json')
+        self.assertEqual(reaction_response.status_code, 400)
+        self.assertEqual(json.loads(reaction_response.content)['type'], 'validation_error')
 
         metabolite_response = self.client.patch('/cobra/metabolites/{}/'.format('7777777'), {
             'name': 'test'
