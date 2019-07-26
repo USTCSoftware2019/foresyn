@@ -31,9 +31,9 @@ def reaction_string_to_metabolites(reaction_string):
     return metabolites, coefficients
 
 
-def data_metabolite_to_cobra_metabolite(key,value):
+def data_metabolite_to_cobra_metabolite(key, value):
     try:
-        data_metabolite_object = DataMetabolite.objects.get(key=value)
+        data_metabolite_object = DataMetabolite.objects.get(**{key: value})
     except ObjectDoesNotExist:
         return None
     # relationships
@@ -45,6 +45,40 @@ def data_metabolite_to_cobra_metabolite(key,value):
     cobra_metabolite_object.compartment = data_metabolite_object.bigg_id[-1]
     # cobra_metabolite_object.user
     return cobra_metabolite_object
+
+
+def data_reaction_to_cobra_reaction(key, value, data_reaction_object=None, **params):
+    if data_reaction_object is None:
+        try:
+            data_reaction_object = DataReaction.objects.get(**{key: value})
+        except ObjectDoesNotExist:
+            return JsonResponse("error")
+
+    cobra_reaction_object = CobraReaction()
+
+    # Add metabolites first
+    reaction_string = data_reaction_object.reaction_string
+    (metabolite_names, coefficients) = reaction_string_to_metabolites(reaction_string)
+    for name in metabolite_names:
+        cobra_metabolite_object = data_metabolite_to_cobra_metabolite("bigg_id", name)
+        cobra_reaction_object.save()
+        cobra_reaction_object.metabolites.add(cobra_metabolite_object)
+
+    # relationship
+    cobra_reaction_object.name = data_reaction_object.name
+    cobra_reaction_object.identifier = data_reaction_object.bigg_id
+    gene_reaction_rules = [gene.gene_reaction_rule for gene in data_reaction_object.reactiongene_set.all()]
+    cobra_reaction_object.gene_reaction_rule = " or ".join(gene_reaction_rules)
+    # cobra_reaction_object.user
+
+    if params is not {}:
+        cobra_reaction_object.subsystem = params["subsystem"]
+        cobra_reaction_object.upper_bound = params["upper_bound"]
+        cobra_reaction_object.lower_bound = params["lower_bound"]
+        cobra_reaction_object.objective_coefficient = params["objective_coefficient"]
+
+    cobra_reaction_object.coefficients = coefficients
+    return cobra_reaction_object
 
 
 def is_number(num):
