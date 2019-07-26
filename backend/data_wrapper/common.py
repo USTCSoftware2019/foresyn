@@ -1,8 +1,7 @@
-from abc import ABCMeta, abstractmethod
-from cobra_wrapper.models import CobraModel, CobraMetabolite, CobraReaction
-from bigg_database.models import Model as DataModel, Metabolite as DataMetabolite, Reaction as DataReaction
+from cobra_wrapper.models import CobraMetabolite, CobraReaction
+from bigg_database.models import Metabolite as DataMetabolite, Reaction as DataReaction
 from django.http import JsonResponse
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 import re
 
 
@@ -31,7 +30,7 @@ def reaction_string_to_metabolites(reaction_string):
     return metabolites, coefficients
 
 
-def data_metabolite_to_cobra_metabolite(key, value):
+def data_metabolite_to_cobra_metabolite(key, value, user):
     try:
         data_metabolite_object = DataMetabolite.objects.get(**{key: value})
     except ObjectDoesNotExist:
@@ -43,11 +42,11 @@ def data_metabolite_to_cobra_metabolite(key, value):
     cobra_metabolite_object.identifier = data_metabolite_object.bigg_id
     cobra_metabolite_object.charge = data_metabolite_object.charges
     cobra_metabolite_object.compartment = data_metabolite_object.bigg_id[-1]
-    # cobra_metabolite_object.user
+    cobra_metabolite_object.user = user
     return cobra_metabolite_object
 
 
-def data_reaction_to_cobra_reaction(key, value, data_reaction_object=None, **params):
+def data_reaction_to_cobra_reaction(key, value, user, data_reaction_object=None, **params):
     if data_reaction_object is None:
         try:
             data_reaction_object = DataReaction.objects.get(**{key: value})
@@ -63,21 +62,20 @@ def data_reaction_to_cobra_reaction(key, value, data_reaction_object=None, **par
         cobra_metabolite_object = data_metabolite_to_cobra_metabolite("bigg_id", name)
         cobra_reaction_object.save()
         cobra_reaction_object.metabolites.add(cobra_metabolite_object)
-
+    cobra_reaction_object.coefficients = coefficients
     # relationship
     cobra_reaction_object.name = data_reaction_object.name
     cobra_reaction_object.identifier = data_reaction_object.bigg_id
     gene_reaction_rules = [gene.gene_reaction_rule for gene in data_reaction_object.reactiongene_set.all()]
     cobra_reaction_object.gene_reaction_rule = " or ".join(gene_reaction_rules)
-    # cobra_reaction_object.user
 
     if params is not {}:
         cobra_reaction_object.subsystem = params["subsystem"]
         cobra_reaction_object.upper_bound = params["upper_bound"]
         cobra_reaction_object.lower_bound = params["lower_bound"]
-        cobra_reaction_object.objective_coefficient = params["objective_coefficient"]
+        # cobra_reaction_object.objective_coefficient = params["objective_coefficient"]
 
-    cobra_reaction_object.coefficients = coefficients
+    cobra_reaction_object.user = user
     return cobra_reaction_object
 
 
