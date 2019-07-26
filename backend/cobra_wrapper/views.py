@@ -34,7 +34,6 @@ def get_validation_error_content(error):
 
 
 class SetMixin:
-    raise_exception = True
     http_method_names = ['get', 'post']
 
     model = None
@@ -63,12 +62,14 @@ class SetMixin:
 
 
 class CobraMetaboliteSetApi(LoginRequiredMixin, SetMixin, View):
+    raise_exception = True
     model = CobraMetabolite
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
     related_field = None
 
 
 class CobraReactionSetApi(LoginRequiredMixin, SetMixin, View):
+    raise_exception = True
     model = CobraReaction
     fields = [
         'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
@@ -78,13 +79,13 @@ class CobraReactionSetApi(LoginRequiredMixin, SetMixin, View):
 
 
 class CobraModelSetApi(LoginRequiredMixin, SetMixin, View):
+    raise_exception = True
     model = CobraModel
     fields = ['cobra_id', 'name', 'objective']
     related_field = {'name': 'reactions', 'to': CobraReaction}
 
 
 class ObjectMixin:
-    raise_exception = True
     http_method_names = ['get', 'delete', 'patch']
 
     model = None
@@ -129,12 +130,14 @@ class ObjectMixin:
 
 
 class CobraMetaboliteObjectApi(LoginRequiredMixin, ObjectMixin, View):
+    raise_exception = True
     model = CobraMetabolite
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
     related_field = None
 
 
 class CobraReactionObjectApi(LoginRequiredMixin, ObjectMixin, View):
+    raise_exception = True
     model = CobraReaction
     fields = [
         'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
@@ -144,6 +147,7 @@ class CobraReactionObjectApi(LoginRequiredMixin, ObjectMixin, View):
 
 
 class CobraModelObjectApi(LoginRequiredMixin, ObjectMixin, View):
+    raise_exception = True
     model = CobraModel
     fields = ['cobra_id', 'name', 'objective']
     related_field = {'name': 'reactions', 'to': CobraReaction}
@@ -175,7 +179,7 @@ class CobraModelObjectComputeApi(LoginRequiredMixin, View):
                 except ValidationError as error:
                     return JsonResponse({
                         'type': 'validation_error',
-                        'content': get_validation_error_content(error)
+                        'content': ''  # FIXME
                     }, status=400)
             else:
                 return JsonResponse({}, status=404)

@@ -233,16 +233,30 @@ class CobraWrapperViewTests(TestCase):
             'objective': 'test'
         }, content_type='application/json')
         self.assertEqual(model_response.status_code, 404)
+        model_response = self.client.patch('/cobra/models/{}/'.format(info['models'][0].id), {
+            'objective': 'test'*13
+        }, content_type='application/json')
+        self.assertEqual(model_response.status_code, 400)
+        self.assertEqual(json.loads(model_response.content)['type'], 'validation_error')
 
         reaction_response = self.client.patch('/cobra/reactions/{}/'.format('7777777'), {
             'coefficients': [1, 1, 1, 1, 1, 1]
         }, content_type='application/json')
         self.assertEqual(reaction_response.status_code, 404)
+        # reaction_response = self.client.patch('/cobra/reactions/{}/'.format(info['reactions'][0].id), {
+        #     'coefficients': # todo
+        # }, content_type='application/json')
+        # self.assertEqual(reaction_response.status_code, 400)
 
         metabolite_response = self.client.patch('/cobra/metabolites/{}/'.format('7777777'), {
             'name': 'test'
         }, content_type='application/json')
         self.assertEqual(metabolite_response.status_code, 404)
+        metabolite_response = self.client.patch('/cobra/metabolites/{}/'.format(info['metabolites'][0].id), {
+            'name': 'test'*13
+        }, content_type='application/json')
+        self.assertEqual(metabolite_response.status_code, 400)
+        self.assertEqual(json.loads(metabolite_response.content)['type'], 'validation_error')
 
     def test_object_delete_ok(self):
         user = self._create_user_and_login()
@@ -259,6 +273,22 @@ class CobraWrapperViewTests(TestCase):
         metabolite_response = self.client.delete(
             '/cobra/metabolites/{}/'.format(info['metabolites'][0].id), content_type='application/json')
         self.assertEqual(metabolite_response.status_code, 204)
+
+    def test_object_delete_failure(self):
+        user = self._create_user_and_login()
+        info = self._create_models(user)
+
+        model_response = self.client.delete(
+            '/cobra/models/{}/'.format('7777777'), content_type='application/json')
+        self.assertEqual(model_response.status_code, 404)
+
+        reaction_response = self.client.delete(
+            '/cobra/reactions/{}/'.format('7777777'), content_type='application/json')
+        self.assertEqual(reaction_response.status_code, 404)
+
+        metabolite_response = self.client.delete(
+            '/cobra/metabolites/{}/'.format('7777777'), content_type='application/json')
+        self.assertEqual(metabolite_response.status_code, 404)
 
     def test_object_get_ok(self):
         user = self._create_user_and_login()
@@ -278,6 +308,22 @@ class CobraWrapperViewTests(TestCase):
             '/cobra/metabolites/{}/'.format(info['metabolites'][0].id), content_type='application/json')
         self.assertEqual(metabolite_response.status_code, 200)
         self.assertEqual(json.loads(metabolite_response.content)['cobra_id'], 'ACP_c')
+
+    def test_object_get_failure(self):
+        user = self._create_user_and_login()
+        info = self._create_models(user)
+
+        model_response = self.client.get(
+            '/cobra/models/{}/'.format('7777777'), content_type='application/json')
+        self.assertEqual(model_response.status_code, 404)
+
+        reaction_response = self.client.get(
+            '/cobra/reactions/{}/'.format('7777777'), content_type='application/json')
+        self.assertEqual(reaction_response.status_code, 404)
+
+        metabolite_response = self.client.get(
+            '/cobra/metabolites/{}/'.format('7777777'), content_type='application/json')
+        self.assertEqual(metabolite_response.status_code, 404)
 
     def test_object_computation_post_ok(self):
         user = self._create_user_and_login()
@@ -299,24 +345,28 @@ class CobraWrapperViewTests(TestCase):
         }, content_type='application/json')
         self.assertEqual(
             json.loads(fva_response.content), {"minimum": {"3OAS140": 0.0}, "maximum": {"3OAS140": 0.0}})
-        # fba_response = self.client.post(
-        #     '/cobra/models/{}/fba/'.format('7777777'), {}, content_type='application/json')
-        # self.assertEqual(fba_response.status_code, 404)
-        # self.assertEqual(json.loads(fba_response.content)['code'], 100101)
-        # fva_response = self.client.post('/cobra/models/{}/fva/'.format('7777777'), {
-        #     'reaction_list': [info['reactions'][0].id]
-        # }, content_type='application/json')
-        # self.assertEqual(fva_response.status_code, 404)
-        # self.assertEqual(json.loads(fva_response.content)['code'], 100101)
-        # fva_response = self.client.post('/cobra/models/{}/fva/'.format(info['models'][0].id), {
-        #     'reaction_list': ['7777777']
-        # }, content_type='application/json')
-        # self.assertEqual(fva_response.status_code, 404)
-        # self.assertEqual(json.loads(fva_response.content)['code'], 100102)
-        # test_v_response = self.client.post(
-        #     '/cobra/models/{}/test/'.format(info['models'][0].id), {}, content_type='application/json')
-        # self.assertEqual(test_v_response.status_code, 404)
-        # self.assertEqual(json.loads(test_v_response.content)['code'], 100103)
+
+    def test_object_computation_post_failure(self):
+        user = self._create_user_and_login()
+        info = self._create_models(user)
+        
+        fba_response = self.client.post(
+            '/cobra/models/{}/fba/'.format('7777777'), {}, content_type='application/json')
+        self.assertEqual(fba_response.status_code, 404)
+        
+        fva_response = self.client.post('/cobra/models/{}/fva/'.format('7777777'), {
+            'reaction_list': [info['reactions'][0].id]
+        }, content_type='application/json')
+        self.assertEqual(fva_response.status_code, 404)
+        fva_response = self.client.post('/cobra/models/{}/fva/'.format(info['models'][0].id), {
+            'reaction_list': ['7777777']
+        }, content_type='application/json')
+        self.assertEqual(fva_response.status_code, 400)
+        self.assertEqual(json.loads(fva_response.content)['type'], 'validation_error')
+        
+        test_response = self.client.post(
+            '/cobra/models/{}/test/'.format(info['models'][0].id), {}, content_type='application/json')
+        self.assertEqual(test_response.status_code, 404)
 
     def test_not_login_get_or_post(self):
         self.client = Client()

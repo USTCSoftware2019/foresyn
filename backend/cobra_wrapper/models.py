@@ -76,7 +76,7 @@ class CobraReaction(AutoCleanModel):
     upper_bound = models.FloatField(blank=True, null=True, default=None)
     objective_coefficient = models.FloatField(default=0.0)
     metabolites = models.ManyToManyField(CobraMetabolite)
-    coefficients = JSONField(default=[])
+    coefficients = JSONField(default=[])  # FIXME
     gene_reaction_rule = models.TextField(blank=True, default='')
 
     def json(self):
