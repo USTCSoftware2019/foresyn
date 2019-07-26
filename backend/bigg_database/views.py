@@ -153,7 +153,7 @@ class GeneDetailView(CustomDetailView):
     fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
               'mapped_to_genbank', 'strand', 'protein_sequence',
               'dna_sequence', 'genome_name', 'genome_ref_string',
-              'database_links', 'id']
+              'database_links', 'id', 'bigg_id', 'name']
     model = Gene
 
     def get_context_data(self, pk):
@@ -278,7 +278,7 @@ class GenesInReaction(CustomListView):
     fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
               'mapped_to_genbank', 'strand', 'protein_sequence',
               'dna_sequence', 'genome_name', 'genome_ref_string',
-              'database_links', 'id']
+              'database_links', 'id', 'bigg_id', 'name']
     from_model = Reaction
     to_model = 'gene_set'
 
