@@ -98,7 +98,7 @@ class ObjectMixin:
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
 
-    def delete(self, request, model_id):
+    def delete(self, request, model_id):  # TODO: Check dependency before deletion
         try:
             self.model.objects.get(owner=request.user, id=model_id).delete()
         except ObjectDoesNotExist:
