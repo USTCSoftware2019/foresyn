@@ -4,94 +4,107 @@ import django.core.exceptions
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
+from django.shortcuts import render, reverse
 from django.utils.translation import gettext as _
-from django.views.generic import View
+from django.views.generic import ListView, View
 from fuzzywuzzy import fuzz
 
+from .common import TopKHeap
+from .forms import SearchForm
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
                      Reaction, ReactionGene, ReactionMetabolite)
-
-MATCH_RATIO = 80
 
 
 def fuzzy_search(query_set, request_name, request_data):
     request_name = request_name.lower()
     request_data = request_data.lower()
-    return [
-        instance
-        for instance in query_set
-        if fuzz.partial_ratio(getattr(instance, request_name).lower(), request_data) >= MATCH_RATIO
-    ]
+    t = TopKHeap(10)
+    for instance in query_set:
+        t.push((fuzz.partial_ratio(getattr(instance, request_name).lower(), request_data), instance))
+    return t.top_k()
 
 
-def custom_model_to_dict(instance, fields=None, count_number_fields=None, exclude=None):
-    ret_dict = model_to_dict(instance, fields=fields, exclude=exclude)
-    if count_number_fields:
-        ret_dict.update({
-            field + '_count': getattr(instance, field).count()
-            for field in count_number_fields
-        })
-    return ret_dict
-
-
-class SearchView(View):
-    http_method_names = ['get']
-    model = None
+class SearchView(ListView):
+    http_method_names = ['get', 'post']
     by = ['bigg_id', 'name']
-    fields = None
-    count_number_fields = None
+    fields = []
+    count_number_fields = []
+    search_model = None
+
+    template_name = 'bigg_database/search_result.html'
+    context_object_name = 'result_list'
+
+    def get_default_form(self):
+        form = SearchForm()
+        form.fields['search_by'].choices = [
+            (x, x)
+            for x in self.by
+        ]
+        return form
 
     def get(self, request):
-        if self.model is None or self.fields is None:
-            raise RuntimeError("model or fields not specified")
+        return render(request, 'bigg_database/search.html',
+                      {'form': self.get_default_form()})
 
-        bigg_id = request.GET.get('bigg_id')
-        name = request.GET.get('name')
-        if bigg_id is not None and 'bigg_id' in self.by:
-            return JsonResponse({'result': [
-                custom_model_to_dict(instance, fields=self.fields,
-                                     count_number_fields=self.count_number_fields)
-                for instance in fuzzy_search(self.model.objects.all(), 'bigg_id', bigg_id)
-            ]})
-        elif name is not None and 'name' in self.by:
-            return JsonResponse({'result': [
-                custom_model_to_dict(instance, fields=self.fields,
-                                     count_number_fields=self.count_number_fields)
-                for instance in fuzzy_search(self.model.objects.all(), 'name', name)
-            ]})
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        for ins in self.object_list:
+            for f in self.count_number_fields:
+                setattr(ins, f.replace('_set', '') + '_count', getattr(ins, f).count())
+        context['display_fields'] = self.fields
+        context['search_key_word'] = self.form.cleaned_data['keyword']
+        return context
+
+    def get_queryset(self, *args, **kwargs):
+        return fuzzy_search(
+            self.search_model.objects.all(),
+            self.form.get_search_by_display(),
+            self.form.cleaned_data['keyword'])
+
+    def post(self, request, *args, **kwargs):
+        self.form = SearchForm(request.POST)
+        self.form.fields['search_by'].choices = [
+            (x, x)
+            for x in self.by
+        ]
+        if self.form.is_valid():
+            return super().get(request, *args, **kwargs)
         else:
-            return JsonResponse({'result': []})
+            return render(request, 'bigg_database/search.html',
+                          {
+                              'form': self.get_default_form(),
+                              'errors': 'Keyword or search_type is invaild'
+                          })
 
 
 class ModelSearchView(SearchView):
-    model = Model
+    search_model = Model
     by = ['bigg_id']
-    fields = ['bigg_id', 'compartments', 'id']
+    fields = ['bigg_id', 'compartments']
     count_number_fields = ['reaction_set', 'metabolite_set', 'gene_set']
 
 
 class MetaboliteSearchView(SearchView):
-    model = Metabolite
+    search_model = Metabolite
     by = ['bigg_id', 'name']
-    fields = ['bigg_id', 'name', 'formulae', 'charges', 'database_links', 'id']
+    fields = ['bigg_id', 'name', 'formulae', 'charges']
     count_number_fields = ['reactions', 'models']
 
 
 class ReactionSearchView(SearchView):
-    model = Reaction
+    search_model = Reaction
     by = ['bigg_id', 'name']
     fields = ['bigg_id', 'name', 'reaction_string',
-              'pseudoreaction', 'database_links', 'id']
+              'pseudoreaction']
     count_number_fields = ['models', 'metabolite_set', 'gene_set']
 
 
 class GeneSearchView(SearchView):
-    model = Gene
+    search_model = Gene
     by = ['bigg_id', 'name']
     fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
               'mapped_to_genbank', 'strand', 'protein_sequence',
-              'dna_sequence', 'genome_name', 'genome_ref_string',
-              'database_links', 'id']
+              'dna_sequence', 'genome_name', 'genome_ref_string']
     count_number_fields = ['reactions', 'models']
 
 
