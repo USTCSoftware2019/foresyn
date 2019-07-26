@@ -42,7 +42,7 @@ def data_metabolite_to_cobra_metabolite(key, value, user):
     cobra_metabolite_object.identifier = data_metabolite_object.bigg_id
     cobra_metabolite_object.charge = data_metabolite_object.charges
     cobra_metabolite_object.compartment = data_metabolite_object.bigg_id[-1]
-    cobra_metabolite_object.user = user
+    # cobra_metabolite_object.user = user
     return cobra_metabolite_object
 
 
@@ -75,7 +75,7 @@ def data_reaction_to_cobra_reaction(key, value, user, data_reaction_object=None,
         cobra_reaction_object.lower_bound = params["lower_bound"]
         # cobra_reaction_object.objective_coefficient = params["objective_coefficient"]
 
-    cobra_reaction_object.user = user
+    # cobra_reaction_object.user = user
     return cobra_reaction_object
 
 
