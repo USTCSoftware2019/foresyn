@@ -61,13 +61,13 @@ class SetMixin:
             {'all': [model.json() for model in self.model.objects.filter(owner=request.user)]}, status=200)
 
 
-class CobraMetaboliteSetApi(SetMixin, LoginRequiredMixin, View):
+class CobraMetaboliteSetApi(LoginRequiredMixin, SetMixin, View):
     model = CobraMetabolite
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
     related_field = None
 
 
-class CobraReactionSetApi(SetMixin, LoginRequiredMixin, View):
+class CobraReactionSetApi(LoginRequiredMixin, SetMixin, View):
     model = CobraReaction
     fields = [
         'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
@@ -76,7 +76,7 @@ class CobraReactionSetApi(SetMixin, LoginRequiredMixin, View):
     related_field = {'name': 'metabolites', 'to': CobraMetabolite}
 
 
-class CobraModelSetApi(SetMixin, LoginRequiredMixin, View):
+class CobraModelSetApi(LoginRequiredMixin, SetMixin, View):
     model = CobraModel
     fields = ['cobra_id', 'name', 'objective']
     related_field = {'name': 'reactions', 'to': CobraReaction}
