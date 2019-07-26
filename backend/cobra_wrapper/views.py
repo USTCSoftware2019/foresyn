@@ -179,7 +179,14 @@ class CobraModelObjectComputeApi(LoginRequiredMixin, View):
                 except ValidationError as error:
                     return JsonResponse({
                         'type': 'validation_error',
-                        'content': ''  # FIXME
+                        'content': {
+                            'reaction_list': [
+                                {
+                                    'code': error.code,
+                                    'message': error.message
+                                }
+                            ]
+                        }
                     }, status=400)
             else:
                 return JsonResponse({}, status=404)
