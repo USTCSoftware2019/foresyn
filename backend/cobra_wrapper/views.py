@@ -7,233 +7,181 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from cobra.exceptions import OptimizationError
 
 from .models import CobraModel, CobraReaction, CobraMetabolite
-from .utils import get_possible_params
 
 
-class CobraModelApi(LoginRequiredMixin, View):
-    raise_exception = True
-
-    def post(self, request):
-        params = json.loads(request.body)
-        try:
-            reactions = [
-                CobraReaction.objects.get(user=request.user, id=reaction_id)
-                for reaction_id in params['reactions']
-            ]
-        except AttributeError:
-            reactions = []
-        except ObjectDoesNotExist as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        model = CobraModel(**get_possible_params(params, CobraModel.plain_fields), user=request.user)
-        try:
-            model.full_clean()
-        except ValidationError as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        model.save()
-        model.reactions.set(reactions)
-        model.save()
-        return JsonResponse({'id': model.id}, status=201)
-
-    def get(self, request):
-        if 'id' in request.GET.keys():
-            try:
-                return JsonResponse(
-                    CobraModel.objects.get(user=request.user, id=request.GET['id'][0]).json(), status=200)
-            except ObjectDoesNotExist:
-                return JsonResponse({}, status=404)
-        else:
-            return JsonResponse(
-                {'models': [model.json() for model in CobraModel.objects.filter(user=request.user)]}, status=200)
-
-    def delete(self, request):
-        try:
-            model = CobraModel.objects.get(user=request.user, id=json.loads(request.body)['id'])
-        except AttributeError as error:
-            return JsonResponse({'code': 100101, 'message': error.args[0]}, status=400)
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-        model.delete()
-        return JsonResponse({}, status=204)
-
-    def patch(self, request):
-        params = json.loads(request.body)
-        try:
-            model = CobraModel.objects.get(user=request.user, id=params['id'])
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-        try:
-            if 'reactions' in params.keys():
-                reactions = [
-                    CobraReaction.objects.get(user=request.user, id=reaction_id)
-                    for reaction_id in params['reactions']
-                ]
-                model.reactions.set(reactions)
-        except ObjectDoesNotExist as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        for field in CobraModel.plain_fields:
-            if field in params.keys():
-                setattr(model, field, params[field])
-        try:
-            model.full_clean()
-        except ValidationError as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        model.save()
-        return JsonResponse({'id': model.id}, status=200)
+def get_models_by_id(model_type, model_id_list, model_owner):
+    try:
+        return [model_type.objects.get(id=model_id, owner=model_owner) for model_id in model_id_list]
+    except ObjectDoesNotExist:
+        raise ValidationError('invalid id in model id list', 'invalid')
 
 
-class CobraReactionApi(LoginRequiredMixin, View):
-    raise_exception = True
+def try_get_fields(content, fields):
+    return {field: content[field] for field in fields if field in content.keys()}
+
+
+def get_validation_error_content(error):
+    return {
+        field: [
+            {
+                'code': field_error.code,
+                'message': field_error.message
+            }
+            for field_error in error.error_dict[field]
+        ]
+        for field in error.error_dict.keys()
+    }
+
+
+class SetMixin:
+    http_method_names = ['get', 'post']
+
+    model = None
+    fields = []
+    related_field = {'name': None, 'to': None}
 
     def post(self, request):
-        params = json.loads(request.body)
+        content = json.loads(request.body)
         try:
-            metabolites = [
-                CobraMetabolite.objects.get(user=request.user, id=metabolite_id)
-                for metabolite_id in params['metabolites']
-            ]
-        except AttributeError:
-            metabolites = []
-        except ObjectDoesNotExist as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        reaction = CobraReaction(**get_possible_params(params, CobraReaction.plain_fields), user=request.user)
-        if 'coefficients' in params.keys():
-            reaction.coefficients = ' '.join(map(lambda num: str(num), params['coefficients']))
-        try:
-            reaction.full_clean()
+            new_model = self.model.objects.create(**try_get_fields(content, self.fields), owner=request.user)
+            if self.related_field:
+                getattr(new_model, self.related_field['name']).set(
+                    get_models_by_id(
+                        self.related_field['to'], content.get(self.related_field['name'], []), request.user)
+                )
         except ValidationError as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        reaction.save()
-        reaction.metabolites.set(metabolites)
-        reaction.save()
-        return JsonResponse({'id': reaction.id}, status=201)
+            return JsonResponse({
+                'type': 'validation_error',
+                'content': get_validation_error_content(error)
+            }, status=400)
+        return JsonResponse({'id': new_model.id}, status=201)
 
     def get(self, request):
-        if 'id' in request.GET.keys():
-            try:
-                return JsonResponse(
-                    CobraReaction.objects.get(user=request.user, id=request.GET['id'][0]).json(), status=200)
-            except ObjectDoesNotExist:
-                return JsonResponse({}, status=404)
-        else:
-            return JsonResponse(
-                {'reactions': list([reaction.json() for reaction in CobraReaction.objects.filter(user=request.user)])},
-                status=200
-            )
-
-    def delete(self, request):
-        try:
-            reaction = CobraReaction.objects.get(user=request.user, id=json.loads(request.body)['id'])
-        except AttributeError as error:
-            return JsonResponse({'code': 100101, 'message': error.args[0]}, status=400)
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-        reaction.delete()
-        return JsonResponse({}, status=204)
-
-    def patch(self, request):
-        params = json.loads(request.body)
-        try:
-            reaction = CobraReaction.objects.get(user=request.user, id=params['id'])
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-        try:
-            if 'metabolites' in params.keys():
-                metabolites = [
-                    CobraMetabolite.objects.get(user=request.user, id=metabolite_id)
-                    for metabolite_id in params['metabolites']
-                ]
-                reaction.metabolites.set(metabolites)
-        except ObjectDoesNotExist as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        if 'coefficients' in params.keys():
-            reaction.coefficients = ' '.join(map(lambda num: str(num), params['coefficients']))
-        for field in CobraReaction.plain_fields:
-            if field in params.keys():
-                setattr(reaction, field, params[field])
-        try:
-            reaction.full_clean()
-        except ValidationError as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        reaction.save()
-        return JsonResponse({'id': reaction.id}, status=200)
+        return JsonResponse(
+            {'all': [model.json() for model in self.model.objects.filter(owner=request.user)]}, status=200)
 
 
-class CobraMetaboliteApi(LoginRequiredMixin, View):
+class CobraMetaboliteSetApi(LoginRequiredMixin, SetMixin, View):
     raise_exception = True
+    model = CobraMetabolite
+    fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
+    related_field = None
 
-    def post(self, request):
-        params = json.loads(request.body)
-        metabolite = CobraMetabolite(**get_possible_params(params, CobraMetabolite.plain_fields), user=request.user)
+
+class CobraReactionSetApi(LoginRequiredMixin, SetMixin, View):
+    raise_exception = True
+    model = CobraReaction
+    fields = [
+        'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
+        'gene_reaction_rule'
+    ]
+    related_field = {'name': 'metabolites', 'to': CobraMetabolite}
+
+
+class CobraModelSetApi(LoginRequiredMixin, SetMixin, View):
+    raise_exception = True
+    model = CobraModel
+    fields = ['cobra_id', 'name', 'objective']
+    related_field = {'name': 'reactions', 'to': CobraReaction}
+
+
+class ObjectMixin:
+    http_method_names = ['get', 'delete', 'patch']
+
+    model = None
+    fields = []
+    related_fields = {'name': None, 'to': None}
+
+    def get(self, request, model_id):
         try:
-            metabolite.full_clean()
-        except ValidationError as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        metabolite.save()
-        return JsonResponse({'id': metabolite.id}, status=201)
-
-    def get(self, request):
-        if 'id' in request.GET.keys():
-            try:
-                return JsonResponse(
-                    CobraMetabolite.objects.get(user=request.user, id=request.GET['id'][0]).json(), status=200)
-            except ObjectDoesNotExist:
-                return JsonResponse({}, status=404)
-        else:
-            return JsonResponse(
-                {
-                    'metabolites': [
-                        metabolite.json() for metabolite in CobraMetabolite.objects.filter(user=request.user)
-                    ]
-                }, status=200
-            )
-
-    def delete(self, request):
-        try:
-            metabolite = CobraMetabolite.objects.get(user=request.user, id=json.loads(request.body)['id'])
-        except AttributeError as error:
-            return JsonResponse({'code': 100101, 'message': error.args[0]}, status=400)
+            return JsonResponse(self.model.objects.get(owner=request.user, id=model_id).json(), status=200)
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
-        metabolite.delete()
+
+    def delete(self, request, model_id):
+        try:
+            self.model.objects.get(owner=request.user, id=model_id).delete()
+        except ObjectDoesNotExist:
+            return JsonResponse({}, status=404)
         return JsonResponse({}, status=204)
 
-    def patch(self, request):
-        params = json.loads(request.body)
+    def patch(self, request, model_id):
+        content = json.loads(request.body)
         try:
-            metabolite = CobraMetabolite.objects.get(user=request.user, id=params['id'])
+            model = self.model.objects.get(owner=request.user, id=model_id)
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
-        for field in CobraModel.plain_fields:
-            if field in params.keys():
-                setattr(metabolite, field, params[field])
+
+        for field in self.fields:
+            if field in content.keys():
+                setattr(model, field, content[field])
+
         try:
-            metabolite.full_clean()
+            model.save()
+            if self.related_fields and self.related_fields['name'] in content.keys():
+                getattr(model, self.related_fields['name']).set(
+                    get_models_by_id(self.related_fields['to'], content[self.related_fields['name']], request.user))
         except ValidationError as error:
-            return JsonResponse({'code': 100101, 'message': error.messages[0]}, status=400)
-        metabolite.save()
-        return JsonResponse({'id': metabolite.id}, status=200)
+            return JsonResponse({
+                'type': 'validation_error',
+                'content': get_validation_error_content(error)
+            }, status=400)
+        return JsonResponse({}, status=200)
 
 
-class CobraComputeApi(LoginRequiredMixin, View):
+class CobraMetaboliteObjectApi(LoginRequiredMixin, ObjectMixin, View):
+    raise_exception = True
+    model = CobraMetabolite
+    fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
+    related_field = None
+
+
+class CobraReactionObjectApi(LoginRequiredMixin, ObjectMixin, View):
+    raise_exception = True
+    model = CobraReaction
+    fields = [
+        'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
+        'gene_reaction_rule'
+    ]
+    related_field = {'name': 'metabolites', 'to': CobraMetabolite}
+
+
+class CobraModelObjectApi(LoginRequiredMixin, ObjectMixin, View):
+    raise_exception = True
+    model = CobraModel
+    fields = ['cobra_id', 'name', 'objective']
+    related_field = {'name': 'reactions', 'to': CobraReaction}
+
+
+class CobraModelObjectComputeApi(LoginRequiredMixin, View):
     raise_exception = True
 
     def post(self, request, model_id, method):
-        params = json.loads(request.body)
+        content = json.loads(request.body)
         try:
-            model = CobraModel.objects.get(user=request.user, id=model_id)
+            model = CobraModel.objects.get(owner=request.user, id=model_id)
         except ObjectDoesNotExist:
             return JsonResponse({}, status=404)
+
         try:
             if method == 'fba':
                 return JsonResponse(model.fba(), status=200)
             elif method == 'fva':
-                fva_params = get_possible_params(
-                    params, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
-                params['reaction_list'] = list(
-                    [model.reactions.get(id=reaction_id).identifier for reaction_id in params['reaction_list']])
-                return JsonResponse(
-                    model.fva(reaction_list=params['reaction_list'], **fva_params), status=200)
+                fva_params = try_get_fields(content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
+
+                try:
+                    if 'reaction_list' in content.keys():
+                        reactions = get_models_by_id(CobraReaction, content['reaction_list'], request.user)
+                        content['reaction_list'] = []
+                        for reaction in reactions:
+                            content['reaction_list'].append(reaction.build())
+                    return JsonResponse(model.fva(reaction_list=content['reaction_list'], **fva_params), status=200)
+                except ValidationError as error:
+                    return JsonResponse({
+                        'type': 'validation_error',
+                        'content': get_validation_error_content(error)
+                    }, status=400)
             else:
                 return JsonResponse({}, status=404)
         except OptimizationError as error:
-            return JsonResponse({'code': 100102, 'message': error.args[0]}, status=400)
+            return JsonResponse({'code': 'cobra-error', 'message': error.args[0]}, status=400)
