@@ -46,7 +46,13 @@ def convert_cobra_id(info):
     return info
 
 
-class CobraMetabolite(models.Model):
+class AutoCleanModel(models.Model):
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
+class CobraMetabolite(AutoCleanModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
@@ -61,7 +67,7 @@ class CobraMetabolite(models.Model):
         return cobra.Metabolite(**convert_cobra_id(self.json()))
 
 
-class CobraReaction(models.Model):
+class CobraReaction(AutoCleanModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
@@ -93,7 +99,7 @@ class CobraReaction(models.Model):
         return cobra_reaction
 
 
-class CobraModel(models.Model):
+class CobraModel(AutoCleanModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
