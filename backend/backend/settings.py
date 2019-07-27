@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     'data_wrapper',
     'cobra_wrapper.apps.CobraWrapperConfig',
     'bigg_database.apps.BiggDatabaseConfig',
-    'accounts.apps.AccountsConfig',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -58,7 +57,9 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

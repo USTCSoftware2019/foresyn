@@ -67,6 +67,11 @@ class CobraMetabolite(AutoCleanModel):
         return cobra.Metabolite(**convert_cobra_id(self.json()))
 
 
+def validate_coefficients_is_list(value):
+    if not isinstance(value, (list, tuple)):
+        raise ValidationError('the field requires list or tuple', 'invalid')
+
+
 class CobraReaction(AutoCleanModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=50)
@@ -76,7 +81,7 @@ class CobraReaction(AutoCleanModel):
     upper_bound = models.FloatField(blank=True, null=True, default=None)
     objective_coefficient = models.FloatField(default=0.0)
     metabolites = models.ManyToManyField(CobraMetabolite)
-    coefficients = JSONField(default=[])
+    coefficients = JSONField(default=[], validators=[validate_coefficients_is_list])
     gene_reaction_rule = models.TextField(blank=True, default='')
 
     def json(self):
