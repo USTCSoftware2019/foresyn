@@ -31,4 +31,45 @@ Gene: {{ gene.bigg_id }}
 {% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
 {% endif %}
 
+<h4><a href="{% url 'bigg_database:gene_from_models' gene.id %}">
+    Models Containing {{ gene.bigg_id }}</a></h4>
+<table>
+    <thead>
+    <tr>
+        <th>BiGG ID</th>
+        <th>Compartments</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for model in gene.models.all %}
+    <!-- Make row clickable? Or move link to bigg_id? -->
+    <tr href="{% url 'bigg_database:model_detail' model.id %}">
+        <td>{{ model.bigg_id }}</td>
+        <td>{{ model.compartments|join:', ' }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h4><a href="{% url 'bigg_database:gene_from_reactions' gene.id %}">
+    Reactions Containing {{ gene.bigg_id }}</a></h4>
+<table>
+    <thead>
+    <tr>
+        <th>BiGG ID</th>
+        <th>Name</th>
+        <th>Gene Reaction Rule</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for reaction in gene.reactiongene_set.all %}
+    <tr href="{% url 'bigg_database:reaction_detail' reaction.reaction.id %}">
+        <td>{{ reaction.reaction.bigg_id }}</td>
+        <td>{{ reaction.reaction.name }}</td>
+        <td>{{ reaction.gene_reaction_rule }}</td>
+    </tr>
+    </tbody>
+    {% endfor %}
+</table>
+
 {% endblock %}
