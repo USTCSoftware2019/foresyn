@@ -1,10 +1,8 @@
 {% extends 'base.html' %}
 
-{% block head %}
-<title>All {{ model_name }}</title>
-{% endblock %}
+{% block title %}All {{ model_name }}{% endblock %}
 
-{% block body %}
+{% block content %}
 
 {% for model_info in content %}
 <table>

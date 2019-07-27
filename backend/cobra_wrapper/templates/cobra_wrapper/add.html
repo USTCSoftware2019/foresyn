@@ -1,10 +1,8 @@
 {% extend 'base.html' %}
 
-{% block head %}
-<title>Add {{ model_name }}</title>
-{% endblock %}
+{% block title %}Add {{ model_name }}{% endblock %}
 
-{% block body %}
+{% block content %}
 
 <form action="
 {% if model_name == 'model' %}
