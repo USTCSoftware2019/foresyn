@@ -1,19 +1,23 @@
 <table>
-    <tr>
-        {% for field in display_fields %}
-        <th>
-            {% field %}
-        </th>
-        {% endfor %}
-    </tr>
+    <thead>
+        <tr>
+            {% for field in display_fields %}
+            <th>
+                {% field %}
+            </th>
+            {% endfor %}
+        </tr>
+    </thead>
 
-    {% for ins in result_list %}
-    <tr>
-        {% for field in display_fields %}
-        <th>
-            {% ins|get_obj_attr:field %}
-        </th>
+    <tbody>
+        {% for ins in result_list %}
+        <tr>
+            {% for field in display_fields %}
+            <td>
+                {% ins|get_obj_attr:field %}
+            </td>
+            {% endfor %}
+        </tr>
         {% endfor %}
-    </tr>
-    {% endfor %}
+    </tbody>
 </table>
