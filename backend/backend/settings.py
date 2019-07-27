@@ -131,3 +131,5 @@ else:
     CORS_ORIGIN_WHITELIST = [
         "http://127.0.0.1:8080"  # for testing purpose (vue-cli project)
     ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # for email debug
