@@ -1,0 +1,26 @@
+{% extend 'base.html' %}
+
+{% block head %}
+<title>Add {{ model_name }}</title>
+{% endblock %}
+
+{% block body %}
+
+<form action="
+{% if model_name == 'model' %}
+    {% url 'cobra_wrapper:model_set' %}
+{% elif model_name == 'reaction' %}
+    {% url 'cobra_wrapper:reaction_set' %}
+{% elif model_name == 'metabolite' %}
+    {% url 'cobra_wrapper:metabolite_set' %}
+{% endif %}  {# FIXME: Better checking way #}
+" method="post">
+{% csrf_token %}
+{% for field in fields %}
+    <p>{{ field }}</p>
+    <input type="text" name={{ field }}><br>
+{% endfor %}
+    <input  type="submit" value="Submit">
+</form>
+
+{% endblock %}
