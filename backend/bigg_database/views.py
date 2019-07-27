@@ -208,6 +208,7 @@ class RelationshipLookupView(SingleObjectMixin, ListView):
     fields = []
     from_model = None
     to_model_name = None
+    template_name = 'bigg_database/relationship_lookup_list.html'
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
