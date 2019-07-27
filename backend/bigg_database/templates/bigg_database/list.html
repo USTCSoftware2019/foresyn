@@ -1,0 +1,19 @@
+<table>
+    <tr>
+        {% for field in display_fields %}
+        <th>
+            {% field %}
+        </th>
+        {% endfor %}
+    </tr>
+
+    {% for ins in result_list %}
+    <tr>
+        {% for field in display_fields %}
+        <th>
+            {% ins|get_obj_attr:field %}
+        </th>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
