@@ -5,9 +5,9 @@ import django.core.exceptions
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from django.shortcuts import render, reverse
+from django.shortcuts import Http404, render, reverse
 from django.utils.translation import gettext as _
-from django.views.generic import ListView, View, DetailView
+from django.views.generic import DetailView, ListView, View
 from django.views.generic.detail import SingleObjectMixin
 from fuzzywuzzy import fuzz
 
@@ -76,18 +76,21 @@ class SearchView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        context['display_fields'] = self.result_info_model.fields
 
         # Add extra info
-        for ins in self.object_list:
+        for ins in context['result_list']:
 
             # Add link to detail
-            setattr(ins, 'Link',
+            setattr(ins, 'link',
                     reverse('bigg_database:{}_detail'.format(self.form.fields['search_model']), args=(ins.id,)))
+            context['display_fields'].append('link')
 
             for f in self.result_info_model.count_number_fields:
                 # Add count for related model
                 setattr(ins, f.replace('_set', '') + '_count', getattr(ins, f).count())
-        context['display_fields'] = self.result_info_model.fields
+                context['display_fields'].append(f.replace('_set', '') + '_count')
+
         context['search_key_word'] = self.form.cleaned_data['keyword']
         return context
 
@@ -134,7 +137,7 @@ class GeneDetailView(DetailView):
 # Add link for each related object
 
 
-class RelationshipLookupView(SingleObjectMixin, ListView):
+class RelationshipLookupView(ListView):
     '''
     This view aims to be the base view of (*)In(*)View or (*)From(*)View
 
@@ -155,12 +158,23 @@ class RelationshipLookupView(SingleObjectMixin, ListView):
     template_name = 'bigg_database/relationship_lookup_list.html'
     context_object_name = 'result_list'
 
+    def get_object_extra_info(self, instance):
+        return {}
+
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+
+        for ins in context['result_list']:
+            for key, value in self.get_object_extra_info(ins).items():
+                setattr(ins, key, value)
+                self.fields.append(key)
+            setattr(ins, 'link', reverse('bigg_database:{}_detail'.format(ins._meta.verbose_name), args=(ins.id,)))
+            self.fields.append('link')
+
         try:
-            context['from_model'] = self.objects.name
+            context['from_model'] = self.object.name
         except AttributeError:
-            context['from_model'] = self.objects.bigg_id
+            context['from_model'] = self.object.bigg_id
         context['to_model'] = self.to_model_name.replace('_set', '')
         context['display_fields'] = self.fields
         return context
@@ -171,10 +185,14 @@ class RelationshipLookupView(SingleObjectMixin, ListView):
         # add '_set' as suffix to their to_model_name variables.
         # Instead, it is not necessary to add '_set' to their to_model_name
         # variables when using 'reverse lookup' views
-        return getattr(self.objects, self.to_model_name).all()
+        return getattr(self.object, self.to_model_name).all()
 
     def get(self, request, *args, **kwargs):
-        self.objects = self.get_object(self.from_model.objects.all())
+        try:
+            self.object = self.from_model.objects.get(id=kwargs.get('pk'))
+        except ObjectDoesNotExist:
+            raise Http404(_("No %(verbose_name)s found matching the query") %
+                          {'verbose_name': self.from_model._meta.verbose_name})
         return super().get(self, request, *args, **kwargs)
 
 
@@ -198,11 +216,13 @@ class MetabolitesInModel(RelationshipLookupView):
     from_model = Model
     to_model_name = 'metabolite_set'
 
-    def get_context_data(self, instance, fields):
-        context = super().get_context_data(instance, fields)
-        mm = ModelMetabolite.objects.get(model=self.object_list, metabolite=instance)
-        context['organism'] = mm.organism
-        return context
+    def get_object_extra_info(self, instance):
+        mm = ModelMetabolite.objects.get(model=self.object, metabolite=instance)
+
+        extra_info = {
+            'organism': mm.organism,
+        }
+        return extra_info
 
 
 class ReactionsInModel(RelationshipLookupView):
@@ -213,15 +233,16 @@ class ReactionsInModel(RelationshipLookupView):
     from_model = Model
     to_model_name = 'reaction_set'
 
-    def get_context_data(self, instance, fields):
-        context = super().get_context_data(instance, fields)
-        mr = ModelReaction.objects.get(model=self.object_list, reaction=instance)
-        context['organism'] = mr.organism
-        context['lower_bound'] = mr.lower_bound
-        context['upper_bound'] = mr.upper_bound
-        context['subsystem'] = mr.subsystem
-        context['gene_reaction_rule'] = mr.gene_reaction_rule
-        return context
+    def get_object_extra_info(self, instance):
+        mr = ModelReaction.objects.get(model=self.object, reaction=instance)
+        extra_info = {
+            'organism': mr.organism,
+            'lower_bound': mr.lower_bound,
+            'upper_bound': mr.upper_bound,
+            'subsystem': mr.subsystem,
+            'gene_reaction_rule': mr.gene_reaction_rule,
+        }
+        return extra_info
 
 
 class MetabolitesInReaction(RelationshipLookupView):
@@ -232,11 +253,13 @@ class MetabolitesInReaction(RelationshipLookupView):
     from_model = Reaction
     to_model_name = 'metabolite_set'
 
-    def get_context_data(self, instance, fields):
-        context = super().get_context_data(instance, fields)
-        rm = ReactionMetabolite.objects.get(metabolite=instance, reaction=self.object_list)
-        context['stoichiometry'] = rm.stoichiometry
-        return context
+    def get_object_extra_info(self, instance):
+        rm = ReactionMetabolite.objects.get(metabolite=instance, reaction=self.object)
+        extra_info = {
+            'stoichiometry': rm.stoichiometry
+        }
+
+        return extra_info
 
 
 class GenesInReaction(RelationshipLookupView):
@@ -250,12 +273,12 @@ class GenesInReaction(RelationshipLookupView):
     from_model = Reaction
     to_model_name = 'gene_set'
 
-    def get_context_data(self, instance, fields):
-        context = super().get_context_data(instance, fields)
-        rg = ReactionGene.objects.get(gene=instance, reaction=self.object_list)
-        context['gene_reaction_rule'] = rg.gene_reaction_rule
-
-        return context
+    def get_object_extra_info(self, instance):
+        rg = ReactionGene.objects.get(gene=instance, reaction=self.object)
+        extra_info = {
+            'gene_reaction_rule': rg.gene_reaction_rule
+        }
+        return extra_info
 
 
 class GeneFromModels(RelationshipLookupView):
@@ -275,11 +298,12 @@ class MetaboliteFromModels(RelationshipLookupView):
     from_model = Metabolite
     to_model_name = 'models'
 
-    def get_context_data(self, instance, fields):
-        context = super().get_context_data(instance, fields)
-        mm = ModelMetabolite.objects.get(model=instance, metabolite=self.object_list)
-        context['organism'] = mm.organism
-        return context
+    def get_object_extra_info(self, instance):
+        mm = ModelMetabolite.objects.get(model=instance, metabolite=self.object)
+        extra_info = {
+            'organism': mm.organism
+        }
+        return extra_info
 
 
 class ReactionFromModels(RelationshipLookupView):
@@ -290,15 +314,16 @@ class ReactionFromModels(RelationshipLookupView):
     from_model = Reaction
     to_model_name = 'models'
 
-    def get_context_data(self, instance, fields):
-        context = super().get_context_data(instance, fields)
-        mr = ModelReaction.objects.get(model=instance, reaction=self.object_list)
-        context['organism'] = mr.organism
-        context['lower_bound'] = mr.lower_bound
-        context['upper_bound'] = mr.upper_bound
-        context['subsystem'] = mr.subsystem
-        context['gene_reaction_rule'] = mr.gene_reaction_rule
-        return context
+    def get_object_extra_info(self, instance):
+        mr = ModelReaction.objects.get(model=instance, reaction=self.object)
+        extra_info = {
+            'organism': mr.organism,
+            'lower_bound': mr.lower_bound,
+            'upper_bound': mr.upper_bound,
+            'subsystem': mr.subsystem,
+            'gene_reaction_rule': mr.gene_reaction_rule,
+        }
+        return extra_info
 
 
 class GeneFromReactions(RelationshipLookupView):
@@ -309,12 +334,12 @@ class GeneFromReactions(RelationshipLookupView):
     from_model = Gene
     to_model_name = 'reactions'
 
-    def get_context_data(self, instance, fields):
-        context = super().get_context_data(instance, fields)
-        rg = ReactionGene.objects.get(gene=self.object_list, reaction=instance)
-        context['gene_reaction_rule'] = rg.gene_reaction_rule
-
-        return context
+    def get_object_extra_info(self, instance):
+        rg = ReactionGene.objects.get(gene=self.object, reaction=instance)
+        extra_info = {
+            'gene_reaction_rule': rg.gene_reaction_rule
+        }
+        return extra_info
 
 
 class MetaboliteFromReactions(RelationshipLookupView):
@@ -325,8 +350,9 @@ class MetaboliteFromReactions(RelationshipLookupView):
     from_model = Metabolite
     to_model_name = 'reactions'
 
-    def get_context_data(self, instance, fields):
-        context = super().get_context_data(instance, fields)
-        rm = ReactionMetabolite.objects.get(metabolite=self.object_list, reaction=instance)
-        context['stoichiometry'] = rm.stoichiometry
-        return context
+    def get_object_extra_info(self, instance):
+        rm = ReactionMetabolite.objects.get(metabolite=self.object, reaction=instance)
+        extra_info = {
+            'stoichiometry': rm.stoichiometry
+        }
+        return extra_info

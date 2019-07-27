@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load bigg_database_tags %}
+{% block title %}
+Relationship lookup for {{ from_model }}
+{% endblock %}
+
+{% block content %}
+<h2>The {{ to_model }} contain {{ from_model }}</h2>
+
+{% include "bigg_database/list.html" %}
+
+{% endblock %}

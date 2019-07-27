@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load bigg_database_tags %}
+{% block title %}
+Search result - {{ search_key_word }}
+{% endblock %}
+
+{% block content %}
+
+<h3>Search result for {{ search_key_word }}</h3>
+
+{% include "bigg_database/list.html" %}
+
+{% endblock %}
