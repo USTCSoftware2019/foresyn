@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load bigg_database_tags %}
-{% block head %}
-<title>Relationship lookup for {% from_model %}</title>
+{% block title %}
+Relationship lookup for {{ from_model }}
 {% endblock %}
 
-{% block body %}
-<h2>The {% to_model %}s contain {% from_model %}</h2>
+{% block content %}
+<h2>The {{ to_model }}s contain {{ from_model }}</h2>
 <table>
     <tr>
         {% for field in display_fields %}
         <th>
-            {% field %}
+            {{ field }}
         </th>
         {% endfor %}
     </tr>
@@ -19,7 +19,7 @@
     <tr>
         {% for field in display_fields %}
         <th>
-            {% ins|get_obj_attr:field %}
+            {{ ins|get_obj_attr:field }}
         </th>
         {% endfor %}
     </tr>

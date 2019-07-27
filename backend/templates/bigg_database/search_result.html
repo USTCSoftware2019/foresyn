@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% load bigg_database_tags %}
-{% block head %}
-<title>Search result - {% search_key_word %}</title>
+{% block title %}
+Search result - {{ search_key_word }}
 {% endblock %}
 
-{% block body %}
+{% block content %}
 
-<h3>Search result for {% search_key_word %}</h3>
+<h3>Search result for {{ search_key_word }}</h3>
 <table>
     {# Table title #}
     <tr>
         {% for field in display_fields %}
         <th>
-            {% field %}
+            {{ field }}
         </th>
         {% endfor %}
     </tr>
@@ -21,7 +21,7 @@
     <tr>
         {% for field in display_fields %}
         <th>
-            {% ins|get_obj_attr:field %}
+            {{ ins|get_obj_attr:field }}
         </th>
         {% endfor %}
     </tr>
