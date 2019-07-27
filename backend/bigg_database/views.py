@@ -1,4 +1,5 @@
 import json
+from functools import reduce
 
 import django.core.exceptions
 from django.core.exceptions import ObjectDoesNotExist
@@ -24,6 +25,37 @@ def fuzzy_search(query_set, request_name, request_data):
         t.push((fuzz.partial_ratio(getattr(instance, request_name).lower(), request_data), instance))
     return t.top_k()
 
+
+class ModelSearchInfo:
+    search_model = Model
+    by = ['bigg_id']
+    fields = ['bigg_id', 'compartments']
+    count_number_fields = ['reaction_set', 'metabolite_set', 'gene_set']
+
+
+class MetaboliteSearchInfo:
+    search_model = Metabolite
+    by = ['bigg_id', 'name']
+    fields = ['bigg_id', 'name', 'formulae', 'charges']
+    count_number_fields = ['reactions', 'models']
+
+
+class ReactionSearchInfo:
+    search_model = Reaction
+    by = ['bigg_id', 'name']
+    fields = ['bigg_id', 'name', 'reaction_string',
+              'pseudoreaction']
+    count_number_fields = ['models', 'metabolite_set', 'gene_set']
+
+
+class GeneSearchInfo:
+    search_model = Gene
+    by = ['bigg_id', 'name']
+    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
+              'mapped_to_genbank', 'strand', 'protein_sequence',
+              'dna_sequence', 'genome_name', 'genome_ref_string']
+    count_number_fields = ['reactions', 'models']
+
 # TODO
 # Maybe it is not suitable to display the result in this way
 # Redirect to a truly list view is better
@@ -38,85 +70,36 @@ class SearchView(ListView):
     '''
     http_method_names = ['get', 'post']
     by = ['bigg_id', 'name']
-    fields = []
-    count_number_fields = []
-    search_model = None
 
     template_name = 'bigg_database/search_result.html'
     context_object_name = 'result_list'
 
-    def get_default_form(self):
-        form = SearchForm()
-        form.fields['search_by'].choices = [
-            (x, x)
-            for x in self.by
-        ]
-        return form
-
-    def get(self, request):
-        return render(request, 'bigg_database/search.html',
-                      {'form': self.get_default_form()})
-
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
         for ins in self.object_list:
-            for f in self.count_number_fields:
+            for f in self.result_info_model.count_number_fields:
                 setattr(ins, f.replace('_set', '') + '_count', getattr(ins, f).count())
-        context['display_fields'] = self.fields
+        context['display_fields'] = self.result_info_model.fields
         context['search_key_word'] = self.form.cleaned_data['keyword']
         return context
 
     def get_queryset(self, *args, **kwargs):
-        return fuzzy_search(
-            self.search_model.objects.all(),
-            self.form.get_search_by_display(),
-            self.form.cleaned_data['keyword'])
+        return set(reduce(lambda a, b: a + b,
+                          [fuzzy_search(self.result_info_model.search_model.objects.all(),
+                                        search_by,
+                                        self.form.cleaned_data['keyword']) for search_by in self.result_info_model.by]))
 
-    def post(self, request, *args, **kwargs):
-        self.form = SearchForm(request.POST)
-        self.form.fields['search_by'].choices = [
-            (x, x)
-            for x in self.by
-        ]
+    def get(self, request, *args, **kwargs):
+        self.form = SearchForm(request.GET)
         if self.form.is_valid():
+            self.result_info_model = eval(dict(self.form.fields['search_model'].choices)[
+                                          self.form.cleaned_data['search_model']] + 'SearchInfo')
             return super().get(request, *args, **kwargs)
         else:
             return render(request, 'bigg_database/search.html',
                           {
-                              'form': self.get_default_form(),
-                              'errors': 'Keyword or search_type is invaild'
+                              'form': SearchForm()
                           })
-
-
-class ModelSearchView(SearchView):
-    search_model = Model
-    by = ['bigg_id']
-    fields = ['bigg_id', 'compartments']
-    count_number_fields = ['reaction_set', 'metabolite_set', 'gene_set']
-
-
-class MetaboliteSearchView(SearchView):
-    search_model = Metabolite
-    by = ['bigg_id', 'name']
-    fields = ['bigg_id', 'name', 'formulae', 'charges']
-    count_number_fields = ['reactions', 'models']
-
-
-class ReactionSearchView(SearchView):
-    search_model = Reaction
-    by = ['bigg_id', 'name']
-    fields = ['bigg_id', 'name', 'reaction_string',
-              'pseudoreaction']
-    count_number_fields = ['models', 'metabolite_set', 'gene_set']
-
-
-class GeneSearchView(SearchView):
-    search_model = Gene
-    by = ['bigg_id', 'name']
-    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
-              'mapped_to_genbank', 'strand', 'protein_sequence',
-              'dna_sequence', 'genome_name', 'genome_ref_string']
-    count_number_fields = ['reactions', 'models']
 
 
 class CustomDetailView(View):
@@ -209,6 +192,7 @@ class RelationshipLookupView(SingleObjectMixin, ListView):
     from_model = None
     to_model_name = None
     template_name = 'bigg_database/relationship_lookup_list.html'
+    context_object_name = 'result_list'
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
@@ -220,7 +204,7 @@ class RelationshipLookupView(SingleObjectMixin, ListView):
         context['display_fields'] = self.fields
         return context
 
-    def get_query_set(self):
+    def get_queryset(self):
         # In order to reuse this view in 'reverse lookup' views,
         # delete the '_set'. To use 'forward lookup' views, please
         # add '_set' as suffix to their to_model_name variables.
@@ -240,7 +224,7 @@ class GenesInModel(RelationshipLookupView):
     fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
               'mapped_to_genbank', 'strand', 'protein_sequence',
               'dna_sequence', 'genome_name', 'genome_ref_string',
-              'database_links']
+              'database_links', 'bigg_id', 'name']
     from_model = Model
     to_model_name = 'gene_set'
 
