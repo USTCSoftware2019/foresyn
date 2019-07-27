@@ -6,8 +6,8 @@
     <title>ProjectName - {% block title %}{% endblock %}</title>
 </head>
 <body>
-    {# header... #}
+    {% include "header.html" %}
     {% block body %}{% endblock %}
-    {# footer... #}
+    {% include "footer.html" %}
 </body>
 </html>
