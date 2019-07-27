@@ -4,26 +4,9 @@
 Relationship lookup for {{ from_model }}
 {% endblock %}
 
-{% block content %}
-<h2>The {{ to_model }}s contain {{ from_model }}</h2>
-<table>
-    <tr>
-        {% for field in display_fields %}
-        <th>
-            {{ field }}
-        </th>
-        {% endfor %}
-    </tr>
+{% block body %}
+<h2>The {% to_model %}s contain {% from_model %}</h2>
 
-    {% for ins in result_list %}
-    <tr>
-        {% for field in display_fields %}
-        <th>
-            {{ ins|get_obj_attr:field }}
-        </th>
-        {% endfor %}
-    </tr>
-    {% endfor %}
-</table>
+{% include "bigg_database/list.html" %}
 
 {% endblock %}
