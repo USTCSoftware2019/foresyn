@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block head %}
-<title>Reaction: {{ reaction.bigg_id }}</title>
+{% block title %}
+Reaction: {{ reaction.bigg_id }}
 {% endblock %}
 
-{% block body %}
+{% block content %}
 
 <h1>Reaction: {{ reaction.bigg_id }}</h1>
 
@@ -24,4 +24,46 @@
 {% include 'bigg_database/db_links.html' with db_links=reaction.database_links only %}
 {% endif %}
 
+<h4><a href="{% url 'bigg_database:metabolites_in_reaction' reaction.id %}">
+    Related Metabolites</a></h4>
+<table>
+    <thead>
+        <tr>
+            <th>BiGG ID</th>
+            <th>Name</th>
+            <th>Stoichiometry</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for meta in reaction.reactionmetabolite_set.all %}
+        <!-- Make row clickable? Or move link to bigg_id? -->
+        <tr href="{% url 'bigg_database:metabolite_detail' meta.metabolite.id %}">
+            <td>{{ meta.metabolite.bigg_id }}</td>
+            <td>{{ meta.metabolite.name }}</td>
+            <td>{{ meta.stoichiometry }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h4><a href="{% url 'bigg_database:reaction_from_models' reaction.id %}">
+    Models Containing {{ reaction.bigg_id }}</a></h4>
+<table>
+    <thead>
+        <tr>
+            <th>BiGG ID</th>
+            <th>Organism</th>
+            <th>Subsystem</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for model in reaction.modelreaction_set.all %}
+        <tr href="{% url 'bigg_database:model_detail' model.model.id %}">
+            <td>{{ model.model.bigg_id }}</td>
+            <td>{{ model.organism }}</td>
+            <td>{{ model.subsystem }}</td>
+        </tr>
+    </tbody>
+    {% endfor %}
+</table>
 {% endblock %}
