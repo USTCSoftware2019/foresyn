@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>Metabolite: {{ meta.bigg_id }}</title>
+{% endblock %}
+
+{% block content %}
+
+<h1>Metabolite: {{ meta.bigg_id }}</h1>
+
+<h4>Descriptive name</h4>
+<p>{{ meta.name }}</p>
+
+<h4>Formulae</h4>
+<p>{{ meta.formulae|join:', ' }}</p>
+
+{% if meta.charges %}
+<h4>Charges</h4>
+<p>{{ meta.charges }}</p>
+{% endif %}
+
+{% if meta.database_links%}
+<h4>External database links</h4>
+{% include 'bigg_database/db_links.html' with db_links=meta.database_links only %}
+{% endif %}
+
+<h4><a href="{% url 'bigg_database:metabolites_in_model' meta.id %}">
+    Models Containing {{ meta.bigg_id }}</a></h4>
+<table>
+    <thead>
+    <tr>
+        <th>BiGG ID</th>
+        <th>Organism</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for model in meta.modelmetabolite_set.all %}
+    <!-- Make row clickable? Or move link to bigg_id? -->
+    <tr href="{% url 'bigg_database:model_detail' model.model.id %}">
+        <td>{{ model.model.bigg_id }}</td>
+        <td>{{ model.organism }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h4><a href="{% url 'bigg_database:metabolite_from_reactions' meta.id %}">
+    Reactions Containing {{ meta.bigg_id }}</a></h4>
+<table>
+    <thead>
+    <tr>
+        <th>BiGG ID</th>
+        <th>Name</th>
+        <th>Stoichiometry</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for reaction in meta.reactionmetabolite_set.all %}
+    <tr href="{% url 'bigg_database:reaction_detail' reaction.reaction.id %}">
+        <td>{{ reaction.reaction.bigg_id }}</td>
+        <td>{{ reaction.reaction.name }}</td>
+        <td>{{ reaction.stoichiometry }}</td>
+    </tr>
+    </tbody>
+    {% endfor %}
+</table>
+
+{% endblock %}

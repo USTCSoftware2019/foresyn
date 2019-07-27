@@ -60,6 +60,8 @@ class CobraMetabolite(AutoCleanModel):
     charge = models.CharField(max_length=50, blank=True, null=True, default=None)
     compartment = models.CharField(max_length=50, blank=True, null=True, default=None)
 
+    model_name = 'metabolite'
+
     def json(self):
         return get_fields(self, ['id', 'cobra_id', 'name', 'formula', 'charge', 'compartment'])
 
@@ -83,6 +85,8 @@ class CobraReaction(AutoCleanModel):
     metabolites = models.ManyToManyField(CobraMetabolite)
     coefficients = JSONField(default=[], validators=[validate_coefficients_is_list])
     gene_reaction_rule = models.TextField(blank=True, default='')
+
+    model_name = 'reaction'
 
     def json(self):
         return dict(
@@ -110,6 +114,8 @@ class CobraModel(AutoCleanModel):
     name = models.CharField(max_length=50, blank=True, default='')
     reactions = models.ManyToManyField(CobraReaction)
     objective = models.CharField(max_length=50, default='')
+
+    model_name = 'model'
 
     def json(self):
         return dict(

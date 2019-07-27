@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Model: {{ model.bigg_id }}
+{% endblock %}
+
+{% block content %}
+<h4>Model metrics</h4>
+<table>
+    <thead>
+    <tr>
+        <th>Component</th>
+        <th>Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Row clickable or count clickable? -->
+    <tr href="{% url 'bigg_database:reactions_in_model' model.id %}">
+        <td>Reactions</td>
+        <td>{{ model.reaction_set.count }}</td>
+    </tr>
+    <tr href="{% url 'bigg_database:metabolites_in_model' model.id %}">
+        <td>Metabolites</td>
+        <td>{{ model.metabolite_set.count }}</td>
+    </tr>
+    <tr href="{% url 'bigg_database:genes_in_model' model.id %}">
+        <td>Genes</td>
+        <td>{{ model.gene_set.count }}</td>
+    </tr>
+    </tbody>
+</table>
+
+{% endblock %}

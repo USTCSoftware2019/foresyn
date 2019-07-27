@@ -1,16 +1,12 @@
 {% extends "base.html" %}
-
 {% block title %}
 Search
 {% endblock %}
 
-{% block body %}
+{% block content %}
 <p>Search models, reactions, metabolites and genes</p>
 
-{% if errors %}
-<p>{{ errors }}</p>
-{% endif %}
-<form method="post">
+<form method="get">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Search">
