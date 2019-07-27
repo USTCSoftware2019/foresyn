@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Reaction: {{ reaction.bigg_id }}</title>
+{% endblock %}
+
+{% block body %}
+
+<h1>Reaction: {{ reaction.bigg_id }}</h1>
+
+<!-- Just a boolean to mark if it's a pseudo reaction or not. -->
+{% if reaction.pseudoreaction %}
+<span>pseudoreaction</span>
+{% endif %}
+
+<h4>Descriptive name</h4>
+<p>{{ reaction.name }}</p>
+
+<h4>Reaction</h4>
+<p>{{ reaction.reaction_string|safe }}</p>
+
+{% if reaction.database_links %}
+<h4>External database links</h4>
+{% include 'bigg_database/db_links.html' with db_links=reaction.database_links only %}
+{% endif %}
+
+{% endblock %}

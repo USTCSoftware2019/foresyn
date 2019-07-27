@@ -1,0 +1,6 @@
+<header>
+    This is a header!
+    {% if user.is_authenticated %}
+        Hello, {{ user.username }}!
+    {% endif %}
+</header>

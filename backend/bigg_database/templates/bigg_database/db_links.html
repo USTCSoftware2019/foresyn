@@ -1,0 +1,14 @@
+<ul>
+{% for db, links in db_links.items %}
+    <li>
+        {{ db }}:
+        <ul>
+        {% for link in links %}
+            <li>
+                <a href="{{ link.link }}">{{ link.id }}</a>
+            </li>
+        {% endfor %}
+        </ul>
+    </li>
+{% endfor %}
+</ul>
