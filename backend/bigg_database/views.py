@@ -76,8 +76,16 @@ class SearchView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+
+        # Add extra info
         for ins in self.object_list:
+
+            # Add link to detail
+            setattr(ins, 'Link',
+                    reverse('bigg_database:{}_detail'.format(self.form.fields['search_model']), args=(ins.id,)))
+
             for f in self.result_info_model.count_number_fields:
+                # Add count for related model
                 setattr(ins, f.replace('_set', '') + '_count', getattr(ins, f).count())
         context['display_fields'] = self.result_info_model.fields
         context['search_key_word'] = self.form.cleaned_data['keyword']
@@ -92,8 +100,9 @@ class SearchView(ListView):
     def get(self, request, *args, **kwargs):
         self.form = SearchForm(request.GET)
         if self.form.is_valid():
-            self.result_info_model = eval(dict(self.form.fields['search_model'].choices)[
-                                          self.form.cleaned_data['search_model']] + 'SearchInfo')
+            self.result_info_model = eval(
+                dict(self.form.fields['search_model'].choices)[self.form.cleaned_data['search_model']] +
+                'SearchInfo')
             return super().get(request, *args, **kwargs)
         else:
             return render(request, 'bigg_database/search.html',
