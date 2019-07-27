@@ -6,7 +6,7 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import render, reverse
 from django.utils.translation import gettext as _
-from django.views.generic import ListView, View
+from django.views.generic import ListView, View, DetailView
 from django.views.generic.detail import SingleObjectMixin
 from fuzzywuzzy import fuzz
 
@@ -119,72 +119,24 @@ class GeneSearchView(SearchView):
     count_number_fields = ['reactions', 'models']
 
 
-class CustomDetailView(View):
-    http_method_names = ['get']
-    fields = None  # Don't include foreign key in this. Override get_context_data instead.
-    model = None
-
-    def __init__(self):
-        super().__init__()
-        self.context_object = None
-
-    def get_context_data(self, pk):
-        result = self.model.objects.get(pk=pk)
-        self.context_object = result
-        return model_to_dict(result, fields=self.fields)
-
-    def get(self, request, pk):
-        try:
-            return JsonResponse(self.get_context_data(pk), status=200)
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-
-
-class ModelDetailView(CustomDetailView):
-    fields = ['id', 'bigg_id', 'compartments', 'version']
+class ModelDetailView(DetailView):
     model = Model
-
-    def get_context_data(self, pk):
-        context = super().get_context_data(pk)
-        context['reaction_count'] = self.context_object.reaction_set.count()
-        context['metabolite_count'] = self.context_object.metabolite_set.count()
-        return context
+    context_object_name = 'model'
 
 
-class MetaboliteDetailView(CustomDetailView):
-    fields = ['id', 'bigg_id', 'name', 'formulae', 'charges', 'database_links']
+class MetaboliteDetailView(DetailView):
     model = Metabolite
-
-    def get_context_data(self, pk):
-        context = super().get_context_data(pk)
-        context['reaction_count'] = self.context_object.reactions.count()
-        context['model_count'] = self.context_object.models.count()
-        return context
+    context_object_name = 'meta'
 
 
-class ReactionDetailView(CustomDetailView):
-    fields = ['id', 'bigg_id', 'name', 'reaction_string', 'pseudoreaction', 'database_links']
+class ReactionDetailView(DetailView):
     model = Reaction
-
-    def get_context_data(self, pk):
-        context = super().get_context_data(pk)
-        context['model_count'] = self.context_object.models.count()
-        context['metabolite_count'] = self.context_object.metabolite_set.count()
-        return context
+    context_object_name = 'reaction'
 
 
-class GeneDetailView(CustomDetailView):
-    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
-              'mapped_to_genbank', 'strand', 'protein_sequence',
-              'dna_sequence', 'genome_name', 'genome_ref_string',
-              'database_links', 'id', 'bigg_id', 'name']
+class GeneDetailView(DetailView):
     model = Gene
-
-    def get_context_data(self, pk):
-        context = super().get_context_data(pk)
-        context['model_count'] = self.context_object.models.count()
-        context['reaction_count'] = self.context_object.reactions.count()
-        return context
+    context_object_name = 'gene'
 
 # TODO
 # Add link for each related object

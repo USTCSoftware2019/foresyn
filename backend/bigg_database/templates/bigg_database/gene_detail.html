@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Gene: {{ gene.bigg_id }}</title>
+{% endblock %}
+
+{% block body %}
+
+<h1>Gene: {{ gene.bigg_id }}</h1>
+
+<h4>Descriptive name</h4>
+<p>{{ gene.name }}</p>
+
+<h4>Position</h4>
+<p>{{ gene.leftpos }} ~ {{ gene.rightpos }}</p>
+
+<h4>Strand</h4>
+<p>{{ gene.strand }}</p>
+
+<h4>Chromosome</h4>
+<p>{{ gene.chromosome_ncbi_accession }}</p>
+
+<h4>DNA Sequence</h4>
+<p>{{ gene.dna_sequence }}</p>
+
+<h4>Protein Sequence</h4>
+<p>{{ gene.protein_sequence }}</p>
+
+{% if gene.database_links %}
+<h4>External database links</h4>
+{% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
+{% endif %}
+
+{% endblock %}
