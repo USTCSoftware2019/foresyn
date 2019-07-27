@@ -1,19 +1,29 @@
-<table>
-    <tr>
-        {% for field in display_fields %}
-        <th>
-            {% field %}
-        </th>
-        {% endfor %}
-    </tr>
+{% load bigg_database_tags %}
 
-    {% for ins in result_list %}
-    <tr>
-        {% for field in display_fields %}
-        <th>
-            {% ins|get_obj_attr:field %}
-        </th>
+<table>
+    <thead>
+        <tr>
+            {% for field in display_fields %}
+            <th>
+                {{ field }}
+            </th>
+            {% endfor %}
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for ins in result_list %}
+        <tr>
+            {% for field in display_fields %}
+            <td>
+                {% ifnotequal field "link" %}
+                    {{ ins|get_obj_attr:field }}
+                {% else %}
+                    <a href="{{ ins|get_obj_attr:field }}">Detail</a>
+                {% endifnotequal %}
+            </td>
+            {% endfor %}
+        </tr>
         {% endfor %}
-    </tr>
-    {% endfor %}
+    </tbody>
 </table>
