@@ -41,6 +41,10 @@ class UserSignUp(CreateView):
             )
             email.send()
             return render(request, "accounts/signup_done.html")
+        else:
+            return render(request, "accounts/signup.html", {
+                "form": form,
+            })
 
 
 class UserActivation(View):
