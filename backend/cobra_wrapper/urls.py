@@ -4,7 +4,7 @@ from . import api, views
 
 ENABLE_API = False
 
-app_name = 'cobra'
+app_name = 'cobra_wrapper'
 urlpatterns = [
     *([
         path('api/metabolites/', api.CobraMetaboliteSetApi.as_view(), name='api_metabolite_set'),
