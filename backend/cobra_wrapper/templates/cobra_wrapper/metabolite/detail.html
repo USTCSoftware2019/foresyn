@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ metabolite }}{% endblock title %}
+
+{% block content %}
+
+<table>
+    <tr><td>id</td><td>{{ metabolite.id }}</td></tr>
+    <tr><td>cobra_id</td><td>{{ metabolite.cobra_id }}</td></tr>
+    <tr><td>name</td><td>{{ metabolite.name }}</td></tr>
+    <tr><td>formula</td><td>{{ metabolite.formula }}</td></tr>
+    <tr><td>charge</td><td>
+    {% if metabolite.charge %}
+        {{ metabolite.charge }}
+    {% else %}
+        None
+    {% endif %}
+    </td></tr>
+    <tr><td>compartment</td><td>
+    {% if metabolite.compartment %}
+        None
+    {% else %}
+        {{ metabolite.compartment }}
+    {% endif %}
+    </td></tr>
+</table>
+
+{% endblock content %}

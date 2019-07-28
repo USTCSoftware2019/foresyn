@@ -1,19 +1,19 @@
 import json
 
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.views import View
-from django.http import JsonResponse
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.http import HttpResponseBadRequest, Http404
+from django.core.exceptions import ValidationError
 from django.contrib.auth.mixins import LoginRequiredMixin
 from cobra.exceptions import OptimizationError
 
 from .models import CobraModel, CobraReaction, CobraMetabolite
 
 
-def get_models_by_id(model_type, model_id_list, model_owner):
+def get_models_by_id(model_type, pk_list, model_owner):
     try:
-        return [model_type.objects.get(id=model_id, owner=model_owner) for model_id in model_id_list]
-    except ObjectDoesNotExist:
+        return [model_type.objects.get(id=pk, owner=model_owner) for pk in pk_list]
+    except model_type.DetailDoesNotExist:
         raise ValidationError('invalid id in model id list', 'invalid')
 
 
@@ -34,7 +34,7 @@ def get_validation_error_content(error):
     }
 
 
-class SetMixin:
+class ListMixin:
     http_method_names = ['get', 'post']
 
     model = None
@@ -51,27 +51,25 @@ class SetMixin:
                         self.related_field['to'], content.get(self.related_field['name'], []), request.user)
                 )
         except ValidationError as error:
-            return JsonResponse({
+            return HttpResponseBadRequest(json.dumps({
                 'type': 'validation_error',
                 'content': get_validation_error_content(error)
-            }, status=400)
-        return redirect(reverse('cobra_wrapper:{}_set'.format(self.model.model_name)))
+            }))
+        return redirect(self.model.get_list_url())
 
     def get(self, request):
-        content = [model.json() for model in self.model.objects.filter(owner=request.user)]
-        return render(request, 'cobra_wrapper/set.html', context={
-            'content': content,
-            'model_name': self.model.model_name
+        return render(request, 'cobra_wrapper/{}/list.html'.format(self.model.MODEL_NAME), context={
+            'all': self.model.objects.filter(owner=request.user)
         })
 
 
-class CobraMetaboliteSetView(LoginRequiredMixin, SetMixin, View):
+class CobraMetaboliteListView(LoginRequiredMixin, ListMixin, View):
     model = CobraMetabolite
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
     related_field = None
 
 
-class CobraReactionSetView(LoginRequiredMixin, SetMixin, View):
+class CobraReactionListView(LoginRequiredMixin, ListMixin, View):
     model = CobraReaction
     fields = [
         'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
@@ -80,40 +78,36 @@ class CobraReactionSetView(LoginRequiredMixin, SetMixin, View):
     related_field = {'name': 'metabolites', 'to': CobraMetabolite}
 
 
-class CobraModelSetView(LoginRequiredMixin, SetMixin, View):
+class CobraModelListView(LoginRequiredMixin, ListMixin, View):
     model = CobraModel
     fields = ['cobra_id', 'name', 'objective']
     related_field = {'name': 'reactions', 'to': CobraReaction}
 
 
-class ObjectMixin:
-    http_method_names = ['get', 'delete', 'patch']
+class DetailMixin:
+    http_method_names = ['get', 'post']
 
     model = None
     fields = []
     related_fields = {'name': None, 'to': None}
 
-    def get(self, request, model_id):
-        try:
-            content = self.model.objects.get(owner=request.user, id=model_id).json()
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
-        return render(request, 'cobra_wrapper/object.html', context={
-            'content': content
+    def get(self, request, pk):
+        return render(request, 'cobra_wrapper/{}/detail.html'.format(self.model.MODEL_NAME), context={
+            self.model.MODEL_NAME: get_object_or_404(self.model, pk=pk, owner=request.user)
         })
 
-    # def delete(self, request, model_id):  # TODO: Check dependency before deletion
+    # def delete(self, request, pk):  # TODO
     #     try:
-    #         self.model.objects.get(owner=request.user, id=model_id).delete()
-    #     except ObjectDoesNotExist:
+    #         self.model.objects.get(owner=request.user, id=pk).delete()
+    #     except DetailDoesNotExist:
     #         return JsonResponse({}, status=404)
     #     return JsonResponse({}, status=204)
 
-    # def patch(self, request, model_id):
+    # def patch(self, request, pk):
     #     content = json.loads(request.body)
     #     try:
-    #         model = self.model.objects.get(owner=request.user, id=model_id)
-    #     except ObjectDoesNotExist:
+    #         model = self.model.objects.get(owner=request.user, id=pk)
+    #     except DetailDoesNotExist:
     #         return JsonResponse({}, status=404)
 
     #     for field in self.fields:
@@ -129,17 +123,17 @@ class ObjectMixin:
     #         return JsonResponse({
     #             'type': 'validation_error',
     #             'content': get_validation_error_content(error)
-    #         }, status=400)
+    #         })
     #     return JsonResponse({}, status=200)
 
 
-class CobraMetaboliteObjectView(LoginRequiredMixin, ObjectMixin, View):
+class CobraMetaboliteDetailView(LoginRequiredMixin, DetailMixin, View):
     model = CobraMetabolite
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
     related_field = None
 
 
-class CobraReactionObjectView(LoginRequiredMixin, ObjectMixin, View):
+class CobraReactionDetailView(LoginRequiredMixin, DetailMixin, View):
     model = CobraReaction
     fields = [
         'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
@@ -148,26 +142,24 @@ class CobraReactionObjectView(LoginRequiredMixin, ObjectMixin, View):
     related_field = {'name': 'metabolites', 'to': CobraMetabolite}
 
 
-class CobraModelObjectView(LoginRequiredMixin, ObjectMixin, View):
+class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
     model = CobraModel
     fields = ['cobra_id', 'name', 'objective']
     related_field = {'name': 'reactions', 'to': CobraReaction}
 
 
-class CobraModelObjectComputeView(LoginRequiredMixin, View):
+class CobraModelDetailComputeView(LoginRequiredMixin, View):
 
-    def post(self, request, model_id, method):
+    def post(self, request, pk, method):
         content = json.loads(request.body)
-        try:
-            model = CobraModel.objects.get(owner=request.user, id=model_id)
-        except ObjectDoesNotExist:
-            return JsonResponse({}, status=404)
+        # model = get_object_or_404(CobraModel, pk=pk, user=request.user)
 
         try:
             if method == 'fba':
-                return JsonResponse(model.fba(), status=200)
+                # return JsonResponse(model.fba(), status=200)
+                return  # TODO
             elif method == 'fva':
-                fva_params = try_get_fields(content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
+                # fva_params = try_get_fields(content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
 
                 try:
                     if 'reaction_list' in content.keys():
@@ -175,9 +167,10 @@ class CobraModelObjectComputeView(LoginRequiredMixin, View):
                         content['reaction_list'] = []
                         for reaction in reactions:
                             content['reaction_list'].append(reaction.build())
-                    return JsonResponse(model.fva(reaction_list=content['reaction_list'], **fva_params), status=200)
+                    # return JsonResponse(model.fva(reaction_list=content['reaction_list'], **fva_params), status=200)
+                    return  # TODO
                 except ValidationError as error:
-                    return JsonResponse({
+                    return HttpResponseBadRequest(json.dumps({
                         'type': 'validation_error',
                         'content': {
                             'reaction_list': [
@@ -187,8 +180,8 @@ class CobraModelObjectComputeView(LoginRequiredMixin, View):
                                 }
                             ]
                         }
-                    }, status=400)
+                    }))
             else:
-                return JsonResponse({}, status=404)
+                return Http404()
         except OptimizationError as error:
-            return JsonResponse({'code': 'cobra-error', 'message': error.args[0]}, status=400)
+            return HttpResponseBadRequest(json.dumps({'code': 'cobra-error', 'message': error.args[0]}))

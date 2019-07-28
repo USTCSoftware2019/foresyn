@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ model }}{% endblock title %}
+
+{% block content %}
+
+<table>
+    <tr><td>id</td><td>{{ model.id }}</td></tr>
+    <tr><td>cobra_id</td><td>{{ model.cobra_id }}</td></tr>
+    <tr><td>name</td><td>{{ model.name }}</td></tr>
+    <tr><td>objective</td><td>{{ model.objective }}</td></tr>
+    <tr><td>reactions</td><td>[
+    {% for reaction in model.reactions.all %}
+        {% if not forloop.counter == 1 %}
+        ,
+        {% endif %}
+        <a href="{% url 'cobra_wrapper:reaction_detail' reaction.pk %}">{{ reaction }}</a>:
+    {% endfor %}
+    ]</td></tr>
+</table>
+
+{% endblock content %}

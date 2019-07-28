@@ -3,6 +3,7 @@ import json
 from django.db import models, connection
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.shortcuts import reverse
 import cobra
 
 try:
@@ -46,13 +47,24 @@ def convert_cobra_id(info):
     return info
 
 
-class AutoCleanModel(models.Model):
+class AutoCleanMixin:
     def save(self, *args, **kwargs):
-        self.full_clean()
+        super().full_clean()
         return super().save(*args, **kwargs)
 
 
-class CobraMetabolite(AutoCleanModel):
+class CobraStrMixin:
+    cobra_id = None
+    name = None
+
+    def __str__(self):
+        if self.name:
+            return '{} - {}'.format(self.cobra_id, self.name)
+        else:
+            return self.cobra_id
+
+
+class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
@@ -60,7 +72,13 @@ class CobraMetabolite(AutoCleanModel):
     charge = models.CharField(max_length=50, blank=True, null=True, default=None)
     compartment = models.CharField(max_length=50, blank=True, null=True, default=None)
 
-    model_name = 'metabolite'
+    MODEL_NAME = 'metabolite'
+
+    def get_list_url(self):
+        return reverse('cobra_wrapper:metabolite_list')
+
+    def get_absolute_url(self):
+        return reverse("cobra_wrapper:metabolite_detail", kwargs={"pk": self.pk})
 
     def json(self):
         return get_fields(self, ['id', 'cobra_id', 'name', 'formula', 'charge', 'compartment'])
@@ -74,7 +92,7 @@ def validate_coefficients_is_list(value):
         raise ValidationError('the field requires list or tuple', 'invalid')
 
 
-class CobraReaction(AutoCleanModel):
+class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
@@ -86,7 +104,13 @@ class CobraReaction(AutoCleanModel):
     coefficients = JSONField(default=[], validators=[validate_coefficients_is_list])
     gene_reaction_rule = models.TextField(blank=True, default='')
 
-    model_name = 'reaction'
+    MODEL_NAME = 'reaction'
+
+    def get_list_url(self):
+        return reverse('cobra_wrapper:reaction_list')
+
+    def get_absolute_url(self):
+        return reverse("cobra_wrapper:reaction_detail", kwargs={"pk": self.pk})
 
     def json(self):
         return dict(
@@ -107,15 +131,24 @@ class CobraReaction(AutoCleanModel):
         cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
         return cobra_reaction
 
+    def get_metabolites_and_coefficients(self):
+        return zip(self.metabolites.all(), self.coefficients)
 
-class CobraModel(AutoCleanModel):
+
+class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
     reactions = models.ManyToManyField(CobraReaction)
     objective = models.CharField(max_length=50, default='')
 
-    model_name = 'model'
+    MODEL_NAME = 'model'
+
+    def get_list_url(self):
+        return reverse('cobra_wrapper:model_list')
+
+    def get_absolute_url(self):
+        return reverse("cobra_wrapper:model_detail", kwargs={"pk": self.pk})
 
     def json(self):
         return dict(

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ reaction }}{% endblock title %}
+
+{% block content %}
+
+<table>
+    <tr><td>id</td><td>{{ reaction.id }}</td></tr>
+    <tr><td>cobra_id</td><td>{{ reaction.cobra_id }}</td></tr>
+    <tr><td>name</td><td>{{ reaction.name }}</td></tr>
+    <tr><td>subsystem</td><td>{{ reaction.subsystem }}</td></tr>
+    <tr><td>lower_bound</td><td>{{ reaction.lower_bound }}</td></tr>
+    <tr><td>upper_bound</td><td>
+    {% if reaction.upper_bound %}
+        {{ reaction.upper_bound }}
+    {% else %}
+        None
+    {% endif %}
+    </td></tr>
+    <tr><td>objective_coefficient</td><td>{{ reaction.objective_coefficient }}</td></tr>
+    <tr><td>metabolites and coefficients</td><td>[
+    {% for metabolite, coefficient in reaction.get_metabolites_and_coefficients %}
+        {% if not forloop.counter == 1 %}
+        ,
+        {% endif %}
+        <a href="{% url 'cobra_wrapper:metabolite_detail' metabolite.pk %}">{{ metabolite }}</a>:
+        {{ coefficient }}
+    {% endfor %}
+    ]</td></tr>
+    <tr><td>gene_reaction_rule</td><td>{{ reaction.gene_reaction_rule }}</td></tr>
+</table>
+
+{% endblock content %}

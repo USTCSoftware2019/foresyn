@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}All reactions{% endblock title %}
+
+{% block content %}
+
+{% for reaction in all %}
+<table>
+    <tr><td>id</td><td>{{ reaction.id }}</td></tr>
+    <tr><td>cobra_id</td><td>{{ reaction.cobra_id }}</td></tr>
+    <tr><td>name</td><td>{{ reaction.name }}</td></tr>
+    <tr><td><a href="{% url 'cobra_wrapper:reaction_detail' reaction.pk %}">see detail</a></td></tr>
+</table>
+{% endfor %}
+
+{% endblock content %}
