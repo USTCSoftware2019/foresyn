@@ -1,18 +1,16 @@
 {% extends 'base.html' %}
 
-{% block title %}All {{ model_name }}{% endblock %}
+{% block title %}{{ model_name }} {{ content.id }}{% endblock %}
 
 {% block content %}
 
-{% for model_info in content %}
 <table>
-    {% for field, value in model_info.items %}
+{% for field, value in content.items %}
     <tr>
         <td>{{ field }}</td>
         <td>{{ value }}</td>
     </tr>
-    {% endfor %}
-</table>
 {% endfor %}
+</table>
 
 {% endblock %}

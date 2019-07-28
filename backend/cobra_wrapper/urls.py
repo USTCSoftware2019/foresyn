@@ -24,10 +24,10 @@ urlpatterns = [
     path('reactions/', views.CobraReactionSetView.as_view(), name='reaction_set'),
     path('reactions/<int:model_id>/', views.CobraReactionObjectView.as_view(), name='reaction_object'),
     path('models/', views.CobraModelSetView.as_view(), name='model_set'),
-    path('models/<int:model_id>/', views.CobraModelObjectApi.as_view(), name='model_object'),
-    path(
-        'models/<int:model_id>/<str:method>/',
-        views.CobraModelObjectComputeApi.as_view(),
-        name='model_object_computation'
-    ),
+    path('models/<int:model_id>/', views.CobraModelObjectView.as_view(), name='model_object'),
+    # path(
+    #     'models/<int:model_id>/<str:method>/',
+    #     views.CobraModelObjectComputeApi.as_view(),
+    #     name='model_object_computation'
+    # ),
 ]
