@@ -356,3 +356,110 @@ class MetaboliteFromReactions(RelationshipLookupView):
             'stoichiometry': rm.stoichiometry
         }
         return extra_info
+
+
+class RelationshipDetailView(View):
+    http_method_names = ['get']
+    from_model = None
+    to_model = None
+    template_name = None
+    fields = []
+
+    def get_object_extra_info(self, *args, **kwargs):
+        return {}
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.from_model_instance = self.from_model.objects.get(id=kwargs.get('from_model_pk'))
+            self.to_model_instance = self.to_model.objects.get(id=kwargs.get('to_model_pk'))
+        except ObjectDoesNotExist:
+            raise Http404('The required from_model or to_model does not exist')
+
+        for key, value in self.get_object_extra_info().items():
+            setattr(self.to_model_instance, key, value)
+            self.fields.append(key)
+
+        context = {
+            'from_model': self.from_model_instance,
+            'to_model': self.to_model_instance,
+            'display_fields': self.fields,
+        }
+
+        return render(request, self.template_name, context=context)
+
+
+class ModelMetaboliteRelationshipDetailView(RelationshipDetailView):
+    from_model = Model
+    to_model = Metabolite
+    template_name = 'bigg_database/model_metabolite_detail.html'
+    fields = ['bigg_id', 'name', 'formulae', 'charges', 'database_links']
+
+    def get_object_extra_info(self, *args, **kwargs):
+        mm = ModelMetabolite.objects.get(model=self.from_model_instance,
+                                         metabolite=self.to_model_instance)
+        extra_info = {
+            'organism': mm.organism
+        }
+        return extra_info
+
+
+class ModelReactionRelationshipDetailView(RelationshipDetailView):
+    from_model = Model
+    to_model = Reaction
+    template_name = 'bigg_database/model_reaction_detail.html'
+    fields = ['bigg_id', 'name', 'reaction_string', 'pseudoreaction', 'database_links']
+
+    def get_object_extra_info(self, *args, **kwargs):
+        mr = ModelReaction.objects.get(model=self.from_model_instance,
+                                       reaction=self.to_model_instance)
+        extra_info = {
+            'organism': mr.organism,
+            'lower_bound': mr.lower_bound,
+            'upper_bound': mr.upper_bound,
+            'subsystem': mr.subsystem,
+            'gene_reaction_rule': mr.gene_reaction_rule,
+        }
+        return extra_info
+
+
+class ReactionMetaboliteRelationshipDetailView(RelationshipDetailView):
+    from_model = Reaction
+    to_model = Metabolite
+    template_name = 'bigg_database/reaction_metabolite_detail.html'
+    fields = ['bigg_id', 'name', 'formulae', 'charges', 'database_links']
+
+    def get_object_extra_info(self, *args, **kwargs):
+        rm = ReactionMetabolite.objects.get(reaction=self.from_model_instance,
+                                            metabolite=self.to_model_instance)
+        extra_info = {
+            'stoichiometry': rm.stoichiometry
+        }
+        return extra_info
+
+
+class ReactionGeneRelationshipDetailView(RelationshipDetailView):
+    from_model = Reaction
+    to_model = Gene
+    template_name = 'bigg_database/reaction_gene_detail.html'
+    fields = ['bigg_id', 'name', 'rightpos', 'leftpos', 'chromosome_ncbi_accession',
+              'mapped_to_genbank', 'strand', 'protein_sequence',
+              'dna_sequence', 'genome_name', 'genome_ref_string',
+              'database_links']
+
+    def get_object_extra_info(self, *args, **kwargs):
+        rg = ReactionGene.objects.get(reaction=self.from_model_instance,
+                                      gene=self.to_model_instance)
+        extra_info = {
+            'gene_reaction_rule': rg.gene_reaction_rule
+        }
+        return extra_info
+
+
+class ModelGeneRelationshipDetailView(RelationshipDetailView):
+    from_model = Model
+    to_model = Gene
+    template_name = 'bigg_database/model_gene_detail.html'
+    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
+              'mapped_to_genbank', 'strand', 'protein_sequence',
+              'dna_sequence', 'genome_name', 'genome_ref_string',
+              'database_links', 'bigg_id', 'name']

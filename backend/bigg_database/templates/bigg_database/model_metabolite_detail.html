@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}
+Metabolite {{to_model.bigg_id}}
+{% endblock %}
+
+{% block content %}
+<h3>Metebolite {{to_model.bigg_id}}</h3>
+
+<h4>Descriptive name</h4>
+<p>{{to_model.name}}</p>
+
+<h4>Formulae</h4>
+<p>{{to_model.formulae|join:', '}}</p>
+
+<h4>Charges</h4>
+<p>{{to_model.charges}}</p>
+
+<h4>Organism</h4>
+<p>{{to_model.organism}}</p>
+
+{% if gene.database_links %}
+<h4>External database links</h4>
+{% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
+{% endif %}
+{% endblock %}

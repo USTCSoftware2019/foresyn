@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+Reaction {{ to_model.bigg_id }}
+{% endblock %}
+
+{% block content %}
+<h3>Reaction {{ to_model.bigg_id }}</h3>
+
+<h4>Descriptive name</h4>
+<p>{{ to_model.name }}</p>
+
+<h4>Reactin String</h4>
+<p>{{ to_model.reaction_string }}</p>
+
+<h4>Pseudoreaction</h4>
+<p>{{ to_model.pseudoreaction }}</p>
+
+<h4>Organism</h4>
+<p>{{ to_model.organism }}</p>
+
+<h4>Default bound</h4>
+<p>({{ to_model.lower_bound }}, {{ to_model.upper_bound }})</p>
+
+<h4>Subsystem</h4>
+<p>{{ to_model.subsystem }}</p>
+
+<h4>Gene reaction rule</h4>
+<p>{{ to_model.gene_reaction_rule }}</p>
+
+{% if gene.database_links %}
+<h4>External database links</h4>
+{% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
+{% endif %}
+{% endblock %}
