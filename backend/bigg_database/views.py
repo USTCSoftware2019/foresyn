@@ -164,6 +164,17 @@ class RelationshipLookupView(ListView):
     def get_extra_fields(self):
         return []
 
+    def get_reverse_url(self, model_name_a, model_name_b):
+        # FIXME
+        if model_name_b == 'model':
+            return 'model_' + model_name_a + '_relationship_detail'
+        if model_name_a == 'model':
+            return 'model_' + model_name_b + '_relationship_detail'
+        if model_name_b == 'reaction':
+            return 'reaction_' + model_name_a + '_relationship_detail'
+        if model_name_a == 'reaction':
+            return 'reaction_' + model_name_b + '_relationship_detail'
+
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
 
@@ -171,7 +182,10 @@ class RelationshipLookupView(ListView):
         for ins in context['result_list']:
             for key, value in self.get_object_extra_info(ins).items():
                 setattr(ins, key, value)
-            setattr(ins, 'link', reverse('bigg_database:{}_detail'.format(ins._meta.verbose_name), args=(ins.id,)))
+            setattr(ins, 'link',
+                    reverse(
+                        self.get_reverse_url(self.object._meta.verbose_name, ins._meta.verbose_name),
+                        args=(self.object.id, ins.id,)))
 
         self.fields.append('link')
 

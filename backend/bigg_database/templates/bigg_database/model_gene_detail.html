@@ -8,7 +8,7 @@ Gene {{to_model.bigg_id}}
 <h3>Gene {{to_model.bigg_id}}</h3>
 
 <h4>Model</h4>
-<p>{{ from_model.bigg_id }}</p>
+<p><a href="{% url 'bigg_database:model_detail' from_model.id %}">{{ from_model.bigg_id }}</a></p>
     
 <h4>Descriptive name</h4>
 <p>{{ to_model.name }}</p>
