@@ -80,10 +80,10 @@ class SearchView(ListView):
 
         # Add extra info
         for ins in context['result_list']:
-
+            search_model_name = self.form.cleaned_data['search_model']
             # Add link to detail
             setattr(ins, 'link',
-                    reverse('bigg_database:{}_detail'.format(self.form.fields['search_model']), args=(ins.id,)))
+                    reverse('bigg_database:{}_detail'.format(search_model_name), args=(ins.id,)))
             context['display_fields'].append('link')
 
             for f in self.result_info_model.count_number_fields:
