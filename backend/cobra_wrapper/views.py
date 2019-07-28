@@ -26,11 +26,18 @@ def get_validation_error_content(error):
         field: [
             {
                 'code': field_error.code,
-                'message': field_error.message
+                'message': str(field_error.message)
+                # For Django uses lazy text
             }
             for field_error in error.error_dict[field]
         ]
         for field in error.error_dict.keys()
+    }
+
+
+def get_post_content(request):
+    return {
+        field: (json.loads(value) if value and value[0] == '[' else value) for field, value in request.POST.items()
     }
 
 
@@ -42,7 +49,7 @@ class ListMixin:
     related_field = {'name': None, 'to': None}
 
     def post(self, request):
-        content = json.loads(request.body)
+        content = get_post_content(request)
         try:
             new_model = self.model.objects.create(**try_get_fields(content, self.fields), owner=request.user)
             if self.related_field:
@@ -55,7 +62,7 @@ class ListMixin:
                 'type': 'validation_error',
                 'content': get_validation_error_content(error)
             }))
-        return redirect(self.model.get_list_url())
+        return redirect(new_model)
 
     def get(self, request):
         return render(request, 'cobra_wrapper/{}/list.html'.format(self.model.MODEL_NAME), context={
@@ -96,35 +103,38 @@ class DetailMixin:
             self.model.MODEL_NAME: get_object_or_404(self.model, pk=pk, owner=request.user)
         })
 
-    # def delete(self, request, pk):  # TODO
-    #     try:
-    #         self.model.objects.get(owner=request.user, id=pk).delete()
-    #     except DetailDoesNotExist:
-    #         return JsonResponse({}, status=404)
-    #     return JsonResponse({}, status=204)
+    def post(self, request, pk):
+        if 'delete' in request.POST.keys():
+            return DetailMixin._delete(self, request, pk)
+        elif 'edit' in request.POST.keys():
+            return DetailMixin._patch(self, request, pk)
+        else:
+            return HttpResponseBadRequest('Unknown operation!')
 
-    # def patch(self, request, pk):
-    #     content = json.loads(request.body)
-    #     try:
-    #         model = self.model.objects.get(owner=request.user, id=pk)
-    #     except DetailDoesNotExist:
-    #         return JsonResponse({}, status=404)
+    def _delete(self, request, pk):  # TODO
+        get_object_or_404(self.model, owner=request.user, id=pk).delete()
+        return redirect(self.model.get_list_url())
 
-    #     for field in self.fields:
-    #         if field in content.keys():
-    #             setattr(model, field, content[field])
+    def _patch(self, request, pk):
+        content = get_post_content(request)
+        model = get_object_or_404(self.model, owner=request.user, id=pk)
 
-    #     try:
-    #         model.save()
-    #         if self.related_fields and self.related_fields['name'] in content.keys():
-    #             getattr(model, self.related_fields['name']).set(
-    #                 get_models_by_id(self.related_fields['to'], content[self.related_fields['name']], request.user))
-    #     except ValidationError as error:
-    #         return JsonResponse({
-    #             'type': 'validation_error',
-    #             'content': get_validation_error_content(error)
-    #         })
-    #     return JsonResponse({}, status=200)
+        for field in self.fields:
+            if field in content.keys():
+                setattr(model, field, content[field])
+
+        try:
+            model.save()
+            if self.related_fields and self.related_fields['name'] in content.keys():
+                getattr(model, self.related_fields['name']).set(
+                    get_models_by_id(self.related_fields['to'], content[self.related_fields['name']], request.user))
+        except ValidationError as error:
+            return HttpResponseBadRequest(json.dumps({
+                'type': 'validation_error',
+                'content': get_validation_error_content(error)
+            }))
+
+        return redirect(model)
 
 
 class CobraMetaboliteDetailView(LoginRequiredMixin, DetailMixin, View):
