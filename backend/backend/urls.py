@@ -22,5 +22,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('cobra/', include('cobra_wrapper.urls')),
     path('database/', include('bigg_database.urls')),
-    path('data_wrapper/', include('data_wrapper.urls')),
+    path('data/', include('data_wrapper.urls')),
 ]
