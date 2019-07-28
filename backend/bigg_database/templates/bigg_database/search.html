@@ -7,7 +7,7 @@ Search
 <p>Search models, reactions, metabolites and genes</p>
 
 <form method="get">
-    {% csrf_token %}
+{#    {% csrf_token %}#}
     {{ form.as_p }}
     <input type="submit" value="Search">
 </form>
