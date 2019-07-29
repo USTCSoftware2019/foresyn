@@ -176,7 +176,7 @@ class CobraWrapperViewTests(TestCase):
         self.assertContains(metabolite_response, 'formula')
 
     def test_objective_get_failure(self):
-        user = self._create_user_and_login()
+        self._create_user_and_login()
         # info = self._create_models(user) # Unused?
 
         model_response = self.client.get('/cobra/models/7777777/')
