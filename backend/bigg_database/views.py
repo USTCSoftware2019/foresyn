@@ -124,10 +124,6 @@ class GeneDetailView(DetailView):
     context_object_name = 'gene'
 
 
-# TODO
-# Add link for each related object
-
-
 class RelationshipLookupView(ListView):
     '''
     This view aims to be the base view of (*)In(*)View
@@ -264,6 +260,7 @@ class GeneFromModels(RelationshipLookupView):
     fields = ['bigg_id', 'compartments']
     from_model = Gene
     to_model_name = 'models'
+    template_name = 'bigg_database/relationship_reverse_lookup_list.html'
 
 
 class MetaboliteFromModels(RelationshipLookupView):
@@ -273,6 +270,7 @@ class MetaboliteFromModels(RelationshipLookupView):
     fields = ['bigg_id', 'compartments']
     from_model = Metabolite
     to_model_name = 'models'
+    template_name = 'bigg_database/relationship_reverse_lookup_list.html'
 
     def get_object_extra_info(self, instance):
         mm = ModelMetabolite.objects.get(model=instance, metabolite=self.object)
@@ -280,11 +278,6 @@ class MetaboliteFromModels(RelationshipLookupView):
             'organism': mm.organism
         }
         return extra_info
-
-    def get_extra_fields(self):
-        return [
-            'organism'
-        ]
 
 
 class ReactionFromModels(RelationshipLookupView):
@@ -294,6 +287,7 @@ class ReactionFromModels(RelationshipLookupView):
     fields = ['bigg_id', 'compartments']
     from_model = Reaction
     to_model_name = 'models'
+    template_name = 'bigg_database/relationship_reverse_lookup_list.html'
 
     def get_object_extra_info(self, instance):
         mr = ModelReaction.objects.get(model=instance, reaction=self.object)
@@ -306,15 +300,6 @@ class ReactionFromModels(RelationshipLookupView):
         }
         return extra_info
 
-    def get_extra_fields(self):
-        return [
-            'organism',
-            'lower_bound',
-            'upper_bound',
-            'subsystem',
-            'gene_reaction_rule',
-        ]
-
 
 class GeneFromReactions(RelationshipLookupView):
     '''
@@ -323,6 +308,7 @@ class GeneFromReactions(RelationshipLookupView):
     fields = ['bigg_id', 'name', 'reaction_string']
     from_model = Gene
     to_model_name = 'reactions'
+    template_name = 'bigg_database/relationship_reverse_lookup_list.html'
 
     def get_object_extra_info(self, instance):
         rg = ReactionGene.objects.get(gene=self.object, reaction=instance)
@@ -330,11 +316,6 @@ class GeneFromReactions(RelationshipLookupView):
             'gene_reaction_rule': rg.gene_reaction_rule
         }
         return extra_info
-
-    def get_extra_fields(self):
-        return [
-            'gene_reaction_rule'
-        ]
 
 
 class MetaboliteFromReactions(RelationshipLookupView):
@@ -344,6 +325,7 @@ class MetaboliteFromReactions(RelationshipLookupView):
     fields = ['bigg_id', 'name', 'reaction_string', 'pseudoreaction', 'database_links']
     from_model = Metabolite
     to_model_name = 'reactions'
+    template_name = 'bigg_database/relationship_reverse_lookup_list.html'
 
     def get_object_extra_info(self, instance):
         rm = ReactionMetabolite.objects.get(metabolite=self.object, reaction=instance)
@@ -351,11 +333,6 @@ class MetaboliteFromReactions(RelationshipLookupView):
             'stoichiometry': rm.stoichiometry
         }
         return extra_info
-
-    def get_extra_fields(self):
-        return [
-            'stoichiometry'
-        ]
 
 
 class RelationshipDetailView(View):

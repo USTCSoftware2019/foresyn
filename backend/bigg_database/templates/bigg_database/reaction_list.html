@@ -4,9 +4,9 @@
             <th>BiGG ID</th>
             <th>Name</th>
             <th>Pseudo Reaction</th>
-            {#{% if contain_extra_info %}#}
+            {% if contain_extra_info %}
             <th>Organism</th>
-            {#{% endif %}#}
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -19,9 +19,9 @@
             {% else %}
             <th>X</th>
             {% endif %}
-            {#{% contain_extra_info %}#}
-            <th>{{ reaction.organism }}</th>
-            {#{% endif %}#}
+            {% if contain_extra_info %}
+            <th>{{ reaction.gene_reaction_rule }}</th>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>
