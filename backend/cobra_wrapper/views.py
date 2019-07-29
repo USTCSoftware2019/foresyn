@@ -54,16 +54,17 @@ class ListMixin:
 
     model = None
     fields = []
-    related_field = {'name': None, 'to': None}
+
+    relation_field = None
+    model_to = None
 
     def post(self, request):
         content = get_post_content(request)
         try:
             new_model = self.model.objects.create(**try_get_fields(content, self.fields), owner=request.user)
-            if self.related_field:
-                getattr(new_model, self.related_field['name']).set(
-                    get_models_by_id(
-                        self.related_field['to'], content.get(self.related_field['name'], []), request.user)
+            if self.relation_field:
+                getattr(new_model, self.relation_field).set(
+                    get_models_by_id(self.model_to, content.get(self.relation_field, []), request.user)
                 )
         except ValidationError as error:
             return HttpResponseBadRequest(json.dumps({
@@ -81,7 +82,6 @@ class ListMixin:
 class CobraMetaboliteListView(LoginRequiredMixin, ListMixin, View):
     model = CobraMetabolite
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
-    related_field = None
 
 
 class CobraReactionListView(LoginRequiredMixin, ListMixin, View):
@@ -90,13 +90,17 @@ class CobraReactionListView(LoginRequiredMixin, ListMixin, View):
         'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
         'gene_reaction_rule'
     ]
-    related_field = {'name': 'metabolites', 'to': CobraMetabolite}
+
+    relation_field = 'metabolites'
+    model_to = CobraMetabolite
 
 
 class CobraModelListView(LoginRequiredMixin, ListMixin, View):
     model = CobraModel
     fields = ['cobra_id', 'name', 'objective']
-    related_field = {'name': 'reactions', 'to': CobraReaction}
+
+    relation_field = 'reactions'
+    model_to = CobraReaction
 
 
 class DetailMixin:
@@ -104,12 +108,15 @@ class DetailMixin:
 
     model = None
     fields = []
-    related_field = {'name': None, 'to': None}
+
+    relation_field = None
+    model_to = None
+    model_from = None
 
     def get(self, request, pk):
         return render(request, 'cobra_wrapper/{}/detail.html'.format(self.model.MODEL_NAME), context={
             self.model.MODEL_NAME: get_object_or_404(self.model, pk=pk, owner=request.user),
-            'related_models': self.related_field['to'].objects.filter(owner=request.user)
+            'related_models': (self.model_to.objects.filter(owner=request.user) if self.relation_field else None)
         })
 
     def post(self, request, pk):
@@ -120,8 +127,11 @@ class DetailMixin:
         else:
             return HttpResponseBadRequest('Unknown operation!')
 
-    def _delete(self, request, pk):  # TODO
-        get_object_or_404(self.model, owner=request.user, id=pk).delete()
+    def _delete(self, request, pk):
+        deled_model = get_object_or_404(self.model, owner=request.user, id=pk)
+        if self.model_from and getattr(deled_model, '{}_set'.format(self.model_from.__name__.lower())).count() > 0:
+            return HttpResponseBadRequest('Can not delete')
+        deled_model.delete()
         return redirect(self.model.get_list_url())
 
     def _patch(self, request, pk):
@@ -134,9 +144,9 @@ class DetailMixin:
 
         try:
             model.save()
-            if self.related_field and self.related_field['name'] in content.keys():
-                getattr(model, self.related_field['name']).set(
-                    get_models_by_id(self.related_field['to'], content[self.related_field['name']], request.user))
+            if self.relation_field in content.keys():
+                getattr(model, self.relation_field).set(
+                    get_models_by_id(self.model_to, content[self.relation_field], request.user))
         except ValidationError as error:
             return HttpResponseBadRequest(json.dumps({
                 'type': 'validation_error',
@@ -149,7 +159,8 @@ class DetailMixin:
 class CobraMetaboliteDetailView(LoginRequiredMixin, DetailMixin, View):
     model = CobraMetabolite
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
-    related_field = None
+
+    model_from = CobraReaction
 
 
 class CobraReactionDetailView(LoginRequiredMixin, DetailMixin, View):
@@ -158,13 +169,18 @@ class CobraReactionDetailView(LoginRequiredMixin, DetailMixin, View):
         'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'coefficients',
         'gene_reaction_rule'
     ]
-    related_field = {'name': 'metabolites', 'to': CobraMetabolite}
+
+    relation_field = 'metabolites'
+    model_to = CobraMetabolite
+    model_from = CobraModel
 
 
 class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
     model = CobraModel
     fields = ['cobra_id', 'name', 'objective']
-    related_field = {'name': 'reactions', 'to': CobraReaction}
+
+    relation_field = 'reactions'
+    model_to = CobraReaction
 
 
 class CobraModelDetailComputeView(LoginRequiredMixin, View):
