@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_list_tag %}
 
 {% block title %}
 Gene: {{ gene.bigg_id }}
@@ -33,43 +34,10 @@ Gene: {{ gene.bigg_id }}
 
 <h4><a href="{% url 'bigg_database:gene_from_models' gene.id %}">
     Models Containing {{ gene.bigg_id }}</a></h4>
-<table>
-    <thead>
-    <tr>
-        <th>BiGG ID</th>
-        <th>Compartments</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for model in gene.models.all %}
-    <!-- Make row clickable? Or move link to bigg_id? -->
-    <tr href="{% url 'bigg_database:model_detail' model.id %}">
-        <td>{{ model.bigg_id }}</td>
-        <td>{{ model.compartments|join:', ' }}</td>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+{% render_list_tag gene.models.all 'model' 'model_gene_relationship_detail' id=gene.id reverse=True %}
 
 <h4><a href="{% url 'bigg_database:gene_from_reactions' gene.id %}">
     Reactions Containing {{ gene.bigg_id }}</a></h4>
-<table>
-    <thead>
-    <tr>
-        <th>BiGG ID</th>
-        <th>Name</th>
-        <th>Gene Reaction Rule</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for reaction in gene.reactiongene_set.all %}
-    <tr href="{% url 'bigg_database:reaction_detail' reaction.reaction.id %}">
-        <td>{{ reaction.reaction.bigg_id }}</td>
-        <td>{{ reaction.reaction.name }}</td>
-        <td>{{ reaction.gene_reaction_rule }}</td>
-    </tr>
-    </tbody>
-    {% endfor %}
-</table>
+{% render_list_tag gene.reactions.all 'reaction' 'reaction_gene_relationship_detail' id=gene.id reverse=True %}
 
 {% endblock %}

@@ -1,29 +1,9 @@
-{% load bigg_database_tags %}
-
-<table>
-    <thead>
-        <tr>
-            {% for field in display_fields %}
-            <th>
-                {{ field }}
-            </th>
-            {% endfor %}
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for ins in result_list %}
-        <tr>
-            {% for field in display_fields %}
-            <td>
-                {% ifnotequal field "link" %}
-                    {{ ins|get_obj_attr:field }}
-                {% else %}
-                    <a href="{{ ins|get_obj_attr:field }}">Detail</a>
-                {% endifnotequal %}
-            </td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% if model == 'model' %}
+{% include 'bigg_database/model_list.html' with list=list only %}
+{% elif model == 'reaction' %}
+{% include 'bigg_database/reaction_list.html' with list=list only %}
+{% elif model == 'metabolite' %}
+{% include 'bigg_database/metabolite_list.html' with list=list only %}
+{% elif model == 'gene' %}
+{% include 'bigg_database/gene_list.html' with list=list only %}
+{% endif %}

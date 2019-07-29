@@ -1,0 +1,22 @@
+<table>
+    <thead>
+    <tr>
+        <th>BiGG ID</th>
+        <th>Name</th>
+        <th>Pseudo Reaction</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for reaction in list %}
+    <tr>
+        <th><a href="{{ reaction.detail_url }}">{{ reaction.bigg_id }}</a></th>
+        <th>{{ reaction.name }}</th>
+        {% if reaction.pseudoreaction %}
+        <th>√</th>
+        {% else %}
+        <th>X</th>
+        {% endif %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
