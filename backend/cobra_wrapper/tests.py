@@ -97,7 +97,7 @@ class CobraWrapperViewTests(TestCase):
             formula='C11H21N2O7PRS',
             name='acyl-carrier-protein',
             compartment='c'
-            ), content_type='application/json')
+        ), content_type='application/json')
         self.assertEqual(metabolite_0_response.status_code, 302)
         metabolite_1_response = self.client.post('/cobra/metabolites/', dict(
             cobra_id='3omrsACP_c',
@@ -146,7 +146,7 @@ class CobraWrapperViewTests(TestCase):
             metabolites=[1, 2, 3, 4, 5, 6],
             coefficients=[-1.0, -1.0, -1.0, 1.0, 1.0, 1.0],
             gene_reaction_rule='( STM2378 or STM1197 )'
-            ), content_type='application/json')
+        ), content_type='application/json')
         self.assertEqual(reaction_response.status_code, 302)
         reaction_set_response = self.client.get('/cobra/reactions/')
         self.assertContains(reaction_set_response, 'content')
@@ -170,14 +170,14 @@ class CobraWrapperViewTests(TestCase):
         reaction_response = self.client.get('/cobra/reactions/{}/'.format(info['reactions'][0].id))
         self.assertEqual(reaction_response.status_code, 200)
         self.assertContains(reaction_response, 'subsystem')
-        
+
         metabolite_response = self.client.get('/cobra/metabolites/{}/'.format(info['metabolites'][0].id))
         self.assertEqual(metabolite_response.status_code, 200)
         self.assertContains(metabolite_response, 'formula')
 
     def test_objective_get_failure(self):
         user = self._create_user_and_login()
-        info = self._create_models(user)
+        # info = self._create_models(user) # Unused?
 
         model_response = self.client.get('/cobra/models/7777777/')
         self.assertEqual(model_response.status_code, 404)
@@ -186,7 +186,7 @@ class CobraWrapperViewTests(TestCase):
         reaction_response = self.client.get('/cobra/reactions/7777777/')
         self.assertEqual(reaction_response.status_code, 404)
         self.assertEqual(json.loads(reaction_response.content), {})
-        
+
         metabolite_response = self.client.get('/cobra/metabolites/7777777/')
         self.assertEqual(metabolite_response.status_code, 404)
         self.assertEqual(json.loads(metabolite_response.content), {})
