@@ -98,14 +98,14 @@ class SearchView(ListView):
         return set(reduce(lambda a, b: a + b,
                           [fuzzy_search(self.result_info_model.search_model.objects.all(),
                                         search_by,
-                                        self.form.cleaned_data['keyword']) for search_by in self.result_info_model.by]))
+                                        self.form.cleaned_data['keyword'])
+                           for search_by in self.result_info_model.by]))
 
     def get(self, request, *args, **kwargs):
         self.form = SearchForm(request.GET)
         if self.form.is_valid():
             self.result_info_model = eval(
-                dict(self.form.fields['search_model'].choices)[self.form.cleaned_data['search_model']] +
-                'SearchInfo')
+                dict(self.form.fields['search_model'].choices)[self.form.cleaned_data['search_model']] + 'SearchInfo')
             return super().get(request, *args, **kwargs)
         else:
             return render(request, 'bigg_database/search.html',
