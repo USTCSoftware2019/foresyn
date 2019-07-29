@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ model }}{% endblock title %}
+
+{% block content %}
+
+<form action="{% url 'cobra_wrapper:model_detail' model.pk %}" method="post">
+    <table><tbody>
+        <tr><td>id</td><td>{{ model.id }}</td></tr>
+        <tr><td>cobra_id</td><td>{{ model.cobra_id }}</td><td>
+            <input type="text" name="cobra_id" value="{{ model.cobra_id }}">
+        </td></tr>
+        <tr><td>name</td><td>{{ model.name }}</td><td>
+            <input type="text" name="name" value="{{ model.name }}">
+        </td></tr>
+        <tr><td>objective</td><td>{{ model.objective }}</td><td>
+            <input type="text" name="objective" value="{{ model.objective }}">
+        </td></tr>
+        <tr><td>reactions</td><td>[
+        {% for reaction in model.reactions.all %}
+            {% if not forloop.counter == 1 %}
+            ,
+            {% endif %}
+            <a href="{% url 'cobra_wrapper:reaction_detail' reaction.pk %}">{{ reaction }}</a>:
+        {% endfor %}
+        ]</td><td>
+            <select name="reactions">
+            {% for reaction in model.reactions.all %}
+                <option value="{{ reaction.id }}">{{ reaction }}</option>
+            {% endfor %}
+            </select>
+        </td></tr>
+        <tr><td></td><td>
+            <button type="reset">abort</button>
+        </td><td>
+            <button type="submit">edit</button>
+        </td></tr>
+    </tbody></table>
+</form>
+<form action="{% url 'cobra_wrapper:model_detail' model.pk %}" method="post">
+    <input type="hidden" name="delete">
+    <button type="submit">delete</button>
+</form>
+
+{% endblock content %}
