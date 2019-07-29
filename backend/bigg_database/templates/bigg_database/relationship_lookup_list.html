@@ -9,13 +9,13 @@ Relationship lookup for {{ from_model_name }}
 <h2>The {{ to_model_name }} in {{ from_model.bigg_id }}</h2>
 
 {% if to_model_name == 'metabolite' %}
-    {% render_list_tag result_list 'metabolite' 'model_metabolite_relationship_detail' id=from_model.id contain_extra_info=True %}
-{% elif to_model_name == 'reaction' %}
     {% if from_model_name == 'model' %}
-        {% render_list_tag result_list 'reaction' 'model_reaction_relationship_detail' id=from_model.id contain_extra_info=True %}
-    {% elif from_model_name == 'metabolite' %}
-        {% render_list_tag result_list 'reaction' 'reaction_metabolite_relationship_detail' id=from_model.id reverse=True contain_extra_info=True %}
+        {% render_list_tag result_list 'metabolite' 'model_metabolite_relationship_detail' id=from_model.id contain_extra_info=True %}
+    {% elif from_model_name == 'reaction' %}
+        {% render_list_tag result_list 'metabolite' 'reaction_metabolite_relationship_detail' id=from_model.id contain_extra_info=True %}
     {% endif %}
+{% elif to_model_name == 'reaction' %}
+    {% render_list_tag result_list 'reaction' 'model_reaction_relationship_detail' id=from_model.id contain_extra_info=True %}
 {% elif to_model_name == 'gene' %}
     {% if from_model_name == 'model' %}
         {% render_list_tag result_list 'gene' 'model_gene_relationship_detail' id=from_model.id contain_extra_info=True %}
