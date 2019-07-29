@@ -5,7 +5,8 @@
 {% block content %}
 
 <form action="{% url 'cobra_wrapper:reaction_detail' reaction.pk %}" method="post">
-    <tbody><tbody>
+{% csrf_token %}
+    <table><tbody>
         <tr><td>id</td><td>{{ reaction.id }}</td></tr>
         <tr><td>cobra_id</td><td>{{ reaction.cobra_id }}</td><td>
             <input type="text" name="cobra_id" value="{{ reaction.cobra_id }}">
@@ -17,16 +18,16 @@
             <input type="text" name="subsystem" value="{{ reaction.subsystem }}">
         </td></tr>
         <tr><td>lower_bound</td><td>{{ reaction.lower_bound }}</td><td>
-            <input type="number" name="lower_bound" value="{{ reaction.lower_bound }}">
+            <input type="text" name="lower_bound" value="{{ reaction.lower_bound }}">
         </td></tr>
         <tr><td>upper_bound</td><td>
-            <input type="number" name="upper_bound" value="{{ reaction.upper_bound }}">
-        </td><td>
         {% if reaction.upper_bound %}
             {{ reaction.upper_bound }}
         {% else %}
             None
         {% endif %}
+        </td><td>
+            <input type="text" name="upper_bound" value="{% if reaction.upper_bound %}{{ reaction.upper_bound }}{% endif %}">
         </td></tr>
         <tr><td>objective_coefficient</td><td>{{ reaction.objective_coefficient }}</td><td>
             <input type="text" name="objective_coefficient" value="{{ reaction.objective_coefficient }}">
@@ -48,9 +49,11 @@
         </td><td>
             <button type="submit">edit</button>
         </td></tr>
-    </tbody></tbody>
+    </tbody></table>
+    <input type="hidden" name="edit">
 </form>
 <form action="{% url 'cobra_wrapper:reaction_detail' reaction.pk %}" method="post">
+{% csrf_token %}
     <input type="hidden" name="delete">
     <button type="submit">delete</button>
 </form>

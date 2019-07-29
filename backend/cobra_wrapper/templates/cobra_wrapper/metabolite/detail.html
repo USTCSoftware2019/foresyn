@@ -32,6 +32,7 @@
     <input type="hidden" name="edit">
 </form>
 <form action="{% url 'cobra_wrapper:metabolite_detail' metabolite.pk %}" method="post">
+{% csrf_token %}
     <input type="hidden" name="delete">
     <button type="submit">delete</button>
 </form>
