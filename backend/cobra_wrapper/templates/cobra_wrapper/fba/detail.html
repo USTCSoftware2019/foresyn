@@ -10,8 +10,8 @@
         <th>status</th>
     </tr>
     <tr>
-        <td>solution.objective_value</td>
-        <td>solution.status</td>
+        <td>{{ solution.objective_value }}</td>
+        <td>{{ solution.status }}</td>
     </tr>
 </table>
 
@@ -26,8 +26,8 @@
         </tr>
         {% for name, value in solution.fluxes.items %}
         <tr>
-            <td>name</td>
-            <td>value</td>
+            <td>{{ name }}</td>
+            <td>{{ value }}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -44,8 +44,8 @@
         </tr>
         {% for name, value in solution.shadow_prices.items %}
         <tr>
-            <td>name</td>
-            <td>value</td>
+            <td>{{ name }}</td>
+            <td>{{ value }}</td>
         </tr>
         {% endfor %}
     </tbody>
