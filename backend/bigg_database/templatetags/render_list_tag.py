@@ -13,7 +13,7 @@ relp_views = [
 
 
 @register.inclusion_tag('bigg_database/list.html')
-def render_list_tag(lst, model, view_name, id=None, reverse=False, **kwargs):
+def render_list_tag(lst, model, view_name, **kwargs):
     """
     This is used to render all kinds of list, including gene_list, metabolite_list, model_list, reaction_list.
     This template tag just render url for them, as the url is hard to evaluate in template.
@@ -36,10 +36,12 @@ def render_list_tag(lst, model, view_name, id=None, reverse=False, **kwargs):
                     ins.detail_url = reverse(app_view_name, args=(ins.id, kwargs['id']))
                 else:
                     ins.detail_url = reverse(app_view_name, args=(kwargs['id'], ins.id))
+                # Don't pass reverse and id to the template in case of some conflicts
+                del kwargs['reverse']
             except KeyError:
                 # no reverse. default is false
                 ins.detail_url = reverse(app_view_name, args=(kwargs['id'], ins.id))
-
+            del kwargs['id']
         else:
             ins.detail_url = reverse(app_view_name, args=(ins.id,))
 
