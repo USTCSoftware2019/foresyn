@@ -13,7 +13,7 @@ relp_views = [
 
 
 @register.inclusion_tag('bigg_database/list.html')
-def render_list_tag(lst, model, view_name, **kwargs):
+def render_list_tag(lst, model, view_name, id=None, reverse=False, **kwargs):
     """
     This is used to render all kinds of list, including gene_list, metabolite_list, model_list, reaction_list.
     This template tag just render url for them, as the url is hard to evaluate in template.
@@ -46,4 +46,5 @@ def render_list_tag(lst, model, view_name, **kwargs):
     return {
         'list': lst,
         'model': model,
+        **kwargs
     }

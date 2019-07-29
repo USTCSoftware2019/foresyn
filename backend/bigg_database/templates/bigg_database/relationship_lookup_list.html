@@ -1,12 +1,19 @@
 {% extends "base.html" %}
 {% load bigg_database_tags %}
+{% load render_list_tag %}
 {% block title %}
-Relationship lookup for {{ from_model }}
+Relationship lookup for {{ from_model_name }}
 {% endblock %}
 
 {% block content %}
-<h2>The {{ to_model }} contain {{ from_model }}</h2>
+<h2>The {{ to_model_name }} in {{ from_model.bigg_id }}</h2>
 
-{% include "bigg_database/list.html" %}
+{% if to_model_name == 'metabolite' %}
+{% render_list_tag result_list 'metabolite' 'metabolites_in_'|add:from_model_name id=from_model.id contain_extra_info=True %}
+{% elif to_model_name == 'reaction' %}
+{% render_list_tag result_list 'reaction' 'reactions_in_'|add:from_model_name id=from_model.id contain_extra_info=True %}
+{% elif to_model_name == 'gene' %}
+{% render_list_tag result_list 'gene' 'gene_in_'|add:from_model_name id=from_model.id contain_extra_info=True %}
+{% endif %}
 
 {% endblock %}
