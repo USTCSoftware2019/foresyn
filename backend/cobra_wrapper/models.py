@@ -88,7 +88,7 @@ class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
         for field in ['charge', 'compartment']:
             if not metabolite_init[field]:
                 metabolite_init[field] = None
-        return cobra.Metabolite(metabolite_init)
+        return cobra.Metabolite(**metabolite_init)
 
 
 def validate_coefficients_is_list(value):
