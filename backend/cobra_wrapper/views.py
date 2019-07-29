@@ -185,14 +185,14 @@ class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
 
 class CobraModelDetailComputeView(LoginRequiredMixin, View):
 
-    def get(self, request, pk, method):
+    def get(self, request, pk, method):  # TODO: Actually should be post
         # content = json.loads(request.body)
         model = get_object_or_404(CobraModel, pk=pk, owner=request.user)
 
         try:
             if method == 'fba':
                 # return JsonResponse(model.fba(), status=200)
-                return render(request, 'cobra_wrapper/fba/detail.html', context={"solution": model.fba()})
+                return render(request, 'cobra_wrapper/fba/detail.html', context={"solution": model.fba(), "id": pk})
             # elif method == 'fva':
             #     # fva_params = try_get_fields(
             # content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])

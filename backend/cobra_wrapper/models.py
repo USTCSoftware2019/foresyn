@@ -88,7 +88,7 @@ class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
         for field in ['charge', 'compartment']:
             if not metabolite_init[field]:
                 metabolite_init[field] = None
-        return cobra.Metabolite(metabolite_init)
+        return cobra.Metabolite(**metabolite_init)
 
 
 def validate_coefficients_is_list(value):
@@ -170,9 +170,9 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
         for reaction in self.reactions.all():
             cobra_reaction = reaction.build()
             reaction_list.append((cobra_reaction, reaction))
-        for one, two in reaction_list:
-            cobra_reaction_list.append(one)
-            temp_reaction_list.append(two)
+        for bound in reaction_list:
+            cobra_reaction_list.append(bound[0])
+            temp_reaction_list.append(bound[1])
         cobra_model.add_reactions(cobra_reaction_list)
         i = 0
         for reaction in cobra_model.reactions:
@@ -181,7 +181,7 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
         cobra_model.objective = self.objective
         return cobra_model
 
-    def fba(self):  # FIXME
+    def fba(self):
         solution = self.build().optimize()
         return {
             'objective_value': solution.objective_value,
