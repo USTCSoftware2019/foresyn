@@ -5,6 +5,7 @@
 {% block content %}
 
 <form action="{% url 'cobra_wrapper:model_detail' model.pk %}" method="post">
+{% csrf_token %}
     <table><tbody>
         <tr><td>id</td><td>{{ model.id }}</td></tr>
         <tr><td>cobra_id</td><td>{{ model.cobra_id }}</td><td>
@@ -21,11 +22,11 @@
             {% if not forloop.counter == 1 %}
             ,
             {% endif %}
-            <a href="{% url 'cobra_wrapper:reaction_detail' reaction.pk %}">{{ reaction }}</a>:
+            <a href="{% url 'cobra_wrapper:reaction_detail' reaction.pk %}">{{ reaction }}</a>
         {% endfor %}
         ]</td><td>
-            <select name="reactions">
-            {% for reaction in model.reactions.all %}
+            <select name="reactions" multiple>
+            {% for reaction in related_models %}
                 <option value="{{ reaction.id }}">{{ reaction }}</option>
             {% endfor %}
             </select>
@@ -36,8 +37,10 @@
             <button type="submit">edit</button>
         </td></tr>
     </tbody></table>
+    <input type="hidden" name="edit">
 </form>
 <form action="{% url 'cobra_wrapper:model_detail' model.pk %}" method="post">
+{% csrf_token %}
     <input type="hidden" name="delete">
     <button type="submit">delete</button>
 </form>

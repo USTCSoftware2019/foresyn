@@ -74,7 +74,7 @@ class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
 
     MODEL_NAME = 'metabolite'
 
-    def get_list_url(self):
+    def get_list_url():
         return reverse('cobra_wrapper:metabolite_list')
 
     def get_absolute_url(self):
@@ -106,7 +106,7 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
 
     MODEL_NAME = 'reaction'
 
-    def get_list_url(self):
+    def get_list_url():
         return reverse('cobra_wrapper:reaction_list')
 
     def get_absolute_url(self):
@@ -144,7 +144,7 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
 
     MODEL_NAME = 'model'
 
-    def get_list_url(self):
+    def get_list_url():
         return reverse('cobra_wrapper:model_list')
 
     def get_absolute_url(self):

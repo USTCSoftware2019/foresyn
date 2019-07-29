@@ -36,7 +36,17 @@ def get_validation_error_content(error):
 
 
 def get_post_content(request):
-    return {field: value for field, value in request.POST.items()}
+    info = {field: value for field, value in request.POST.items()}
+    for field in info.keys():
+        if field in ['reaction', 'metabolites']:
+            info[field] = [int(pk) for pk in info[field]]  # FIXME: May raise error
+
+        if field in ['lower_bound', 'upper_bound', 'objective_coefficient']:
+            if info[field]:
+                info[field] = float(info[field])  # FIXME: See above
+            else:
+                info[field] = None
+    return info
 
 
 class ListMixin:
@@ -94,11 +104,12 @@ class DetailMixin:
 
     model = None
     fields = []
-    related_fields = {'name': None, 'to': None}
+    related_field = {'name': None, 'to': None}
 
     def get(self, request, pk):
         return render(request, 'cobra_wrapper/{}/detail.html'.format(self.model.MODEL_NAME), context={
-            self.model.MODEL_NAME: get_object_or_404(self.model, pk=pk, owner=request.user)
+            self.model.MODEL_NAME: get_object_or_404(self.model, pk=pk, owner=request.user),
+            'related_models': self.related_field['to'].objects.filter(owner=request.user)
         })
 
     def post(self, request, pk):
@@ -123,9 +134,9 @@ class DetailMixin:
 
         try:
             model.save()
-            if self.related_fields and self.related_fields['name'] in content.keys():
-                getattr(model, self.related_fields['name']).set(
-                    get_models_by_id(self.related_fields['to'], content[self.related_fields['name']], request.user))
+            if self.related_field and self.related_field['name'] in content.keys():
+                getattr(model, self.related_field['name']).set(
+                    get_models_by_id(self.related_field['to'], content[self.related_field['name']], request.user))
         except ValidationError as error:
             return HttpResponseBadRequest(json.dumps({
                 'type': 'validation_error',
