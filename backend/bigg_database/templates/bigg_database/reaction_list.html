@@ -1,22 +1,28 @@
 <table>
     <thead>
-    <tr>
-        <th>BiGG ID</th>
-        <th>Name</th>
-        <th>Pseudo Reaction</th>
-    </tr>
+        <tr>
+            <th>BiGG ID</th>
+            <th>Name</th>
+            <th>Pseudo Reaction</th>
+            {% if contain_extra_info %}
+            <th>Organism</th>
+            {% endif %}
+        </tr>
     </thead>
     <tbody>
-    {% for reaction in list %}
-    <tr>
-        <th><a href="{{ reaction.detail_url }}">{{ reaction.bigg_id }}</a></th>
-        <th>{{ reaction.name }}</th>
-        {% if reaction.pseudoreaction %}
-        <th>√</th>
-        {% else %}
-        <th>X</th>
-        {% endif %}
-    </tr>
-    {% endfor %}
+        {% for reaction in list %}
+        <tr>
+            <th><a href="{{ reaction.detail_url }}">{{ reaction.bigg_id }}</a></th>
+            <th>{{ reaction.name }}</th>
+            {% if reaction.pseudoreaction %}
+            <th>√</th>
+            {% else %}
+            <th>X</th>
+            {% endif %}
+            {% if contain_extra_info %}
+            <th>{{ reaction.gene_reaction_rule }}</th>
+            {% endif %}
+        </tr>
+        {% endfor %}
     </tbody>
 </table>

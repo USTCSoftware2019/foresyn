@@ -40,12 +40,22 @@
             <a href="{% url 'cobra_wrapper:metabolite_detail' metabolite.pk %}">{{ metabolite }}</a>:
             {{ coefficient }}
         {% endfor %}
-        ]</td><td>Temporately uneditable<!-- TODO --></td></tr>
+        ]</td></tr>
+        <tr><td></td><td>metabolites</td><td>
+            <select name="metabolites" multiple>
+            {% for metabolite in related_models %}
+                <option value="{{ metabolite.id }}">{{ metabolite }}</option>
+            {% endfor %}
+            </select>
+        </td></tr>
+        <tr><td></td><td>coefficients</td><td>
+            <input type="text" name="coefficients" value="{{ reaction.coefficient }}">
+        </td></tr>
         <tr><td>gene_reaction_rule</td><td>{{ reaction.gene_reaction_rule }}</td><td>
             <input type="text" name="gene_reaction_rule" value="{{ reaction.gene_reaction_rule }}">
         </td></tr>
         <tr><td></td><td>
-            <button type="reset">abort</button>
+            <button type="reset">reset</button>
         </td><td>
             <button type="submit">edit</button>
         </td></tr>

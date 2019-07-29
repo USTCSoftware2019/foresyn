@@ -37,15 +37,29 @@ def get_validation_error_content(error):
 
 def get_post_content(request):
     info = {field: value for field, value in request.POST.items()}
+
+    is_to_pop_metabolites_and_coefficients = False
+
     for field in info.keys():
-        if field in ['reaction', 'metabolites']:
-            info[field] = [int(pk) for pk in info[field]]  # FIXME: May raise error
+        if field in ['reactions', 'metabolites']:
+            info[field] = [int(pk) for pk in request.POST.getlist(field)]  # FIXME: May raise error
 
         if field in ['lower_bound', 'upper_bound', 'objective_coefficient']:
             if info[field]:
                 info[field] = float(info[field])  # FIXME: See above
             else:
                 info[field] = None
+
+        if field == 'coefficients':
+            if 'metabolites' not in info.keys() or not info[field]:
+                is_to_pop_metabolites_and_coefficients = True
+            else:
+                info[field] = json.loads(info[field])  # FIXME: See above
+
+    if is_to_pop_metabolites_and_coefficients:
+        info.pop('metabolites', None)
+        info.pop('coefficients', None)
+
     return info
 
 
