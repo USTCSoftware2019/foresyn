@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% load bigg_database_tags %}
+{% load render_list_tag %}
+
 {% block title %}
 Search result - {{ search_key_word }}
 {% endblock %}
@@ -8,6 +9,6 @@ Search result - {{ search_key_word }}
 
 <h3>Search result for {{ search_key_word }}</h3>
 
-{% include "bigg_database/list.html" %}
+{% render_list_tag result_list model view_name %}
 
 {% endblock %}

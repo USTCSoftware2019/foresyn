@@ -29,32 +29,25 @@ def fuzzy_search(query_set, request_name, request_data):
 class ModelSearchInfo:
     search_model = Model
     by = ['bigg_id']
-    fields = ['bigg_id', 'compartments']
-    count_number_fields = ['reaction_set', 'metabolite_set', 'gene_set']
+    view_name = 'model_detail'
 
 
 class MetaboliteSearchInfo:
     search_model = Metabolite
     by = ['bigg_id', 'name']
-    fields = ['bigg_id', 'name', 'formulae', 'charges']
-    count_number_fields = ['reactions', 'models']
+    view_name = 'metabolite_detail'
 
 
 class ReactionSearchInfo:
     search_model = Reaction
     by = ['bigg_id', 'name']
-    fields = ['bigg_id', 'name', 'reaction_string',
-              'pseudoreaction']
-    count_number_fields = ['models', 'metabolite_set', 'gene_set']
+    view_name = 'reaction_detail'
 
 
 class GeneSearchInfo:
     search_model = Gene
     by = ['bigg_id', 'name']
-    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
-              'mapped_to_genbank', 'strand', 'protein_sequence',
-              'dna_sequence', 'genome_name', 'genome_ref_string']
-    count_number_fields = ['reactions', 'models']
+    view_name = 'gene_detail'
 
 # TODO
 # Maybe it is not suitable to display the result in this way
@@ -65,41 +58,36 @@ class GeneSearchInfo:
 
 
 class SearchView(ListView):
-    '''
-    the base view for ModelSearchView, MetaboliteSearchView, ReactionSearchView and GeneSearchView
-    '''
-    http_method_names = ['get', 'post']
-    by = ['bigg_id', 'name']
+    """
+    The view to search model, reaction, gene and metabolite
+    """
+    http_method_names = ['get']
 
     template_name = 'bigg_database/search_result.html'
     context_object_name = 'result_list'
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['display_fields'] = self.result_info_model.fields + ["link"]
-        if self.result_info_model.count_number_fields:
-            for f in self.result_info_model.count_number_fields:
-                context['display_fields'].append(f.replace('_set', '') + '_count')
+    model_info_dict = {
+        'model': ModelSearchInfo,
+        'reaction': ReactionSearchInfo,
+        'metabolite': MetaboliteSearchInfo,
+        'gene': GeneSearchInfo,
+    }
 
-        # Add extra info
-        for ins in context['result_list']:
-            search_model_name = self.form.cleaned_data['search_model']
-            # Add link to detail
-            setattr(ins, 'link',
-                    reverse('bigg_database:{}_detail'.format(search_model_name), args=(ins.id,)))
-            # context['display_fields'].append('link')
+    def __init__(self):
+        super().__init__()
+        self.form = None
+        self.result_info_model = None
 
-            for f in self.result_info_model.count_number_fields:
-                # Add count for related model
-                setattr(ins, f.replace('_set', '') + '_count', getattr(ins, f).count())
-                # context['display_fields'].append(f.replace('_set', '') + '_count')
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['model'] = self.form.cleaned_data['search_model']
+        context['view_name'] = self.result_info_model.view_name
         context['search_key_word'] = self.form.cleaned_data['keyword']
         return context
 
     def get_queryset(self, *args, **kwargs):
         return set(reduce(lambda a, b: a + b,
-                          [fuzzy_search(self.result_info_model.search_model.objects.all(),
+                          [fuzzy_search(self.model.objects.all(),
                                         search_by,
                                         self.form.cleaned_data['keyword'])
                            for search_by in self.result_info_model.by]))
@@ -107,15 +95,13 @@ class SearchView(ListView):
     def get(self, request, *args, **kwargs):
         self.form = SearchForm(request.GET)
         if self.form.is_valid():
-            # FIXME: replace eval() to other safe functions
-            self.result_info_model = eval(
-                dict(self.form.fields['search_model'].choices)[self.form.cleaned_data['search_model']] + 'SearchInfo')
+            self.result_info_model = self.model_info_dict[self.form.cleaned_data['search_model']]
+            self.model = self.result_info_model.search_model
             return super().get(request, *args, **kwargs)
         else:
-            return render(request, 'bigg_database/search.html',
-                          {
-                              'form': SearchForm()
-                          })
+            return render(request, 'bigg_database/search.html', {
+                'form': SearchForm()
+            })
 
 
 class ModelDetailView(DetailView):
