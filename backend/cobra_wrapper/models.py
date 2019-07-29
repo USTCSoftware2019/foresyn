@@ -69,8 +69,8 @@ class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
     cobra_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
     formula = models.CharField(max_length=50, blank=True, default='')
-    charge = models.CharField(max_length=50, blank=True, null=True, default=None)
-    compartment = models.CharField(max_length=50, blank=True, null=True, default=None)
+    charge = models.CharField(max_length=50, blank=True, default='')
+    compartment = models.CharField(max_length=50, blank=True, default='')
 
     MODEL_NAME = 'metabolite'
 
@@ -84,7 +84,11 @@ class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
         return get_fields(self, ['id', 'cobra_id', 'name', 'formula', 'charge', 'compartment'])
 
     def build(self):
-        return cobra.Metabolite(**convert_cobra_id(self.json()))
+        metabolite_init = convert_cobra_id(self.json())
+        for field in ['charge', 'compartment']:
+            if not metabolite_init[field]:
+                metabolite_init[field] = None
+        return cobra.Metabolite(metabolite_init)
 
 
 def validate_coefficients_is_list(value):
