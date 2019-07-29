@@ -36,5 +36,3 @@ def render_list_tag(lst, model, view_name, *args):
         'list': lst,
         'model': model,
     }
-
-

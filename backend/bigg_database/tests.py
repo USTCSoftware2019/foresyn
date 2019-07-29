@@ -180,7 +180,6 @@ class NameSearchTests(TestCase):
         expect = {1, 2, 3, 4}
 
         self.assertSetEqual(metabolites, expect)
-'''
 
 
 class DetailTests(TestCase):
@@ -751,3 +750,4 @@ class RelationshipViewTests(TestCase):
         }
 
         self.assertJSONEqual(resp.content, expect)
+'''
