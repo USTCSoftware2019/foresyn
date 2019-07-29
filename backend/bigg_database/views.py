@@ -76,7 +76,10 @@ class SearchView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        context['display_fields'] = self.result_info_model.fields
+        context['display_fields'] = self.result_info_model.fields + ["link"]
+        if self.result_info_model.count_number_fields:
+            for f in self.result_info_model.count_number_fields:
+                context['display_fields'].append(f.replace('_set', '') + '_count')
 
         # Add extra info
         for ins in context['result_list']:
@@ -84,12 +87,12 @@ class SearchView(ListView):
             # Add link to detail
             setattr(ins, 'link',
                     reverse('bigg_database:{}_detail'.format(search_model_name), args=(ins.id,)))
-            context['display_fields'].append('link')
+            # context['display_fields'].append('link')
 
             for f in self.result_info_model.count_number_fields:
                 # Add count for related model
                 setattr(ins, f.replace('_set', '') + '_count', getattr(ins, f).count())
-                context['display_fields'].append(f.replace('_set', '') + '_count')
+                # context['display_fields'].append(f.replace('_set', '') + '_count')
 
         context['search_key_word'] = self.form.cleaned_data['keyword']
         return context
@@ -104,6 +107,7 @@ class SearchView(ListView):
     def get(self, request, *args, **kwargs):
         self.form = SearchForm(request.GET)
         if self.form.is_valid():
+            # FIXME: replace eval() to other safe functions
             self.result_info_model = eval(
                 dict(self.form.fields['search_model'].choices)[self.form.cleaned_data['search_model']] + 'SearchInfo')
             return super().get(request, *args, **kwargs)
