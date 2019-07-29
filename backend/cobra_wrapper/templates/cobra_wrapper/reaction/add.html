@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Add reaction{% endblock title %}
+
+{% block content %}
+
+<form action="{% url 'cobra_wrapper:reaction_list' %}" method="post">
+{% csrf_token %}
+    <table><tbody>
+        <tr><td>cobra_id</td><td><input type="text" name="cobra_id"></td></tr>
+        <tr><td>name</td><td><input type="text" name="name"></td></tr>
+        <tr><td>subsystem</td><td><input type="text" name="subsystem"></td></tr>
+        <tr><td>lower_bound</td><td><input type="text" name="lower_bound"></td></tr>
+        <tr><td>upper_bound</td><td><input type="text" name="upper_bound"></td></tr>
+        <tr><td>objective_coefficient</td><td><input type="text" name="objective_coefficient"></td></tr>
+        <tr><td>metabolites</td><td>
+            <select name="metabolites" multiple>
+            {% for metabolite in related_models %}
+                <option value="{{ metabolite.id }}">{{ metabolite }}</option>
+            {% endfor %}
+            </select>
+        </td></tr>
+        <tr><td>coefficients</td><td><input type="text" name="coefficients"></td></tr>
+        <tr><td>gene_reaction_rule</td><td><input type="text" name="gene_reaction_rule"></td></tr>
+        <tr>
+            <td><button type="reset">reset</button></td>
+            <td><button type="submit">edit</button></td>
+        </tr>
+    </tbody></table>
+</form>
+
+{% endblock content %}
