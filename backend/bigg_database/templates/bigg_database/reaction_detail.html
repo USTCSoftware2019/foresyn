@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_list_tag %}
 
 {% block title %}
 Reaction: {{ reaction.bigg_id }}
@@ -26,44 +27,10 @@ Reaction: {{ reaction.bigg_id }}
 
 <h4><a href="{% url 'bigg_database:metabolites_in_reaction' reaction.id %}">
     Related Metabolites</a></h4>
-<table>
-    <thead>
-        <tr>
-            <th>BiGG ID</th>
-            <th>Name</th>
-            <th>Stoichiometry</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for meta in reaction.reactionmetabolite_set.all %}
-        <!-- Make row clickable? Or move link to bigg_id? -->
-        <tr href="{% url 'bigg_database:metabolite_detail' meta.metabolite.id %}">
-            <td>{{ meta.metabolite.bigg_id }}</td>
-            <td>{{ meta.metabolite.name }}</td>
-            <td>{{ meta.stoichiometry }}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+{% render_list_tag reaction.metabolite_set.all 'metabolite' 'reaction_metabolite_relationship_detail' id=reaction.id %}
 
 <h4><a href="{% url 'bigg_database:reaction_from_models' reaction.id %}">
     Models Containing {{ reaction.bigg_id }}</a></h4>
-<table>
-    <thead>
-        <tr>
-            <th>BiGG ID</th>
-            <th>Organism</th>
-            <th>Subsystem</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for model in reaction.modelreaction_set.all %}
-        <tr href="{% url 'bigg_database:model_detail' model.model.id %}">
-            <td>{{ model.model.bigg_id }}</td>
-            <td>{{ model.organism }}</td>
-            <td>{{ model.subsystem }}</td>
-        </tr>
-    </tbody>
-    {% endfor %}
-</table>
+{% render_list_tag reaction.models.all 'model' 'model_reaction_relationship_detail' id=reaction.id reverse=True %}
+
 {% endblock %}

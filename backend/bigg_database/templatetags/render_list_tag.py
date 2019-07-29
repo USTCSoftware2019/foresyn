@@ -12,25 +12,36 @@ relp_views = [
 ]
 
 
-@register.inclusion_tag('list.html')
-def render_list_tag(lst, model, view_name, *args):
+@register.inclusion_tag('bigg_database/list.html')
+def render_list_tag(lst, model, view_name, **kwargs):
     """
     This is used to render all kinds of list, including gene_list, metabolite_list, model_list, reaction_list.
     This template tag just render url for them, as the url is hard to evaluate in template.
 
-    Usage: {% render_list_tag result_list 'gene' 'model_gene_relationship_detail' model.id %}
+    Usage: {% render_list_tag result_list 'gene' 'model_gene_relationship_detail' id=model.id reverse=False %}
 
     :param lst: list of instances
     :param model: one of ('gene', 'model', 'reaction', 'metabolite')
     :param view_name: one of DetailViews in urls.py
-    :param args: if view_name is one of RelationShipDetailView, you may need to pass in an extra id.
-    this id will be used to reverse url
+    :param kwargs: 'id': if view_name is one of RelationShipDetailView, you may need to pass in an extra id.
+                   'reverse': boolean. If True, it means this is a reverse lookup, extra id will be the second arg.
+                              E.g., if you want to render list of reactions from model, reverse=False,
+                              if you want to render list of models from reaction, reverse=True, default is False
     """
-    for ins in list:
+    for ins in lst:
+        app_view_name = 'bigg_database:' + view_name
         if view_name in relp_views:
-            ins.detail_url = reverse('bigg_database:' + view_name, args[0], ins.id)
+            try:
+                if kwargs['reverse']:
+                    ins.detail_url = reverse(app_view_name, args=(ins.id, kwargs['id']))
+                else:
+                    ins.detail_url = reverse(app_view_name, args=(kwargs['id'], ins.id))
+            except KeyError:
+                # no reverse. default is false
+                ins.detail_url = reverse(app_view_name, args=(kwargs['id'], ins.id))
+
         else:
-            ins.detail_url = reverse('bigg_database:' + view_name, ins.id)
+            ins.detail_url = reverse(app_view_name, args=(ins.id,))
 
     return {
         'list': lst,

@@ -1,9 +1,9 @@
 {% if model == 'model' %}
-{% include 'model_list.html' with list=list only %}
+{% include 'bigg_database/model_list.html' with list=list only %}
 {% elif model == 'reaction' %}
-{% include 'reaction_list.html' with list=list only %}
+{% include 'bigg_database/reaction_list.html' with list=list only %}
 {% elif model == 'metabolite' %}
-{% include 'metabolite_list.html' with list=list only %}
+{% include 'bigg_database/metabolite_list.html' with list=list only %}
 {% elif model == 'gene' %}
-{% include 'gene_list.html with list=list only %}
+{% include 'bigg_database/gene_list.html' with list=list only %}
 {% endif %}
