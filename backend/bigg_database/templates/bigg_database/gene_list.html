@@ -1,0 +1,18 @@
+<table>
+    <thead>
+        <tr>
+            <th>BiGG ID</th>
+            <th>Name</th>
+            <th>Genome</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for gene in list %}
+        <tr>
+            <th><a href="{{ gene.detail_url }}">{{ gene.bigg_id }}</a></th>
+            <th>{{ gene.name }}</th>
+            <th>{{ gene.gnome_name }}</th>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

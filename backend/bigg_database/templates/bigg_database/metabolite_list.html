@@ -1,0 +1,18 @@
+<table>
+    <thead>
+    <tr>
+        <th>BiGG ID</th>
+        <th>Name</th>
+        <th>Formulae</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for meta in list %}
+    <tr>
+        <th><a href="{{ meta.detail_url }}">{{ meta.bigg_id }}</a></th>
+        <th>{{ meta.name }}</th>
+        <th>{{ meta.formulae.0 }}</th>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
