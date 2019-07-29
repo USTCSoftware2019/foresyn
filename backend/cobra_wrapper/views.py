@@ -192,9 +192,10 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
         try:
             if method == 'fba':
                 # return JsonResponse(model.fba(), status=200)
-                return render(request, 'cobra_wrapper/fba/detail.html', {"solution" : model.fba()})
+                return render(request, 'cobra_wrapper/fba/detail.html', context={"solution": model.fba()})
             # elif method == 'fva':
-            #     # fva_params = try_get_fields(content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
+            #     # fva_params = try_get_fields(
+            # content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
             #
             #     try:
             #         if 'reaction_list' in content.keys():
@@ -202,7 +203,8 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
             #             content['reaction_list'] = []
             #             for reaction in reactions:
             #                 content['reaction_list'].append(reaction.build())
-            #         # return JsonResponse(model.fva(reaction_list=content['reaction_list'], **fva_params), status=200)
+            #         # return JsonResponse(model.fva(
+            # reaction_list=content['reaction_list'], **fva_params), status=200)
             #         return  # TODO
             #     except ValidationError as error:
             #         return HttpResponseBadRequest(json.dumps({

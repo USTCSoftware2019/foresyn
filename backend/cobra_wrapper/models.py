@@ -170,9 +170,9 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
         for reaction in self.reactions.all():
             cobra_reaction = reaction.build()
             reaction_list.append((cobra_reaction, reaction))
-        for reaction_pair in reaction_list:
-            cobra_reaction_list.append(reaction_pair[0])
-            temp_reaction_list.append(reaction_pair[1])
+        for one, two in reaction_list:
+            cobra_reaction_list.append(one)
+            temp_reaction_list.append(two)
         cobra_model.add_reactions(cobra_reaction_list)
         i = 0
         for reaction in cobra_model.reactions:
@@ -181,7 +181,7 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
         cobra_model.objective = self.objective
         return cobra_model
 
-    def fba(self):
+    def fba(self):  # FIXME
         solution = self.build().optimize()
         return {
             'objective_value': solution.objective_value,
