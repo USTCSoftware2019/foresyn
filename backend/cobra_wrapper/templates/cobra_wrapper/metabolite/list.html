@@ -5,12 +5,12 @@
 {% block content %}
 
 {% for metabolite in all %}
-<table>
+<table><tbody>
     <tr><td>id</td><td>{{ metabolite.id }}</td></tr>
     <tr><td>cobra_id</td><td>{{ metabolite.cobra_id }}</td></tr>
     <tr><td>name</td><td>{{ metabolite.name }}</td></tr>
     <tr><td><a href="{% url 'cobra_wrapper:metabolite_detail' metabolite.pk %}">see detail</a></td></tr>
-</table>
+</tbody></table>
 {% endfor %}
 
 {% endblock content %}

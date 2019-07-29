@@ -12,7 +12,7 @@ from .models import CobraModel, CobraReaction, CobraMetabolite
 
 def get_models_by_id(model_type, pk_list, model_owner):
     try:
-        return [model_type.objects.get(id=pk, owner=model_owner) for pk in pk_list]
+        return [model_type.objects.get(id=int(pk), owner=model_owner) for pk in pk_list]
     except model_type.DetailDoesNotExist:
         raise ValidationError('invalid id in model id list', 'invalid')
 
@@ -36,9 +36,7 @@ def get_validation_error_content(error):
 
 
 def get_post_content(request):
-    return {
-        field: (json.loads(value) if value and value[0] == '[' else value) for field, value in request.POST.items()
-    }
+    return {field: value for field, value in request.POST.items()}
 
 
 class ListMixin:

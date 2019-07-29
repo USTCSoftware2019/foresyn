@@ -5,12 +5,12 @@
 {% block content %}
 
 {% for model in all %}
-<table>
+<table><tbody>
     <tr><td>id</td><td>{{ model.id }}</td></tr>
     <tr><td>cobra_id</td><td>{{ model.cobra_id }}</td></tr>
     <tr><td>name</td><td>{{ model.name }}</td></tr>
     <tr><td><a href="{% url 'cobra_wrapper:model_detail' model.pk %}">see detail</a></td></tr>
-</table>
+</tbody></table>
 {% endfor %}
 
 {% endblock content %}

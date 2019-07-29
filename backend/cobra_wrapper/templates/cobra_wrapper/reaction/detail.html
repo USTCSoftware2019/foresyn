@@ -4,30 +4,55 @@
 
 {% block content %}
 
-<table>
-    <tr><td>id</td><td>{{ reaction.id }}</td></tr>
-    <tr><td>cobra_id</td><td>{{ reaction.cobra_id }}</td></tr>
-    <tr><td>name</td><td>{{ reaction.name }}</td></tr>
-    <tr><td>subsystem</td><td>{{ reaction.subsystem }}</td></tr>
-    <tr><td>lower_bound</td><td>{{ reaction.lower_bound }}</td></tr>
-    <tr><td>upper_bound</td><td>
-    {% if reaction.upper_bound %}
-        {{ reaction.upper_bound }}
-    {% else %}
-        None
-    {% endif %}
-    </td></tr>
-    <tr><td>objective_coefficient</td><td>{{ reaction.objective_coefficient }}</td></tr>
-    <tr><td>metabolites and coefficients</td><td>[
-    {% for metabolite, coefficient in reaction.get_metabolites_and_coefficients %}
-        {% if not forloop.counter == 1 %}
-        ,
+<form action="{% url 'cobra_wrapper:reaction_detail' reaction.pk %}" method="post">
+    <tbody><tbody>
+        <tr><td>id</td><td>{{ reaction.id }}</td></tr>
+        <tr><td>cobra_id</td><td>{{ reaction.cobra_id }}</td><td>
+            <input type="text" name="cobra_id" value="{{ reaction.cobra_id }}">
+        </td></tr>
+        <tr><td>name</td><td>{{ reaction.name }}</td><td>
+            <input type="text" name="name" value="{{ reaction.name }}">
+        </td></tr>
+        <tr><td>subsystem</td><td>{{ reaction.subsystem }}</td><td>
+            <input type="text" name="subsystem" value="{{ reaction.subsystem }}">
+        </td></tr>
+        <tr><td>lower_bound</td><td>{{ reaction.lower_bound }}</td><td>
+            <input type="number" name="lower_bound" value="{{ reaction.lower_bound }}">
+        </td></tr>
+        <tr><td>upper_bound</td><td>
+            <input type="number" name="upper_bound" value="{{ reaction.upper_bound }}">
+        </td><td>
+        {% if reaction.upper_bound %}
+            {{ reaction.upper_bound }}
+        {% else %}
+            None
         {% endif %}
-        <a href="{% url 'cobra_wrapper:metabolite_detail' metabolite.pk %}">{{ metabolite }}</a>:
-        {{ coefficient }}
-    {% endfor %}
-    ]</td></tr>
-    <tr><td>gene_reaction_rule</td><td>{{ reaction.gene_reaction_rule }}</td></tr>
-</table>
+        </td></tr>
+        <tr><td>objective_coefficient</td><td>{{ reaction.objective_coefficient }}</td><td>
+            <input type="text" name="objective_coefficient" value="{{ reaction.objective_coefficient }}">
+        </td></tr>
+        <tr><td>metabolites and coefficients</td><td>[
+        {% for metabolite, coefficient in reaction.get_metabolites_and_coefficients %}
+            {% if not forloop.counter == 1 %}
+            ,
+            {% endif %}
+            <a href="{% url 'cobra_wrapper:metabolite_detail' metabolite.pk %}">{{ metabolite }}</a>:
+            {{ coefficient }}
+        {% endfor %}
+        ]</td><td>Temporately uneditable<!-- TODO --></td></tr>
+        <tr><td>gene_reaction_rule</td><td>{{ reaction.gene_reaction_rule }}</td><td>
+            <input type="text" name="gene_reaction_rule" value="{{ reaction.gene_reaction_rule }}">
+        </td></tr>
+        <tr><td></td><td>
+            <button type="reset">abort</button>
+        </td><td>
+            <button type="submit">edit</button>
+        </td></tr>
+    </tbody></tbody>
+</form>
+<form action="{% url 'cobra_wrapper:reaction_detail' reaction.pk %}" method="post">
+    <input type="hidden" name="delete">
+    <button type="submit">delete</button>
+</form>
 
 {% endblock content %}
