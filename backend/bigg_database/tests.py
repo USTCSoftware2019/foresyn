@@ -66,7 +66,7 @@ class DetailTests(TestCase):
         resp = self.client.get('/database/model/1')
 
         self.assertTemplateUsed(resp, 'bigg_database/model_detail.html')
-        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+        self.assertTemplateNotUsed(resp, 'bigg_database/list.html')
 
         self.assertContains(resp, 'Model metrics')
         self.assertContains(resp, '/database/model/1/reactions')
@@ -94,12 +94,12 @@ class DetailTests(TestCase):
 
         resp = self.client.get('/database/metabolite/1')
 
-        self.assertContains('nac_e')
-        self.assertContains('/database/model/1/metabolites/1')
-        self.assertContains('/database/reaction/1/metabolites')
+        self.assertContains(resp, 'nac_e')
+        self.assertContains(resp, '/database/model/1/metabolites/1')
+        self.assertContains(resp, '/database/reaction/1/metabolites')
 
     def test_gene_detail(self):
-        resp = self.client.get('/database/gene/1')
+        resp = self.client.get('/database/gene/4')
 
         self.assertTemplateUsed(resp, 'bigg_database/gene_detail.html')
         self.assertTemplateUsed(resp, 'bigg_database/list.html')
@@ -242,10 +242,6 @@ class IdSearchApiTests(TestCase):
     def test_search_with_id_and_name(self):
 
         client = Client()
-        data = {
-            'bigg_id': 'Iaf',
-            'name': "It doesn't matter",
-        }
         resp = client.get('/database/api/search/model', {
             'bigg_id': 'Iaf',
             'name': "It doesn't matter",
@@ -259,7 +255,7 @@ class IdSearchApiTests(TestCase):
         self.assertSetEqual(models, expect)
 
 
-class NameSearchTests(TestCase):
+class NameSearchApiTests(TestCase):
     fixtures = ['bigg_database/test_data']
 
     def test_name_reaction(self):
@@ -290,7 +286,7 @@ class NameSearchTests(TestCase):
         self.assertSetEqual(metabolites, expect)
 
 
-class DetailTests(TestCase):
+class DetailApiTests(TestCase):
     fixtures = ['bigg_database/test_data']
 
     def test_model_detail(self):
@@ -389,7 +385,7 @@ class DetailTests(TestCase):
         self.assertJSONEqual(resp.content, expect)
 
 
-class RelationshipTests(TestCase):
+class RelationshipApiTests(TestCase):
     """
     this will test and show how to do manytomanyfield lookup, reverse lookup, and fetch through fields
     """
@@ -467,7 +463,7 @@ class RelationshipTests(TestCase):
         self.assertEqual(through.stoichiometry, 1)
 
 
-class RelationshipViewTests(TestCase):
+class RelationshipViewApiTests(TestCase):
     """
     this will test GenesInModel, GenesInReaction, MetabolitesInModel, ...
     """
