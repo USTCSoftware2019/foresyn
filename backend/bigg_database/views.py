@@ -50,13 +50,6 @@ class GeneSearchInfo:
     by = ['bigg_id', 'name']
     view_name = 'gene_detail'
 
-# TODO
-# Maybe it is not suitable to display the result in this way
-# Redirect to a truly list view is better
-# Or submit the keyword and search_by through url param
-#
-# Add link to each result
-
 
 class SearchView(ListView):
     """
@@ -206,7 +199,6 @@ class ReactionsInModel(RelationshipLookupView):
     '''
     Lookup which reactions are in a model
     '''
-    fields = ['bigg_id', 'name']
     from_model = Model
     to_model_name = 'reaction_set'
 
@@ -226,7 +218,6 @@ class MetabolitesInReaction(RelationshipLookupView):
     '''
     Lookup which metabolites are in a reaction
     '''
-    fields = ['bigg_id', 'name', 'formulae', 'charges', 'database_links']
     from_model = Reaction
     to_model_name = 'metabolite_set'
 
@@ -242,7 +233,6 @@ class GenesInReaction(RelationshipLookupView):
     '''
     Lookup which genes are related to reaction
     '''
-    fields = ['bigg_id', 'name', 'genome_name']
     from_model = Reaction
     to_model_name = 'gene_set'
 
@@ -258,7 +248,6 @@ class GeneFromModels(RelationshipLookupView):
     '''
     Reverse lookup which models contain a certain gene
     '''
-    fields = ['bigg_id', 'compartments']
     from_model = Gene
     to_model_name = 'models'
     template_name = 'bigg_database/relationship_reverse_lookup_list.html'
@@ -268,7 +257,6 @@ class MetaboliteFromModels(RelationshipLookupView):
     '''
     Reverse lookup which models contain a certain metabolite
     '''
-    fields = ['bigg_id', 'compartments']
     from_model = Metabolite
     to_model_name = 'models'
     template_name = 'bigg_database/relationship_reverse_lookup_list.html'
@@ -285,7 +273,6 @@ class ReactionFromModels(RelationshipLookupView):
     '''
     Reverse lookup which models contain a certain reaction
     '''
-    fields = ['bigg_id', 'compartments']
     from_model = Reaction
     to_model_name = 'models'
     template_name = 'bigg_database/relationship_reverse_lookup_list.html'
@@ -306,7 +293,6 @@ class GeneFromReactions(RelationshipLookupView):
     '''
     Reverse lookup which reactions contain a certain gene
     '''
-    fields = ['bigg_id', 'name', 'reaction_string']
     from_model = Gene
     to_model_name = 'reactions'
     template_name = 'bigg_database/relationship_reverse_lookup_list.html'
@@ -341,7 +327,6 @@ class RelationshipDetailView(View):
     from_model = None
     to_model = None
     template_name = None
-    fields = []
 
     def get_object_extra_info(self, *args, **kwargs):
         return {}
