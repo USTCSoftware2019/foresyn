@@ -42,11 +42,17 @@ def get_post_content(request):
 
     for field in info.keys():
         if field in ['reactions', 'metabolites']:
-            info[field] = [int(pk) for pk in request.POST.getlist(field)]  # FIXME: May raise error
+            try:
+                info[field] = [int(pk) for pk in request.POST.getlist(field)]
+            except ValueError:
+                pass
 
         if field in ['lower_bound', 'upper_bound', 'objective_coefficient']:
             if info[field]:
-                info[field] = float(info[field])  # FIXME: See above
+                try:
+                    info[field] = float(info[field])
+                except ValueError:
+                    pass
             else:
                 info[field] = None
 
@@ -54,7 +60,10 @@ def get_post_content(request):
             if 'metabolites' not in info.keys() or not info[field]:
                 is_to_pop_metabolites_and_coefficients = True
             else:
-                info[field] = json.loads(info[field])  # FIXME: See above
+                try:
+                    info[field] = json.loads(info[field])
+                except json.decoder.JSONDecodeError:
+                    pass
 
     if is_to_pop_metabolites_and_coefficients:
         info.pop('metabolites', None)
