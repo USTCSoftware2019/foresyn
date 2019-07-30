@@ -35,26 +35,41 @@ def get_validation_error_content(error):
     }
 
 
-def get_post_content(request):
-    info = {field: value for field, value in request.POST.items()}
+def get_request_content(method, request):
+    info = {field: value for field, value in getattr(request, method).items()}
 
     is_to_pop_metabolites_and_coefficients = False
 
     for field in info.keys():
-        if field in ['reactions', 'metabolites']:
-            info[field] = [int(pk) for pk in request.POST.getlist(field)]  # FIXME: May raise error
+        if field in ['reactions', 'metabolites', 'reaction_list']:
+            try:
+                info[field] = [int(pk) for pk in getattr(request, method).getlist(field)]
+            except ValueError:
+                pass
 
-        if field in ['lower_bound', 'upper_bound', 'objective_coefficient']:
+        if field in ['lower_bound', 'upper_bound', 'objective_coefficient', 'pfba_factor']:
             if info[field]:
-                info[field] = float(info[field])  # FIXME: See above
+                try:
+                    info[field] = float(info[field])
+                except ValueError:
+                    pass
             else:
                 info[field] = None
+
+        if field == 'fraction_of_optimum':
+            try:
+                info[field] = float(info[field])
+            except ValueError:
+                pass
 
         if field == 'coefficients':
             if 'metabolites' not in info.keys() or not info[field]:
                 is_to_pop_metabolites_and_coefficients = True
             else:
-                info[field] = json.loads(info[field])  # FIXME: See above
+                try:
+                    info[field] = json.loads(info[field])
+                except json.decoder.JSONDecodeError:
+                    pass
 
     if is_to_pop_metabolites_and_coefficients:
         info.pop('metabolites', None)
@@ -73,7 +88,7 @@ class ListMixin:
     to_model = None
 
     def post(self, request):
-        content = get_post_content(request)
+        content = get_request_content('GET', request)
         try:
             new_model = self.model.objects.create(**try_get_fields(content, self.fields), owner=request.user)
             if self.relation_field:
@@ -149,7 +164,7 @@ class DetailMixin:
         return redirect(self.model.get_list_url())
 
     def _patch(self, request, pk):
-        content = get_post_content(request)
+        content = get_request_content('GET', request)
         model = get_object_or_404(self.model, owner=request.user, id=pk)
 
         for field in self.fields:
@@ -200,44 +215,48 @@ class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
 class CobraModelDetailComputeView(LoginRequiredMixin, View):
 
     def get(self, request, pk, method):  # TODO: Actually should be post
-        # content = json.loads(request.body)
+        content = get_request_content('GET', request)
         model = get_object_or_404(CobraModel, pk=pk, owner=request.user)
 
         try:
             if method == 'fba':
-                # return JsonResponse(model.fba(), status=200)
                 return render(request, 'cobra_wrapper/model/fba.html', context={
                     'solution': model.fba(), 'model': model
                 })
-            # elif method == 'fva':
-            #     # fva_params = try_get_fields(
-            # content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
-            #
-            #     try:
-            #         if 'reaction_list' in content.keys():
-            #             reactions = get_models_by_id(CobraReaction, content['reaction_list'], request.user)
-            #             content['reaction_list'] = []
-            #             for reaction in reactions:
-            #                 content['reaction_list'].append(reaction.build())
-            #         # return JsonResponse(model.fva(
-            # reaction_list=content['reaction_list'], **fva_params), status=200)
-            #         return  # TODO
-            #     except ValidationError as error:
-            #         return HttpResponseBadRequest(json.dumps({
-            #             'type': 'validation_error',
-            #             'content': {
-            #                 'reaction_list': [
-            #                     {
-            #                         'code': error.code,
-            #                         'message': error.message
-            #                     }
-            #                 ]
-            #             }
-            #         }))
+
+            elif method == 'fva':
+                fva_params = try_get_fields(content, ['loopless', 'fraction_of_optimum', 'pfba_factor'])
+
+                try:
+                    if 'reaction_list' in content.keys():
+                        reactions = get_models_by_id(CobraReaction, content['reaction_list'], request.user)
+                        content['reaction_list'] = []
+                        for reaction in reactions:
+                            content['reaction_list'].append(reaction.build())
+                    solution_temp = model.fva(reaction_list=content['reaction_list'], **fva_params)
+                    solution = []
+                    for name in solution_temp['maximum'].keys():
+                        solution.append((name, solution_temp['maximum'][name], solution_temp['minimum'][name]))
+                    return render(request, 'cobra_wrapper/model/fva.html', context={
+                        'solution': solution, 'model': model
+                    })
+                except ValidationError as error:
+                    return HttpResponseBadRequest(json.dumps({
+                        'type': 'validation_error',
+                        'content': {
+                            'reaction_list': [
+                                {
+                                    'code': error.code,
+                                    'message': error.message
+                                }
+                            ]
+                        }
+                    }))
+
             else:
                 return Http404()
         except OptimizationError as error:
-            return HttpResponseBadRequest(json.dumps({'code': 'cobra-error', 'message': error.args[0]}))
+            return HttpResponseBadRequest(json.dumps({'type': 'cobra_error', 'content': error.args[0]}))
 
 
 class NewMixin:

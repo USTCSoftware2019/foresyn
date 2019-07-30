@@ -49,4 +49,15 @@
     To see fba result of model {{ model }}
 </a>
 
+<form action="{% url 'cobra_wrapper:model_detail_computation' model.pk 'fva' %}" method="get">
+    <select name="reaction_list" multiple>
+    {% for reaction in related_models %}
+        <option value="{{ reaction.id }}">{{ reaction }}</option>
+    {% endfor %}
+    </select>
+    <input type="checkbox" name="loopless">
+    <input type="text" name="fraction_of_optimum" value="1.0">
+    <input type="text" name="pfba_factor">
+    <button type="reset">reset</button> <button type="submit">submit</button>
+</form>
 {% endblock content %}
