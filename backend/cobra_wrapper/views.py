@@ -233,7 +233,10 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
                         content['reaction_list'] = []
                         for reaction in reactions:
                             content['reaction_list'].append(reaction.build())
-                    solution = model.fva(reaction_list=content['reaction_list'], **fva_params)
+                    solution_temp = model.fva(reaction_list=content['reaction_list'], **fva_params)
+                    solution = []
+                    for name in solution_temp['maximum'].keys():
+                        solution.append((name, solution_temp['maximum'][name], solution_temp['minimum'][name]))
                     return render(request, 'cobra_wrapper/model/fva.html', context={
                         'solution': solution, 'model': model
                     })

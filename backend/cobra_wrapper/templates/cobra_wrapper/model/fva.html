@@ -10,11 +10,11 @@
         <th>maximum</th>
         <th>minimum</th>
     </tr>
-    {% for name in solution.maximum.keys %}
+    {% for name, max, min in solution %}
     <tr>
         <td>{{ name }}</td>
-        <td>{{ solution.maximum.name }}</td>
-        <td>{{ solution.minimum.name }}</td>
+        <td>{{ max }}</td>
+        <td>{{ min }}</td>
     </tr>
     {% endfor %}
 </table>
