@@ -59,7 +59,7 @@ class SearchTests(TestCase):
             self.assertContains(resp, bigg_id)
 
 
-class RelationshipTests(TestCase):
+class RelationshipListViewTests(TestCase):
     fixtures = ['bigg_database/test_data']
 
     def test_metabolites_in_model(self):
@@ -87,10 +87,10 @@ class RelationshipTests(TestCase):
     def test_reactions_in_model(self):
         resp = self.client.get('/database/model/1/reactions')
 
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
         self.assertTemplateUsed(resp, 'bigg_database/reaction_list.html')
         self.assertTemplateUsed(resp, 'bigg_database/list.html')
-        self.assertEqual(resp.status_code, 200)
 
         self.assertContains(resp, 'The reactions in iAF987')
 
@@ -103,6 +103,7 @@ class RelationshipTests(TestCase):
     def test_genes_in_model(self):
         resp = self.client.get('/database/model/1/genes')
 
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
         self.assertTemplateUsed(resp, 'bigg_database/gene_list.html')
         self.assertTemplateUsed(resp, 'bigg_database/list.html')
@@ -115,6 +116,7 @@ class RelationshipTests(TestCase):
     def test_metabolites_in_reaction(self):
         resp = self.client.get('/database/reaction/1/metabolites')
 
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
         self.assertTemplateUsed(resp, 'bigg_database/metabolite_list.html')
         self.assertTemplateUsed(resp, 'bigg_database/list.html')
@@ -128,6 +130,7 @@ class RelationshipTests(TestCase):
     def test_gene_from_reactions(self):
         resp = self.client.get('/database/reaction/1/genes')
 
+        self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
         self.assertTemplateUsed(resp, 'bigg_database/gene_list.html')
         self.assertTemplateUsed(resp, 'bigg_database/list.html')
@@ -135,6 +138,75 @@ class RelationshipTests(TestCase):
         self.assertContains(resp, 'The genes in PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
         self.assertContains(resp, '/database/reaction/1/genes/1')
         self.assertContains(resp, 'CRv4_Au5_s2_g9116_t1')
+
+
+class ReverseRelationshipListTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_gene_from_models(self):
+        resp = self.client.get('/database/gene/1/models')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/model_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The models contain CRv4_Au5_s2_g9116_t1')
+        self.assertContains(resp, '/database/model/1/genes/1')
+        self.assertContains(resp, 'iAF987')
+        self.assertContains(resp, 'c, e, p')
+
+    def test_metabolite_from_models(self):
+        resp = self.client.get('/database/metabolite/1/models')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/model_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The models contain nac_e')
+        self.assertContains(resp, '/database/model/1/metabolites/1')
+        self.assertContains(resp, 'iAF987')
+        self.assertContains(resp, 'c, e, p')
+
+    def test_reaction_from_models(self):
+        resp = self.client.get('/database/reaction/1/models')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/model_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The models contain PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, '/database/model/1/reactions/1')
+        self.assertContains(resp, 'iAF987')
+        self.assertContains(resp, 'c, e, p')
+
+    def test_gene_from_reactions(self):
+        resp = self.client.get('/database/gene/1/reactions')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The reactions contain CRv4_Au5_s2_g9116_t1')
+        self.assertContains(resp, '/database/reaction/1/genes/1')
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, 'Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)')
+
+    def test_metabolite_from_reactions(self):
+        resp = self.client.get('/database/metabolite/1/reactions')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The reactions contain nac_e')
+        self.assertContains(resp, '/database/reaction/1/metabolites/1')
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, 'Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)')
 
 
 '''
