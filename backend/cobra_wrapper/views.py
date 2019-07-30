@@ -1,4 +1,5 @@
 import json
+import math
 
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.views import View
@@ -37,9 +38,6 @@ def get_validation_error_content(error):
 
 def get_request_content(method, request):
     info = {field: value for field, value in getattr(request, method).items()}
-
-    is_to_pop_metabolites_and_coefficients = False
-
     for field in info.keys():
         if field in ['reactions', 'metabolites', 'reaction_list']:
             try:
@@ -47,34 +45,33 @@ def get_request_content(method, request):
             except ValueError:
                 pass
 
-        if field in ['lower_bound', 'upper_bound', 'objective_coefficient', 'pfba_factor']:
+        if field in ['lower_bound', 'upper_bound', 'objective_coefficient', 'pfba_factor', 'fraction_of_optimum']:
             if info[field]:
                 try:
                     info[field] = float(info[field])
                 except ValueError:
                     pass
             else:
-                info[field] = None
-
-        if field == 'fraction_of_optimum':
-            try:
-                info[field] = float(info[field])
-            except ValueError:
-                pass
+                info[field] = {
+                    'lower_bound': 0.0,
+                    'upper_bound': math.nan,
+                    'objective_coefficient': 0.0,
+                    'pfba_factor': None,
+                    'fraction_of_optimum': 1.0
+                }[field]
 
         if field == 'coefficients':
             if 'metabolites' not in info.keys() or not info[field]:
-                is_to_pop_metabolites_and_coefficients = True
+                info.pop('metabolites', None)
+                info.pop('coefficients', None)
             else:
                 try:
                     info[field] = json.loads(info[field])
                 except json.decoder.JSONDecodeError:
                     pass
 
-    if is_to_pop_metabolites_and_coefficients:
-        info.pop('metabolites', None)
-        info.pop('coefficients', None)
-
+        if field == 'loopless':
+            info[field] = True
     return info
 
 
@@ -270,17 +267,17 @@ class NewMixin:
         })
 
 
-class CobraMetaboliteNewView(NewMixin, View):
+class CobraMetaboliteNewView(LoginRequiredMixin, NewMixin, View):
     model = CobraMetabolite
 
 
-class CobraReactionNewView(NewMixin, View):
+class CobraReactionNewView(LoginRequiredMixin, NewMixin, View):
     model = CobraReaction
 
     to_model = CobraMetabolite
 
 
-class CobraModelNewView(NewMixin, View):
+class CobraModelNewView(LoginRequiredMixin, NewMixin, View):
     model = CobraModel
 
     to_model = CobraReaction

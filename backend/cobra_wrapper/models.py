@@ -1,4 +1,5 @@
 import json
+import math
 
 from django.db import models, connection
 from django.contrib.auth.models import User
@@ -80,15 +81,14 @@ class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
     def get_absolute_url(self):
         return reverse("cobra_wrapper:metabolite_detail", kwargs={"pk": self.pk})
 
-    def json(self):
-        return get_fields(self, ['id', 'cobra_id', 'name', 'formula', 'charge', 'compartment'])
-
     def build(self):
-        metabolite_init = convert_cobra_id(self.json())
-        for field in ['charge', 'compartment']:
-            if not metabolite_init[field]:
-                metabolite_init[field] = None
-        return cobra.Metabolite(**metabolite_init)
+        return cobra.Metabolite(
+            id=self.cobra_id,
+            name=self.name,
+            formula=self.formula,
+            charge=(self.charge if self.charge else None),
+            compartment=(self.compartment if self.compartment else None)
+        )
 
 
 def validate_coefficients_is_list(value):
@@ -102,7 +102,7 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
     name = models.CharField(max_length=50, blank=True, default='')
     subsystem = models.CharField(max_length=50, blank=True, default='')
     lower_bound = models.FloatField(default=0.0)
-    upper_bound = models.FloatField(blank=True, null=True, default=None)
+    upper_bound = models.FloatField(default=math.nan)
     objective_coefficient = models.FloatField(default=0.0)
     metabolites = models.ManyToManyField(CobraMetabolite)
     coefficients = JSONField(default=[], validators=[validate_coefficients_is_list])
@@ -116,22 +116,15 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
     def get_absolute_url(self):
         return reverse("cobra_wrapper:reaction_detail", kwargs={"pk": self.pk})
 
-    def json(self):
-        return dict(
-            **get_fields(self, [
-                'id', 'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient',
-                'coefficients', 'gene_reaction_rule'
-            ]),
-            metabolites=[metabolite.id for metabolite in self.metabolites.all()]
-        )
-
     def build(self):
-        reaction_init = convert_cobra_id(self.json())
-        for field in ['metabolites', 'coefficients', 'objective_coefficient', 'gene_reaction_rule']:
-            reaction_init.pop(field)
-        cobra_reaction = cobra.Reaction(**reaction_init)
-        cobra_reaction.add_metabolites(
-            dict(zip([metabolite.build() for metabolite in self.metabolites.all()], self.coefficients)))
+        cobra_reaction = cobra.Reaction(
+            id=self.cobra_id,
+            name=self.name,
+            subsystem=self.subsystem,
+            lower_bound=self.lower_bound,
+            upper_bound=(self.upper_bound if self.upper_bound != math.nan else None)
+        )
+        cobra_reaction.add_metabolites(self.get_metabolites_and_coefficients)
         cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
         return cobra_reaction
 
@@ -154,16 +147,12 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
     def get_absolute_url(self):
         return reverse("cobra_wrapper:model_detail", kwargs={"pk": self.pk})
 
-    def json(self):
-        return dict(
-            **get_fields(self, ['id', 'cobra_id', 'name', 'objective']),
-            reactions=[reaction.id for reaction in self.reactions.all()]
-        )
-
     def build(self):
-        model_init = convert_cobra_id(self.json())
-        model_init.pop('reactions')
-        cobra_model = cobra.Model(model_init)
+        cobra_model = cobra.Model(
+            id=self.cobra_id,
+            name=self.name,
+            objective=self.objective
+        )
 
         reaction_pairs = []
         for reaction in self.reactions.all():
