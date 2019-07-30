@@ -59,6 +59,59 @@ class SearchTests(TestCase):
             self.assertContains(resp, bigg_id)
 
 
+class DetailTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_model_detail(self):
+        resp = self.client.get('/database/model/1')
+
+        self.assertTemplateUsed(resp, 'bigg_database/model_detail.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'Model metrics')
+        self.assertContains(resp, '/database/model/1/reactions')
+        self.assertContains(resp, '/database/model/1/metabolites')
+        self.assertContains(resp, '/database/model/1/genes')
+
+    def test_reaction_detail(self):
+        resp = self.client.get('/database/reaction/1')
+
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_detail.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, '/database/reaction/1/metabolites/1')
+        self.assertContains(resp, '/database/model/1/reactions/1')
+
+    def test_metabolite_detail(self):
+        resp = self.client.get('/database/metabolite/10')
+
+        self.assertTemplateUsed(resp, 'bigg_database/metabolite_detail.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'f420_7_c')
+        self.assertNotContains(resp, 'Charges')
+
+        resp = self.client.get('/database/metabolite/1')
+
+        self.assertContains('nac_e')
+        self.assertContains('/database/model/1/metabolites/1')
+        self.assertContains('/database/reaction/1/metabolites')
+
+    def test_gene_detail(self):
+        resp = self.client.get('/database/gene/1')
+
+        self.assertTemplateUsed(resp, 'bigg_database/gene_detail.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'UM146_11635')
+
+    def test_object_not_exist(self):
+        resp = self.client.get('/database/reaction/101')
+
+        self.assertEqual(resp.status_code, 404)
+
+
 class RelationshipTests(TestCase):
     fixtures = ['bigg_database/test_data']
 

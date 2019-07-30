@@ -3,10 +3,7 @@ from django.contrib.auth.models import User
 
 
 class ModelTest(TestCase):
-    fixtures = ['bigg_database/test_data',
-                'bigg_database/test_gene_data',
-                'bigg_database/test_relationship_data'
-                ]
+    fixtures = ['bigg_database/test_data',]
 
     def _create_user_and_login(self):
         user_info = {'username': 'test', 'password': '12345678'}
