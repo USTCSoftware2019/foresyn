@@ -164,20 +164,16 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
         model_init = convert_cobra_id(self.json())
         model_init.pop('reactions')
         cobra_model = cobra.Model(model_init)
-        reaction_list = []
-        cobra_reaction_list = []
-        temp_reaction_list = []
+
+        reaction_pairs = []
         for reaction in self.reactions.all():
             cobra_reaction = reaction.build()
-            reaction_list.append((cobra_reaction, reaction))
-        for bound in reaction_list:
-            cobra_reaction_list.append(bound[0])
-            temp_reaction_list.append(bound[1])
-        cobra_model.add_reactions(cobra_reaction_list)
-        i = 0
-        for reaction in cobra_model.reactions:
-            reaction.objective_coefficient = temp_reaction_list[i].objective_coefficient
-            i += 1
+            reaction_pairs.append((cobra_reaction, reaction))
+        cobra_model.add_reactions(list(zip(*reaction_pairs))[0])
+
+        for cobra_reaction, reaction in reaction_pairs:
+            cobra_reaction.objective_coefficient = reaction.objective_coefficient
+
         cobra_model.objective = self.objective
         return cobra_model
 
