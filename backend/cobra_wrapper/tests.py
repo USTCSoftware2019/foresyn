@@ -151,21 +151,21 @@ class CobraWrapperViewTests(TestCase):
         # model_set_response = self.client.get('/cobra/models/', content_type='application/json')
         # self.assertContains(model_set_response, 'content')
 
-    def test_detail_get_ok(self):
-        user = self._create_user_and_login()
-        info = self._create_models(user)
+    # def test_detail_get_ok(self):
+    #     user = self._create_user_and_login()
+    #     info = self._create_models(user)
 
-        model_response = self.client.get('/cobra/models/{}/'.format(info['models'][0].id))
-        self.assertEqual(model_response.status_code, 200)
-        self.assertContains(model_response, 'objective')
+    #     model_response = self.client.get('/cobra/models/{}/'.format(info['models'][0].id))
+    #     self.assertEqual(model_response.status_code, 200)
+    #     self.assertContains(model_response, 'objective')
 
-        reaction_response = self.client.get('/cobra/reactions/{}/'.format(info['reactions'][0].id))
-        self.assertEqual(reaction_response.status_code, 200)
-        self.assertContains(reaction_response, 'subsystem')
+    #     reaction_response = self.client.get('/cobra/reactions/{}/'.format(info['reactions'][0].id))
+    #     self.assertEqual(reaction_response.status_code, 200)
+    #     self.assertContains(reaction_response, 'subsystem')
 
-        metabolite_response = self.client.get('/cobra/metabolites/{}/'.format(info['metabolites'][0].id))
-        self.assertEqual(metabolite_response.status_code, 200)
-        self.assertContains(metabolite_response, 'formula')
+    #     metabolite_response = self.client.get('/cobra/metabolites/{}/'.format(info['metabolites'][0].id))
+    #     self.assertEqual(metabolite_response.status_code, 200)
+    #     self.assertContains(metabolite_response, 'formula')
 
     def test_detail_get_failure(self):
         self._create_user_and_login()
