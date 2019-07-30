@@ -225,7 +225,7 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
                 })
 
             elif method == 'fva':
-                fva_params = try_get_fields(content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
+                fva_params = try_get_fields(content, ['loopless', 'fraction_of_optimum', 'pfba_factor'])
 
                 try:
                     if 'reaction_list' in content.keys():
@@ -256,7 +256,7 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
             else:
                 return Http404()
         except OptimizationError as error:
-            return HttpResponseBadRequest(json.dumps({'code': 'cobra-error', 'message': error.args[0]}))
+            return HttpResponseBadRequest(json.dumps({'type': 'cobra_error', 'content': error.args[0]}))
 
 
 class NewMixin:
