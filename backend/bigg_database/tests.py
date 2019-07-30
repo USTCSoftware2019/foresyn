@@ -59,17 +59,15 @@ class SearchTests(TestCase):
             self.assertContains(resp, bigg_id)
 
 
-'''
-class IdSearchTests(TestCase):
+class IdSearchApiTests(TestCase):
     fixtures = ['bigg_database/test_data']
 
     def test_id_model(self):
 
         client = Client()
-        data = {
-            "bigg_id": "Iaf"
-        }
-        resp = client.get(build_url('search_model', get=data))
+        resp = client.get('/database/api/search/model', {
+            'bigg_id': 'Iaf',
+        })
         resp = json.loads(resp.content)
 
         models = {model['bigg_id'] for model in resp['result']}
@@ -92,10 +90,9 @@ class IdSearchTests(TestCase):
     def test_id_reaction(self):
 
         client = Client()
-        data = {
-            "bigg_id": "PLDAGAT_MARS"
-        }
-        resp = client.get(build_url('search_reaction', get=data))
+        resp = client.get('/database/api/search/reaction', {
+            'bigg_id': 'PLDAGAT_MARS',
+        })
         resp = json.loads(resp.content)
 
         reactions = {reaction['bigg_id'] for reaction in resp['result']}
@@ -122,8 +119,9 @@ class IdSearchTests(TestCase):
     def test_id_metabolite(self):
 
         client = Client()
-        data = {"bigg_id": "nac_e"}
-        resp = client.get(build_url('search_metabolite', get=data))
+        resp = client.get('/database/api/search/metabolite', {
+            'bigg_id': 'nac_e',
+        })
         resp = json.loads(resp.content)
 
         metabolites = {meta['bigg_id'] for meta in resp['result']}
@@ -166,7 +164,7 @@ class IdSearchTests(TestCase):
     def test_search_with_no_id_name(self):
 
         client = Client()
-        resp = client.get(build_url('search_metabolite'))
+        resp = client.get('/database/api/search/metabolite')
         resp = json.loads(resp.content)
 
         metabolites = resp['result']
@@ -181,7 +179,10 @@ class IdSearchTests(TestCase):
             'bigg_id': 'Iaf',
             'name': "It doesn't matter",
         }
-        resp = client.get(build_url('search_model', get=data))
+        resp = client.get('/database/api/search/model', {
+            'bigg_id': 'Iaf',
+            'name': "It doesn't matter",
+        })
         resp = json.loads(resp.content)
 
         models = {model['bigg_id'] for model in resp['result']}
@@ -197,9 +198,10 @@ class NameSearchTests(TestCase):
     def test_name_reaction(self):
 
         client = Client()
-        data = {"name": "diacylgycero"}  # typo: diacylglycerol -> diacylgycero, this is deliberate
 
-        resp = client.get(build_url('search_reaction', get=data))
+        resp = client.get('/database/api/search/reaction', {
+            'name': 'diacylgycero',
+        })
         resp = json.loads(resp.content)
 
         reactions = {reaction['id'] for reaction in resp['result']}
@@ -210,10 +212,9 @@ class NameSearchTests(TestCase):
     def test_name_metabolite(self):
 
         client = Client()
-        data = {
-            "name": "nictina"  # typo: nicotina -> nictina
-        }
-        resp = client.get(build_url('search_metabolite', get=data))
+        resp = client.get('/database/api/search/metabolite', {
+            'name': 'nictina',
+        })
         resp = json.loads(resp.content)
 
         metabolites = {meta['id'] for meta in resp['result']}
@@ -228,7 +229,7 @@ class DetailTests(TestCase):
     def test_model_detail(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:model_detail', args=(20,)))
+        resp = client.get('/database/api/model/20')
 
         expect = {
             "id": 20,
@@ -244,7 +245,7 @@ class DetailTests(TestCase):
     def test_reaction_detail(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:reaction_detail', args=(20,)))
+        resp = client.get('/database/api/reaction/20')
 
         expect = {
             "id": 20,
@@ -263,7 +264,7 @@ class DetailTests(TestCase):
     def test_metabolite_detail(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolite_detail', args=(20,)))
+        resp = client.get('/database/api/metabolite/20')
 
         expect = {
             "id": 20,
@@ -283,7 +284,7 @@ class DetailTests(TestCase):
     def test_gene_detail(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:gene_detail', args=(20,)))
+        resp = client.get('/database/api/gene/20')
 
         expect = {
             "id": 20,
@@ -408,7 +409,7 @@ class RelationshipViewTests(TestCase):
     def test_genes_in_model(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:genes_in_model', args=(1,)))
+        resp = client.get('/database/api/model/1/genes')
 
         expect = {
             "result": [{
@@ -432,7 +433,7 @@ class RelationshipViewTests(TestCase):
     def test_metabolites_in_model(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolites_in_model', args=(1,)))
+        resp = client.get('/database/api/model/1/metabolites')
 
         expect = {
             "result": [
@@ -536,7 +537,7 @@ class RelationshipViewTests(TestCase):
     def test_reactions_in_model(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:reactions_in_model', args=(1,)))
+        resp = client.get('/database/api/model/1/reactions')
 
         expect = {
             "result": [
@@ -561,7 +562,7 @@ class RelationshipViewTests(TestCase):
     def test_metabolites_in_reaction(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolites_in_reaction', args=(1,)))
+        resp = client.get('/database/api/reaction/1/metabolites')
 
         expect = {
             "result": [
@@ -665,7 +666,7 @@ class RelationshipViewTests(TestCase):
     def test_genes_in_reaction(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:genes_in_reaction', args=(1,)))
+        resp = client.get('/database/api/reaction/1/genes')
 
         expect = {
             "result": [
@@ -693,7 +694,7 @@ class RelationshipViewTests(TestCase):
     def test_gene_from_models(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:gene_from_models', args=(1,)))
+        resp = client.get('/database/api/gene/1/models')
 
         expect = {
             "result": [
@@ -709,7 +710,7 @@ class RelationshipViewTests(TestCase):
     def test_metabolite_from_models(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolite_from_models', args=(1,)))
+        resp = client.get('/database/api/metabolite/1/models')
 
         expect = {
             "result": [
@@ -726,7 +727,7 @@ class RelationshipViewTests(TestCase):
     def test_reaction_from_models(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:reaction_from_models', args=(1,)))
+        resp = client.get('/database/api/reaction/1/models')
 
         expect = {
             "result": [
@@ -752,7 +753,7 @@ class RelationshipViewTests(TestCase):
     def test_gene_from_reactions(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:gene_from_reactions', args=(1,)))
+        resp = client.get('/database/api/gene/1/reactions')
 
         expect = {
             "result": [
@@ -773,7 +774,7 @@ class RelationshipViewTests(TestCase):
     def test_metabolite_from_reactions(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolite_from_reactions', args=(1,)))
+        resp = client.get('/database/api/metabolite/1/reactions')
 
         expect = {
             "result": [
@@ -790,4 +791,3 @@ class RelationshipViewTests(TestCase):
         }
 
         self.assertJSONEqual(resp.content, expect)
-'''

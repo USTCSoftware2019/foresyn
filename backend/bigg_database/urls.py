@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from . import api_views
 
 app_name = 'bigg_database'
 urlpatterns = [
@@ -49,4 +50,42 @@ urlpatterns = [
     path('model/<int:from_model_pk>/genes/<int:to_model_pk>',
          views.ModelGeneRelationshipDetailView.as_view(),
          name='model_gene_relationship_detail'),
+
+    # ApiViews
+    path('api/search/reaction', api_views.ReactionSearchApiView.as_view(),
+         name='api_search_reaction'),
+    path('api/search/metabolite', api_views.MetaboliteSearchApiView.as_view(),
+         name='api_search_metabolite'),
+    path('api/search/model', api_views.ModelSearchApiView.as_view(),
+         name='api_search_model'),
+    path('api/search/gene', api_views.GeneSearchApiView.as_view(),
+         name='api_search_gene'),
+    path('api/model/<int:pk>', api_views.ModelDetailApiView.as_view(),
+         name='api_model_detail'),
+    path('api/reaction/<int:pk>', api_views.ReactionDetailApiView.as_view(),
+         name='api_reaction_detail'),
+    path('api/metabolite/<int:pk>', api_views.MetaboliteDetailApiView.as_view(),
+         name='api_metabolite_detail'),
+    path('api/gene/<int:pk>', api_views.GeneDetailApiView.as_view(),
+         name='api_gene_detail'),
+    path('api/model/<int:pk>/genes', api_views.GenesInModel.as_view(),
+         name='api_genes_in_model'),
+    path('api/model/<int:pk>/metabolites', api_views.MetabolitesInModelApiView.as_view(),
+         name='api_metabolites_in_model'),
+    path('api/model/<int:pk>/reactions', api_views.ReactionsInModelApiView.as_view(),
+         name='api_reactions_in_model'),
+    path('api/reaction/<int:pk>/metabolites', api_views.MetabolitesInReactionApiView.as_view(),
+         name='api_metabolites_in_reaction'),
+    path('api/reaction/<int:pk>/genes', api_views.GenesInReactionApiView.as_view(),
+         name='api_genes_in_reaction'),
+    path('api/gene/<int:pk>/models', api_views.GeneFromModelsApiView.as_view(),
+         name='api_gene_from_models'),
+    path('api/metabolite/<int:pk>/models', api_views.MetaboliteFromModelsApiView.as_view(),
+         name='api_metabolite_from_models'),
+    path('api/reaction/<int:pk>/models', api_views.ReactionFromModelsApiView.as_view(),
+         name='api_reaction_from_models'),
+    path('api/gene/<int:pk>/reactions', api_views.GeneFromReactionsApiView.as_view(),
+         name='api_gene_from_reactions'),
+    path('api/metabolite/<int:pk>/reactions', api_views.MetaboliteFromReactionsApiView.as_view(),
+         name='api_metabolite_from_reactions'),
 ]
