@@ -111,6 +111,7 @@ class DetailTests(TestCase):
 
         self.assertEqual(resp.status_code, 404)
 
+
 class RelationshipListViewTests(TestCase):
     fixtures = ['bigg_database/test_data']
 
@@ -145,7 +146,7 @@ class RelationshipListViewTests(TestCase):
         self.assertTemplateUsed(resp, 'bigg_database/list.html')
 
         self.assertContains(resp, 'The reactions in iAF987')
-        
+
         self.assertContains(resp, '/database/model/1/reactions/1')
         self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
         self.assertContains(resp, 'Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)')
