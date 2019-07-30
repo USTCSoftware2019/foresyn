@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}fva result{% endblock title %}
+
+{% block content %}
+
+<table>
+    <tr>
+        <th>name</th>
+        <th>maximum</th>
+        <th>minimum</th>
+    </tr>
+    {% for name in solution.maximum.keys %}
+    <tr>
+        <td>{{ name }}</td>
+        <td>{{ solution.maximum.name }}</td>
+        <td>{{ solution.minimum.name }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}
