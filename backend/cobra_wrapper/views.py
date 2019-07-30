@@ -70,7 +70,7 @@ class ListMixin:
     fields = []
 
     relation_field = None
-    model_to = None
+    to_model = None
 
     def post(self, request):
         content = get_post_content(request)
@@ -78,7 +78,7 @@ class ListMixin:
             new_model = self.model.objects.create(**try_get_fields(content, self.fields), owner=request.user)
             if self.relation_field:
                 getattr(new_model, self.relation_field).set(
-                    get_models_by_id(self.model_to, content.get(self.relation_field, []), request.user)
+                    get_models_by_id(self.to_model, content.get(self.relation_field, []), request.user)
                 )
         except ValidationError as error:
             return HttpResponseBadRequest(json.dumps({
@@ -106,7 +106,7 @@ class CobraReactionListView(LoginRequiredMixin, ListMixin, View):
     ]
 
     relation_field = 'metabolites'
-    model_to = CobraMetabolite
+    to_model = CobraMetabolite
 
 
 class CobraModelListView(LoginRequiredMixin, ListMixin, View):
@@ -114,7 +114,7 @@ class CobraModelListView(LoginRequiredMixin, ListMixin, View):
     fields = ['cobra_id', 'name', 'objective']
 
     relation_field = 'reactions'
-    model_to = CobraReaction
+    to_model = CobraReaction
 
 
 class DetailMixin:
@@ -124,13 +124,13 @@ class DetailMixin:
     fields = []
 
     relation_field = None
-    model_to = None
-    model_from = None
+    to_model = None
+    from_model = None
 
     def get(self, request, pk):
         return render(request, 'cobra_wrapper/{}/detail.html'.format(self.model.MODEL_NAME), context={
             self.model.MODEL_NAME: get_object_or_404(self.model, pk=pk, owner=request.user),
-            'related_models': (self.model_to.objects.filter(owner=request.user) if self.relation_field else None)
+            'related_models': (self.to_model.objects.filter(owner=request.user) if self.relation_field else None)
         })
 
     def post(self, request, pk):
@@ -143,7 +143,7 @@ class DetailMixin:
 
     def _delete(self, request, pk):
         deled_model = get_object_or_404(self.model, owner=request.user, id=pk)
-        if self.model_from and getattr(deled_model, '{}_set'.format(self.model_from.__name__.lower())).count() > 0:
+        if self.from_model and getattr(deled_model, '{}_set'.format(self.from_model.__name__.lower())).count() > 0:
             return HttpResponseBadRequest('Can not delete')
         deled_model.delete()
         return redirect(self.model.get_list_url())
@@ -160,7 +160,7 @@ class DetailMixin:
             model.save()
             if self.relation_field in content.keys():
                 getattr(model, self.relation_field).set(
-                    get_models_by_id(self.model_to, content[self.relation_field], request.user))
+                    get_models_by_id(self.to_model, content[self.relation_field], request.user))
         except ValidationError as error:
             return HttpResponseBadRequest(json.dumps({
                 'type': 'validation_error',
@@ -174,7 +174,7 @@ class CobraMetaboliteDetailView(LoginRequiredMixin, DetailMixin, View):
     model = CobraMetabolite
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
 
-    model_from = CobraReaction
+    from_model = CobraReaction
 
 
 class CobraReactionDetailView(LoginRequiredMixin, DetailMixin, View):
@@ -185,8 +185,8 @@ class CobraReactionDetailView(LoginRequiredMixin, DetailMixin, View):
     ]
 
     relation_field = 'metabolites'
-    model_to = CobraMetabolite
-    model_from = CobraModel
+    to_model = CobraMetabolite
+    from_model = CobraModel
 
 
 class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
@@ -194,7 +194,7 @@ class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
     fields = ['cobra_id', 'name', 'objective']
 
     relation_field = 'reactions'
-    model_to = CobraReaction
+    to_model = CobraReaction
 
 
 class CobraModelDetailComputeView(LoginRequiredMixin, View):
@@ -241,11 +241,11 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
 class NewMixin:
     model = None
 
-    model_to = None
+    to_model = None
 
     def get(self, request):
         return render(request, 'cobra_wrapper/{}/new.html'.format(self.model.MODEL_NAME), {
-            'related_models': (self.model_to.objects.filter(owner=request.user) if self.model_to else None)
+            'related_models': (self.to_model.objects.filter(owner=request.user) if self.to_model else None)
         })
 
 
@@ -256,10 +256,10 @@ class CobraMetaboliteNewView(NewMixin, View):
 class CobraReactionNewView(NewMixin, View):
     model = CobraReaction
 
-    model_to = CobraMetabolite
+    to_model = CobraMetabolite
 
 
 class CobraModelNewView(NewMixin, View):
     model = CobraModel
 
-    model_to = CobraReaction
+    to_model = CobraReaction
