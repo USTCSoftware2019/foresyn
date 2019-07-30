@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}fba result{% endblock title %}
+{% block title %}FBA result of {{ model }}{% endblock title %}
 
 {% block content %}
 
@@ -51,6 +51,6 @@
     </tbody>
 </table>
 
-<a href="{% url 'cobra_wrapper:model_detail' id %}">Return to model {{ id }}</a>
+<a href="{% url 'cobra_wrapper:model_detail' model.pk %}">Return to model {{ model }}</a>
 
 {% endblock content %}

@@ -206,7 +206,9 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
         try:
             if method == 'fba':
                 # return JsonResponse(model.fba(), status=200)
-                return render(request, 'cobra_wrapper/fba/detail.html', context={"solution": model.fba(), "id": pk})
+                return render(request, 'cobra_wrapper/model/fba.html', context={
+                    'solution': model.fba(), 'model': model
+                })
             # elif method == 'fva':
             #     # fva_params = try_get_fields(
             # content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
