@@ -83,7 +83,7 @@ class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
 
     def build(self):
         return cobra.Metabolite(
-            id=self.cobra_id,
+            self.cobra_id,
             name=self.name,
             formula=self.formula,
             charge=(self.charge if self.charge else None),
@@ -102,10 +102,10 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
     name = models.CharField(max_length=50, blank=True, default='')
     subsystem = models.CharField(max_length=50, blank=True, default='')
     lower_bound = models.FloatField(default=0.0)
-    upper_bound = models.FloatField(default=math.nan)
+    upper_bound = models.FloatField(blank=True, null=True, default=None)
     objective_coefficient = models.FloatField(default=0.0)
-    metabolites = models.ManyToManyField(CobraMetabolite)
-    coefficients = JSONField(default=[], validators=[validate_coefficients_is_list])
+    metabolites = models.ManyToManyField(CobraMetabolite, blank=True)
+    coefficients = JSONField(default=[], validators=[validate_coefficients_is_list])  # TODO: Check same number
     gene_reaction_rule = models.TextField(blank=True, default='')
 
     MODEL_NAME = 'reaction'
@@ -118,25 +118,25 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
 
     def build(self):
         cobra_reaction = cobra.Reaction(
-            id=self.cobra_id,
+            self.cobra_id,
             name=self.name,
             subsystem=self.subsystem,
             lower_bound=self.lower_bound,
-            upper_bound=(self.upper_bound if self.upper_bound != math.nan else None)
+            upper_bound=self.upper_bound
         )
-        cobra_reaction.add_metabolites(self.get_metabolites_and_coefficients)
+        cobra_reaction.add_metabolites(self.get_metabolites_and_coefficients())
         cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
         return cobra_reaction
 
     def get_metabolites_and_coefficients(self):
-        return zip(self.metabolites.all(), self.coefficients)
+        return dict(zip([metabolite.build() for metabolite in self.metabolites.all()], self.coefficients))
 
 
 class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=50)
     name = models.CharField(max_length=50, blank=True, default='')
-    reactions = models.ManyToManyField(CobraReaction)
+    reactions = models.ManyToManyField(CobraReaction, blank=True)
     objective = models.CharField(max_length=50, default='')
 
     MODEL_NAME = 'model'
@@ -149,9 +149,8 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
 
     def build(self):
         cobra_model = cobra.Model(
-            id=self.cobra_id,
+            self.cobra_id,
             name=self.name,
-            objective=self.objective
         )
 
         reaction_pairs = []

@@ -38,6 +38,7 @@ def get_validation_error_content(error):
 
 def get_request_content(method, request):
     info = {field: value for field, value in getattr(request, method).items()}
+    pop_metabolites_and_coefficients = False
     for field in info.keys():
         if field in ['reactions', 'metabolites', 'reaction_list']:
             try:
@@ -54,7 +55,7 @@ def get_request_content(method, request):
             else:
                 info[field] = {
                     'lower_bound': 0.0,
-                    'upper_bound': math.nan,
+                    'upper_bound': None,
                     'objective_coefficient': 0.0,
                     'pfba_factor': None,
                     'fraction_of_optimum': 1.0
@@ -62,8 +63,7 @@ def get_request_content(method, request):
 
         if field == 'coefficients':
             if 'metabolites' not in info.keys() or not info[field]:
-                info.pop('metabolites', None)
-                info.pop('coefficients', None)
+                pop_metabolites_and_coefficients = True
             else:
                 try:
                     info[field] = json.loads(info[field])
@@ -72,6 +72,9 @@ def get_request_content(method, request):
 
         if field == 'loopless':
             info[field] = True
+    if pop_metabolites_and_coefficients:
+        info.pop('metabolites', None)
+        info.pop('coefficients', None)
     return info
 
 
@@ -85,7 +88,7 @@ class ListMixin:
     to_model = None
 
     def post(self, request):
-        content = get_request_content('GET', request)
+        content = get_request_content('POST', request)
         try:
             new_model = self.model.objects.create(**try_get_fields(content, self.fields), owner=request.user)
             if self.relation_field:
@@ -161,7 +164,7 @@ class DetailMixin:
         return redirect(self.model.get_list_url())
 
     def _patch(self, request, pk):
-        content = get_request_content('GET', request)
+        content = get_request_content('POST', request)
         model = get_object_or_404(self.model, owner=request.user, id=pk)
 
         for field in self.fields:
@@ -212,7 +215,6 @@ class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
 class CobraModelDetailComputeView(LoginRequiredMixin, View):
 
     def get(self, request, pk, method):  # TODO: Actually should be post
-        content = get_request_content('GET', request)
         model = get_object_or_404(CobraModel, pk=pk, owner=request.user)
 
         try:
@@ -222,6 +224,7 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
                 })
 
             elif method == 'fva':
+                content = get_request_content('GET', request)
                 fva_params = try_get_fields(content, ['loopless', 'fraction_of_optimum', 'pfba_factor'])
 
                 try:
@@ -230,14 +233,20 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
                         content['reaction_list'] = []
                         for reaction in reactions:
                             content['reaction_list'].append(reaction.build())
+                    else:
+                        content['reaction_list'] = []
                     solution_temp = model.fva(reaction_list=content['reaction_list'], **fva_params)
-                    solution = []
-                    for name in solution_temp['maximum'].keys():
-                        solution.append((name, solution_temp['maximum'][name], solution_temp['minimum'][name]))
+
+                    # TODO: validate
+
+                    solution = [
+                        (name, solution_temp['maximum'][name], solution_temp['minimum'][name])
+                        for name in solution_temp['maximum'].keys()
+                    ]
                     return render(request, 'cobra_wrapper/model/fva.html', context={
                         'solution': solution, 'model': model
                     })
-                except ValidationError as error:
+                except ValidationError or ValueError as error:
                     return HttpResponseBadRequest(json.dumps({
                         'type': 'validation_error',
                         'content': {
