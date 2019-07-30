@@ -79,6 +79,12 @@ class Gene(_models.Model):
         Reaction, through='ReactionGene', through_fields=('gene', 'reaction'))
     models = _models.ManyToManyField(Model)
 
+    class Meta:
+        constraints = [
+            _models.CheckConstraint(check=_models.Q(rightpos__gte=_models.F('leftpos')),
+                                    name='right_gte_left')
+        ]
+
 
 class ReactionGene(_models.Model):
     gene_reaction_rule = _models.CharField(max_length=127)
@@ -113,3 +119,9 @@ class ModelReaction(_models.Model):
 
     model = _models.ForeignKey(Model, on_delete=_models.CASCADE)
     reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)
+
+    class Meta:
+        constraints = [
+            _models.CheckConstraint(check=_models.Q(upper_bound__gte=_models.F('lower_bound')),
+                                    name='upper_gte_lower')
+        ]
