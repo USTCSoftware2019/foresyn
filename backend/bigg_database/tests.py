@@ -96,9 +96,9 @@ class IdSearchApiTests(TestCase):
             "id": 1,
             "bigg_id": "iAF987",
             "compartments": ["c", "e", "p"],
-            "reaction_set_count": 0,
-            "metabolite_set_count": 0,
-            "gene_set_count": 0
+            "reaction_set_count": 1,
+            "metabolite_set_count": 1,
+            "gene_set_count": 1
         })
 
     def test_id_reaction(self):
@@ -125,9 +125,9 @@ class IdSearchApiTests(TestCase):
             "reaction_string": "12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c",
             "pseudoreaction": False,
             "database_links": {},
-            "models_count": 0,
-            "metabolite_set_count": 0,
-            "gene_set_count": 0
+            "models_count": 1,
+            "metabolite_set_count": 1,
+            "gene_set_count": 1
         })
 
     def test_id_metabolite(self):
@@ -171,8 +171,8 @@ class IdSearchApiTests(TestCase):
                     {"link": "http://identifiers.org/metanetx.chemical/MNXM274", "id": "MNXM274"}],
                 "SEED Compound": [{"link": "http://identifiers.org/seed.compound/cpd00218", "id": "cpd00218"}],
                 "KEGG Drug": [{"link": "http://identifiers.org/kegg.drug/D00049", "id": "D00049"}]},
-            "reactions_count": 0,
-            "models_count": 0
+            "reactions_count": 1,
+            "models_count": 1
         })
 
     def test_search_with_no_id_name(self):
@@ -238,7 +238,7 @@ class NameSearchTests(TestCase):
 
 
 class DetailTests(TestCase):
-    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data']
+    fixtures = ['bigg_database/test_data']
 
     def test_model_detail(self):
         client = Client()
@@ -251,7 +251,7 @@ class DetailTests(TestCase):
             "compartments": ["c", "e", "p"],
             "version": "1",
             "reaction_count": 0,
-            "metabolite_count": 0
+            "metabolite_count": 0,
         }
 
         self.assertJSONEqual(resp.content, expect)
@@ -340,7 +340,7 @@ class RelationshipTests(TestCase):
     """
     this will test and show how to do manytomanyfield lookup, reverse lookup, and fetch through fields
     """
-    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data', 'bigg_database/test_relationship_data']
+    fixtures = ['bigg_database/test_data']
 
     @classmethod
     def setUpClass(cls):
@@ -418,7 +418,7 @@ class RelationshipViewTests(TestCase):
     """
     this will test GenesInModel, GenesInReaction, MetabolitesInModel, ...
     """
-    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data', 'bigg_database/test_relationship_data']
+    fixtures = ['bigg_database/test_data']
 
     def test_genes_in_model(self):
         client = Client()
