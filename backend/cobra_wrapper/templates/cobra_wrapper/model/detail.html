@@ -45,4 +45,8 @@
     <button type="submit">delete</button>
 </form>
 
+<a href="{% url 'cobra_wrapper:model_detail_computation' pk=model.pk method='fba' %}">
+    To see fba result of model {{ model.pk }}
+</a>
+
 {% endblock content %}

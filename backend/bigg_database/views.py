@@ -1,5 +1,6 @@
 import json
 from functools import reduce
+import heapq
 
 import django.core.exceptions
 from django.core.exceptions import ObjectDoesNotExist
@@ -86,11 +87,11 @@ class SearchView(ListView):
         return context
 
     def get_queryset(self, *args, **kwargs):
-        return set(reduce(lambda a, b: a + b,
-                          [fuzzy_search(self.model.objects.all(),
-                                        search_by,
-                                        self.form.cleaned_data['keyword'])
-                           for search_by in self.result_info_model.by]))
+        # consider using OrderedDict while your python version doesn't guarantee the order of dict
+        return dict.fromkeys([element[2] for element in reduce(lambda a, b: heapq.merge(a, b, reverse=True), [
+            fuzzy_search(self.model.objects.all(), search_by, self.form.cleaned_data['keyword'])
+            for search_by in self.result_info_model.by
+        ])])
 
     def get(self, request, *args, **kwargs):
         self.form = SearchForm(request.GET)
@@ -357,12 +358,10 @@ class RelationshipDetailView(View):
 
         for key, value in self.get_object_extra_info().items():
             setattr(self.to_model_instance, key, value)
-        self.fields.extend(self.get_extra_fields())
 
         context = {
             'from_model': self.from_model_instance,
             'to_model': self.to_model_instance,
-            'display_fields': self.fields,
         }
 
         return render(request, self.template_name, context=context)
@@ -372,7 +371,6 @@ class ModelMetaboliteRelationshipDetailView(RelationshipDetailView):
     from_model = Model
     to_model = Metabolite
     template_name = 'bigg_database/model_metabolite_detail.html'
-    fields = ['bigg_id', 'name', 'formulae', 'charges', 'database_links']
 
     def get_object_extra_info(self, *args, **kwargs):
         mm = ModelMetabolite.objects.get(model=self.from_model_instance,
@@ -382,17 +380,11 @@ class ModelMetaboliteRelationshipDetailView(RelationshipDetailView):
         }
         return extra_info
 
-    def get_extra_fields(self):
-        return [
-            'organism'
-        ]
-
 
 class ModelReactionRelationshipDetailView(RelationshipDetailView):
     from_model = Model
     to_model = Reaction
     template_name = 'bigg_database/model_reaction_detail.html'
-    fields = ['bigg_id', 'name', 'reaction_string', 'pseudoreaction', 'database_links']
 
     def get_object_extra_info(self, *args, **kwargs):
         mr = ModelReaction.objects.get(model=self.from_model_instance,
@@ -406,21 +398,11 @@ class ModelReactionRelationshipDetailView(RelationshipDetailView):
         }
         return extra_info
 
-    def get_extra_fields(self):
-        return [
-            'organism',
-            'lower_bound',
-            'upper_bound',
-            'subsystem',
-            'gene_reaction_rule',
-        ]
-
 
 class ReactionMetaboliteRelationshipDetailView(RelationshipDetailView):
     from_model = Reaction
     to_model = Metabolite
     template_name = 'bigg_database/reaction_metabolite_detail.html'
-    fields = ['bigg_id', 'name', 'formulae', 'charges', 'database_links']
 
     def get_object_extra_info(self, *args, **kwargs):
         rm = ReactionMetabolite.objects.get(reaction=self.from_model_instance,
@@ -430,20 +412,11 @@ class ReactionMetaboliteRelationshipDetailView(RelationshipDetailView):
         }
         return extra_info
 
-    def get_extra_fields(self):
-        return [
-            'stoichiometry'
-        ]
-
 
 class ReactionGeneRelationshipDetailView(RelationshipDetailView):
     from_model = Reaction
     to_model = Gene
     template_name = 'bigg_database/reaction_gene_detail.html'
-    fields = ['bigg_id', 'name', 'rightpos', 'leftpos', 'chromosome_ncbi_accession',
-              'mapped_to_genbank', 'strand', 'protein_sequence',
-              'dna_sequence', 'genome_name', 'genome_ref_string',
-              'database_links']
 
     def get_object_extra_info(self, *args, **kwargs):
         rg = ReactionGene.objects.get(reaction=self.from_model_instance,
@@ -453,17 +426,8 @@ class ReactionGeneRelationshipDetailView(RelationshipDetailView):
         }
         return extra_info
 
-    def get_extra_fields(self):
-        return [
-            'gene_reaction_rule'
-        ]
-
 
 class ModelGeneRelationshipDetailView(RelationshipDetailView):
     from_model = Model
     to_model = Gene
     template_name = 'bigg_database/model_gene_detail.html'
-    fields = ['rightpos', 'leftpos', 'chromosome_ncbi_accession',
-              'mapped_to_genbank', 'strand', 'protein_sequence',
-              'dna_sequence', 'genome_name', 'genome_ref_string',
-              'database_links', 'bigg_id', 'name']

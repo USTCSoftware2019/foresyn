@@ -10,17 +10,17 @@ Relationship lookup for {{ from_model_name }}
 
 {% if to_model_name == 'models' %}
     {% if from_model_name == 'gene' %}
-        {% render_list_tag result_list 'model' 'model_gene_relationship_detail' id=from_model.id contain_extra_info=True reverse=True %}
+        {% render_list_tag result_list 'model' 'model_gene_relationship_detail' id=from_model.id reverse=True %}
     {% elif from_model_name == 'reaction' %}
-        {% render_list_tag result_list 'model' 'model_reaction_relationship_detail' id=from_model.id contain_extra_info=True reverse=True %}
+        {% render_list_tag result_list 'model' 'model_reaction_relationship_detail' id=from_model.id contain_organism=True reverse=True %}
     {% elif from_model_name == 'metabolite' %}
-        {% render_list_tag result_list 'model' 'model_metabolite_relationship_detail' id=from_model.id contain_extra_info=True reverse=True %}
+        {% render_list_tag result_list 'model' 'model_metabolite_relationship_detail' id=from_model.id contain_organism=True reverse=True %}
     {% endif %}
 {% elif to_model_name == 'reactions' %}
     {% if from_model_name == 'gene' %}
-        {% render_list_tag result_list 'reaction' 'reaction_gene_relationship_detail' id=from_model.id contain_extra_info=True reverse=True %}
+        {% render_list_tag result_list 'reaction' 'reaction_gene_relationship_detail' id=from_model.id reverse=True %}
     {% elif from_model_name == 'metabolite' %}
-        {% render_list_tag result_list 'reaction' 'reaction_metabolite_relationship_detail' id=from_model.id contain_extra_info=True reverse=True %}
+        {% render_list_tag result_list 'reaction' 'reaction_metabolite_relationship_detail' id=from_model.id contain_stoichiometry=True reverse=True %}
     {% endif %}
 {% endif %}
 {% endblock %}

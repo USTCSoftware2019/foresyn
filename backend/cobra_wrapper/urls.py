@@ -28,9 +28,9 @@ urlpatterns = [
     path('models/', views.CobraModelListView.as_view(), name='model_list'),
     path('models/<int:pk>/', views.CobraModelDetailView.as_view(), name='model_detail'),
     path('models/new/', views.CobraModelNewView.as_view(), name='model_new'),
-    # path(
-    #     'models/<int:pk>/<str:method>/',
-    #     views.CobraModelDetailComputeApi.as_view(),
-    #     name='model_detail_computation'
-    # ),
+    path(
+        'models/<int:pk>/<str:method>/',
+        views.CobraModelDetailComputeView.as_view(),
+        name='model_detail_computation'
+    ),
 ]

@@ -4,7 +4,10 @@
         <th>BiGG ID</th>
         <th>Name</th>
         <th>Formulae</th>
-        {% if contain_extra_info %}
+        {% if contain_stoichiometry %}
+        <th>Stoichiometry</th>
+        {% endif %}
+        {% if contain_organism %}
         <th>Organism</th>
         {% endif %}
     </tr>
@@ -15,8 +18,11 @@
         <th><a href="{{ meta.detail_url }}">{{ meta.bigg_id }}</a></th>
         <th>{{ meta.name }}</th>
         <th>{{ meta.formulae.0 }}</th>
-        {% if contain_extra_info %}
-        <th>{{ meta.organism }}</th>
+        {% if contain_stoichiometry %}
+        <th>{{ meta.stoichiometry }}</th>
+        {% endif %}
+        {% if contain_organism %}
+        {{ meta.organism }}
         {% endif %}
     </tr>
     {% endfor %}
