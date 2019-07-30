@@ -79,12 +79,21 @@ class Gene(_models.Model):
         Reaction, through='ReactionGene', through_fields=('gene', 'reaction'))
     models = _models.ManyToManyField(Model)
 
+    class Meta:
+        constraints = [
+            _models.CheckConstraint(check=_models.Q(rightpos__gte=_models.F('leftpos')),
+                                    name='right_gte_left')
+        ]
+
 
 class ReactionGene(_models.Model):
     gene_reaction_rule = _models.CharField(max_length=127)
 
     reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)
     gene = _models.ForeignKey(Gene, on_delete=_models.CASCADE)
+
+    class Meta:
+        unique_together = ('reaction', 'gene')
 
 
 class ReactionMetabolite(_models.Model):
@@ -93,12 +102,18 @@ class ReactionMetabolite(_models.Model):
     reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)
     metabolite = _models.ForeignKey(Metabolite, on_delete=_models.CASCADE)
 
+    class Meta:
+        unique_together = ('reaction', 'metabolite')
+
 
 class ModelMetabolite(_models.Model):
     organism = _models.CharField(max_length=127)
 
     model = _models.ForeignKey(Model, on_delete=_models.CASCADE)
     metabolite = _models.ForeignKey(Metabolite, on_delete=_models.CASCADE)
+
+    class Meta:
+        unique_together = ('model', 'metabolite')
 
 
 class ModelReaction(_models.Model):
@@ -113,3 +128,10 @@ class ModelReaction(_models.Model):
 
     model = _models.ForeignKey(Model, on_delete=_models.CASCADE)
     reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)
+
+    class Meta:
+        unique_together = ('model', 'reaction')
+        constraints = [
+            _models.CheckConstraint(check=_models.Q(upper_bound__gte=_models.F('lower_bound')),
+                                    name='upper_gte_lower')
+        ]

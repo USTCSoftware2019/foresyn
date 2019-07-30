@@ -37,13 +37,14 @@ def render_list_tag(lst, model, view_name, **kwargs):
                 else:
                     ins.detail_url = reverse(app_view_name, args=(kwargs['id'], ins.id))
                 # Don't pass reverse and id to the template in case of some conflicts
-                del kwargs['reverse']
             except KeyError:
                 # no reverse. default is false
                 ins.detail_url = reverse(app_view_name, args=(kwargs['id'], ins.id))
-            del kwargs['id']
         else:
             ins.detail_url = reverse(app_view_name, args=(ins.id,))
+
+    kwargs.pop('id', None)
+    kwargs.pop('reverse', None)
 
     return {
         'list': lst,

@@ -322,6 +322,8 @@ class MetaboliteFromReactions(RelationshipLookupView):
         return extra_info
 
 
+# TODO
+# Add link to from_model
 class RelationshipDetailView(View):
     http_method_names = ['get']
     from_model = None
