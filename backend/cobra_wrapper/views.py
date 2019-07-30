@@ -215,18 +215,17 @@ class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
 class CobraModelDetailComputeView(LoginRequiredMixin, View):
 
     def get(self, request, pk, method):  # TODO: Actually should be post
-        content = get_post_content(request)
+        content = get_request_content('GET', request)
         model = get_object_or_404(CobraModel, pk=pk, owner=request.user)
 
         try:
             if method == 'fba':
-                # return JsonResponse(model.fba(), status=200)
                 return render(request, 'cobra_wrapper/model/fba.html', context={
                     'solution': model.fba(), 'model': model
                 })
+
             elif method == 'fva':
-                fva_params = try_get_fields(
-            content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
+                fva_params = try_get_fields(content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
 
                 try:
                     if 'reaction_list' in content.keys():
@@ -250,6 +249,7 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
                             ]
                         }
                     }))
+
             else:
                 return Http404()
         except OptimizationError as error:
