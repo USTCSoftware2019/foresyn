@@ -21,10 +21,13 @@ urlpatterns = [
     ] if ENABLE_API else []),
     path('metabolites/', views.CobraMetaboliteListView.as_view(), name='metabolite_list'),
     path('metabolites/<int:pk>/', views.CobraMetaboliteDetailView.as_view(), name='metabolite_detail'),
+    path('metabolites/new/', views.CobraMetaboliteNewView.as_view(), name='metabolite_new'),
     path('reactions/', views.CobraReactionListView.as_view(), name='reaction_list'),
     path('reactions/<int:pk>/', views.CobraReactionDetailView.as_view(), name='reaction_detail'),
+    path('reactions/new/', views.CobraReactionNewView.as_view(), name='reaction_new'),
     path('models/', views.CobraModelListView.as_view(), name='model_list'),
     path('models/<int:pk>/', views.CobraModelDetailView.as_view(), name='model_detail'),
+    path('models/new/', views.CobraModelNewView.as_view(), name='model_new'),
     path(
         'models/<int:pk>/<str:method>/',
         views.CobraModelDetailComputeView.as_view(),
