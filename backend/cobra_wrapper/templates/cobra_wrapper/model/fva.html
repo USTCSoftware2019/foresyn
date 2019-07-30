@@ -19,4 +19,6 @@
     {% endfor %}
 </table>
 
+<a href="{% url 'cobra_wrapper:model_detail' model.pk %}">Return to model {{ model }}</a>
+
 {% endblock content %}
