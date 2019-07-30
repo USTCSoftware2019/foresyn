@@ -19,6 +19,60 @@ def build_url(viewname, *args, **kwargs):
     return url
 
 
+class SearchTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_search_id(self):
+        resp = self.client.get('/database/search', {
+            'keyword': 'Iaf',
+            'search_model': 'model',
+        })
+        self.assertTemplateUsed(resp, 'bigg_database/search_result.html')
+
+        for bigg_id in ['iAF987', 'iAF1260b', 'iAF1260', 'iAF692']:
+            self.assertContains(resp, bigg_id)
+
+        resp = self.client.get('/database/search', {
+            'keyword': 'PLDAGAT_MARS',
+            'search_model': 'reaction',
+        })
+        self.assertTemplateUsed(resp, 'bigg_database/search_result.html')
+
+        self.assertContains(resp, '<a href="/database/reaction/1">PLDAGAT_MYRS_EPA_MYRS_PC_3_c</a>', html=True)
+
+    def test_search_name(self):
+        resp = self.client.get('/database/search', {
+            'keyword': 'diacylgycero',
+            'search_model': 'reaction',
+        })
+
+        self.assertTemplateUsed(resp, 'bigg_database/search_result.html')
+
+        self.assertContains(resp, '<a href="/database/reaction/1">PLDAGAT_MYRS_EPA_MYRS_PC_3_c</a>', html=True)
+
+        resp = self.client.get('/database/search', {
+            'keyword': 'Nictinat',
+            'search_model': 'metabolite',
+        })
+
+        for bigg_id in ['nac_e', 'nac_m', 'nac_p', 'nac_c']:
+            self.assertContains(resp, bigg_id)
+
+
+class RelationshipTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_model_metabolites(self):
+        resp = self.client.get('/database/model/1/metabolites')
+
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
+
+        self.assertContains(resp, '<a href="/database/model/1/metabolites/1">nac_e</a>')
+
+        self.assertContains(resp, '<th>Organism</th>')
+        self.assertContains(resp, '<th>Human</th>')
+
+
 '''
 class IdSearchTests(TestCase):
     fixtures = ['bigg_database/test_data']
