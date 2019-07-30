@@ -59,6 +59,20 @@ class SearchTests(TestCase):
             self.assertContains(resp, bigg_id)
 
 
+class RelationshipTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_model_metabolites(self):
+        resp = self.client.get('/database/model/1/metabolites')
+
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
+
+        self.assertContains(resp, '<a href="/database/model/1/metabolites/1">nac_e</a>')
+
+        self.assertContains(resp, '<th>Organism</th>')
+        self.assertContains(resp, '<th>Human</th>')
+
+
 '''
 class IdSearchTests(TestCase):
     fixtures = ['bigg_database/test_data']
