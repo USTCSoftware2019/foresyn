@@ -86,6 +86,9 @@ class ReactionGene(_models.Model):
     reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)
     gene = _models.ForeignKey(Gene, on_delete=_models.CASCADE)
 
+    class Meta:
+        unique_together = ('reaction', 'gene')
+
 
 class ReactionMetabolite(_models.Model):
     stoichiometry = _models.IntegerField()
@@ -93,12 +96,18 @@ class ReactionMetabolite(_models.Model):
     reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)
     metabolite = _models.ForeignKey(Metabolite, on_delete=_models.CASCADE)
 
+    class Meta:
+        unique_together = ('reaction', 'metabolite')
+
 
 class ModelMetabolite(_models.Model):
     organism = _models.CharField(max_length=127)
 
     model = _models.ForeignKey(Model, on_delete=_models.CASCADE)
     metabolite = _models.ForeignKey(Metabolite, on_delete=_models.CASCADE)
+
+    class Meta:
+        unique_together = ('model', 'metabolite')
 
 
 class ModelReaction(_models.Model):
@@ -113,3 +122,6 @@ class ModelReaction(_models.Model):
 
     model = _models.ForeignKey(Model, on_delete=_models.CASCADE)
     reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)
+
+    class Meta:
+        unique_together = ('model', 'reaction')
