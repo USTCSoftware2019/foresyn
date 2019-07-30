@@ -209,6 +209,65 @@ class ReverseRelationshipListTests(TestCase):
         self.assertContains(resp, 'Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)')
 
 
+class RelationshipDetailTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_model_metabolite_relationship_detail(self):
+        resp = self.client.get('/database/model/1/metabolites/1')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/model_metabolite_detail.html')
+
+        self.assertContains(resp, 'Metebolite nac_e')
+        self.assertContains(resp, 'Nicotinate')
+        self.assertContains(resp, 'C6H4NO2')
+        self.assertContains(resp, 'Organism')
+        self.assertContains(resp, 'Human')
+
+    def test_model_reaction_relationship_detail(self):
+        resp = self.client.get('/database/model/1/reactions/1')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/model_reaction_detail.html')
+
+        self.assertContains(resp, 'Reaction PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, 'Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)')
+        self.assertContains(resp, '12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c')
+        self.assertContains(resp, 'Organism')
+        self.assertContains(resp, 'Human')
+
+    def test_reaction_metabolite_relationship_detail(self):
+        resp = self.client.get('/database/reaction/1/metabolites/1')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_metabolite_detail.html')
+
+        self.assertContains(resp, 'Metebolite nac_e')
+        self.assertContains(resp, 'Nicotinate')
+        self.assertContains(resp, 'C6H4NO2')
+        self.assertContains(resp, 'Stoichiometry')
+
+    def test_reaction_gene_relationship_detail(self):
+        resp = self.client.get('/database/reaction/1/genes/1')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_gene_detail.html')
+
+        self.assertContains(resp, 'Gene CRv4_Au5_s2_g9116_t1')
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, '0 ~ 0')
+        self.assertContains(resp, 'Gene reaction rule')
+
+    def test_model_gene_relationship_detail(self):
+        resp = self.client.get('/database/model/1/genes/1')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/model_gene_detail.html')
+
+        self.assertContains(resp, 'Gene CRv4_Au5_s2_g9116_t1')
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, '0 ~ 0')
+
+
 '''
 class IdSearchTests(TestCase):
     fixtures = ['bigg_database/test_data']
