@@ -35,19 +35,19 @@ def get_validation_error_content(error):
     }
 
 
-def get_post_content(request):
-    info = {field: value for field, value in request.POST.items()}
+def get_request_content(method, request):
+    info = {field: value for field, value in getattr(request, method).items()}
 
     is_to_pop_metabolites_and_coefficients = False
 
     for field in info.keys():
-        if field in ['reactions', 'metabolites']:
+        if field in ['reactions', 'metabolites', 'reaction_list']:
             try:
-                info[field] = [int(pk) for pk in request.POST.getlist(field)]
+                info[field] = [int(pk) for pk in getattr(request, method).getlist(field)]
             except ValueError:
                 pass
 
-        if field in ['lower_bound', 'upper_bound', 'objective_coefficient']:
+        if field in ['lower_bound', 'upper_bound', 'objective_coefficient', 'pfba_factor']:
             if info[field]:
                 try:
                     info[field] = float(info[field])
@@ -55,6 +55,12 @@ def get_post_content(request):
                     pass
             else:
                 info[field] = None
+
+        if field == 'fraction_of_optimum':
+            try:
+                info[field] = float(info[field])
+            except ValueError:
+                pass
 
         if field == 'coefficients':
             if 'metabolites' not in info.keys() or not info[field]:
@@ -82,7 +88,7 @@ class ListMixin:
     to_model = None
 
     def post(self, request):
-        content = get_post_content(request)
+        content = get_request_content('GET', request)
         try:
             new_model = self.model.objects.create(**try_get_fields(content, self.fields), owner=request.user)
             if self.relation_field:
@@ -158,7 +164,7 @@ class DetailMixin:
         return redirect(self.model.get_list_url())
 
     def _patch(self, request, pk):
-        content = get_post_content(request)
+        content = get_request_content('GET', request)
         model = get_object_or_404(self.model, owner=request.user, id=pk)
 
         for field in self.fields:
