@@ -234,3 +234,30 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
                 return Http404()
         except OptimizationError as error:
             return HttpResponseBadRequest(json.dumps({'code': 'cobra-error', 'message': error.args[0]}))
+
+
+class NewMixin:
+    model = None
+
+    model_to = None
+
+    def get(self, request):
+        return render(request, 'cobra_wrapper/{}/new.html'.format(self.model.MODEL_NAME), {
+            'related_models': (self.model_to.objects.filter(owner=request.user) if self.model_to else None)
+        })
+
+
+class CobraMetaboliteNewView(NewMixin, View):
+    model = CobraMetabolite
+
+
+class CobraReactionNewView(NewMixin, View):
+    model = CobraReaction
+
+    model_to = CobraMetabolite
+
+
+class CobraModelNewView(NewMixin, View):
+    model = CobraModel
+
+    model_to = CobraReaction
