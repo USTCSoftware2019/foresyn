@@ -24,4 +24,5 @@ class TopKHeap:
 
     def top_k(self):
         data_len = len(self.data)
-        return [element[2] for element in reversed([heapq.heappop(self.data) for _ in range(data_len)])]
+        # return priority to sort
+        return [element for element in reversed([heapq.heappop(self.data) for _ in range(data_len)])]

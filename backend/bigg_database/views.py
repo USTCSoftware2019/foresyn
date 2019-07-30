@@ -1,5 +1,6 @@
 import json
 from functools import reduce
+import heapq
 
 import django.core.exceptions
 from django.core.exceptions import ObjectDoesNotExist
@@ -86,11 +87,11 @@ class SearchView(ListView):
         return context
 
     def get_queryset(self, *args, **kwargs):
-        return set(reduce(lambda a, b: a + b,
-                          [fuzzy_search(self.model.objects.all(),
-                                        search_by,
-                                        self.form.cleaned_data['keyword'])
-                           for search_by in self.result_info_model.by]))
+        # consider using OrderedDict while your python version doesn't guarantee the order of dict
+        return dict.fromkeys([element[2] for element in reduce(lambda a, b: heapq.merge(a, b, reverse=True), [
+            fuzzy_search(self.model.objects.all(), search_by, self.form.cleaned_data['keyword'])
+            for search_by in self.result_info_model.by
+        ])])
 
     def get(self, request, *args, **kwargs):
         self.form = SearchForm(request.GET)
