@@ -11,7 +11,7 @@ Reaction {{ to_model.bigg_id }}
 <p>{{ to_model.name }}</p>
 
 <h4>Reactin String</h4>
-<p>{{ to_model.reaction_string }}</p>
+<p>{{ to_model.reaction_string|safe }}</p>
 
 <h4>Pseudoreaction</h4>
 <p>{{ to_model.pseudoreaction }}</p>
