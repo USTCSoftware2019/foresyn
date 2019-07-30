@@ -215,7 +215,7 @@ class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
 class CobraModelDetailComputeView(LoginRequiredMixin, View):
 
     def get(self, request, pk, method):  # TODO: Actually should be post
-        # content = json.loads(request.body)
+        content = get_post_content(request)
         model = get_object_or_404(CobraModel, pk=pk, owner=request.user)
 
         try:
@@ -224,31 +224,32 @@ class CobraModelDetailComputeView(LoginRequiredMixin, View):
                 return render(request, 'cobra_wrapper/model/fba.html', context={
                     'solution': model.fba(), 'model': model
                 })
-            # elif method == 'fva':
-            #     # fva_params = try_get_fields(
-            # content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
-            #
-            #     try:
-            #         if 'reaction_list' in content.keys():
-            #             reactions = get_models_by_id(CobraReaction, content['reaction_list'], request.user)
-            #             content['reaction_list'] = []
-            #             for reaction in reactions:
-            #                 content['reaction_list'].append(reaction.build())
-            #         # return JsonResponse(model.fva(
-            # reaction_list=content['reaction_list'], **fva_params), status=200)
-            #         return  # TODO
-            #     except ValidationError as error:
-            #         return HttpResponseBadRequest(json.dumps({
-            #             'type': 'validation_error',
-            #             'content': {
-            #                 'reaction_list': [
-            #                     {
-            #                         'code': error.code,
-            #                         'message': error.message
-            #                     }
-            #                 ]
-            #             }
-            #         }))
+            elif method == 'fva':
+                fva_params = try_get_fields(
+            content, ['loopless', 'fraction_of_optimum', 'pfba_factor', 'processes'])
+
+                try:
+                    if 'reaction_list' in content.keys():
+                        reactions = get_models_by_id(CobraReaction, content['reaction_list'], request.user)
+                        content['reaction_list'] = []
+                        for reaction in reactions:
+                            content['reaction_list'].append(reaction.build())
+                    solution = model.fva(reaction_list=content['reaction_list'], **fva_params)
+                    return render(request, 'cobra_wrapper/model/fva.html', context={
+                        'solution': solution, 'model': model
+                    })
+                except ValidationError as error:
+                    return HttpResponseBadRequest(json.dumps({
+                        'type': 'validation_error',
+                        'content': {
+                            'reaction_list': [
+                                {
+                                    'code': error.code,
+                                    'message': error.message
+                                }
+                            ]
+                        }
+                    }))
             else:
                 return Http404()
         except OptimizationError as error:
