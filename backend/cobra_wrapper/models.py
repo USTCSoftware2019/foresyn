@@ -14,6 +14,10 @@ class CobraMetabolite(models.Model):
     charge = models.CharField(max_length=50, blank=True, default='')
     compartment = models.CharField(max_length=50, blank=True, default='')
 
+    class Meta:
+        verbose_name = "metabolite"
+        ordering = ['cobra_id', 'name']
+
     def __str__(self):
         return '{}[{}]'.format(self.cobra_id, self.name)
 
@@ -41,6 +45,10 @@ class CobraReaction(models.Model):
     metabolites = models.ManyToManyField(CobraMetabolite, blank=True)
     coefficients = models.TextField(default='', validators=[])  # TODO: Check same number
     gene_reaction_rule = models.TextField(blank=True, default='')
+
+    class Meta:
+        verbose_name = "reaction"
+        ordering = ['cobra_id', 'name']
 
     def __str__(self):
         return '{}[{}]'.format(self.cobra_id, self.name)
@@ -77,6 +85,10 @@ class CobraModel(models.Model):
     name = models.CharField(max_length=127, blank=True, default='')
     reactions = models.ManyToManyField(CobraReaction, blank=True)
     objective = models.CharField(max_length=50, default='', blank=True)
+
+    class Meta:
+        verbose_name = "model"
+        ordering = ['cobra_id', 'name']
 
     def __str__(self):
         return '{}[{}]'.format(self.cobra_id, self.name)
