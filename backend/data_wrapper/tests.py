@@ -12,14 +12,17 @@ class ModelTest(TestCase):
         self.client.login(**user_info)
         return user
 
-    def test_add_model(self):
-        # TBD
-        pass
-
+    # Waiting for additional data
+    # def test_add_model(self):
+    #     self._create_user_and_login()
+    #     pk = 1
+    #     res = self.client.post("/data/add_models/", {"pk": pk}).status_code
+    #     self.assertEqual(res, 200)
+    #
     # def test_add_reactions(self):
     #     self._create_user_and_login()
     #     pk = 1
-    #     res = self.client.post("/data_wrapper/add_reactions/", {"pk": pk}).status_code
+    #     res = self.client.post("/data/add_reactions/", {"pk": pk}).status_code
     #     self.assertEqual(res, 200)
 
     def test_add_metabolite(self):
@@ -27,9 +30,3 @@ class ModelTest(TestCase):
         pk = 1
         res = self.client.post("/data/add_metabolites/", {"pk": pk}).status_code
         self.assertEqual(res, 200)
-
-    # def test_add_metabolite_without_login(self):
-    #     self.client = Client()
-    #     pk = 1
-    #     res = self.client.post("/data_wrapper/add_metabolites/", {"pk": pk}).status_code
-    #     self.assertEqual(res, 401)

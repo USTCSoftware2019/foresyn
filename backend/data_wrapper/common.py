@@ -40,14 +40,13 @@ def data_metabolite_to_cobra_metabolite(key, value, user):
     cobra_metabolite_object.cobra_id = data_metabolite_object.bigg_id
     cobra_metabolite_object.formula = data_metabolite_object.formulae
     cobra_metabolite_object.name = data_metabolite_object.name
-    # cobra_metabolite_object.identifier = data_metabolite_object.bigg_id
     cobra_metabolite_object.charge = data_metabolite_object.charges
     cobra_metabolite_object.compartment = data_metabolite_object.bigg_id[-1]
     cobra_metabolite_object.owner = user
     return cobra_metabolite_object
 
 
-def data_reaction_to_cobra_reaction(key, value, user, data_reaction_object=None, **params):
+def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_object=None, **params):
     if data_reaction_object is None:
         try:
             data_reaction_object = DataReaction.objects.get(**{key: value})
@@ -66,6 +65,7 @@ def data_reaction_to_cobra_reaction(key, value, user, data_reaction_object=None,
         cobra_metabolite_object.save()
         cobra_reaction_object.metabolites.add(cobra_metabolite_object)
     cobra_reaction_object.coefficients = coefficients
+
     # relationship
     cobra_reaction_object.name = data_reaction_object.name
     cobra_reaction_object.identifier = data_reaction_object.bigg_id
