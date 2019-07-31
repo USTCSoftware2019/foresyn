@@ -87,7 +87,7 @@ class Gene(_models.Model):
 
 
 class ReactionGene(_models.Model):
-    gene_reaction_rule = _models.CharField(max_length=127)
+    gene_reaction_rule = _models.TextField()
 
     reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)
     gene = _models.ForeignKey(Gene, on_delete=_models.CASCADE)
@@ -124,7 +124,7 @@ class ModelReaction(_models.Model):
 
     subsystem = _models.CharField(max_length=127, blank=True, null=True)
 
-    gene_reaction_rule = _models.CharField(max_length=127)
+    gene_reaction_rule = _models.TextField()
 
     model = _models.ForeignKey(Model, on_delete=_models.CASCADE)
     reaction = _models.ForeignKey(Reaction, on_delete=_models.CASCADE)

@@ -13,7 +13,10 @@ def parse_all_files_in_dir(path):
     for root, _, files in os.walk(path):
         for file in files:
             with open(os.path.join(root, file), 'r') as json_file:
-                objects[file[:-5]] = json.load(json_file)
+                try:
+                    objects[file[:-5]] = json.load(json_file)
+                except json.decoder.JSONDecodeError as e:
+                    print(e, file)
 
     return objects
 
@@ -29,13 +32,16 @@ def link(model, reaction, reaction_info):
 
     gene_reaction_rule = reaction_info['gene_reaction_rule']
 
-    ModelReaction.objects.create(model=model,
-                                 reaction=reaction,
-                                 organism=organism,
-                                 lower_bound=lower_bound,
-                                 upper_bound=upper_bound,
-                                 subsystem=subsystem,
-                                 gene_reaction_rule=gene_reaction_rule)
+    try:
+        ModelReaction.objects.create(model=model,
+                                     reaction=reaction,
+                                     organism=organism,
+                                     lower_bound=lower_bound,
+                                     upper_bound=upper_bound,
+                                     subsystem=subsystem,
+                                     gene_reaction_rule=gene_reaction_rule)
+    except Exception as e:
+        print(e, model.id, reaction_info)
 
 
 def organism_lookup(reaction, model, reactions):

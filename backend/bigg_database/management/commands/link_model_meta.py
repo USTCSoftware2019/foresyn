@@ -29,11 +29,14 @@ def main(meta_path):
                 model_instance = Model.objects.get(
                     bigg_id=compartment['model_bigg_id'])
 
-                mm = ModelMetabolite.objects.get(
-                    metabolite=meta_instance, model=model_instance)
+                try:
+                    mm = ModelMetabolite.objects.create(
+                        metabolite=meta_instance, model=model_instance)
 
-                mm.organism = compartment['organism']
-                mm.save()
+                    mm.organism = compartment['organism']
+                    mm.save()
+                except Exception as e:
+                    print(e, meta_bigg_id, compartment['model_bigg_id'])
 
 
 class Command(BaseCommand):
