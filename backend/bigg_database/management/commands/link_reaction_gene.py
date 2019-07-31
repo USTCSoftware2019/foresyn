@@ -27,9 +27,14 @@ def main(gene_path):
                 reaction_bigg_id = reaction['bigg_id']
                 reaction_instance = Reaction.objects.get(
                     bigg_id=reaction_bigg_id)
-                ReactionGene.objects.create(
-                    reaction=reaction_instance, gene=gene_instance,
-                    gene_reaction_rule=reaction['gene_reaction_rule'])
+                try:
+                    ReactionGene.objects.create(
+                        reaction=reaction_instance, gene=gene_instance,
+                        gene_reaction_rule=reaction['gene_reaction_rule'])
+                except Exception as e:
+                    print(e, reaction_instance.id, reaction_bigg_id,
+                          gene_instance.id, gene_bigg_id, reaction['gene_reaction_rule'])
+                    # exit(-1)
 
 
 class Command(BaseCommand):
