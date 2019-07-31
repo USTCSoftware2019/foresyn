@@ -12,6 +12,7 @@ class ModelTest(TestCase):
         self.client.login(**user_info)
         return user
 
+    # Waiting for additional data
     # def test_add_model(self):
     #     self._create_user_and_login()
     #     pk = 1
