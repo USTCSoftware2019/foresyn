@@ -3,10 +3,7 @@ from django.contrib.auth.models import User
 
 
 class ModelTest(TestCase):
-    fixtures = ['bigg_database/test_data',
-                'bigg_database/test_gene_data',
-                'bigg_database/test_relationship_data'
-                ]
+    fixtures = ['bigg_database/test_data', ]
 
     def _create_user_and_login(self):
         user_info = {'username': 'test', 'password': '12345678'}
@@ -28,7 +25,7 @@ class ModelTest(TestCase):
     def test_add_metabolite(self):
         self._create_user_and_login()
         pk = 1
-        res = self.client.post("/data_wrapper/add_metabolites/", {"pk": pk}).status_code
+        res = self.client.post("/data/add_metabolites/", {"pk": pk}).status_code
         self.assertEqual(res, 200)
 
     # def test_add_metabolite_without_login(self):

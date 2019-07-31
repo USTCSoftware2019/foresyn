@@ -19,17 +19,316 @@ def build_url(viewname, *args, **kwargs):
     return url
 
 
-'''
-class IdSearchTests(TestCase):
+class SearchTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_search_id(self):
+        resp = self.client.get('/database/search', {
+            'keyword': 'Iaf',
+            'search_model': 'model',
+        })
+        self.assertTemplateUsed(resp, 'bigg_database/search_result.html')
+
+        for bigg_id in ['iAF987', 'iAF1260b', 'iAF1260', 'iAF692']:
+            self.assertContains(resp, bigg_id)
+
+        resp = self.client.get('/database/search', {
+            'keyword': 'PLDAGAT_MARS',
+            'search_model': 'reaction',
+        })
+        self.assertTemplateUsed(resp, 'bigg_database/search_result.html')
+
+        self.assertContains(resp, '<a href="/database/reaction/1">PLDAGAT_MYRS_EPA_MYRS_PC_3_c</a>', html=True)
+
+    def test_search_name(self):
+        resp = self.client.get('/database/search', {
+            'keyword': 'diacylgycero',
+            'search_model': 'reaction',
+        })
+
+        self.assertTemplateUsed(resp, 'bigg_database/search_result.html')
+
+        self.assertContains(resp, '<a href="/database/reaction/1">PLDAGAT_MYRS_EPA_MYRS_PC_3_c</a>', html=True)
+
+        resp = self.client.get('/database/search', {
+            'keyword': 'Nictinat',
+            'search_model': 'metabolite',
+        })
+
+        for bigg_id in ['nac_e', 'nac_m', 'nac_p', 'nac_c']:
+            self.assertContains(resp, bigg_id)
+
+
+class DetailTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_model_detail(self):
+        resp = self.client.get('/database/model/1')
+
+        self.assertTemplateUsed(resp, 'bigg_database/model_detail.html')
+        self.assertTemplateNotUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'Model metrics')
+        self.assertContains(resp, '/database/model/1/reactions')
+        self.assertContains(resp, '/database/model/1/metabolites')
+        self.assertContains(resp, '/database/model/1/genes')
+
+    def test_reaction_detail(self):
+        resp = self.client.get('/database/reaction/1')
+
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_detail.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, '/database/reaction/1/metabolites/1')
+        self.assertContains(resp, '/database/model/1/reactions/1')
+
+    def test_metabolite_detail(self):
+        resp = self.client.get('/database/metabolite/10')
+
+        self.assertTemplateUsed(resp, 'bigg_database/metabolite_detail.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'f420_7_c')
+        self.assertNotContains(resp, 'Charges')
+
+        resp = self.client.get('/database/metabolite/1')
+
+        self.assertContains(resp, 'nac_e')
+        self.assertContains(resp, '/database/model/1/metabolites/1')
+        self.assertContains(resp, '/database/reaction/1/metabolites')
+
+    def test_gene_detail(self):
+        resp = self.client.get('/database/gene/4')
+
+        self.assertTemplateUsed(resp, 'bigg_database/gene_detail.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'UM146_11635')
+
+    def test_object_not_exist(self):
+        resp = self.client.get('/database/reaction/101')
+
+        self.assertEqual(resp.status_code, 404)
+
+
+class RelationshipListViewTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_metabolites_in_model(self):
+        resp = self.client.get('/database/model/1/metabolites')
+
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/metabolite_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertEqual(resp.status_code, 200)
+
+        self.assertContains(resp, 'The metabolites in iAF987')
+
+        self.assertContains(resp, '/database/model/1/metabolites/1"')
+        self.assertContains(resp, 'nac_e')
+        self.assertContains(resp, 'Nicotinate')
+        self.assertContains(resp, 'C6H4NO2')
+
+        self.assertContains(resp, 'Organism')
+        self.assertContains(resp, 'Human')
+
+        resp = self.client.get('/database/model/100/metabolites')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_reactions_in_model(self):
+        resp = self.client.get('/database/model/1/reactions')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The reactions in iAF987')
+
+        self.assertContains(resp, '/database/model/1/reactions/1')
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, 'Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)')
+        self.assertContains(resp, 'Organism')
+        self.assertContains(resp, 'Human')
+
+    def test_genes_in_model(self):
+        resp = self.client.get('/database/model/1/genes')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/gene_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The genes in iAF987')
+
+        self.assertContains(resp, '/database/model/1/genes/1')
+        self.assertContains(resp, 'CRv4_Au5_s2_g9116_t1')
+
+    def test_metabolites_in_reaction(self):
+        resp = self.client.get('/database/reaction/1/metabolites')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/metabolite_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The metabolites in PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, '/database/reaction/1/metabolites/1')
+        self.assertContains(resp, 'Stoichiometry')
+        self.assertContains(resp, 'Nicotinate')
+        self.assertContains(resp, 'C6H4NO2')
+
+    def test_gene_from_reactions(self):
+        resp = self.client.get('/database/reaction/1/genes')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/gene_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The genes in PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, '/database/reaction/1/genes/1')
+        self.assertContains(resp, 'CRv4_Au5_s2_g9116_t1')
+
+
+class ReverseRelationshipListTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_gene_from_models(self):
+        resp = self.client.get('/database/gene/1/models')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/model_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The models contain CRv4_Au5_s2_g9116_t1')
+        self.assertContains(resp, '/database/model/1/genes/1')
+        self.assertContains(resp, 'iAF987')
+        self.assertContains(resp, 'c, e, p')
+
+    def test_metabolite_from_models(self):
+        resp = self.client.get('/database/metabolite/1/models')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/model_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The models contain nac_e')
+        self.assertContains(resp, '/database/model/1/metabolites/1')
+        self.assertContains(resp, 'iAF987')
+        self.assertContains(resp, 'c, e, p')
+
+    def test_reaction_from_models(self):
+        resp = self.client.get('/database/reaction/1/models')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/model_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The models contain PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, '/database/model/1/reactions/1')
+        self.assertContains(resp, 'iAF987')
+        self.assertContains(resp, 'c, e, p')
+
+    def test_gene_from_reactions(self):
+        resp = self.client.get('/database/gene/1/reactions')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The reactions contain CRv4_Au5_s2_g9116_t1')
+        self.assertContains(resp, '/database/reaction/1/genes/1')
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, 'Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)')
+
+    def test_metabolite_from_reactions(self):
+        resp = self.client.get('/database/metabolite/1/reactions')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/relationship_reverse_lookup_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_list.html')
+        self.assertTemplateUsed(resp, 'bigg_database/list.html')
+
+        self.assertContains(resp, 'The reactions contain nac_e')
+        self.assertContains(resp, '/database/reaction/1/metabolites/1')
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, 'Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)')
+
+
+class RelationshipDetailTests(TestCase):
+    fixtures = ['bigg_database/test_data']
+
+    def test_model_metabolite_relationship_detail(self):
+        resp = self.client.get('/database/model/1/metabolites/1')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/model_metabolite_detail.html')
+
+        self.assertContains(resp, 'Metebolite nac_e')
+        self.assertContains(resp, 'Nicotinate')
+        self.assertContains(resp, 'C6H4NO2')
+        self.assertContains(resp, 'Organism')
+        self.assertContains(resp, 'Human')
+
+    def test_model_reaction_relationship_detail(self):
+        resp = self.client.get('/database/model/1/reactions/1')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/model_reaction_detail.html')
+
+        self.assertContains(resp, 'Reaction PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, 'Phospholipid: diacylglycerol acyltransferase (14:0/20:5(5Z,8Z,11Z,14Z,17Z)/14:0)')
+        self.assertContains(resp, '12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c')
+        self.assertContains(resp, 'Organism')
+        self.assertContains(resp, 'Human')
+
+    def test_reaction_metabolite_relationship_detail(self):
+        resp = self.client.get('/database/reaction/1/metabolites/1')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_metabolite_detail.html')
+
+        self.assertContains(resp, 'Metebolite nac_e')
+        self.assertContains(resp, 'Nicotinate')
+        self.assertContains(resp, 'C6H4NO2')
+        self.assertContains(resp, 'Stoichiometry')
+
+    def test_reaction_gene_relationship_detail(self):
+        resp = self.client.get('/database/reaction/1/genes/1')
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/reaction_gene_detail.html')
+
+        self.assertContains(resp, 'Gene CRv4_Au5_s2_g9116_t1')
+        self.assertContains(resp, 'PLDAGAT_MYRS_EPA_MYRS_PC_3_c')
+        self.assertContains(resp, '0 ~ 0')
+        self.assertContains(resp, 'Gene reaction rule')
+
+    def test_model_gene_relationship_detail(self):
+        resp = self.client.get('/database/model/1/genes/1')
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'bigg_database/model_gene_detail.html')
+
+        self.assertContains(resp, 'Gene CRv4_Au5_s2_g9116_t1')
+        self.assertContains(resp, '0 ~ 0')
+
+
+class IdSearchApiTests(TestCase):
     fixtures = ['bigg_database/test_data']
 
     def test_id_model(self):
 
         client = Client()
-        data = {
-            "bigg_id": "Iaf"
-        }
-        resp = client.get(build_url('search_model', get=data))
+        resp = client.get('/database/api/search/model', {
+            'bigg_id': 'Iaf',
+        })
         resp = json.loads(resp.content)
 
         models = {model['bigg_id'] for model in resp['result']}
@@ -44,18 +343,17 @@ class IdSearchTests(TestCase):
             "id": 1,
             "bigg_id": "iAF987",
             "compartments": ["c", "e", "p"],
-            "reaction_set_count": 0,
-            "metabolite_set_count": 0,
-            "gene_set_count": 0
+            "reaction_set_count": 1,
+            "metabolite_set_count": 1,
+            "gene_set_count": 1
         })
 
     def test_id_reaction(self):
 
         client = Client()
-        data = {
-            "bigg_id": "PLDAGAT_MARS"
-        }
-        resp = client.get(build_url('search_reaction', get=data))
+        resp = client.get('/database/api/search/reaction', {
+            'bigg_id': 'PLDAGAT_MARS',
+        })
         resp = json.loads(resp.content)
 
         reactions = {reaction['bigg_id'] for reaction in resp['result']}
@@ -74,16 +372,17 @@ class IdSearchTests(TestCase):
             "reaction_string": "12dgr140205n3_c + pc1619Z140_c &#8652; 1agpc161_c + tag140205n3140_c",
             "pseudoreaction": False,
             "database_links": {},
-            "models_count": 0,
-            "metabolite_set_count": 0,
-            "gene_set_count": 0
+            "models_count": 1,
+            "metabolite_set_count": 1,
+            "gene_set_count": 1
         })
 
     def test_id_metabolite(self):
 
         client = Client()
-        data = {"bigg_id": "nac_e"}
-        resp = client.get(build_url('search_metabolite', get=data))
+        resp = client.get('/database/api/search/metabolite', {
+            'bigg_id': 'nac_e',
+        })
         resp = json.loads(resp.content)
 
         metabolites = {meta['bigg_id'] for meta in resp['result']}
@@ -119,14 +418,14 @@ class IdSearchTests(TestCase):
                     {"link": "http://identifiers.org/metanetx.chemical/MNXM274", "id": "MNXM274"}],
                 "SEED Compound": [{"link": "http://identifiers.org/seed.compound/cpd00218", "id": "cpd00218"}],
                 "KEGG Drug": [{"link": "http://identifiers.org/kegg.drug/D00049", "id": "D00049"}]},
-            "reactions_count": 0,
-            "models_count": 0
+            "reactions_count": 1,
+            "models_count": 1
         })
 
     def test_search_with_no_id_name(self):
 
         client = Client()
-        resp = client.get(build_url('search_metabolite'))
+        resp = client.get('/database/api/search/metabolite')
         resp = json.loads(resp.content)
 
         metabolites = resp['result']
@@ -137,11 +436,10 @@ class IdSearchTests(TestCase):
     def test_search_with_id_and_name(self):
 
         client = Client()
-        data = {
+        resp = client.get('/database/api/search/model', {
             'bigg_id': 'Iaf',
             'name': "It doesn't matter",
-        }
-        resp = client.get(build_url('search_model', get=data))
+        })
         resp = json.loads(resp.content)
 
         models = {model['bigg_id'] for model in resp['result']}
@@ -151,15 +449,16 @@ class IdSearchTests(TestCase):
         self.assertSetEqual(models, expect)
 
 
-class NameSearchTests(TestCase):
+class NameSearchApiTests(TestCase):
     fixtures = ['bigg_database/test_data']
 
     def test_name_reaction(self):
 
         client = Client()
-        data = {"name": "diacylgycero"}  # typo: diacylglycerol -> diacylgycero, this is deliberate
 
-        resp = client.get(build_url('search_reaction', get=data))
+        resp = client.get('/database/api/search/reaction', {
+            'name': 'diacylgycero',
+        })
         resp = json.loads(resp.content)
 
         reactions = {reaction['id'] for reaction in resp['result']}
@@ -170,26 +469,24 @@ class NameSearchTests(TestCase):
     def test_name_metabolite(self):
 
         client = Client()
-        data = {
-            "name": "nictina"  # typo: nicotina -> nictina
-        }
-        resp = client.get(build_url('search_metabolite', get=data))
+        resp = client.get('/database/api/search/metabolite', {
+            'name': 'nictina',
+        })
         resp = json.loads(resp.content)
 
         metabolites = {meta['id'] for meta in resp['result']}
         expect = {1, 2, 3, 4}
 
         self.assertSetEqual(metabolites, expect)
-'''
 
 
-class DetailTests(TestCase):
-    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data']
+class DetailApiTests(TestCase):
+    fixtures = ['bigg_database/test_data']
 
     def test_model_detail(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:model_detail', args=(20,)))
+        resp = client.get('/database/api/model/20')
 
         expect = {
             "id": 20,
@@ -197,7 +494,7 @@ class DetailTests(TestCase):
             "compartments": ["c", "e", "p"],
             "version": "1",
             "reaction_count": 0,
-            "metabolite_count": 0
+            "metabolite_count": 0,
         }
 
         self.assertJSONEqual(resp.content, expect)
@@ -205,7 +502,7 @@ class DetailTests(TestCase):
     def test_reaction_detail(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:reaction_detail', args=(20,)))
+        resp = client.get('/database/api/reaction/20')
 
         expect = {
             "id": 20,
@@ -224,7 +521,7 @@ class DetailTests(TestCase):
     def test_metabolite_detail(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolite_detail', args=(20,)))
+        resp = client.get('/database/api/metabolite/20')
 
         expect = {
             "id": 20,
@@ -244,7 +541,7 @@ class DetailTests(TestCase):
     def test_gene_detail(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:gene_detail', args=(20,)))
+        resp = client.get('/database/api/gene/20')
 
         expect = {
             "id": 20,
@@ -282,11 +579,11 @@ class DetailTests(TestCase):
         self.assertJSONEqual(resp.content, expect)
 
 
-class RelationshipTests(TestCase):
+class RelationshipApiTests(TestCase):
     """
     this will test and show how to do manytomanyfield lookup, reverse lookup, and fetch through fields
     """
-    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data', 'bigg_database/test_relationship_data']
+    fixtures = ['bigg_database/test_data']
 
     @classmethod
     def setUpClass(cls):
@@ -360,16 +657,16 @@ class RelationshipTests(TestCase):
         self.assertEqual(through.stoichiometry, 1)
 
 
-class RelationshipViewTests(TestCase):
+class RelationshipViewApiTests(TestCase):
     """
     this will test GenesInModel, GenesInReaction, MetabolitesInModel, ...
     """
-    fixtures = ['bigg_database/test_data', 'bigg_database/test_gene_data', 'bigg_database/test_relationship_data']
+    fixtures = ['bigg_database/test_data']
 
     def test_genes_in_model(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:genes_in_model', args=(1,)))
+        resp = client.get('/database/api/model/1/genes')
 
         expect = {
             "result": [{
@@ -393,7 +690,7 @@ class RelationshipViewTests(TestCase):
     def test_metabolites_in_model(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolites_in_model', args=(1,)))
+        resp = client.get('/database/api/model/1/metabolites')
 
         expect = {
             "result": [
@@ -497,7 +794,7 @@ class RelationshipViewTests(TestCase):
     def test_reactions_in_model(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:reactions_in_model', args=(1,)))
+        resp = client.get('/database/api/model/1/reactions')
 
         expect = {
             "result": [
@@ -522,7 +819,7 @@ class RelationshipViewTests(TestCase):
     def test_metabolites_in_reaction(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolites_in_reaction', args=(1,)))
+        resp = client.get('/database/api/reaction/1/metabolites')
 
         expect = {
             "result": [
@@ -626,7 +923,7 @@ class RelationshipViewTests(TestCase):
     def test_genes_in_reaction(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:genes_in_reaction', args=(1,)))
+        resp = client.get('/database/api/reaction/1/genes')
 
         expect = {
             "result": [
@@ -654,7 +951,7 @@ class RelationshipViewTests(TestCase):
     def test_gene_from_models(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:gene_from_models', args=(1,)))
+        resp = client.get('/database/api/gene/1/models')
 
         expect = {
             "result": [
@@ -670,7 +967,7 @@ class RelationshipViewTests(TestCase):
     def test_metabolite_from_models(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolite_from_models', args=(1,)))
+        resp = client.get('/database/api/metabolite/1/models')
 
         expect = {
             "result": [
@@ -687,7 +984,7 @@ class RelationshipViewTests(TestCase):
     def test_reaction_from_models(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:reaction_from_models', args=(1,)))
+        resp = client.get('/database/api/reaction/1/models')
 
         expect = {
             "result": [
@@ -713,7 +1010,7 @@ class RelationshipViewTests(TestCase):
     def test_gene_from_reactions(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:gene_from_reactions', args=(1,)))
+        resp = client.get('/database/api/gene/1/reactions')
 
         expect = {
             "result": [
@@ -734,7 +1031,7 @@ class RelationshipViewTests(TestCase):
     def test_metabolite_from_reactions(self):
         client = Client()
 
-        resp = client.get(reverse('bigg_database:metabolite_from_reactions', args=(1,)))
+        resp = client.get('/database/api/metabolite/1/reactions')
 
         expect = {
             "result": [

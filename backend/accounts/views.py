@@ -1,7 +1,7 @@
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes, force_text
@@ -40,7 +40,11 @@ class UserSignUp(CreateView):
                 mail_subject, message, to=[to_email]
             )
             email.send()
-            return render(request, "accounts/signup_done.html")
+            return redirect("accounts:signup_done")
+        else:
+            return render(request, "accounts/signup.html", {
+                "form": form,
+            })
 
 
 class UserActivation(View):

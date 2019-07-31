@@ -1,6 +1,6 @@
 You received this email because someone registered an account for email {{ email }} on our website.
 
 If you want to activate your account, follow the link below:
-{{ protocol }}://{{ domain }}{% url 'accounts:signup_done' uidb64=uid token=token %}
+{{ protocol }}://{{ domain }}{% url 'accounts:activate' uidb64=uid token=token %}
 
 Otherwise, you can ignore this email.

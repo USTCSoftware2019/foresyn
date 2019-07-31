@@ -1,0 +1,34 @@
+<table>
+    <thead>
+        <tr>
+            <th>BiGG ID</th>
+            <th>Name</th>
+            <th>Pseudo Reaction</th>
+            {% if contain_organism %}
+            <th>Organism</th>
+            {% endif %}
+            {% if contain_stoichiometry %}
+            <th>Stoichiometry</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for reaction in list %}
+        <tr>
+            <th><a href="{{ reaction.detail_url }}">{{ reaction.bigg_id }}</a></th>
+            <th>{{ reaction.name }}</th>
+            {% if reaction.pseudoreaction %}
+            <th>√</th>
+            {% else %}
+            <th>X</th>
+            {% endif %}
+            {% if contain_organism %}
+            <th>{{ reaction.organism }}</th>
+            {% endif %}
+            {% if contain_stoichiometry %}
+            <th>{{ reaction.stoichiometry }}</th>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

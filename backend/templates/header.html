@@ -1,6 +1,12 @@
 <header>
     This is a header!
+    <br>
     {% if user.is_authenticated %}
         Hello, {{ user.username }}!
     {% endif %}
+    <br>
+    <a href="{% url 'bigg_database:search' %}">Search database</a> |
+    <a href="{% url 'cobra_wrapper:model_list' %}">Your computational models</a> |
+    <a href="{% url 'login' %}">Login your account</a>
+    <hr>
 </header>
