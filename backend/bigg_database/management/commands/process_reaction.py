@@ -24,12 +24,18 @@ def main(reaction_path):
                 database_links = content['database_links']
                 pseudoreaction = content['pseudoreaction']
                 reaction_string = content['reaction_string']
+                # print(reaction_string)
             except KeyError as e:
                 print(e, file)
                 continue
 
-            Reaction.objects.create(bigg_id=bigg_id, name=name, reaction_string=reaction_string,
-                                    pseudoreaction=pseudoreaction, database_links=database_links)
+            try:
+                Reaction.objects.create(bigg_id=bigg_id, name=name, reaction_string=reaction_string,
+                                        pseudoreaction=pseudoreaction, database_links=database_links)
+            except Exception as e:
+                print(e)
+                print(content)
+                exit(-1)
 
 
 class Command(BaseCommand):
