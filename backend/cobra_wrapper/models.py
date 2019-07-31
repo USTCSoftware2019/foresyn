@@ -1,71 +1,12 @@
 import json
-import math
 
-from django.db import models, connection
+from django.db import models
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.shortcuts import reverse
 import cobra
 
-try:
-    if connection.vendor == 'postgresql':
-        from django.contrib.postgres.fields import JSONField
-    else:
-        from bigg_database.fields import JSONField
-except ImportError:
-    class JSONField(models.TextField):
-        description = "JSON"
 
-        def from_db_value(self, value, expression, connection):
-            if value is None:
-                return value
-            return json.loads(value)
-
-        def to_python(self, value):
-            if value is None or not isinstance(value, str):
-                return value
-            else:
-                try:
-                    return json.loads(value)
-                except json.JSONDecodeError:
-                    raise ValidationError
-
-        def get_prep_value(self, value):
-            return json.dumps(value)
-
-        def value_to_string(self, obj):
-            value = self.value_from_object(obj)
-            return self.get_prep_value(value)
-
-
-def get_fields(obj, fields):
-    return {field: getattr(obj, field) for field in fields}
-
-
-def convert_cobra_id(info):
-    info['id'] = info['cobra_id']
-    info.pop('cobra_id')
-    return info
-
-
-class AutoCleanMixin:
-    def save(self, *args, **kwargs):
-        super().full_clean()
-        return super().save(*args, **kwargs)
-
-
-class CobraStrMixin:
-    cobra_id = None
-    name = None
-
-    def __str__(self):
-        if self.name:
-            return '{} - {}'.format(self.cobra_id, self.name)
-        else:
-            return self.cobra_id
-
-
-class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
+class CobraMetabolite(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=511)
     name = models.CharField(max_length=511, blank=True, default='')
@@ -75,7 +16,10 @@ class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
 
     MODEL_NAME = 'metabolite'
 
-    def get_list_url(self):
+    def __str__(self):
+        return '{}[{}]'.format(self.cobra_id, self.name)
+
+    def get_list_url():
         return reverse('cobra_wrapper:metabolite_list')
 
     def get_absolute_url(self):
@@ -91,12 +35,7 @@ class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
         )
 
 
-def validate_coefficients_is_list(value):
-    if not isinstance(value, (list, tuple)):
-        raise ValidationError('the field requires list or tuple', 'invalid')
-
-
-class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
+class CobraReaction(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=511)
     name = models.CharField(max_length=511, blank=True, default='')
@@ -105,12 +44,15 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
     upper_bound = models.FloatField(blank=True, null=True, default=None)
     objective_coefficient = models.FloatField(default=0.0)
     metabolites = models.ManyToManyField(CobraMetabolite, blank=True)
-    coefficients = JSONField(default=[], validators=[validate_coefficients_is_list])  # TODO: Check same number
+    coefficients = models.TextField(default='', validators=[])  # TODO: Check same number
     gene_reaction_rule = models.TextField(blank=True, default='')
 
     MODEL_NAME = 'reaction'
 
-    def get_list_url(self):
+    def __str__(self):
+        return '{}[{}]'.format(self.cobra_id, self.name)
+
+    def get_list_url():
         return reverse('cobra_wrapper:reaction_list')
 
     def get_absolute_url(self):
@@ -129,14 +71,17 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
         return cobra_reaction
 
     def get_metabolites_and_coefficients(self):
-        return dict(zip([metabolite.build() for metabolite in self.metabolites.all()], self.coefficients))
+        return dict(zip(
+            [metabolite.build() for metabolite in self.metabolites.all()],
+            [float(coefficient) for coefficient in self.coefficients.split()]
+        ))
 
     @property
     def metabolites_and_coefficients(self):
         return dict(zip([metabolite for metabolite in self.metabolites.all()], self.coefficients))
 
 
-class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
+class CobraModel(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=127)
     name = models.CharField(max_length=127, blank=True, default='')
@@ -145,7 +90,10 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
 
     MODEL_NAME = 'model'
 
-    def get_list_url(self):
+    def __str__(self):
+        return '{}[{}]'.format(self.cobra_id, self.name)
+
+    def get_list_url():
         return reverse('cobra_wrapper:model_list')
 
     def get_absolute_url(self):
@@ -178,5 +126,5 @@ class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
             'shadow_prices': json.loads(solution.shadow_prices.to_json())
         }
 
-    def fva(self, **kwarg):  # Param checking is done by views
+    def fva(self, **kwarg):
         return json.loads(cobra.flux_analysis.flux_variability_analysis(self.build(), **kwarg).to_json())
