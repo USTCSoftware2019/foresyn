@@ -1,4 +1,5 @@
 from django import forms
+from django.db import models
 from django.contrib.auth.models import User
 
 from .models import CobraMetabolite, CobraReaction, CobraModel
@@ -7,12 +8,19 @@ from .models import CobraMetabolite, CobraReaction, CobraModel
 def convert_pk_list(form, field, model):
     """Convert pk list field in form to model list
     :param form: Form to be converted. Make sure form.owner has been set to a User
-    :param field: Str
+    :param field: Str. Use constexpr for this field.
     :param model: model class searched
     """
     assert isinstance(form.get('owner'), User)
-    model_list = [model.objects.get(pk=pk, owner=form.get('owner')) for pk in form.get(field).split()]
-    setattr(form, field, model_list)
+
+    try:
+        model_list = [model.objects.get(pk=int(pk), owner=form.get('owner')) for pk in form.get(field).split()]
+    except models.ObjectDoesNotExist:
+        form.add_error(field, 'invalid pk value in pk list')
+    except ValueError:
+        form.add_error(field, 'invalid type of pk in pk list')
+    else:
+        setattr(form, field, model_list)
 
 
 class CobraMetaboliteForm(forms.ModelForm):
@@ -37,10 +45,10 @@ class CobraReactionForm(forms.ModelForm):
         try:
             coefficients = [float(coefficient) for coefficient in coefficients.split()]
         except ValueError:
-            raise forms.ValidationError('coefficients contains non-float value')
+            self.add_error('coefficients', 'coefficients contains non-float value')
 
         if len(metabolites) != len(coefficients):
-            raise forms.ValidationError('len of metabolites and coefficients are not the same')
+            self.add_error('coefficients', 'len of coefficients and metabolites are not the same')
 
 
 class CobraModelForm(forms.Form):
@@ -49,4 +57,4 @@ class CobraModelForm(forms.Form):
 
 
 class FvaForm(forms.Form):
-    pass
+    pass  # TODO:
