@@ -15,17 +15,17 @@ Model: {{ model.bigg_id }}
     </thead>
     <tbody>
     <!-- Row clickable or count clickable? -->
-    <tr href="{% url 'bigg_database:reactions_in_model' model.id %}">
+    <tr>
         <td>Reactions</td>
-        <td>{{ model.reaction_set.count }}</td>
+        <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a></td>
     </tr>
-    <tr href="{% url 'bigg_database:metabolites_in_model' model.id %}">
+    <tr>
         <td>Metabolites</td>
-        <td>{{ model.metabolite_set.count }}</td>
+        <td><a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a></td>
     </tr>
-    <tr href="{% url 'bigg_database:genes_in_model' model.id %}">
+    <tr>
         <td>Genes</td>
-        <td>{{ model.gene_set.count }}</td>
+        <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
     </tr>
     </tbody>
 </table>
