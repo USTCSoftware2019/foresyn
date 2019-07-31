@@ -1,27 +1,26 @@
 import json
 
-from django.shortcuts import render, redirect, reverse, get_object_or_404
-from django.views import View
-from django.http import HttpResponseBadRequest, Http404
-from django.core.exceptions import ValidationError
+# from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+# from django.http import HttpResponseBadRequest, Http404
 from django.contrib.auth.mixins import LoginRequiredMixin
-from cobra.exceptions import OptimizationError
+# from cobra.exceptions import OptimizationError
 
 from .models import CobraMetabolite, CobraReaction, CobraModel
-from .forms import CobraMetaboliteForm, CobraReactionForm, CobraModelForm, convert_pk_list
+from .forms import CobraMetaboliteForm, CobraReactionForm, CobraModelForm
 
 
-def get_validation_error_content(error):
-    return {
-        field: [
-            {
-                'code': field_error.code,
-                'message': str(field_error.message)  # Lazy text
-            }
-            for field_error in error.error_dict[field]
-        ]
-        for field in error.error_dict.keys()
-    }
+# def get_validation_error_content(error):
+#     return {
+#         field: [
+#             {
+#                 'code': field_error.code,
+#                 'message': str(field_error.message)  # Lazy text
+#             }
+#             for field_error in error.error_dict[field]
+#         ]
+#         for field in error.error_dict.keys()
+#     }
 
 
 # def get_request_content(method, request):
@@ -66,32 +65,32 @@ def get_validation_error_content(error):
 #     return info
 
 
-class ListMixin:
-    http_method_names = ['get', 'post']
+# class ListMixin:
+#     http_method_names = ['get', 'post']
 
-    model = None
-    form = None
-    relation_field = None
-    to_model = None
+#     model = None
+#     form = None
+#     relation_field = None
+#     to_model = None
 
-    def post(self, request):
-        new_form = self.form(request.POST)
-        new_form.owner = request.user
-        try:
-            if self.relation_field:
-                convert_pk_list(new_form, self.relation_field, self.to_model)
-            new_model = new_form.save()
-        except ValidationError as error:
-            return HttpResponseBadRequest(json.dumps({
-                'type': 'validation_error',
-                'content': get_validation_error_content(error)
-            }))
-        return redirect(new_model)
+#     def post(self, request):
+#         new_form = self.form(request.POST)
+#         new_form.owner = request.user
+#         try:
+#             if self.relation_field:
+#                 clean_pk_list(new_form, self.relation_field, self.to_model)
+#             new_model = new_form.save()
+#         except ValueError:
+#             return HttpResponseBadRequest(json.dumps({
+#                 'type': 'value_error',
+#                 'errors': new_form.errors
+#             }))
+#         return redirect(new_model)
 
-    def get(self, request):
-        return render(request, 'cobra_wrapper/{}/list.html'.format(self.model.MODEL_NAME), context={
-            'all': self.model.objects.filter(owner=request.user)
-        })
+#     def get(self, request):
+#         return render(request, 'cobra_wrapper/{}/list.html'.format(self.model.MODEL_NAME), context={
+#             'all': self.model.objects.filter(owner=request.user)
+#         })
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListMixin, View):
@@ -113,52 +112,50 @@ class CobraModelListView(LoginRequiredMixin, ListMixin, View):
     to_model = CobraReaction
 
 
-class DetailMixin:
-    http_method_names = ['get', 'post']
+# class DetailMixin:
+#     http_method_names = ['get', 'post']
 
-    model = None
-    form = CobraMetaboliteForm
-    relation_field = None
-    to_model = None
-    from_model = None
+#     model = None
+#     form = CobraMetaboliteForm
+#     relation_field = None
+#     to_model = None
+#     from_model = None
 
-    def get(self, request, pk):
-        return render(request, 'cobra_wrapper/{}/detail.html'.format(self.model.MODEL_NAME), context={
-            self.model.MODEL_NAME: get_object_or_404(self.model, pk=pk, owner=request.user),
-            'related_models': (self.to_model.objects.filter(owner=request.user) if self.relation_field else None)
-        })
+#     def get(self, request, pk):
+#         return render(request, 'cobra_wrapper/{}/detail.html'.format(self.model.MODEL_NAME), context={
+#             self.model.MODEL_NAME: get_object_or_404(self.model, pk=pk, owner=request.user),
+#             'related_models': (self.to_model.objects.filter(owner=request.user) if self.relation_field else None)
+#         })
 
-    def post(self, request, pk):
-        if 'delete' in request.POST.keys():
-            return DetailMixin._delete(self, request, pk)
-        elif 'edit' in request.POST.keys():
-            return DetailMixin._patch(self, request, pk)
-        else:
-            return HttpResponseBadRequest('Unknown operation!')
+#     def post(self, request, pk):
+#         if 'delete' in request.POST.keys():
+#             return DetailMixin._delete(self, request, pk)
+#         elif 'edit' in request.POST.keys():
+#             return DetailMixin._patch(self, request, pk)
+#         else:
+#             return HttpResponseBadRequest('Unknown operation!')
 
-    def _delete(self, request, pk):
-        deled_model = get_object_or_404(self.model, owner=request.user, id=pk)
-        if self.from_model and getattr(deled_model, '{}_set'.format(self.from_model.__name__.lower())).count() > 0:
-            return HttpResponseBadRequest('Can not delete')
-        deled_model.delete()
-        return redirect(self.model.get_list_url())
+#     def _delete(self, request, pk):
+#         deled_model = get_object_or_404(self.model, owner=request.user, id=pk)
+#         if self.from_model and getattr(deled_model, '{}_set'.format(self.from_model.__name__.lower())).count() > 0:
+#             return HttpResponseBadRequest('Can not delete')
+#         deled_model.delete()
+#         return redirect(self.model.get_list_url())
 
-    def _patch(self, request, pk):
-        model = get_object_or_404(self.model, owner=request.user, id=pk)
-        editing_form = self.form(request.POST, instance=model)
-        editing_form.owner = request.owner
-
-        try:
-            if self.relation_field:
-                convert_pk_list(editing_form, self.relation_field, self.to_model)
-            edited_model = editing_form.save()
-        except ValidationError as error:
-            return HttpResponseBadRequest(json.dumps({
-                'type': 'validation_error',
-                'content': get_validation_error_content(error)
-            }))
-
-        return redirect(edited_model)
+#     def _patch(self, request, pk):
+#         instance = get_object_or_404(self.model, owner=request.user, id=pk)
+#         editing_form = self.form(request.POST, instance=instance)
+#         editing_form.owner = request.user
+#         try:
+#             if self.relation_field:
+#                 clean_pk_list(editing_form, self.relation_field, self.to_model)
+#             edited_instance = editing_form.save()
+#         except ValueError:
+#             return HttpResponseBadRequest(json.dumps({
+#                 'type': 'value_error',
+#                 'errors': editing_form.errors
+#             }))
+#         return redirect(edited_instance)
 
 
 class CobraMetaboliteDetailView(LoginRequiredMixin, DetailMixin, View):
@@ -236,16 +233,16 @@ class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
 #             return HttpResponseBadRequest(json.dumps({'type': 'cobra_error', 'content': error.args[0]}))
 
 
-class NewMixin:
-    http_method_names = ['get']
+# class NewMixin:
+#     http_method_names = ['get']
 
-    model = None
-    to_model = None
+#     model = None
+#     to_model = None
 
-    def get(self, request):
-        return render(request, 'cobra_wrapper/{}/new.html'.format(self.model.MODEL_NAME), context={
-            'related_models': (self.to_model.objects.filter(owner=request.user) if self.to_model else None)
-        })
+#     def get(self, request):
+#         return render(request, 'cobra_wrapper/{}/new.html'.format(self.model.MODEL_NAME), context={
+#             'related_models': (self.to_model.objects.filter(owner=request.user) if self.to_model else None)
+#         })
 
 
 class CobraMetaboliteNewView(LoginRequiredMixin, NewMixin, View):

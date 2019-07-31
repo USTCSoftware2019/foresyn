@@ -244,7 +244,7 @@ if ENABLE_API:
                 subsystem='Cell Envelope Biosynthesis',
                 lower_bound=0,
                 upper_bound=1000,
-                coefficients=[-1.0, -1.0, -1.0, 1.0, 1.0, 1.0],
+                coefficients='-1.0, -1.0, -1.0, 1.0, 1.0, 1.0',
                 gene_reaction_rule='( STM2378 or STM1197 )',
                 owner=user
             )

@@ -14,13 +14,8 @@ class CobraMetabolite(models.Model):
     charge = models.CharField(max_length=50, blank=True, default='')
     compartment = models.CharField(max_length=50, blank=True, default='')
 
-    MODEL_NAME = 'metabolite'
-
     def __str__(self):
         return '{}[{}]'.format(self.cobra_id, self.name)
-
-    def get_list_url():
-        return reverse('cobra_wrapper:metabolite_list')
 
     def get_absolute_url(self):
         return reverse("cobra_wrapper:metabolite_detail", kwargs={"pk": self.pk})
@@ -47,13 +42,8 @@ class CobraReaction(models.Model):
     coefficients = models.TextField(default='', validators=[])  # TODO: Check same number
     gene_reaction_rule = models.TextField(blank=True, default='')
 
-    MODEL_NAME = 'reaction'
-
     def __str__(self):
         return '{}[{}]'.format(self.cobra_id, self.name)
-
-    def get_list_url():
-        return reverse('cobra_wrapper:reaction_list')
 
     def get_absolute_url(self):
         return reverse("cobra_wrapper:reaction_detail", kwargs={"pk": self.pk})
@@ -66,11 +56,11 @@ class CobraReaction(models.Model):
             lower_bound=self.lower_bound,
             upper_bound=self.upper_bound
         )
-        cobra_reaction.add_metabolites(self.get_metabolites_and_coefficients())
+        cobra_reaction.add_metabolites(self._get_metabolites_and_coefficients())
         cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
         return cobra_reaction
 
-    def get_metabolites_and_coefficients(self):
+    def _get_metabolites_and_coefficients(self):
         return dict(zip(
             [metabolite.build() for metabolite in self.metabolites.all()],
             [float(coefficient) for coefficient in self.coefficients.split()]
@@ -88,13 +78,8 @@ class CobraModel(models.Model):
     reactions = models.ManyToManyField(CobraReaction, blank=True)
     objective = models.CharField(max_length=50, default='', blank=True)
 
-    MODEL_NAME = 'model'
-
     def __str__(self):
         return '{}[{}]'.format(self.cobra_id, self.name)
-
-    def get_list_url():
-        return reverse('cobra_wrapper:model_list')
 
     def get_absolute_url(self):
         return reverse("cobra_wrapper:model_detail", kwargs={"pk": self.pk})
