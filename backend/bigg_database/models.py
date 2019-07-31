@@ -37,7 +37,7 @@ class Reaction(_models.Model):
     models = _models.ManyToManyField(
         Model, through='ModelReaction', through_fields=('reaction', 'model'))
 
-    reaction_string = _models.CharField(max_length=1023)
+    reaction_string = _models.CharField(max_length=7000)
     pseudoreaction = _models.BooleanField()
 
     database_links = JSONField()
@@ -45,7 +45,7 @@ class Reaction(_models.Model):
 
 class Metabolite(_models.Model):
     bigg_id = _models.CharField(unique=True, max_length=127, db_index=True)
-    name = _models.CharField(max_length=127)
+    name = _models.CharField(max_length=511)
 
     reactions = _models.ManyToManyField(
         Reaction, through='ReactionMetabolite', through_fields=('metabolite', 'reaction'))

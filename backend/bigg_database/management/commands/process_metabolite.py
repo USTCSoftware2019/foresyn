@@ -34,9 +34,14 @@ def main(meta_path):
             for compartment_id in set([compartment['bigg_id'] for compartment in content['compartments_in_models']]):
                 bigg_id = bigg_id_without_compartment + \
                     '_' + compartment_id
-                Metabolite.objects.create(
-                    bigg_id=bigg_id, name=name, formulae=formulae,
-                    charges=charges, database_links=database_links)
+                try:
+                    Metabolite.objects.create(
+                        bigg_id=bigg_id, name=name, formulae=formulae,
+                        charges=charges, database_links=database_links)
+                except Exception as e:
+                    print(e)
+                    print(content)
+                    exit(-1)
 
 
 class Command(BaseCommand):
