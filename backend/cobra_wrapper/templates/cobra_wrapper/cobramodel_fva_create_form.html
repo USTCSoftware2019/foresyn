@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}FBA Result of {{ model }}{% endblock title %}
+
+{% block content %}
+<form method="get">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="reset" value="Reset">
+    <input type="submit" value="Submit">
+</form>
+
+<a href="{% url 'cobra_wrapper:cobramodel_detail' object_pk %}">Return</a>
+{% endblock content %}

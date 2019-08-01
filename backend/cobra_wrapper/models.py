@@ -131,4 +131,6 @@ class CobraModel(models.Model):
         }
 
     def fva(self, **kwarg):
+        if 'reaction_list' in kwarg.keys():
+            kwarg['reaction_list'] = [reaction.build() for reaction in kwarg['reaction_list']]
         return json.loads(cobra.flux_analysis.flux_variability_analysis(self.build(), **kwarg).to_json())

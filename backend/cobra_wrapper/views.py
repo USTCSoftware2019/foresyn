@@ -1,10 +1,12 @@
-from django.shortcuts import get_object_or_404
-from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy, reverse
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, TemplateView, FormView
+from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 # from cobra.exceptions import OptimizationError
 
 from .models import CobraMetabolite, CobraReaction, CobraModel
+from .forms import CobraModelFvaForm
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListView):
@@ -42,10 +44,6 @@ class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
     model = CobraMetabolite
     fields = ['owner', 'cobra_id', 'name', 'formula', 'charge', 'compartment']
 
-    # def form_valid(self, form):
-    #     form.instance.owner = self.request.user
-    #     return super().form_valid(form)
-
 
 class CobraReactionCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
@@ -55,22 +53,14 @@ class CobraReactionCreateView(LoginRequiredMixin, CreateView):
         'coefficients', 'gene_reaction_rule'
     ]
 
-    # def form_valid(self, form):
-    #     form.instance.owner = self.request.user
-    #     return super().form_valid(form)
-
 
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraModel
     fields = ['owner', 'cobra_id', 'name', 'reactions', 'objective']
 
-    # def form_valid(self, form):
-    #     form.instance.owner = self.request.user
-    #     return super().form_valid(form)
 
-
-class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):
+class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):  # TODO: Check dependency
     success_url = reverse_lazy('cobra_wrapper:cobrametabolite_list')
 
     def get_object(self):
@@ -118,6 +108,58 @@ class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
+class CobraModelFbaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateView):
+    template_name = 'cobra_wrapper/cobramodel_fba_detail.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().get(request, *args, **kwargs)
+
+    def get_object(self):
+        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['solution'] = self.get_object().fba()
+        return context
+
+
+class CobraModelFvaCreateView(LoginRequiredMixin, FormView):
+    template_name = 'cobra_wrapper/cobramodel_fva_create_form.html'
+    form_class = CobraModelFvaForm
+    success_url = reverse_lazy('cobra_wrapper:cobramodel_fva_detail')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_pk'] = self.request.GET['pk']
+        return context
+
+
+class CobraModelFvaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateView):
+    template_name = 'cobra_wrapper/cobramodel_fva_detail.html'
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = CobraModelFvaForm(request.POST)
+        if form.is_valid():
+            self.fva_params = form.cleaned_data
+            return super().get(request, *args, **kwargs)
+        else:
+            return redirect(self.object)
+
+    def get_object(self):
+        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        solution_obj = self.object.fva(**self.fva_params)
+        context['solution'] = [
+            (name, solution_obj['maximum'][name], solution_obj['minimum'][name])
+            for name in solution_obj['maximum'].keys()
+        ]
+        return context
+
+
 # class CobraModelDetailComputeView(LoginRequiredMixin, View):
 
 #     def get(self, request, pk, method):
@@ -142,13 +184,13 @@ class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
 #                             content['reaction_list'].append(reaction.build())
 #                     else:
 #                         content['reaction_list'] = []
-#                     solution_temp = model.fva(reaction_list=content['reaction_list'], **fva_params)
+#                     solution_obj = model.fva(reaction_list=content['reaction_list'], **fva_params)
 
 #                     # TODO: validate
 
 #                     solution = [
-#                         (name, solution_temp['maximum'][name], solution_temp['minimum'][name])
-#                         for name in solution_temp['maximum'].keys()
+#                         (name, solution_obj['maximum'][name], solution_obj['minimum'][name])
+#                         for name in solution_obj['maximum'].keys()
 #                     ]
 #                     return render(request, 'cobra_wrapper/model/fva.html', context={
 #                         'solution': solution, 'model': model

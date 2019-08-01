@@ -22,19 +22,7 @@
 
 <a href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>
 
-{% comment %} <a href="{% url 'cobra_wrapper:object_detail_computation" pk=object.pk method="fba" %}">
-    To see fba result of object {{ object }}
-</a> {% endcomment %}
+<a href="{% url 'cobra_wrapper:cobramodel_fba_detail' object.pk %}">FBA</a>
 
-{% comment %} <form action="{% url 'cobra_wrapper:object_detail_computation" object.pk "fva" %}" method="get">
-    <select name="reaction_list" multiple>
-    {% for reaction in related_objects %}
-        <option value="{{ reaction.id }}">{{ reaction }}</option>
-    {% endfor %}
-    </select>
-    <input type="checkbox" name="loopless">
-    <input type="text" name="fraction_of_optimum" value="1.0">
-    <input type="text" name="pfba_factor">
-    <button type="reset">reset</button> <button type="submit">submit</button>
-</form> {% endcomment %}
+<a href="{% url 'cobra_wrapper:cobramodel_fva_create_form' object.pk %}">FVA</a>
 {% endblock content %}

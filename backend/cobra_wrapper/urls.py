@@ -45,9 +45,7 @@ urlpatterns = [
         views.CobraModelUpdateView.as_view(),
         name='cobramodel_update_form'
     ),
-    # path(
-    #     'models/<int:pk>/<str:method>/',
-    #     views.CobraModelDetailComputeView.as_view(),
-    #     name='cobramodel_detail_computation'
-    # ),
+    path('models/<int:pk>/fba/', views.CobraModelFbaDetailView.as_view(), name='cobramodel_fba_detail'),
+    path('models/<int:pk>/fva/create/', views.CobraModelFvaCreateView.as_view(), name='cobramodel_fva_create_form'),
+    path('models/<int:pk>/fva/', views.CobraModelFvaDetailView.as_view(), name='cobramodel_fva_detail'),
 ]
