@@ -82,7 +82,8 @@ def main(models_dirname, reactions_dirname):
                     reaction['id'] = id_rmcopy
                 else:
                     print('No such reaction named ' + reaction['id'])
-                    exit()
+                    # exit()
+                    continue
 
             reaction['organism'] = organism_lookup(
                 reaction['id'], model_id, reaction_jsons)
