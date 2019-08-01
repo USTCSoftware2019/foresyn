@@ -30,6 +30,11 @@ class AddDataModelToCobra(View):
         #         cobra_reaction_object.save()
         #         cobra_model_object.reactions.add(cobra_reaction_object)
 
+        cobra_model_object.owner = user
+        cobra_model_object.cobra_id = data_model_object.bigg_id
+        cobra_model_object.objective = ''
+        cobra_model_object.save()
+
         for data_reaction in data_model_object.reaction_set.all():
             for data_model_reaction in data_reaction.modelreaction_set.all():
                 cobra_reaction_object = data_reaction_to_cobra_reaction(
@@ -40,12 +45,10 @@ class AddDataModelToCobra(View):
                     lower_bound=data_model_reaction.lower_bound
                 )
                 if cobra_reaction_object is None:
-                    return JsonResponse({}, status=500)
+                    return JsonResponse({"err": "cobra_reaction_object is null"}, status=500)
                 cobra_reaction_object.save()
                 cobra_model_object.reactions.add(cobra_reaction_object)
 
-        cobra_model_object.owner = user
-        cobra_model_object.save()
         return JsonResponse({}, status=200)
 
 

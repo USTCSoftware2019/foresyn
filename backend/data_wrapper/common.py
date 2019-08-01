@@ -11,7 +11,7 @@ def reaction_string_to_metabolites(reaction_string):
     right = False
     str_list = iter(reaction_string.split(' '))
     for index in str_list:
-        if index != "+":
+        if index != "+" and index != '':
             if index == "&#8652;":
                 right = True
                 continue
@@ -20,6 +20,8 @@ def reaction_string_to_metabolites(reaction_string):
                     coefficients.append(float(index))
                 else:
                     coefficients.append(float("-" + index))
+                # if next(str_list) == '':
+                #     continue
                 metabolites.append(next(str_list))
             else:
                 if right:
@@ -32,6 +34,7 @@ def reaction_string_to_metabolites(reaction_string):
 
 def data_metabolite_to_cobra_metabolite(key, value, user):
     try:
+        print("data_metabolite_to_cobra_metabolite()", key, value)
         data_metabolite_object = DataMetabolite.objects.get(**{key: value})
     except ObjectDoesNotExist:
         return None
@@ -51,19 +54,15 @@ def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_ob
         try:
             data_reaction_object = DataReaction.objects.get(**{key: value})
         except ObjectDoesNotExist:
-            return JsonResponse("error")
+            return None
 
     cobra_reaction_object = CobraReaction()
 
-    # Add metabolites first
+    # Add metabolites
     reaction_string = data_reaction_object.reaction_string
     (metabolite_names, coefficients) = reaction_string_to_metabolites(reaction_string)
-    for name in metabolite_names:
-        cobra_metabolite_object = data_metabolite_to_cobra_metabolite(key="bigg_id", value=name, user=user)
-        if cobra_metabolite_object is None:
-            return None
-        cobra_metabolite_object.save()
-        cobra_reaction_object.metabolites.add(cobra_metabolite_object)
+    print(metabolite_names)
+
     cobra_reaction_object.coefficients = coefficients
 
     # relationship
@@ -79,6 +78,15 @@ def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_ob
         # cobra_reaction_object.objective_coefficient = params["objective_coefficient"]
 
     cobra_reaction_object.owner = user
+    cobra_reaction_object.cobra_id = data_reaction_object.bigg_id
+    cobra_reaction_object.save()
+
+    for name in metabolite_names:
+        cobra_metabolite_object = data_metabolite_to_cobra_metabolite(key="bigg_id", value=name, user=user)
+        if cobra_metabolite_object is None:
+            return None
+        cobra_metabolite_object.save()
+        cobra_reaction_object.metabolites.add(cobra_metabolite_object)
     return cobra_reaction_object
 
 
