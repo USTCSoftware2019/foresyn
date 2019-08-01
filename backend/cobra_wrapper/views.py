@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
-from djaDeleteViewb.UpdateViews import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 # from cobra.exceptions import OptimizationError
 
 from .models import CobraMetabolite, CobraReaction, CobraModel
@@ -39,23 +39,35 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
 
 class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
+    model = CobraMetabolite
+    fields = ['owner', 'cobra_id', 'name', 'formula', 'charge', 'compartment']
 
-    def get_object(self):
-        return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class CobraReactionCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
+    model = CobraReaction
+    fields = [
+        'owner', 'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'metabolites',
+        'coefficients', 'gene_reaction_rule'
+    ]
 
-    def get_object(self):
-        return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
+    model = CobraModel
+    fields = ['owner', 'cobra_id', 'name', 'reactions', 'objective']
 
-    def get_object(self):
-        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):
@@ -81,6 +93,7 @@ class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
 
 class CobraMetaboliteUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
+    fields = ['owner', 'cobra_id', 'name', 'formula', 'charge', 'compartment']
 
     def get_object(self):
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
@@ -88,6 +101,10 @@ class CobraMetaboliteUpdateView(LoginRequiredMixin, UpdateView):
 
 class CobraReactionUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
+    fields = [
+        'owner', 'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'metabolites',
+        'coefficients', 'gene_reaction_rule'
+    ]
 
     def get_object(self):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
@@ -95,6 +112,7 @@ class CobraReactionUpdateView(LoginRequiredMixin, UpdateView):
 
 class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
+    fields = ['owner', 'cobra_id', 'name', 'reactions', 'objective']
 
     def get_object(self):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])

@@ -22,7 +22,7 @@ class CobraMetabolite(models.Model):
         return '{}[{}]'.format(self.cobra_id, self.name)
 
     def get_absolute_url(self):
-        return reverse("cobra_wrapper:metabolite_detail", kwargs={"pk": self.pk})
+        return reverse("cobra_wrapper:cobrametabolite_detail", kwargs={"pk": self.pk})
 
     def build(self):
         return cobra.Metabolite(
@@ -54,7 +54,7 @@ class CobraReaction(models.Model):
         return '{}[{}]'.format(self.cobra_id, self.name)
 
     def get_absolute_url(self):
-        return reverse("cobra_wrapper:reaction_detail", kwargs={"pk": self.pk})
+        return reverse("cobra_wrapper:cobrareaction_detail", kwargs={"pk": self.pk})
 
     def build(self):
         cobra_reaction = cobra.Reaction(
@@ -94,7 +94,7 @@ class CobraModel(models.Model):
         return '{}[{}]'.format(self.cobra_id, self.name)
 
     def get_absolute_url(self):
-        return reverse("cobra_wrapper:model_detail", kwargs={"pk": self.pk})
+        return reverse("cobra_wrapper:cobramodel_detail", kwargs={"pk": self.pk})
 
     def build(self):
         cobra_model = cobra.Model(

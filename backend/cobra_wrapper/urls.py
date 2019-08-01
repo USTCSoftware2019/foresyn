@@ -1,37 +1,53 @@
 from django.urls import path
 
-from . import api, views
-
-ENABLE_API = False
+from . import views
 
 app_name = 'cobra_wrapper'
 urlpatterns = [
-    *([
-        path('api/metabolites/', api.CobraMetaboliteListApi.as_view(), name='api_metabolite_list'),
-        path('api/metabolites/<int:pk>/', api.CobraMetaboliteDetailApi.as_view(), name='api_metabolite_detail'),
-        path('api/reactions/', api.CobraReactionListApi.as_view(), name='api_reaction_list'),
-        path('api/reactions/<int:pk>/', api.CobraReactionDetailApi.as_view(), name='api_reaction_detail'),
-        path('api/models/', api.CobraModelListApi.as_view(), name='api_model_list'),
-        path('api/models/<int:pk>/', api.CobraModelDetailApi.as_view(), name='api_model_detail'),
-        path(
-            'api/models/<int:pk>/<str:method>/',
-            api.CobraModelDetailComputeApi.as_view(),
-            name='api_model_detail_computation'
-        )
-    ] if ENABLE_API else []),
+    path('metabolites/', views.CobraMetaboliteListView.as_view(), name='cobrametabolite_list'),
+    path('metabolites/<int:pk>/', views.CobraMetaboliteDetailView.as_view(), name='cobrametabolite_detail'),
+    path('metabolites/create/', views.CobraMetaboliteCreateView.as_view(), name='cobrametabolite_create_form'),
+    path(
+        'metabolites/<int:pk>/delete/',
+        views.CobraMetaboliteCreateView.as_view(),
+        name='cobrametabolite_confirm_delete'
+    ),
+    path(
+        'metabolites/<int:pk>/update/',
+        views.CobraMetaboliteCreateView.as_view(),
+        name='cobrametabolite_update_form'
+    ),
 
-    path('metabolites/', views.CobraMetaboliteListView.as_view(), name='metabolite_list'),
-    path('metabolites/<int:pk>/', views.CobraMetaboliteDetailView.as_view(), name='metabolite_detail'),
-    path('metabolites/new/', views.CobraMetaboliteNewView.as_view(), name='metabolite_new'),
-    path('reactions/', views.CobraReactionListView.as_view(), name='reaction_list'),
-    path('reactions/<int:pk>/', views.CobraReactionDetailView.as_view(), name='reaction_detail'),
-    path('reactions/new/', views.CobraReactionNewView.as_view(), name='reaction_new'),
-    path('models/', views.CobraModelListView.as_view(), name='model_list'),
-    path('models/<int:pk>/', views.CobraModelDetailView.as_view(), name='model_detail'),
-    path('models/new/', views.CobraModelNewView.as_view(), name='model_new'),
+    path('reactions/', views.CobraReactionListView.as_view(), name='cobrareaction_list'),
+    path('reactions/<int:pk>/', views.CobraReactionDetailView.as_view(), name='cobrareaction_detail'),
+    path('reactions/create/', views.CobraReactionCreateView.as_view(), name='cobrareaction_create_form'),
+    path(
+        'reactions/<int:pk>/delete/',
+        views.CobraReactionDeleteView.as_view(),
+        name='cobrametabolite_confirm_delete'
+    ),
+    path(
+        'reactions/<int:pk>/update/',
+        views.CobraReactionUpdateView.as_view(),
+        name='cobrametabolite_update_form'
+    ),
+
+    path('models/', views.CobraModelListView.as_view(), name='cobramodel_list'),
+    path('models/<int:pk>/', views.CobraModelDetailView.as_view(), name='cobramodel_detail'),
+    path('models/create/', views.CobraModelCreateView.as_view(), name='cobramodel_create_form'),
+    path(
+        'models/<int:pk>/delete/',
+        views.CobraModelDeleteView.as_view(),
+        name='cobrametabolite_confirm_delete'
+    ),
+    path(
+        'models/<int:pk>/update/',
+        views.CobraModelUpdateView.as_view(),
+        name='cobrametabolite_update_form'
+    ),
     # path(
     #     'models/<int:pk>/<str:method>/',
     #     views.CobraModelDetailComputeView.as_view(),
-    #     name='model_detail_computation'
+    #     name='cobramodel_detail_computation'
     # ),
 ]
