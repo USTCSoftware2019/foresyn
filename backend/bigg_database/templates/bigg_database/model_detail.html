@@ -30,4 +30,10 @@ Model: {{ model.bigg_id }}
     </tbody>
 </table>
 
+<form method="post" action="{% url 'data_wrapper:add_models' %}">
+    {% csrf_token %}
+    <input type="number" name="pk" value="{{ model.id }}" hidden>
+    <input type="submit" value="add to cobra">
+</form>
+
 {% endblock %}
