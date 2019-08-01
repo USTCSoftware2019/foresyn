@@ -136,6 +136,7 @@ STATIC_URL = '/static/'
 
 if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
+    DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 else:
     CORS_ORIGIN_WHITELIST = [
         "http://127.0.0.1:8080"  # for testing purpose (vue-cli project)
