@@ -1,8 +1,6 @@
 from cobra_wrapper.models import CobraMetabolite, CobraReaction
 from bigg_database.models import Metabolite as DataMetabolite, Reaction as DataReaction
-from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
-import re
 
 
 def reaction_string_to_metabolites(reaction_string):
@@ -15,7 +13,8 @@ def reaction_string_to_metabolites(reaction_string):
             if index == "&#8652;":
                 right = True
                 continue
-            if is_number(index):
+            try:
+                f = float(index)
                 if right:
                     coefficients.append(float(index))
                 else:
@@ -23,7 +22,7 @@ def reaction_string_to_metabolites(reaction_string):
                 # if next(str_list) == '':
                 #     continue
                 metabolites.append(next(str_list))
-            else:
+            except Exception:
                 if right:
                     coefficients.append(1.0)
                 else:
@@ -34,7 +33,7 @@ def reaction_string_to_metabolites(reaction_string):
 
 def data_metabolite_to_cobra_metabolite(key, value, user):
     try:
-        print("data_metabolite_to_cobra_metabolite()", key, value)
+        # print("data_metabolite_to_cobra_metabolite()", key, value)
         data_metabolite_object = DataMetabolite.objects.get(**{key: value})
     except ObjectDoesNotExist:
         return None
@@ -43,7 +42,8 @@ def data_metabolite_to_cobra_metabolite(key, value, user):
     cobra_metabolite_object.cobra_id = data_metabolite_object.bigg_id
     cobra_metabolite_object.formula = data_metabolite_object.formulae
     cobra_metabolite_object.name = data_metabolite_object.name
-    cobra_metabolite_object.charge = data_metabolite_object.charges
+    if data_metabolite_object.charges:
+        cobra_metabolite_object.charge = data_metabolite_object.charges
     cobra_metabolite_object.compartment = data_metabolite_object.bigg_id[-1]
     cobra_metabolite_object.owner = user
     return cobra_metabolite_object
@@ -61,7 +61,6 @@ def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_ob
     # Add metabolites
     reaction_string = data_reaction_object.reaction_string
     (metabolite_names, coefficients) = reaction_string_to_metabolites(reaction_string)
-    print(metabolite_names)
 
     cobra_reaction_object.coefficients = coefficients
 
@@ -71,7 +70,7 @@ def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_ob
     gene_reaction_rules = [gene.gene_reaction_rule for gene in data_reaction_object.reactiongene_set.all()]
     cobra_reaction_object.gene_reaction_rule = " or ".join(gene_reaction_rules)
 
-    if params is not {}:
+    if params:
         cobra_reaction_object.subsystem = params["subsystem"]
         cobra_reaction_object.upper_bound = params["upper_bound"]
         cobra_reaction_object.lower_bound = params["lower_bound"]
@@ -88,12 +87,3 @@ def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_ob
         cobra_metabolite_object.save()
         cobra_reaction_object.metabolites.add(cobra_metabolite_object)
     return cobra_reaction_object
-
-
-def is_number(num):
-    pattern = re.compile(r'^[-+]?[-0-9]\d*\.\d*|[-+]?\.?[0-9]\d*$')
-    result = pattern.match(num)
-    if result:
-        return True
-    else:
-        return False
