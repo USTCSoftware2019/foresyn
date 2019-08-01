@@ -42,9 +42,9 @@ class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
     model = CobraMetabolite
     fields = ['owner', 'cobra_id', 'name', 'formula', 'charge', 'compartment']
 
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
+    # def form_valid(self, form):
+    #     form.instance.owner = self.request.user
+    #     return super().form_valid(form)
 
 
 class CobraReactionCreateView(LoginRequiredMixin, CreateView):
@@ -55,9 +55,9 @@ class CobraReactionCreateView(LoginRequiredMixin, CreateView):
         'coefficients', 'gene_reaction_rule'
     ]
 
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
+    # def form_valid(self, form):
+    #     form.instance.owner = self.request.user
+    #     return super().form_valid(form)
 
 
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
@@ -65,9 +65,9 @@ class CobraModelCreateView(LoginRequiredMixin, CreateView):
     model = CobraModel
     fields = ['owner', 'cobra_id', 'name', 'reactions', 'objective']
 
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
+    # def form_valid(self, form):
+    #     form.instance.owner = self.request.user
+    #     return super().form_valid(form)
 
 
 class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):

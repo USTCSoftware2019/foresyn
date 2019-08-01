@@ -5,6 +5,9 @@
 {% block content %}
 <form method="post">{% csrf_token %}
     {{ form.as_p }}
+    <input type="reset" value="Reset">
     <input type="submit" value="Create">
 </form>
+
+<a href="{% url 'cobra_wrapper:cobrametabolite_list' %}">Return</a>
 {% endblock content %}

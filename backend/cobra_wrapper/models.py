@@ -68,6 +68,13 @@ class CobraReaction(models.Model):
         cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
         return cobra_reaction
 
+    def get_metabolites_and_coefficients(self):
+        """Used in templates"""
+        return dict(zip(
+            self.metabolites.all(),
+            [float(coefficient) for coefficient in self.coefficients.split()]
+        ))
+
     def _get_metabolites_and_coefficients(self):
         return dict(zip(
             [metabolite.build() for metabolite in self.metabolites.all()],

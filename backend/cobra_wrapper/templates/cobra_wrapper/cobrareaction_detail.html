@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block title %}{{ object }}{% endblock title %}
 
@@ -13,12 +13,17 @@
         <tr><td>upper_bound</td><td>{{ object.upper_bound|default_if_none:"None" }}</td></tr>
         <tr><td>objective_coefficient</td><td>{{ object.objective_coefficient }}</td></tr>
         <tr><td>metabolites and coefficients</td><td>[
-        {% for metabolite, coefficient in object.get_metabolites_and_coefficients %}
+        {% for metabolite, coefficient in object.get_metabolites_and_coefficients.items %}
             {% if not forloop.counter == 1 %},{% endif %}
-            <a href="{% url "cobra_wrapper:cobrametabolite_detail" metabolite.pk %}">{{ metabolite }}</a>:{{ coefficient }}
+            <a href="{% url 'cobra_wrapper:cobrametabolite_detail' metabolite.pk %}">{{ metabolite }}</a>:
+            {{ coefficient }}
         {% endfor %}
         ]</td></tr>
         <tr><td>gene_object_rule</td><td>{{ object.gene_object_rule }}</td></tr>
     </tbody>
 </table>
+
+<a href="{% url 'cobra_wrapper:cobrareaction_update_form' object.pk %}">Edit</a>
+
+<a href="{% url 'cobra_wrapper:cobrareaction_confirm_delete' object.pk %}">Delete</a>
 {% endblock content %}

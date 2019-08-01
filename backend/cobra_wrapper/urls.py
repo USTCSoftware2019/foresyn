@@ -9,12 +9,12 @@ urlpatterns = [
     path('metabolites/create/', views.CobraMetaboliteCreateView.as_view(), name='cobrametabolite_create_form'),
     path(
         'metabolites/<int:pk>/delete/',
-        views.CobraMetaboliteCreateView.as_view(),
+        views.CobraMetaboliteDeleteView.as_view(),
         name='cobrametabolite_confirm_delete'
     ),
     path(
         'metabolites/<int:pk>/update/',
-        views.CobraMetaboliteCreateView.as_view(),
+        views.CobraMetaboliteUpdateView.as_view(),
         name='cobrametabolite_update_form'
     ),
 
@@ -24,12 +24,12 @@ urlpatterns = [
     path(
         'reactions/<int:pk>/delete/',
         views.CobraReactionDeleteView.as_view(),
-        name='cobrametabolite_confirm_delete'
+        name='cobrareaction_confirm_delete'
     ),
     path(
         'reactions/<int:pk>/update/',
         views.CobraReactionUpdateView.as_view(),
-        name='cobrametabolite_update_form'
+        name='cobrareaction_update_form'
     ),
 
     path('models/', views.CobraModelListView.as_view(), name='cobramodel_list'),
@@ -38,12 +38,12 @@ urlpatterns = [
     path(
         'models/<int:pk>/delete/',
         views.CobraModelDeleteView.as_view(),
-        name='cobrametabolite_confirm_delete'
+        name='cobramodel_confirm_delete'
     ),
     path(
         'models/<int:pk>/update/',
         views.CobraModelUpdateView.as_view(),
-        name='cobrametabolite_update_form'
+        name='cobramodel_update_form'
     ),
     # path(
     #     'models/<int:pk>/<str:method>/',
