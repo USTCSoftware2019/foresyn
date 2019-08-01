@@ -67,8 +67,8 @@ class CobraStrMixin:
 
 class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    cobra_id = models.CharField(max_length=127)
-    name = models.CharField(max_length=127, blank=True, default='')
+    cobra_id = models.CharField(max_length=511)
+    name = models.CharField(max_length=511, blank=True, default='')
     formula = models.CharField(max_length=127, blank=True, default='')
     charge = models.CharField(max_length=50, blank=True, default='')
     compartment = models.CharField(max_length=50, blank=True, default='')
@@ -100,7 +100,7 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=127)
     name = models.CharField(max_length=127, blank=True, default='')
-    subsystem = models.CharField(max_length=50, blank=True, null=True, default='')
+    subsystem = models.CharField(max_length=127, blank=True, null=True, default='')
     lower_bound = models.FloatField(default=0.0)
     upper_bound = models.FloatField(blank=True, null=True, default=None)
     objective_coefficient = models.FloatField(default=0.0)
