@@ -84,6 +84,10 @@ def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_ob
         cobra_metabolite_object = data_metabolite_to_cobra_metabolite(key="bigg_id", value=name, user=user)
         if cobra_metabolite_object is None:
             return None
-        cobra_metabolite_object.save()
+        try:
+            cobra_metabolite_object = CobraMetabolite.objects.get(owner_id=user,
+                                                                  cobra_id=cobra_metabolite_object.cobra_id)
+        except ObjectDoesNotExist:
+            cobra_metabolite_object.save()
         cobra_reaction_object.metabolites.add(cobra_metabolite_object)
     return cobra_reaction_object
