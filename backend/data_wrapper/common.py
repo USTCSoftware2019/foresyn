@@ -1,6 +1,6 @@
 from cobra_wrapper.models import CobraMetabolite, CobraReaction
 from bigg_database.models import Metabolite as DataMetabolite, Reaction as DataReaction
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 
 def reaction_string_to_metabolites(reaction_string):
@@ -88,6 +88,8 @@ def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_ob
             cobra_metabolite_object = CobraMetabolite.objects.get(owner_id=user,
                                                                   cobra_id=cobra_metabolite_object.cobra_id)
         except ObjectDoesNotExist:
+            cobra_metabolite_object.save()
+        except MultipleObjectsReturned:
             cobra_metabolite_object.save()
         cobra_reaction_object.metabolites.add(cobra_metabolite_object)
     return cobra_reaction_object
