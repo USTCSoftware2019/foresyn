@@ -50,14 +50,26 @@
 </a>
 
 <form action="{% url 'cobra_wrapper:model_detail_computation' model.pk 'fva' %}" method="get">
-    <select name="reaction_list" multiple>
-    {% for reaction in related_models %}
-        <option value="{{ reaction.id }}">{{ reaction }}</option>
-    {% endfor %}
-    </select>
-    <input type="checkbox" name="loopless">
-    <input type="text" name="fraction_of_optimum" value="1.0">
-    <input type="text" name="pfba_factor">
+    <label>
+        Reaction list
+        <select name="reaction_list" multiple>
+        {% for reaction in related_models %}
+            <option value="{{ reaction.id }}">{{ reaction }}</option>
+        {% endfor %}
+        </select>
+    </label>
+    <label>
+        Loopless
+        <input type="checkbox" name="loopless">
+    </label>
+    <label>
+        Fraction of optimum
+        <input type="text" name="fraction_of_optimum" value="1.0">
+    </label>
+    <label>
+        pfba factor
+        <input type="text" name="pfba_factor">
+    </label>
     <button type="reset">reset</button> <button type="submit">submit</button>
 </form>
 {% endblock content %}

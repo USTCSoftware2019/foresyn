@@ -124,12 +124,13 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
             lower_bound=self.lower_bound,
             upper_bound=self.upper_bound
         )
-        cobra_reaction.add_metabolites(self.get_metabolites_and_coefficients())
+        cobra_reaction.add_metabolites(self.metabolites_and_coefficients)
         cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
         return cobra_reaction
 
-    def get_metabolites_and_coefficients(self):
-        return dict(zip([metabolite.build() for metabolite in self.metabolites.all()], self.coefficients))
+    @property
+    def metabolites_and_coefficients(self):
+        return dict(zip([metabolite for metabolite in self.metabolites.all()], self.coefficients))
 
 
 class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):

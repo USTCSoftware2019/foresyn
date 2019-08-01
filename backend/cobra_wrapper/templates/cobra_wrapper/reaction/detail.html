@@ -33,7 +33,7 @@
             <input type="text" name="objective_coefficient" value="{{ reaction.objective_coefficient }}">
         </td></tr>
         <tr><td>metabolites and coefficients</td><td>[
-        {% for metabolite, coefficient in reaction.get_metabolites_and_coefficients %}
+        {% for metabolite, coefficient in reaction.metabolites_and_coefficients.items %}
             {% if not forloop.counter == 1 %}
             ,
             {% endif %}
