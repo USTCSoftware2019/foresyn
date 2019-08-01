@@ -33,4 +33,11 @@ Reaction: {{ reaction.bigg_id }}
     Models Containing {{ reaction.bigg_id }}</a></h4>
 {% render_list_tag reaction.models.all 'model' 'model_reaction_relationship_detail' id=reaction.id reverse=True %}
 
+<form method="post" action="{% url 'data_wrapper:add_reactions' %}">
+    {% csrf_token %}
+    <input type="number" name="model_pk" value="{{ model.id }}">
+    <input type="number" name="reaction_pk" value="{{ reaction.id }}" hidden>
+    <input type="submit" value="add to your model">
+</form>
+
 {% endblock %}
