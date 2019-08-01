@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object }}{% endblock title %}
+
+{% block content %}
+<table>
+    <tbody>
+        <tr><td>id</td><td>{{ object.id }}</td></tr>
+        <tr><td>cobra_id</td><td>{{ object.cobra_id }}</td></tr>
+        <tr><td>name</td><td>{{ object.name }}</td></tr>
+        <tr><td>objective</td><td>{{ object.objective }}</td></tr>
+        <tr><td>reactions</td><td>[
+        {% for reaction in object.reactions.all %}
+            {% if not forloop.counter == 1 %},{% endif %}
+            <a href="{% url "cobra_wrapper:cobrareaction_detail" reaction.pk %}">{{ reaction }}</a>
+        {% endfor %}
+        ]</td></tr>
+    </tbody>
+</table>
+{% comment %} <a href="{% url "cobra_wrapper:object_detail_computation" pk=object.pk method="fba" %}">
+    To see fba result of object {{ object }}
+</a> {% endcomment %}
+
+{% comment %} <form action="{% url "cobra_wrapper:object_detail_computation" object.pk "fva" %}" method="get">
+    <select name="reaction_list" multiple>
+    {% for reaction in related_objects %}
+        <option value="{{ reaction.id }}">{{ reaction }}</option>
+    {% endfor %}
+    </select>
+    <input type="checkbox" name="loopless">
+    <input type="text" name="fraction_of_optimum" value="1.0">
+    <input type="text" name="pfba_factor">
+    <button type="reset">reset</button> <button type="submit">submit</button>
+</form> {% endcomment %}
+{% endblock content %}

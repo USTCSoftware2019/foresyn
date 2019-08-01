@@ -1,182 +1,103 @@
-import json
-
-# from django.shortcuts import render, redirect, reverse, get_object_or_404
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
-# from django.http import HttpResponseBadRequest, Http404
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
+from djaDeleteViewb.UpdateViews import LoginRequiredMixin
 # from cobra.exceptions import OptimizationError
 
 from .models import CobraMetabolite, CobraReaction, CobraModel
-from .forms import CobraMetaboliteForm, CobraReactionForm, CobraModelForm
 
 
-# def get_validation_error_content(error):
-#     return {
-#         field: [
-#             {
-#                 'code': field_error.code,
-#                 'message': str(field_error.message)  # Lazy text
-#             }
-#             for field_error in error.error_dict[field]
-#         ]
-#         for field in error.error_dict.keys()
-#     }
+class CobraMetaboliteListView(LoginRequiredMixin, ListView):
+    def get_queryset(self):
+        return CobraMetabolite.objects.filter(owner=self.request.user)
 
 
-# def get_request_content(method, request):
-#     info = {field: value for field, value in getattr(request, method).items()}
-#     pop_metabolites_and_coefficients = False
-#     for field in info.keys():
-#         if field in ['reactions', 'metabolites', 'reaction_list']:
-#             try:
-#                 info[field] = [int(pk) for pk in getattr(request, method).getlist(field)]
-#             except ValueError:
-#                 pass
-
-#         if field in ['lower_bound', 'upper_bound', 'objective_coefficient', 'pfba_factor', 'fraction_of_optimum']:
-#             if info[field]:
-#                 try:
-#                     info[field] = float(info[field])
-#                 except ValueError:
-#                     pass
-#             else:
-#                 info[field] = {
-#                     'lower_bound': 0.0,
-#                     'upper_bound': None,
-#                     'objective_coefficient': 0.0,
-#                     'pfba_factor': None,
-#                     'fraction_of_optimum': 1.0
-#                 }[field]
-
-#         if field == 'coefficients':
-#             if 'metabolites' not in info.keys() or not info[field]:
-#                 pop_metabolites_and_coefficients = True
-#             else:
-#                 try:
-#                     info[field] = json.loads(info[field])
-#                 except json.decoder.JSONDecodeError:
-#                     pass
-
-#         if field == 'loopless':
-#             info[field] = True
-#     if pop_metabolites_and_coefficients:
-#         info.pop('metabolites', None)
-#         info.pop('coefficients', None)
-#     return info
+class CobraReactionListView(LoginRequiredMixin, ListView):
+    def get_queryset(self):
+        return CobraReaction.objects.filter(owner=self.request.user)
 
 
-# class ListMixin:
-#     http_method_names = ['get', 'post']
-
-#     model = None
-#     form = None
-#     relation_field = None
-#     to_model = None
-
-#     def post(self, request):
-#         new_form = self.form(request.POST)
-#         new_form.owner = request.user
-#         try:
-#             if self.relation_field:
-#                 clean_pk_list(new_form, self.relation_field, self.to_model)
-#             new_model = new_form.save()
-#         except ValueError:
-#             return HttpResponseBadRequest(json.dumps({
-#                 'type': 'value_error',
-#                 'errors': new_form.errors
-#             }))
-#         return redirect(new_model)
-
-#     def get(self, request):
-#         return render(request, 'cobra_wrapper/{}/list.html'.format(self.model.MODEL_NAME), context={
-#             'all': self.model.objects.filter(owner=request.user)
-#         })
+class CobraModelListView(LoginRequiredMixin, ListView):
+    def get_queryset(self):
+        return CobraModel.objects.filter(owner=self.request.user)
 
 
-class CobraMetaboliteListView(LoginRequiredMixin, ListMixin, View):
-    model = CobraMetabolite
-    form = CobraMetaboliteForm
+class CobraMetaboliteDetailView(LoginRequiredMixin, DetailView):
+    def get_object(self):
+        return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
 
 
-class CobraReactionListView(LoginRequiredMixin, ListMixin, View):
-    model = CobraReaction
-    form = CobraReactionForm
-    relation_field = 'metabolites'
-    to_model = CobraMetabolite
+class CobraReactionDetailView(LoginRequiredMixin, DetailView):
+    def get_object(self):
+        return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
 
 
-class CobraModelListView(LoginRequiredMixin, ListMixin, View):
-    model = CobraModel
-    form = CobraModelForm
-    relation_field = 'reactions'
-    to_model = CobraReaction
+class CobraModelDetailView(LoginRequiredMixin, DetailView):
+    def get_object(self):
+        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
-# class DetailMixin:
-#     http_method_names = ['get', 'post']
+class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
+    template_name_suffix = '_create_form'
 
-#     model = None
-#     form = CobraMetaboliteForm
-#     relation_field = None
-#     to_model = None
-#     from_model = None
-
-#     def get(self, request, pk):
-#         return render(request, 'cobra_wrapper/{}/detail.html'.format(self.model.MODEL_NAME), context={
-#             self.model.MODEL_NAME: get_object_or_404(self.model, pk=pk, owner=request.user),
-#             'related_models': (self.to_model.objects.filter(owner=request.user) if self.relation_field else None)
-#         })
-
-#     def post(self, request, pk):
-#         if 'delete' in request.POST.keys():
-#             return DetailMixin._delete(self, request, pk)
-#         elif 'edit' in request.POST.keys():
-#             return DetailMixin._patch(self, request, pk)
-#         else:
-#             return HttpResponseBadRequest('Unknown operation!')
-
-#     def _delete(self, request, pk):
-#         deled_model = get_object_or_404(self.model, owner=request.user, id=pk)
-#         if self.from_model and getattr(deled_model, '{}_set'.format(self.from_model.__name__.lower())).count() > 0:
-#             return HttpResponseBadRequest('Can not delete')
-#         deled_model.delete()
-#         return redirect(self.model.get_list_url())
-
-#     def _patch(self, request, pk):
-#         instance = get_object_or_404(self.model, owner=request.user, id=pk)
-#         editing_form = self.form(request.POST, instance=instance)
-#         editing_form.owner = request.user
-#         try:
-#             if self.relation_field:
-#                 clean_pk_list(editing_form, self.relation_field, self.to_model)
-#             edited_instance = editing_form.save()
-#         except ValueError:
-#             return HttpResponseBadRequest(json.dumps({
-#                 'type': 'value_error',
-#                 'errors': editing_form.errors
-#             }))
-#         return redirect(edited_instance)
+    def get_object(self):
+        return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
 
 
-class CobraMetaboliteDetailView(LoginRequiredMixin, DetailMixin, View):
-    model = CobraMetabolite
-    form = CobraMetaboliteForm
-    from_model = CobraReaction
+class CobraReactionCreateView(LoginRequiredMixin, CreateView):
+    template_name_suffix = '_create_form'
+
+    def get_object(self):
+        return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
 
 
-class CobraReactionDetailView(LoginRequiredMixin, DetailMixin, View):
-    model = CobraReaction
-    form = CobraReactionForm
-    from_model = CobraModel
-    relation_field = 'metabolites'
-    to_model = CobraMetabolite
+class CobraModelCreateView(LoginRequiredMixin, CreateView):
+    template_name_suffix = '_create_form'
+
+    def get_object(self):
+        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
-class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
-    model = CobraModel
-    form = CobraModelForm
-    relation_field = 'reactions'
-    to_model = CobraReaction
+class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):
+    success_url = reverse_lazy('cobra_wrapper:cobrametabolite_list')
+
+    def get_object(self):
+        return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
+
+
+class CobraReactionDeleteView(LoginRequiredMixin, DeleteView):
+    success_url = reverse_lazy('cobra_wrapper:cobrareaction_list')
+
+    def get_object(self):
+        return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
+
+
+class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
+    success_url = reverse_lazy('cobra_wrapper:cobramodel_list')
+
+    def get_object(self):
+        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+
+
+class CobraMetaboliteUpdateView(LoginRequiredMixin, UpdateView):
+    template_name_suffix = '_update_form'
+
+    def get_object(self):
+        return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
+
+
+class CobraReactionUpdateView(LoginRequiredMixin, UpdateView):
+    template_name_suffix = '_update_form'
+
+    def get_object(self):
+        return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
+
+
+class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
+    template_name_suffix = '_update_form'
+
+    def get_object(self):
+        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
 # class CobraModelDetailComputeView(LoginRequiredMixin, View):
@@ -243,17 +164,3 @@ class CobraModelDetailView(LoginRequiredMixin, DetailMixin, View):
 #         return render(request, 'cobra_wrapper/{}/new.html'.format(self.model.MODEL_NAME), context={
 #             'related_models': (self.to_model.objects.filter(owner=request.user) if self.to_model else None)
 #         })
-
-
-class CobraMetaboliteNewView(LoginRequiredMixin, NewMixin, View):
-    model = CobraMetabolite
-
-
-class CobraReactionNewView(LoginRequiredMixin, NewMixin, View):
-    model = CobraReaction
-    to_model = CobraMetabolite
-
-
-class CobraModelNewView(LoginRequiredMixin, NewMixin, View):
-    model = CobraModel
-    to_model = CobraReaction

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object }}{% endblock title %}
+
+{% block content %}
+<table>
+    <tbody>
+        <tr><td>id</td><td>{{ object.id }}</td></tr>
+        <tr><td>cobra_id</td><td>{{ object.cobra_id }}</td></tr>
+        <tr><td>name</td><td>{{ object.name }}</td></tr>
+        <tr><td>subsystem</td><td>{{ object.subsystem }}</td></tr>
+        <tr><td>lower_bound</td><td>{{ object.lower_bound }}</td></tr>
+        <tr><td>upper_bound</td><td>{{ object.upper_bound|default_if_none:"None" }}</td></tr>
+        <tr><td>objective_coefficient</td><td>{{ object.objective_coefficient }}</td></tr>
+        <tr><td>metabolites and coefficients</td><td>[
+        {% for metabolite, coefficient in object.get_metabolites_and_coefficients %}
+            {% if not forloop.counter == 1 %},{% endif %}
+            <a href="{% url "cobra_wrapper:cobrametabolite_detail" metabolite.pk %}">{{ metabolite }}</a>:{{ coefficient }}
+        {% endfor %}
+        ]</td></tr>
+        <tr><td>gene_object_rule</td><td>{{ object.gene_object_rule }}</td></tr>
+    </tbody>
+</table>
+{% endblock content %}
