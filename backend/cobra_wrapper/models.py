@@ -98,8 +98,8 @@ def validate_coefficients_is_list(value):
 
 class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    cobra_id = models.CharField(max_length=127)
-    name = models.CharField(max_length=127, blank=True, default='')
+    cobra_id = models.CharField(max_length=511)
+    name = models.CharField(max_length=511, blank=True, default='')
     subsystem = models.CharField(max_length=127, blank=True, null=True, default='')
     lower_bound = models.FloatField(default=0.0)
     upper_bound = models.FloatField(blank=True, null=True, default=None)
