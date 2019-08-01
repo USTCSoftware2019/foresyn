@@ -67,15 +67,15 @@ class CobraStrMixin:
 
 class CobraMetabolite(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    cobra_id = models.CharField(max_length=50)
-    name = models.CharField(max_length=50, blank=True, default='')
-    formula = models.CharField(max_length=50, blank=True, default='')
+    cobra_id = models.CharField(max_length=127)
+    name = models.CharField(max_length=127, blank=True, default='')
+    formula = models.CharField(max_length=127, blank=True, default='')
     charge = models.CharField(max_length=50, blank=True, default='')
     compartment = models.CharField(max_length=50, blank=True, default='')
 
     MODEL_NAME = 'metabolite'
 
-    def get_list_url():
+    def get_list_url(self):
         return reverse('cobra_wrapper:metabolite_list')
 
     def get_absolute_url(self):
@@ -98,9 +98,9 @@ def validate_coefficients_is_list(value):
 
 class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    cobra_id = models.CharField(max_length=50)
-    name = models.CharField(max_length=50, blank=True, default='')
-    subsystem = models.CharField(max_length=50, blank=True, default='')
+    cobra_id = models.CharField(max_length=127)
+    name = models.CharField(max_length=127, blank=True, default='')
+    subsystem = models.CharField(max_length=50, blank=True, null=True, default='')
     lower_bound = models.FloatField(default=0.0)
     upper_bound = models.FloatField(blank=True, null=True, default=None)
     objective_coefficient = models.FloatField(default=0.0)
@@ -110,7 +110,7 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
 
     MODEL_NAME = 'reaction'
 
-    def get_list_url():
+    def get_list_url(self):
         return reverse('cobra_wrapper:reaction_list')
 
     def get_absolute_url(self):
@@ -134,14 +134,14 @@ class CobraReaction(CobraStrMixin, AutoCleanMixin, models.Model):
 
 class CobraModel(CobraStrMixin, AutoCleanMixin, models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    cobra_id = models.CharField(max_length=50)
-    name = models.CharField(max_length=50, blank=True, default='')
+    cobra_id = models.CharField(max_length=127)
+    name = models.CharField(max_length=127, blank=True, default='')
     reactions = models.ManyToManyField(CobraReaction, blank=True)
-    objective = models.CharField(max_length=50, default='')
+    objective = models.CharField(max_length=50, default='', blank=True)
 
     MODEL_NAME = 'model'
 
-    def get_list_url():
+    def get_list_url(self):
         return reverse('cobra_wrapper:model_list')
 
     def get_absolute_url(self):
