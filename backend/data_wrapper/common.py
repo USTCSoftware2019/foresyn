@@ -63,6 +63,8 @@ def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_ob
     (metabolite_names, coefficients) = reaction_string_to_metabolites(reaction_string)
 
     cobra_reaction_object.coefficients = coefficients
+    # cobra_reaction_object.coefficients = ' '.join(coefficients)
+    # coefficients will use space-splited text to store these values
 
     # relationship
     cobra_reaction_object.name = data_reaction_object.name
