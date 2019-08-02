@@ -41,23 +41,35 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
 
 class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
-    model = CobraMetabolite  # TODO: Limit choices
-    fields = ['owner', 'cobra_id', 'name', 'formula', 'charge', 'compartment']
+    model = CobraMetabolite
+    fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class CobraReactionCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraReaction
     fields = [
-        'owner', 'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'metabolites',
+        'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'metabolites',
         'coefficients', 'gene_reaction_rule'
     ]
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraModel
-    fields = ['owner', 'cobra_id', 'name', 'reactions', 'objective']
+    fields = ['cobra_id', 'name', 'reactions', 'objective']
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):  # TODO: Check dependency
@@ -83,29 +95,41 @@ class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
 
 class CobraMetaboliteUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
-    fields = ['owner', 'cobra_id', 'name', 'formula', 'charge', 'compartment']
+    fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
 
-    def get_object(self):  # TODO: Limit choices
+    def get_object(self):
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class CobraReactionUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
     fields = [
-        'owner', 'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'metabolites',
+        'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'metabolites',
         'coefficients', 'gene_reaction_rule'
     ]
 
     def get_object(self):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
 
 class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
-    fields = ['owner', 'cobra_id', 'name', 'reactions', 'objective']
+    fields = ['cobra_id', 'name', 'reactions', 'objective']
 
     def get_object(self):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
 
 class CobraModelFbaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateView):
@@ -128,6 +152,11 @@ class CobraModelFvaCreateView(LoginRequiredMixin, FormView):
     template_name = 'cobra_wrapper/cobramodel_fva_create_form.html'
     form_class = CobraModelFvaForm
 
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(self.request.user, **self.get_form_kwargs())
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['object_pk'] = self.kwargs['pk']
@@ -139,7 +168,7 @@ class CobraModelFvaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateVie
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        form = CobraModelFvaForm(request.GET)
+        form = CobraModelFvaForm(self.request.user, request.GET)
         form.is_valid()
         self.fva_params = form.cleaned_data
         return super().get(request, *args, **kwargs)

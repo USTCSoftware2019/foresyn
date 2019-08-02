@@ -130,7 +130,7 @@ class CobraWrapperViewTests(TestCase):
         # metabolite_set_response = self.client.get('/cobra/metabolites/')
         # self.assertContains(metabolite_set_response, 'content')
 
-        # reaction_response = self.client.post('/cobra/reactions/', dict(  # TODO
+        # reaction_response = self.client.post('/cobra/reactions/', dict(
         #     cobra_id='3OAS140',
         #     name='3 oxoacyl acyl carrier protein synthase n C140 ',
         #     subsystem='Cell Envelope Biosynthesis',
