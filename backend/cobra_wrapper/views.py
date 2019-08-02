@@ -41,7 +41,7 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
 
 class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
-    model = CobraMetabolite
+    model = CobraMetabolite  # TODO: Limit choices
     fields = ['owner', 'cobra_id', 'name', 'formula', 'charge', 'compartment']
 
 
@@ -85,7 +85,7 @@ class CobraMetaboliteUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
     fields = ['owner', 'cobra_id', 'name', 'formula', 'charge', 'compartment']
 
-    def get_object(self):
+    def get_object(self):  # TODO: Limit choices
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
 
 
@@ -127,11 +127,10 @@ class CobraModelFbaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateVie
 class CobraModelFvaCreateView(LoginRequiredMixin, FormView):
     template_name = 'cobra_wrapper/cobramodel_fva_create_form.html'
     form_class = CobraModelFvaForm
-    success_url = reverse_lazy('cobra_wrapper:cobramodel_fva_detail')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['object_pk'] = self.request.GET['pk']
+        context['object_pk'] = self.kwargs['pk']
         return context
 
 
@@ -140,12 +139,10 @@ class CobraModelFvaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateVie
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        form = CobraModelFvaForm(request.POST)
-        if form.is_valid():
-            self.fva_params = form.cleaned_data
-            return super().get(request, *args, **kwargs)
-        else:
-            return redirect(self.object)
+        form = CobraModelFvaForm(request.GET)
+        form.is_valid()
+        self.fva_params = form.cleaned_data
+        return super().get(request, *args, **kwargs)
 
     def get_object(self):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])

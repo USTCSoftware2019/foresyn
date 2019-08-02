@@ -3,7 +3,7 @@
 {% block title %}FBA Result of {{ model }}{% endblock title %}
 
 {% block content %}
-<form method="get">{% csrf_token %}
+<form action="{% url 'cobra_wrapper:cobramodel_fva_detail' object_pk %}" method="get">{% csrf_token %}
     {{ form.as_p }}
     <input type="reset" value="Reset">
     <input type="submit" value="Submit">
