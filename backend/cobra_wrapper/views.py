@@ -72,11 +72,16 @@ class CobraModelCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):  # TODO: Check dependency
+class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('cobra_wrapper:cobrametabolite_list')
 
     def get_object(self):
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['deletable'] = self.object.cobrareaction_set.count() == 0
+        return context
 
 
 class CobraReactionDeleteView(LoginRequiredMixin, DeleteView):
@@ -84,6 +89,11 @@ class CobraReactionDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_object(self):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['deletable'] = self.object.cobramodel_set.count() == 0
+        return context
 
 
 class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
