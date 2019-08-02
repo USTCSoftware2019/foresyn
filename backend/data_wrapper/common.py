@@ -64,7 +64,7 @@ def data_reaction_to_cobra_reaction(user, key=None, value=None, data_reaction_ob
 
     cobra_reaction_object.coefficients = coefficients
     # cobra_reaction_object.coefficients = ' '.join(coefficients)
-    # coefficients will use space-splited text to store these values
+    # FIXME: <myl7> coefficients will use space-splited text to store these values
 
     # relationship
     cobra_reaction_object.name = data_reaction_object.name

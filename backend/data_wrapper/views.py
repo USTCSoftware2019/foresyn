@@ -83,7 +83,7 @@ class AddDataMetaboliteToCobra(View):
             return JsonResponse({"messages": "login required"}, status=401)
         user = request.user
         try:
-            metabolite_pk = request.POST["metabolite_pk"]
+            metabolite_pk = request.POST["pk"]  # SEE: <myl7> tests.test_add_metabolite
         except KeyError:
             return JsonResponse({"messages": "pk required"}, status=400)
         cobra_metabolite_object = data_metabolite_to_cobra_metabolite(key="pk", value=metabolite_pk, user=user)
