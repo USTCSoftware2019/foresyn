@@ -2,7 +2,9 @@ from django.views import View
 from cobra_wrapper.models import CobraModel, CobraMetabolite
 from bigg_database.models import Model as DataModel, ModelReaction
 from django.http import JsonResponse
-from .common import data_metabolite_to_cobra_metabolite, data_reaction_to_cobra_reaction, reaction_string_to_metabolites
+from .common import (
+    data_metabolite_to_cobra_metabolite, data_reaction_to_cobra_reaction, reaction_string_to_metabolites
+)
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 import time
 

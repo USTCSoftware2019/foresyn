@@ -14,7 +14,7 @@ def reaction_string_to_metabolites(reaction_string):
                 right = True
                 continue
             try:
-                f = float(index)
+                # f = float(index)
                 if right:
                     coefficients.append(float(index))
                 else:
