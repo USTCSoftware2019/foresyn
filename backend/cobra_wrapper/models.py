@@ -3,6 +3,7 @@ import json
 from django.db import models
 from django.contrib.auth.models import User
 from django.shortcuts import reverse
+from django.core.exceptions import ValidationError
 import cobra
 
 
@@ -34,6 +35,17 @@ class CobraMetabolite(models.Model):
         )
 
 
+def validate_coefficients_space_splited_text(value):
+    for coefficient in value.split():
+        try:
+            float(coefficient)
+        except ValueError:
+            raise ValidationError(
+                '%(value)s in coefficients is not a float',
+                params={'value': coefficient}
+            )
+
+
 class CobraReaction(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=511)
@@ -43,7 +55,7 @@ class CobraReaction(models.Model):
     upper_bound = models.FloatField(blank=True, null=True, default=None)
     objective_coefficient = models.FloatField(default=0.0)
     metabolites = models.ManyToManyField(CobraMetabolite, blank=True)
-    coefficients = models.TextField(default='', validators=[])  # TODO: Check same number
+    coefficients = models.TextField(default='', validators=[validate_coefficients_space_splited_text])
     gene_reaction_rule = models.TextField(blank=True, default='')
 
     class Meta:

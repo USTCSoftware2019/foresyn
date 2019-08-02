@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 # from cobra.exceptions import OptimizationError
 
 from .models import CobraMetabolite, CobraReaction, CobraModel
-from .forms import CobraModelFvaForm
+from .forms import CobraReactionForm, CobraModelFvaForm
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListView):
@@ -52,10 +52,7 @@ class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
 class CobraReactionCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraReaction
-    fields = [
-        'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'metabolites',
-        'coefficients', 'gene_reaction_rule'
-    ]
+    form_class = CobraReactionForm
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -117,10 +114,7 @@ class CobraMetaboliteUpdateView(LoginRequiredMixin, UpdateView):
 
 class CobraReactionUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
-    fields = [
-        'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'metabolites',
-        'coefficients', 'gene_reaction_rule'
-    ]
+    form_class = CobraReactionForm
 
     def get_object(self):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
