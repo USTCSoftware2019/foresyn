@@ -1,5 +1,5 @@
-from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, TemplateView, FormView
 from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
