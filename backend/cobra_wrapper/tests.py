@@ -67,7 +67,7 @@ class CobraWrapperViewTests(TestCase):
             subsystem='Cell Envelope Biosynthesis',
             lower_bound=0,
             upper_bound=1000,
-            coefficients='-1.0, -1.0, -1.0, 1.0, 1.0, 1.0',
+            coefficients='-1.0 -1.0 -1.0 1.0 1.0 1.0',
             gene_reaction_rule='( STM2378 or STM1197 )',
             owner=user
         )
@@ -88,8 +88,89 @@ class CobraWrapperViewTests(TestCase):
             'metabolites': metabolites
         }
 
-    def test_list(self):
+    def test_metabolites_list(self):
         self._create_models(self._create_user_and_login())
+        response = self.client.get('/cobra/metabolites/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'cobra_wrapper/cobrametabolite_list.html')
+        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobrametabolite_detail.html')
+        for comp in ['id', 'cobra_id', 'name']:
+            self.assertContains(response, comp)
+        self.assertNotContains(response, 'formula')
+        self.assertContains(response, '<a href="/cobra/metabolites/1/">Detail</a>', html=True)
+        self.assertContains(response, '<a href="/cobra/metabolites/create/">Create</a>', html=True)
+
+    def test_reactions_list(self):
+        self._create_models(self._create_user_and_login())
+        response = self.client.get('/cobra/reactions/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'cobra_wrapper/cobrareaction_list.html')
+        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobrareaction_detail.html')
+        for comp in ['id', 'cobra_id', 'name']:
+            self.assertContains(response, comp)
+        self.assertNotContains(response, 'subsystem')
+        self.assertContains(response, '<a href="/cobra/reactions/1/">Detail</a>', html=True)
+        self.assertContains(response, '<a href="/cobra/reactions/create/">Create</a>', html=True)
+
+    def test_models_list(self):
+        self._create_models(self._create_user_and_login())
+        response = self.client.get('/cobra/models/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'cobra_wrapper/cobramodel_list.html')
+        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobramodel_detail.html')
+        for comp in ['id', 'cobra_id', 'name']:
+            self.assertContains(response, comp)
+        self.assertNotContains(response, 'objective')
+        self.assertContains(response, '<a href="/cobra/models/1/">Detail</a>', html=True)
+        self.assertContains(response, '<a href="/cobra/models/create/">Create</a>', html=True)
+
+    def test_metabolites_detail(self):
+        self._create_models(self._create_user_and_login())
+        response = self.client.get('/cobra/metabolites/1/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'cobra_wrapper/cobrametabolite_detail.html')
+        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobrametabolite_list.html')
+        for comp in ['id', 'cobra_id', 'name', 'formula', 'charge', 'compartment']:
+            self.assertContains(response, comp)
+        self.assertNotContains(response, 'subsystem')
+        self.assertContains(response, '<a href="/cobra/metabolites/1/delete/">Delete</a>', html=True)
+        self.assertContains(response, '<a href="/cobra/metabolites/1/update/">Edit</a>', html=True)
+
+        response = self.client.get('/cobra/metabolites/7777777/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_reactions_detail(self):
+        self._create_models(self._create_user_and_login())
+        response = self.client.get('/cobra/reactions/1/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'cobra_wrapper/cobrareaction_detail.html')
+        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobrareaction_list.html')
+        for comp in ['id', 'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound',
+                     'objective_coefficient', 'metabolites and coefficients', 'gene_reaction_rule']:
+            self.assertContains(response, comp)
+        self.assertNotContains(response, 'formula')
+        self.assertNotContains(response, 'gene_object_rule')
+        self.assertContains(response, '<a href="/cobra/reactions/1/delete/">Delete</a>', html=True)
+        self.assertContains(response, '<a href="/cobra/reactions/1/update/">Edit</a>', html=True)
+
+        response = self.client.get('/cobra/reactions/7777777/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_models_detail(self):
+        self._create_models(self._create_user_and_login())
+        response = self.client.get('/cobra/models/1/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'cobra_wrapper/cobramodel_detail.html')
+        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobramodel_list.html')
+        for comp in ['id', 'cobra_id', 'name', 'objective', 'reactions']:
+            self.assertContains(response, comp)
+        self.assertNotContains(response, 'gene')
+        self.assertContains(response, '<a href="/cobra/models/1/delete/">Delete</a>', html=True)
+        self.assertContains(response, '<a href="/cobra/models/1/fba/">FBA</a>', html=True)
+        self.assertContains(response, '<a href="/cobra/models/1/fva/create/">FVA</a>', html=True)
+
+        response = self.client.get('/cobra/reactions/7777777/')
+        self.assertEqual(response.status_code, 404)
 
         # metabolite_0_response = self.client.post('/cobra/metabolites/', dict(  # FIXME:
         #     cobra_id='ACP_c',
@@ -150,10 +231,7 @@ class CobraWrapperViewTests(TestCase):
         # model_set_response = self.client.get('/cobra/models/', content_type='application/json')
         # self.assertContains(model_set_response, 'content')
 
-    def test_detail(self):
-        info = self._create_models(self._create_user_and_login())
-        info
-
+    # def test_detail(self):
     #     model_response = self.client.get('/cobra/models/{}/'.format(info['models'][0].id))
     #     self.assertEqual(model_response.status_code, 200)
     #     self.assertContains(model_response, 'objective')
@@ -178,32 +256,31 @@ class CobraWrapperViewTests(TestCase):
     #     metabolite_response = self.client.get('/cobra/metabolites/7777777/')
     #     self.assertEqual(metabolite_response.status_code, 404)
 
-    def test_create_ok(self):
-        self._create_user_and_login()
+    # def test_create_metabolites_ok(self):
+    #     self._create_user_and_login()
+    #     metabolite_new_response = self.client.post('/cobra/metabolites/create/', dict(
+    #         cobra_id='ACP_c',
+    #         formula='C11H21N2O7PRS',
+    #         name='acyl-carrier-protein',
+    #         compartment='c'))
 
     def test_create_fail(self):
         self._create_user_and_login()
 
     def test_update_ok(self):
         info = self._create_models(self._create_user_and_login())
-        info
 
     def test_update_fail(self):
         info = self._create_models(self._create_user_and_login())
-        info
 
     def test_delete_ok(self):
         info = self._create_models(self._create_user_and_login())
-        info
 
     def test_delete_fail(self):
         info = self._create_models(self._create_user_and_login())
-        info
 
     def test_fba(self):
         info = self._create_models(self._create_user_and_login())
-        info
 
     def test_fva(self):
         info = self._create_models(self._create_user_and_login())
-        info
