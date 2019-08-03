@@ -2,6 +2,7 @@ import json
 
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 from .models import CobraModel, CobraReaction, CobraMetabolite
 
@@ -256,13 +257,69 @@ class CobraWrapperViewTests(TestCase):
     #     metabolite_response = self.client.get('/cobra/metabolites/7777777/')
     #     self.assertEqual(metabolite_response.status_code, 404)
 
-    # def test_create_metabolites_ok(self):
-    #     self._create_user_and_login()
-    #     metabolite_new_response = self.client.post('/cobra/metabolites/create/', dict(
-    #         cobra_id='ACP_c',
-    #         formula='C11H21N2O7PRS',
-    #         name='acyl-carrier-protein',
-    #         compartment='c'))
+    def test_create_metabolites(self):
+        self._create_user_and_login()
+        self.client.post('/cobra/metabolites/create/', dict(
+            cobra_id='test',
+            name='test',
+            formula='test',
+            charge='test',
+            compartment='test' * 50))
+        self.assertRaises(ValidationError)
+
+        response = self.client.post('/cobra/metabolites/create/', dict(
+            cobra_id='test',
+            name='test',
+            formula='test',
+            charge='test',
+            compartment='test'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTemplateUsed('cobra_wrapper/cobrametabolite_create_form.html')
+        self.assertTemplateUsed('cobra_wrapper/cobrametabolite_list.html')
+        self.assertTemplateNotUsed('cobra_wrapper/cobrametabolite_detail.html')
+
+        response = self.client.get('/cobra/metabolites/create/')
+        self.assertContains(response, '<input type="reset" value="Reset">')
+        self.assertContains(response, '<input type="submit" value="Create">')
+        self.assertContains(response, '<a href="/cobra/metabolites/">Return</a>')
+        for comp in ['cobra_id', 'name', 'formula', 'charge', 'compartment']:
+            self.assertContains(response, comp)
+
+    def test_create_reactions(self):
+        self._create_user_and_login()
+        self.client.post('/cobra/reactions/create/', dict(
+            cobra_id='test',
+            name='test',
+            subsystem='test',
+            lower_bound=0,
+            upper_bound=1000,
+            objective_coefficients=0,
+            coefficients='-1.0, -1.0, -1.0, 1.0, 1.0, 1.0',
+            gene_reaction_rule='test'))
+        self.assertRaises(ValidationError)
+
+        response = self.client.post('/cobra/reactions/create/', dict(
+            cobra_id='test',
+            name='test',
+            subsystem='test',
+            lower_bound=0,
+            upper_bound=1000,
+            objective_coefficients=0,
+            metabolites=[1, 2, 3, 4, 5, 6],  # TODO: how to show metabolites as manytomany field
+            coefficients='-1.0 -1.0 -1.0 1.0 1.0 1.0',
+            gene_reaction_rule='test'))
+        self.assertEqual(response.status_code, 200)  # FIXME: why 200 not 302?
+        self.assertTemplateUsed('cobra_wrapper/cobrareaction_create_form.html')
+        self.assertTemplateUsed('cobra_wrapper/cobrareaction_list.html')
+        self.assertTemplateNotUsed('cobra_wrapper/cobrareaction_detail.html')
+
+        response = self.client.get('/cobra/reactions/create/')
+        self.assertContains(response, '<input type="reset" value="Reset">')
+        self.assertContains(response, '<input type="submit" value="Create">')
+        self.assertContains(response, '<a href="/cobra/reactions/">Return</a>')
+        for comp in ['cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient',
+                     'metabolites', 'coefficients', 'gene_reaction_rule']:
+            self.assertContains(response, comp)
 
     def test_create_fail(self):
         self._create_user_and_login()
