@@ -8,16 +8,37 @@ Search
     <h2>Search</h2>
 
     <form method="get" action="{% url 'bigg_database:search' %}">
-        <table>
-            {# TODO #}
-            {# Expand as_p func manully#}
-            {{ form.as_p }}
-            <tr>
-                <td>&nbsp;</td>
-                <td>
-                    <input type="submit" value="Search">
-                </td>
-            </tr>
-        </table>
+        <p>
+            <label for="id_q">Search:</label>
+            <input id="id_q" type="search" name="q" required=true>
+        </p>
+        <p><label>Search In</label></p>
+        <ul id="id_models">
+            <li>
+                <label for="id_models_model">
+                    <input id="id_models_model" type="checkbox" name="models" value="bigg_database.model">
+                    Models
+                </label>
+            </li>
+            <li>
+                <label for="id_models_reaction">
+                    <input id="id_models_reaction" type="checkbox" name="models" value="bigg_database.reaction">
+                    Reactions
+                </label>
+            </li>
+            <li>
+                <label for="id_models_metabolite">
+                    <input id="id_models_metabolite" type="checkbox" name="models" value="bigg_database.metabolite">
+                    Metabolites
+                </label>
+            </li>
+            <li>
+                <label for="id_models_gene">
+                    <input id="id_models_gene" type="checkbox" name="models" value="bigg_database.gene">
+                    Genes
+                </label>
+            </li>
+        </ul>
+        <input type="submit" value="Search">        
     </form>
 {% endblock %}
