@@ -29,18 +29,29 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'data_wrapper',
-    'cobra_wrapper.apps.CobraWrapperConfig',
-    'bigg_database.apps.BiggDatabaseConfig',
-    'accounts.apps.AccountsConfig',
-    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'haystack',
+    'corsheaders',
+
+    'data_wrapper',
+    'cobra_wrapper',
+    'bigg_database',
+    'accounts',
 ]
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'bigg_database.haystack_engine.FuzzyEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'haystack',
+    },
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -143,3 +154,4 @@ else:
     ]
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # for email debug
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
