@@ -13,9 +13,8 @@ from django.views.generic.detail import SingleObjectMixin
 from fuzzywuzzy import fuzz
 from haystack.generic_views import SearchView as HaystackSearchView
 from haystack.query import SQ, SearchQuerySet
-
 from .common import TopKHeap
-from .forms import SearchForm
+from .forms import ModifiedModelSearchForm
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
                      Reaction, ReactionGene, ReactionMetabolite)
 
@@ -52,14 +51,32 @@ class GeneSearchInfo:
     by = ['bigg_id', 'name']
     view_name = 'gene_detail'
 
+# TODO
+# For now, the maximum allowed Levenshtein Edit Distance
+# is set to 2, fixed.
+# See: http://en.wikipedia.org/wiki/Levenshtein_distance
+# However, what we want is that, no matter how much difference
+# between the user's query and the data in the database, we want
+# the best match ones. Even though the similarity is extremely
+# low
 
 class SearchView(HaystackSearchView):
     template_name = 'bigg_database/search_result.html'
+    form_class = ModifiedModelSearchForm
 
     def form_valid(self, form):
+        # FIXME
+        # A more graceful approach to append the fuzzy search operator
         form.cleaned_data['q'] += '~'
         c = super().form_valid(form)
         return c
+
+    def form_invalid(self, form):
+        return render(self.request,
+                      'bigg_database/search.html',
+                      context={
+                          self.form_name: form
+                      })
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
@@ -94,6 +111,7 @@ class SearchView(HaystackSearchView):
             keyword = form.cleaned_data['q']
             result = SearchQuerySet().models(Model).filter(SQ(content__fuzzy=keyword)).load_all()
             # This should be a working version
+            # Need to add fuzziness to the search_kwargs
         else:
             return render(request, self.template_name, context={
                 'form': form
@@ -103,8 +121,13 @@ class SearchView(HaystackSearchView):
 
 '''
 class SearchView(ListView):
-    """
-    The view to search model, reaction, gene and metabolite
+    "" view to search model, reaction, gene and metabolite
+    # is set to 2, fixed
+.
+# However, what we want is that, no matter how much difference
+# between the user's query and the data in the database, we want
+# the best match ones.
+
     """
     http_method_names = ['get']
 
