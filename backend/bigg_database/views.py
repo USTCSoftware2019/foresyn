@@ -60,6 +60,7 @@ class GeneSearchInfo:
 # the best match ones. Even though the similarity is extremely
 # low
 
+
 class SearchView(HaystackSearchView):
     template_name = 'bigg_database/search_result.html'
     form_class = ModifiedModelSearchForm
