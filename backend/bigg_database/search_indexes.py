@@ -34,7 +34,7 @@ class MetaboliteIndex(indexes.SearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name')
 
     def get_model(self):
-        return Metabolite   
+        return Metabolite
 
     def index_queryset(self, using=None):
         return self.get_model().objects.all()

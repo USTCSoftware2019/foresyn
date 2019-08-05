@@ -1,15 +1,23 @@
 {% extends "base.html" %}
+
 {% block title %}
 Search
 {% endblock %}
 
 {% block content %}
-<p>Search models, reactions, metabolites and genes</p>
+    <h2>Search</h2>
 
-<form method="get">
-{#    {% csrf_token %}#}
-    {{ form.as_p }}
-    <input type="submit" value="Search">
-</form>
-
+    <form method="get" action="{% url 'bigg_database:search' %}">
+        <table>
+            {# TODO #}
+            {# Expand as_p func manully#}
+            {{ form.as_p }}
+            <tr>
+                <td>&nbsp;</td>
+                <td>
+                    <input type="submit" value="Search">
+                </td>
+            </tr>
+        </table>
+    </form>
 {% endblock %}

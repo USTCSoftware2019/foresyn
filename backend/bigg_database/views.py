@@ -1,6 +1,6 @@
+import heapq
 import json
 from functools import reduce
-import heapq
 
 import django.core.exceptions
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,6 +11,8 @@ from django.utils.translation import gettext as _
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.detail import SingleObjectMixin
 from fuzzywuzzy import fuzz
+from haystack.generic_views import SearchView as HaystackSearchView
+from haystack.query import SQ, SearchQuerySet
 
 from .common import TopKHeap
 from .forms import SearchForm
@@ -51,6 +53,55 @@ class GeneSearchInfo:
     view_name = 'gene_detail'
 
 
+class SearchView(HaystackSearchView):
+    template_name = 'bigg_database/search_result.html'
+
+    def form_valid(self, form):
+        form.cleaned_data['q'] += '~'
+        c = super().form_valid(form)
+        return c
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['query'] = context['query'][:-1]  # remove '~'
+
+        model_object_list = []
+        reaction_object_list = []
+        metabolite_object_list = []
+        gene_object_list = []
+        for obj in context['page_obj'].object_list:
+            if isinstance(obj.object, Model):
+                model_object_list.append(obj.object)
+            elif isinstance(obj.object, Reaction):
+                reaction_object_list.append(obj.object)
+            elif isinstance(obj.object, Metabolite):
+                metabolite_object_list.append(obj.object)
+            elif isinstance(obj.object, Gene):
+                gene_object_list.append(obj.object)
+        context['model_object_list'] = model_object_list
+        context['reaction_object_list'] = reaction_object_list
+        context['metabolite_object_list'] = metabolite_object_list
+        context['gene_object_list'] = gene_object_list
+
+        return context
+
+
+'''
+    def get(self, request, *args, **kwargs):
+        form = SearchForm(request.GET)
+
+        if form.is_valid():
+            keyword = form.cleaned_data['q']
+            result = SearchQuerySet().models(Model).filter(SQ(content__fuzzy=keyword)).load_all()
+            # This should be a working version
+        else:
+            return render(request, self.template_name, context={
+                'form': form
+            })
+'''
+
+
+'''
 class SearchView(ListView):
     """
     The view to search model, reaction, gene and metabolite
@@ -96,6 +147,7 @@ class SearchView(ListView):
             return render(request, 'bigg_database/search.html', {
                 'form': SearchForm()
             })
+'''
 
 
 class ModelDetailView(DetailView):
