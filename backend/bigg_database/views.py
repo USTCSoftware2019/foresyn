@@ -68,6 +68,12 @@ class SearchView(HaystackSearchView):
         # FIXME
         # A more graceful approach to append the fuzzy search operator
         form.cleaned_data['q'] += '~'
+        form.cleaned_data['models'] = [
+            'bigg_database.model',
+            'bigg_database.reaction',
+            'bigg_database.metabolite',
+            'bigg_database.gene'
+        ]
         c = super().form_valid(form)
         return c
 
