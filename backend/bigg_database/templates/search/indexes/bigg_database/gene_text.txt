@@ -1,0 +1,2 @@
+{{ object.bigg_id }}
+{{ object.name }}
