@@ -61,6 +61,49 @@ class GeneSearchInfo:
 # low
 
 
+class SearchView(View):
+    def get(self, request, *args, **kwargs):
+        form = ModifiedModelSearchForm(request.GET)
+
+        if form.is_valid():
+            keyword = form.cleaned_data['q']
+            queryset = SearchQuerySet().filter(SQ(content__fuzzy=keyword))
+
+            context = {}
+
+            # TODO
+            # The results need to paged
+
+            model_object_list = []
+            reaction_object_list = []
+            metabolite_object_list = []
+            gene_object_list = []
+            for obj in queryset:
+                if isinstance(obj.object, Model):
+                    model_object_list.append(obj.object)
+                elif isinstance(obj.object, Reaction):
+                    reaction_object_list.append(obj.object)
+                elif isinstance(obj.object, Metabolite):
+                    metabolite_object_list.append(obj.object)
+                elif isinstance(obj.object, Gene):
+                    gene_object_list.append(obj.object)
+            context['model_object_list'] = model_object_list
+            context['reaction_object_list'] = reaction_object_list
+            context['metabolite_object_list'] = metabolite_object_list
+            context['gene_object_list'] = gene_object_list
+
+            context['query'] = form.cleaned_data['q']
+
+            return render(request, 'bigg_database/search_result.html', context=context)
+        else:
+            return render(request,
+                          'bigg_database/search.html',
+                          context={
+                              'form': form
+                          })
+
+
+'''
 class SearchView(HaystackSearchView):
     template_name = 'bigg_database/search_result.html'
     form_class = ModifiedModelSearchForm
@@ -108,7 +151,7 @@ class SearchView(HaystackSearchView):
         context['gene_object_list'] = gene_object_list
 
         return context
-
+'''
 
 '''
     def get(self, request, *args, **kwargs):

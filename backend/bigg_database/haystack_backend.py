@@ -13,11 +13,6 @@ class FuzzyBackend(Elasticsearch2SearchBackend):
             # much lower than 6.2.4
             search_kwargs['query']['filtered']['query']['query_string']['fuzziness'] = 2
 
-            # Prevent escape ~ to \~
-            # FIXME:
-            # Needs a better approach to append '~' to the query without escape it
-            search_kwargs['query']['filtered']['query']['query_string']['query'] = \
-                search_kwargs['query']['filtered']['query']['query_string']['query'].replace('\\~', '~')
         except KeyError:
             pass
         return search_kwargs
