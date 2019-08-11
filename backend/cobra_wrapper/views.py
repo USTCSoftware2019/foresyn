@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 # from cobra.exceptions import OptimizationError
 
 from .models import CobraMetabolite, CobraReaction, CobraModel
-from .forms import CobraReactionForm, CobraModelFvaForm
+from .forms import CobraReactionForm, CobraModelForm, CobraModelFvaForm
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListView):
@@ -52,7 +52,9 @@ class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
 class CobraReactionCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraReaction
-    form_class = CobraReactionForm
+
+    def get_form(self, form_class=None):
+        return CobraReactionForm(self.request.user, **self.get_form_kwargs())
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -62,7 +64,9 @@ class CobraReactionCreateView(LoginRequiredMixin, CreateView):
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraModel
-    fields = ['cobra_id', 'name', 'reactions', 'objective']
+
+    def get_form(self, form_class=None):
+        return CobraModelForm(self.request.user, **self.get_form_kwargs())
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -114,10 +118,12 @@ class CobraMetaboliteUpdateView(LoginRequiredMixin, UpdateView):
 
 class CobraReactionUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
-    form_class = CobraReactionForm
 
     def get_object(self, queryset=None):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def get_form(self, form_class=None):
+        return CobraReactionForm(self.request.user, **self.get_form_kwargs())
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -126,10 +132,12 @@ class CobraReactionUpdateView(LoginRequiredMixin, UpdateView):
 
 class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
-    fields = ['cobra_id', 'name', 'reactions', 'objective']
 
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def get_form(self, form_class=None):
+        return CobraModelForm(self.request.user, **self.get_form_kwargs())
 
     def form_valid(self, form):
         form.instance.owner = self.request.user

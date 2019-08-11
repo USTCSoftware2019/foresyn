@@ -1,9 +1,15 @@
 from django import forms
 
-from .models import CobraReaction
+from .models import CobraMetabolite, CobraReaction, CobraModel
 
 
 class CobraReactionForm(forms.ModelForm):
+    def __init__(self, owner, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['metabolites'] = forms.ModelMultipleChoiceField(
+            CobraMetabolite.objects.filter(owner=owner), required=False
+        )
+
     class Meta:
         model = CobraReaction
         fields = [
@@ -18,6 +24,18 @@ class CobraReactionForm(forms.ModelForm):
 
         if len(coefficients) != len(metabolites):
             self.add_error('coefficients', 'len of coefficients and metabolites are not the same')
+
+
+class CobraModelForm(forms.ModelForm):
+    def __init__(self, owner, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['reactions'] = forms.ModelMultipleChoiceField(
+            CobraReaction.objects.filter(owner=owner), required=False
+        )
+
+    class Meta:
+        model = CobraModel
+        fields = ['cobra_id', 'name', 'reactions', 'objective']
 
 
 class CobraModelFvaForm(forms.Form):
