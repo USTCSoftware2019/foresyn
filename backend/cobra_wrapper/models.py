@@ -133,7 +133,7 @@ class CobraModel(models.Model):
         cobra_model.objective = self.objective
         return cobra_model
 
-    def fba(self):
+    def fba(self):  # DEPRECATED(myl7)
         solution = self.build().optimize()
         return {
             'objective_value': solution.objective_value,
@@ -142,7 +142,7 @@ class CobraModel(models.Model):
             'shadow_prices': json.loads(solution.shadow_prices.to_json())
         }
 
-    def fva(self, **kwarg):
+    def fva(self, **kwarg):  # DEPRECATED(myl7)
         if 'reaction_list' in kwarg.keys():
             kwarg['reaction_list'] = [reaction.build() for reaction in kwarg['reaction_list']]
         return json.loads(cobra.flux_analysis.flux_variability_analysis(self.build(), **kwarg).to_json())
