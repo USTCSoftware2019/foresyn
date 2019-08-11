@@ -91,9 +91,9 @@ class AddDataMetaboliteToCobra(View):
         cobra_metabolite_object = data_metabolite_to_cobra_metabolite(key="pk", value=metabolite_pk, user=user)
         if cobra_metabolite_object is None:
             return JsonResponse({"messages": "no metabolite found"}, status=500)
-        try:
-            CobraMetabolite.objects.get(owner_id=user.id, cobra_id=cobra_metabolite_object.cobra_id)
-            return JsonResponse({"messages": "metabolite already exist"}, status=200)
-        except ObjectDoesNotExist:
-            cobra_metabolite_object.save()
+        # try:
+        #     CobraMetabolite.objects.get(owner_id=user.id, cobra_id=cobra_metabolite_object.cobra_id)
+        #     return JsonResponse({"messages": "metabolite already exist"}, status=200)
+        # except ObjectDoesNotExist:
+        cobra_metabolite_object.save()
         return JsonResponse({"messages": "OK"}, status=200)
