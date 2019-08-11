@@ -148,7 +148,7 @@ class CobraModelFbaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateVie
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['solution'] = self.get_object().fba()
+        context['solution'] = self.object.fba()
         return context
 
 
