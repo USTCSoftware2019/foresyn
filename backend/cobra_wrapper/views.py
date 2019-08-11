@@ -25,17 +25,17 @@ class CobraModelListView(LoginRequiredMixin, ListView):
 
 
 class CobraMetaboliteDetailView(LoginRequiredMixin, DetailView):
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
 
 
 class CobraReactionDetailView(LoginRequiredMixin, DetailView):
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
 
 
 class CobraModelDetailView(LoginRequiredMixin, DetailView):
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
@@ -72,7 +72,7 @@ class CobraModelCreateView(LoginRequiredMixin, CreateView):
 class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('cobra_wrapper:cobrametabolite_list')
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
@@ -84,7 +84,7 @@ class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):
 class CobraReactionDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('cobra_wrapper:cobrareaction_list')
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
@@ -96,7 +96,7 @@ class CobraReactionDeleteView(LoginRequiredMixin, DeleteView):
 class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('cobra_wrapper:cobramodel_list')
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
@@ -104,7 +104,7 @@ class CobraMetaboliteUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
 
     def form_valid(self, form):
@@ -116,7 +116,7 @@ class CobraReactionUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
     form_class = CobraReactionForm
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
 
     def form_valid(self, form):
@@ -128,7 +128,7 @@ class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
     fields = ['cobra_id', 'name', 'reactions', 'objective']
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
     def form_valid(self, form):
@@ -143,7 +143,7 @@ class CobraModelFbaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateVie
         self.object = self.get_object()
         return super().get(request, *args, **kwargs)
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
@@ -177,7 +177,7 @@ class CobraModelFvaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateVie
         self.fva_params = form.cleaned_data
         return super().get(request, *args, **kwargs)
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
