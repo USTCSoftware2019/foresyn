@@ -1,12 +1,11 @@
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, reverse
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, TemplateView, FormView
-from django.views.generic.detail import SingleObjectMixin
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-# from cobra.exceptions import OptimizationError
+from django_celery_results.models import TaskResult
 
-from .models import CobraMetabolite, CobraReaction, CobraModel
-from .forms import CobraReactionForm, CobraModelForm, CobraModelFvaForm
+from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFba, CobraFva
+from .forms import CobraReactionForm, CobraModelForm, CobraFvaForm
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListView):
@@ -63,7 +62,7 @@ class CobraReactionCreateView(LoginRequiredMixin, CreateView):
 
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
-    model = CobraModel
+    model = CobraModel  # TODO(myl7): Is model required ?
 
     def get_form(self, form_class=None):
         return CobraModelForm(self.request.user, **self.get_form_kwargs())
@@ -81,7 +80,7 @@ class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['deletable'] = self.object.cobrareaction_set.count() == 0
+        context['deletable'] = (self.object.cobrareaction_set.count() == 0)
         return context
 
 
@@ -93,7 +92,7 @@ class CobraReactionDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['deletable'] = self.object.cobramodel_set.count() == 0
+        context['deletable'] = (self.object.cobramodel_set.count() == 0)
         return context
 
 
@@ -144,55 +143,91 @@ class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class CobraModelFbaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateView):
-    template_name = 'cobra_wrapper/cobramodel_fba_detail.html'
+class CobraFbaListView(LoginRequiredMixin, ListView):
+    def get_queryset(self):
+        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return model.cobrafba_set.all()
 
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        return super().get(request, *args, **kwargs)
 
+class CobraFbaDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
-        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return get_object_or_404(model.cobrafba_set.all(), pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['solution'] = self.object.fba()
+        try:
+            context['result'] = TaskResult.objects.get(task_id=self.object.task_id)
+        except TaskResult.DoesNotExist:
+            context['result'] = None
         return context
 
 
-class CobraModelFvaCreateView(LoginRequiredMixin, FormView):
-    template_name = 'cobra_wrapper/cobramodel_fva_create_form.html'
-    form_class = CobraModelFvaForm
+class CobraFbaCreateView(LoginRequiredMixin, CreateView):
+    template_name_suffix = '_create_form'
+    model = CobraFba
+    fields = []
+
+    def get(self, request, *args, **kwargs):
+        self.object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.model = self.object
+        # form.instance.result_id  # TODO(myl7): Celery
+        return super().form_valid(form)
+
+
+class CobraFbaDeleteView(LoginRequiredMixin, DeleteView):
+    def get_object(self, queryset=None):
+        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return get_object_or_404(model.cobrafba_set.all(), pk=self.kwargs['pk'])
+
+    def get_success_url(self):
+        return reverse('cobra_wrapper:cobrafba_list', kwargs={'model_pk': self.kwargs['model_pk']})
+
+
+class CobraFvaListView(LoginRequiredMixin, ListView):
+    def get_queryset(self):
+        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return model.cobrafva_set.all()
+
+
+class CobraFvaDetailView(LoginRequiredMixin, DetailView):
+    def get_object(self, queryset=None):
+        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return get_object_or_404(model.cobrafva_set.all(), pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            context['result'] = TaskResult.objects.get(task_id=self.object.task_id)
+        except TaskResult.DoesNotExist:
+            context['result'] = None
+        return context
+
+
+class CobraFvaCreateView(LoginRequiredMixin, CreateView):
+    template_name_suffix = '_create_form'
+    model = CobraFva
+
+    def get(self, request, *args, **kwargs):
+        self.object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return super().get(request, *args, **kwargs)
 
     def get_form(self, form_class=None):
-        if form_class is None:
-            form_class = self.get_form_class()
-        return form_class(self.request.user, **self.get_form_kwargs())
+        return CobraFvaForm(self.request.user, **self.get_form_kwargs())
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['object_pk'] = self.kwargs['pk']
-        return context
+    def form_valid(self, form):
+        form.instance.model = self.object
+        # form.instance.result_id  # TODO(myl7): Celery
+        return super().form_valid(form)
 
 
-class CobraModelFvaDetailView(LoginRequiredMixin, SingleObjectMixin, TemplateView):
-    template_name = 'cobra_wrapper/cobramodel_fva_detail.html'
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = CobraModelFvaForm(self.request.user, request.GET)
-        form.is_valid()
-        self.fva_params = form.cleaned_data
-        return super().get(request, *args, **kwargs)
-
+class CobraFvaDeleteView(LoginRequiredMixin, DeleteView):
     def get_object(self, queryset=None):
-        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return get_object_or_404(model.cobrafva_set.all(), pk=self.kwargs['pk'])
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        solution_obj = self.object.fva(**self.fva_params)
-        context['solution'] = [
-            (name, solution_obj['maximum'][name], solution_obj['minimum'][name])
-            for name in solution_obj['maximum'].keys()
-        ]
-        return context
+    def get_success_url(self):
+        return reverse('cobra_wrapper:cobrafva_list', kwargs={'model_pk': self.kwargs['model_pk']})

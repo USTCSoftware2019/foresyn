@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import CobraMetabolite, CobraReaction, CobraModel
+from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFva
 
 
 class CobraReactionForm(forms.ModelForm):
@@ -38,11 +38,13 @@ class CobraModelForm(forms.ModelForm):
         fields = ['cobra_id', 'name', 'reactions', 'objective']
 
 
-class CobraModelFvaForm(forms.Form):
+class CobraFvaForm(forms.ModelForm):
     def __init__(self, owner, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['reaction_list'] = forms.ModelMultipleChoiceField(CobraReaction.objects.filter(owner=owner))
+        self.fields['reaction_list'] = forms.ModelMultipleChoiceField(
+            CobraReaction.objects.filter(owner=owner), required=False
+        )
 
-    loopless = forms.BooleanField(initial=False, required=False)
-    fraction_of_optimum = forms.FloatField(initial=1.0)
-    pfba_factor = forms.NullBooleanField(initial=None)
+    class Meta:
+        model = CobraFva
+        fields = ['reaction_list', 'loopless', 'fraction_of_optimum', 'pfba_factor']
