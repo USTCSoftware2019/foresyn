@@ -11,8 +11,8 @@ class CobraMetabolite(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=511)
     name = models.CharField(max_length=511, blank=True, default='')
-    formula = models.CharField(max_length=127, blank=True, default='')
-    charge = models.CharField(max_length=50, blank=True, default='')
+    formula = models.CharField(max_length=127)
+    charge = models.FloatField()
     compartment = models.CharField(max_length=50, blank=True, default='')
 
     class Meta:
@@ -30,7 +30,7 @@ class CobraMetabolite(models.Model):
             self.cobra_id,
             name=self.name,
             formula=self.formula,
-            charge=(self.charge if self.charge else None),
+            charge=self.charge,
             compartment=(self.compartment if self.compartment else None)
         )
 
@@ -125,7 +125,7 @@ class CobraModel(models.Model):
         for reaction in self.reactions.all():
             cobra_reaction = reaction.build()
             reaction_pairs.append((cobra_reaction, reaction))
-        cobra_model.add_reactions(list(zip(*reaction_pairs))[0])
+        cobra_model.add_reactions([pair[0] for pair in reaction_pairs])
 
         for cobra_reaction, reaction in reaction_pairs:
             cobra_reaction.objective_coefficient = reaction.objective_coefficient
