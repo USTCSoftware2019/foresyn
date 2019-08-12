@@ -507,7 +507,7 @@ class CobraWrapperViewTests(TestCase):
         self._create_models(self._create_user_and_login())
 
         response = self.client.get('/cobra/models/1/fva/create/')
-        self.assertTemplateUsed('cobra_wrapper/cobramodel_fva_create_form.html')
+        self.assertTemplateUsed('cobra_wrapper/cobrafva_create_form.html')
         for comp in ['loopless', 'fraction_of_optimum', 'pfba_factor', 'reaction_list']:
             self.assertContains(response, comp)
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -520,7 +520,7 @@ class CobraWrapperViewTests(TestCase):
 
         response = self.client.get('/cobra/models/1/fva/')
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('cobra_wrapper/cobramodel_fva_detail.html')
+        self.assertTemplateUsed('cobra_wrapper/cobrafva_detail.html')
         for comp in ['name', 'maximum', 'minimum']:
             self.assertContains(response, comp)
         self.assertContains(response, '<a href="/cobra/models/1/">Return</a>', html=True)

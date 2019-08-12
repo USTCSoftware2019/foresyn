@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}All FVA{% endblock title %}
+
+{% block content %}
+{% for object in object_list %}
+<table>
+    <tbody>
+        <tr><td>task_id</td><td>{{ object.task_id }}</td></tr>
+        <tr><td>start_time</td><td>{{ object.start_time }}</td></tr>
+        <tr><td><a href="{% url 'cobra_wrapper:cobrafva_detail' model_pk object.pk %}">Detail</a></td></tr>
+    </tbody>
+</table>
+{% endfor %}
+
+<a href="{% url 'cobra_wrapper:cobrafva_create_form' model_pk %}">Create</a>
+<a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">Return</a>
+{% endblock content %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Add a FVA{% endblock title %}
+
+{% block content %}
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="reset" value="Reset">
+    <input type="submit" value="Submit">
+</form>
+
+<a href="{% url 'cobra_wrapper:cobrafva_list' model_pk %}">Return</a>
+{% endblock content %}

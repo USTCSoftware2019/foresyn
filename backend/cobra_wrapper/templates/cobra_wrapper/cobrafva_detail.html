@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}FVA Result of {{ object }}{% endblock title %}
+
+{% block content %}
+<table>
+    <tr><th>name</th><th>maximum</th><th>minimum</th></tr>
+{% for name, max, min in solution %}
+    <tr><td>{{ name }}</td><td>{{ max }}</td><td>{{ min }}</td></tr>
+{% endfor %}
+</table>
+
+<a href="{% url 'cobra_wrapper:cobrafva_list' model_pk %}">Return</a>
+{% endblock content %}
