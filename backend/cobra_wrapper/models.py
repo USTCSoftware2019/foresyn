@@ -4,7 +4,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.shortcuts import reverse
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 import cobra
+from django_celery_results.models import TaskResult
 
 
 class CobraMetabolite(models.Model):
@@ -66,7 +68,7 @@ class CobraReaction(models.Model):
         return '{}[{}]'.format(self.cobra_id, self.name)
 
     def get_absolute_url(self):
-        return reverse("cobra_wrapper:cobrareaction_detail", kwargs={"pk": self.pk})
+        return reverse('cobra_wrapper:cobrareaction_detail', kwargs={'pk': self.pk})
 
     def build(self):
         cobra_reaction = cobra.Reaction(
@@ -98,22 +100,64 @@ class CobraReaction(models.Model):
         return dict(zip([metabolite for metabolite in self.metabolites.all()], self.coefficients))
 
 
+class CobraFba(models.Model):
+    start_time = models.DateTimeField(auto_now_add=True)
+    result = models.ForeignKey(TaskResult, on_delete=models.CASCADE, blank=True)
+
+    class Meta:
+        verbose_name = 'fba'
+        ordering = ['result']
+
+    def __str__(self):
+        return '{}[fba]'.format(self.result)
+
+    # def get_absolute_url(self):
+    #     return reverse('cobra_wrapper:cobrafba_detail', kwargs={'pk': self.pk})
+
+    def used_time(self):
+        return self.result.date_done - self.start_time
+
+
+class CobraFva(models.Model):
+    reaction_list = models.ManyToManyField(CobraReaction, blank=True)
+    loopless = models.BooleanField(default=False, blank=True)
+    fraction_of_optimum = models.FloatField(default=1.0, blank=True)
+    pfba_factor = models.NullBooleanField(default=None, blank=True)
+    start_time = models.DateTimeField(auto_now_add=True)
+    result = models.ForeignKey(TaskResult, on_delete=models.CASCADE, blank=True)
+
+    class Meta:
+        verbose_name = 'fva'
+        ordering = ['result']
+
+    def __str__(self):
+        return '{}[fva]'.format(self.result)
+
+    # def get_absolute_url(self):
+    #     return reverse('cobra_wrapper:cobrafva_detail', kwargs={'pk': self.pk})
+
+    def used_time(self):
+        return self.result.date_done - self.start_time
+
+
 class CobraModel(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     cobra_id = models.CharField(max_length=127)
     name = models.CharField(max_length=127, blank=True, default='')
     reactions = models.ManyToManyField(CobraReaction, blank=True)
     objective = models.CharField(max_length=50, default='', blank=True)
+    fba = models.ManyToManyField(CobraFba, blank=True)
+    fva = models.ManyToManyField(CobraFva, blank=True)
 
     class Meta:
-        verbose_name = "model"
+        verbose_name = 'model'
         ordering = ['cobra_id', 'name']
 
     def __str__(self):
         return '{}[{}]'.format(self.cobra_id, self.name)
 
     def get_absolute_url(self):
-        return reverse("cobra_wrapper:cobramodel_detail", kwargs={"pk": self.pk})
+        return reverse('cobra_wrapper:cobramodel_detail', kwargs={'pk': self.pk})
 
     def build(self):
         cobra_model = cobra.Model(
