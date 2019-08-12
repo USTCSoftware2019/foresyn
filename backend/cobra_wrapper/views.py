@@ -62,7 +62,7 @@ class CobraReactionCreateView(LoginRequiredMixin, CreateView):
 
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
-    model = CobraModel  # TODO(myl7): Is model required ?
+    model = CobraModel
 
     def get_form(self, form_class=None):
         return CobraModelForm(self.request.user, **self.get_form_kwargs())
