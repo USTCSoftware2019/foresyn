@@ -93,10 +93,6 @@ class CobraReaction(models.Model):
             [float(coefficient) for coefficient in self.coefficients.split()]
         ))
 
-    @property
-    def metabolites_and_coefficients(self):
-        return dict(zip([metabolite for metabolite in self.metabolites.all()], self.coefficients))
-
 
 class CobraModel(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -132,20 +128,6 @@ class CobraModel(models.Model):
 
         cobra_model.objective = self.objective
         return cobra_model
-
-    def fba(self):  # DEPRECATED(myl7)
-        solution = self.build().optimize()
-        return {
-            'objective_value': solution.objective_value,
-            'status': solution.status,
-            'fluxes': json.loads(solution.fluxes.to_json()),
-            'shadow_prices': json.loads(solution.shadow_prices.to_json())
-        }
-
-    def fva(self, **kwarg):  # DEPRECATED(myl7)
-        if 'reaction_list' in kwarg.keys():
-            kwarg['reaction_list'] = [reaction.build() for reaction in kwarg['reaction_list']]
-        return json.loads(cobra.flux_analysis.flux_variability_analysis(self.build(), **kwarg).to_json())
 
 
 class CobraFba(models.Model):
