@@ -144,7 +144,7 @@ class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ModelPkMixin:
+class ModelPkMixin(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['model_pk'] = self.kwargs['model_pk']
@@ -177,6 +177,7 @@ class CobraFbaCreateView(LoginRequiredMixin, ModelPkMixin, CreateView):
     fields = []
 
     def get(self, request, *args, **kwargs):
+        self.object = None
         self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return super().get(request, *args, **kwargs)
 
@@ -222,6 +223,7 @@ class CobraFvaCreateView(LoginRequiredMixin, ModelPkMixin, CreateView):
     model = CobraFva
 
     def get(self, request, *args, **kwargs):
+        self.object = None
         self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return super().get(request, *args, **kwargs)
 
