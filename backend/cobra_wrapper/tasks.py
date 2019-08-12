@@ -3,10 +3,10 @@ from celery import shared_task
 
 
 @shared_task
-def fba(cobra_model):
+def cobra_fba(cobra_model):
     return cobra_model.optimize()
 
 
 @shared_task
-def fva(cobra_model, reaction_list=None, loopless=False, fraction_of_optimum=1.0, pfba_factor=None):
+def cobra_fva(cobra_model, reaction_list=None, loopless=False, fraction_of_optimum=1.0, pfba_factor=None):
     return flux_variability_analysis(cobra_model, reaction_list, loopless, fraction_of_optimum, pfba_factor)

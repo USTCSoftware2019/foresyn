@@ -6,6 +6,7 @@ from django_celery_results.models import TaskResult
 
 from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFba, CobraFva
 from .forms import CobraReactionForm, CobraModelForm, CobraFvaForm
+from .tasks import cobra_fba, cobra_fva
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListView):
@@ -176,12 +177,14 @@ class CobraFbaCreateView(LoginRequiredMixin, ModelPkMixin, CreateView):
     fields = []
 
     def get(self, request, *args, **kwargs):
-        self.object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
-        form.instance.model = self.object
-        # form.instance.result_id  # TODO(myl7): Celery
+        form.instance.model = self.model_object
+        cobra_model = self.model_object.build()
+        task = cobra_fba.delay(cobra_model)
+        form.instance.result_id = task.id
         return super().form_valid(form)
 
 
@@ -219,15 +222,19 @@ class CobraFvaCreateView(LoginRequiredMixin, ModelPkMixin, CreateView):
     model = CobraFva
 
     def get(self, request, *args, **kwargs):
-        self.object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return super().get(request, *args, **kwargs)
 
     def get_form(self, form_class=None):
         return CobraFvaForm(self.request.user, **self.get_form_kwargs())
 
     def form_valid(self, form):
-        form.instance.model = self.object
-        # form.instance.result_id  # TODO(myl7): Celery
+        form.instance.model = self.model_object
+        cobra_model = self.model_object.build()
+        cobra_fva_args = form.cleaned_data.copy()
+        cobra_fva_args['reaction_list'] = list(map(lambda reaction: reaction.build(), cobra_fva_args['reaction_list']))
+        task = cobra_fva.delay(cobra_model, **cobra_fva_args)
+        form.instance.result_id = task.id
         return super().form_valid(form)
 
 
