@@ -143,13 +143,20 @@ class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class CobraFbaListView(LoginRequiredMixin, ListView):
+class ModelPkMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['model_pk'] = self.kwargs['model_pk']
+        return context
+
+
+class CobraFbaListView(LoginRequiredMixin, ModelPkMixin, ListView):
     def get_queryset(self):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return model.cobrafba_set.all()
 
 
-class CobraFbaDetailView(LoginRequiredMixin, DetailView):
+class CobraFbaDetailView(LoginRequiredMixin, ModelPkMixin, DetailView):
     def get_object(self, queryset=None):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.cobrafba_set.all(), pk=self.kwargs['pk'])
@@ -163,7 +170,7 @@ class CobraFbaDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class CobraFbaCreateView(LoginRequiredMixin, CreateView):
+class CobraFbaCreateView(LoginRequiredMixin, ModelPkMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraFba
     fields = []
@@ -178,7 +185,7 @@ class CobraFbaCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CobraFbaDeleteView(LoginRequiredMixin, DeleteView):
+class CobraFbaDeleteView(LoginRequiredMixin, ModelPkMixin, DeleteView):
     def get_object(self, queryset=None):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.cobrafba_set.all(), pk=self.kwargs['pk'])
@@ -187,13 +194,13 @@ class CobraFbaDeleteView(LoginRequiredMixin, DeleteView):
         return reverse('cobra_wrapper:cobrafba_list', kwargs={'model_pk': self.kwargs['model_pk']})
 
 
-class CobraFvaListView(LoginRequiredMixin, ListView):
+class CobraFvaListView(LoginRequiredMixin, ModelPkMixin, ListView):
     def get_queryset(self):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return model.cobrafva_set.all()
 
 
-class CobraFvaDetailView(LoginRequiredMixin, DetailView):
+class CobraFvaDetailView(LoginRequiredMixin, ModelPkMixin, DetailView):
     def get_object(self, queryset=None):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.cobrafva_set.all(), pk=self.kwargs['pk'])
@@ -207,7 +214,7 @@ class CobraFvaDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class CobraFvaCreateView(LoginRequiredMixin, CreateView):
+class CobraFvaCreateView(LoginRequiredMixin, ModelPkMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraFva
 
@@ -224,7 +231,7 @@ class CobraFvaCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CobraFvaDeleteView(LoginRequiredMixin, DeleteView):
+class CobraFvaDeleteView(LoginRequiredMixin, ModelPkMixin, DeleteView):
     def get_object(self, queryset=None):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.cobrafva_set.all(), pk=self.kwargs['pk'])

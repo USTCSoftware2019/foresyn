@@ -497,7 +497,7 @@ class CobraWrapperViewTests(TestCase):
 
         response = self.client.get('/cobra/models/1/fba/')
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('cobra_wrapper/cobramodel_fba_detail.html')
+        self.assertTemplateUsed('cobra_wrapper/cobrafba_detail.html')
         for comp in ['objective_value', 'status', 'fluxes', 'shadow_price']:
             self.assertContains(response, comp)
         self.assertContains(response, '<a href="/cobra/models/1/">Return</a>', html=True)

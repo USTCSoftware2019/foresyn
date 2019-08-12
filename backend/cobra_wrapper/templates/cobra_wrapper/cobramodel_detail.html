@@ -22,7 +22,7 @@
 
 <a href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>
 
-<a href="{% url 'cobra_wrapper:cobramodel_fba_detail' object.pk %}">FBA</a>
+<a href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
 
-<a href="{% url 'cobra_wrapper:cobramodel_fva_create_form' object.pk %}">FVA</a>
+<a href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
 {% endblock content %}
