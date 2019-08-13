@@ -7,7 +7,6 @@ import cobra
 
 from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFba, CobraFva
 from .forms import CobraReactionForm, CobraModelForm, CobraFvaForm
-from .tasks import cobra_fba, cobra_fva
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListView):
@@ -174,7 +173,7 @@ class CobraFbaDetailView(LoginRequiredMixin, DetailView):
 class CobraFbaCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraFba
-    fields = []
+    fields = ['desc']
 
     def form_valid(self, form):
         model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)

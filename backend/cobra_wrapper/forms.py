@@ -47,4 +47,4 @@ class CobraFvaForm(forms.ModelForm):
 
     class Meta:
         model = CobraFva
-        fields = ['reaction_list', 'loopless', 'fraction_of_optimum', 'pfba_factor']
+        fields = ['desc', 'reaction_list', 'loopless', 'fraction_of_optimum', 'pfba_factor']

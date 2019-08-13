@@ -40,10 +40,7 @@ def validate_coefficients_space_splited_text(value):
         try:
             float(coefficient)
         except ValueError:
-            raise ValidationError(
-                '%(value)s in coefficients is not a float',
-                params={'value': coefficient}
-            )
+            raise ValidationError('%(value)s in coefficients is not a float', params={'value': coefficient})
 
 
 class CobraReaction(models.Model):
@@ -120,37 +117,47 @@ class CobraModel(models.Model):
         return cobra_model
 
 
+def validate_json_str_or_blank_str(value):
+    if value:
+        try:
+            json.loads(value)
+        except ValueError:
+            raise ValidationError('%(value)s is neither a blank str nor a json str', params={'value': value})
+
+
 class CobraFba(models.Model):
+    desc = models.TextField(blank=True, default='')
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
-    task_id = models.UUIDField()
+    result = models.TextField(blank=True, default='', validators=[validate_json_str_or_blank_str])
 
     class Meta:
         verbose_name = 'fba'
         ordering = ['-start_time']
 
     def __str__(self):
-        return '{}[fba]'.format(self.task_id)
+        return '{}[fba]'.format(self.desc)
 
     def get_absolute_url(self):
         return reverse('cobra_wrapper:cobrafba_detail', kwargs={'model_pk': self.model.pk, 'pk': self.pk})
 
 
 class CobraFva(models.Model):
+    desc = models.TextField(blank=True, default='')
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
     reaction_list = models.ManyToManyField(CobraReaction, blank=True)
     loopless = models.BooleanField(default=False, blank=True)
     fraction_of_optimum = models.FloatField(default=1.0, blank=True)
     pfba_factor = models.NullBooleanField(default=None, blank=True)
     start_time = models.DateTimeField(auto_now_add=True)
-    task_id = models.UUIDField()
+    result = models.TextField(blank=True, default='', validators=[validate_json_str_or_blank_str])
 
     class Meta:
         verbose_name = 'fva'
         ordering = ['-start_time']
 
     def __str__(self):
-        return '{}[fva]'.format(self.task_id)
+        return '{}[fva]'.format(self.desc)
 
     def get_absolute_url(self):
         return reverse('cobra_wrapper:cobrafva_detail', kwargs={'model_pk': self.model.pk, 'pk': self.pk})
