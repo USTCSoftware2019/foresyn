@@ -7,7 +7,7 @@ import cobra
 
 from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFba, CobraFva
 from .forms import CobraReactionForm, CobraModelForm, CobraFvaForm
-from .celery import cobra_fba, cobra_fva
+from .tasks import cobra_fba, cobra_fva
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListView):
