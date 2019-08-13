@@ -38,6 +38,7 @@ INSTALLED_APPS = [
 
     'haystack',
     'corsheaders',
+    'django_celery_results',
 
     'data_wrapper',
     'cobra_wrapper',
@@ -155,7 +156,3 @@ else:
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # for email debug
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
-
-# CELERY_BROKER_URL = ''  # TODO(myl7): Setup RabbitMQ Broker  # DEPRECATED(myl7)
-# CELERY_RESULT_PERSISTENT = True
-# CELERY_RESULT_BACKEND = 'django-db'
