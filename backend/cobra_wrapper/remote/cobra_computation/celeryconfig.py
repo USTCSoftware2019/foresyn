@@ -1,8 +1,8 @@
-BROKER_URL = 'amqp://test:test123456@localhost:5672/test'
-RESULT_BACKEND = 'rpc://'
-IMPORTS = ('cobra_computation.tasks',)
-TIMEZONE = 'Asia/Shanghai'
-TASK_ANNOTATIONS = {
+broker_url = 'amqp://test:test123456@localhost:5672/test'
+result_backend = 'rpc://'
+imports = ('cobra_computation.tasks',)
+timezone = 'Asia/Shanghai'
+task_annotations = {
     'cobra_computation.tasks.cobra_fba': {
         'rate_limit': '10/s'
     },
@@ -10,3 +10,8 @@ TASK_ANNOTATIONS = {
         'rate_limit': '10/s'
     }
 }
+task_ignore_result = True
+task_routes = ([
+    ('cobra_computation.tasks.*', {'queue': 'feeds'}),
+    ('cobra_wrapper.tasks.*', {'queue': 'results'}),
+],)

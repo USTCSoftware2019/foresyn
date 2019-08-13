@@ -2,11 +2,11 @@ from django.shortcuts import get_object_or_404, reverse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django_celery_results.models import TaskResult
 import cobra
 
 from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFba, CobraFva
 from .forms import CobraReactionForm, CobraModelForm, CobraFvaForm
+from .celery import app
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListView):
@@ -163,10 +163,6 @@ class CobraFbaDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['model_pk'] = self.kwargs['model_pk']
-        try:
-            context['result'] = TaskResult.objects.get(task_id=self.object.task_id)
-        except TaskResult.DoesNotExist:
-            context['result'] = None
         return context
 
 
@@ -179,8 +175,8 @@ class CobraFbaCreateView(LoginRequiredMixin, CreateView):
         model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         form.instance.model = model_object
         cobra_model = model_object.build()
-        task = cobra_fba.delay(cobra.io.to_json(cobra_model))
-        form.instance.task_id = task.id
+        result = app.send_task('cobra_computation.tasks.cobra_fba', args=[cobra.io.to_json(cobra_model)])
+        form.instance.task_id = result.id
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -222,10 +218,6 @@ class CobraFvaDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['model_pk'] = self.kwargs['model_pk']
-        try:
-            context['result'] = TaskResult.objects.get(task_id=self.object.task_id)
-        except TaskResult.DoesNotExist:
-            context['result'] = None
         return context
 
 
@@ -240,11 +232,12 @@ class CobraFvaCreateView(LoginRequiredMixin, CreateView):
         model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         form.instance.model = model_object
         cobra_model = model_object.build()
-        cobra_fva_args = form.cleaned_data.copy()
-        cobra_fva_args['reaction_list'] = list(map(lambda reaction: reaction.build(), cobra_fva_args['reaction_list']))
-        # TODO(myl7): Reaction serialize
-        task = cobra_fva.delay(cobra.io.to_json(cobra_model), **cobra_fva_args)
-        form.instance.result_id = task.id
+        cobra_fva_kwargs = form.cleaned_data.copy()
+        cobra_fva_kwargs['reaction_list'] = [reaction.cobra_id for reaction in cobra_fva_kwargs['reaction_list']]
+        result = app.send_task(
+            'cobra_computation.tasks.cobra_fva', args=[cobra.io.to_json(cobra_model)], kwargs=cobra_fva_kwargs
+        )
+        form.instance.task_id = result.id
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):

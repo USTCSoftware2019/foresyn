@@ -129,6 +129,7 @@ class CobraFba(models.Model):
     desc = models.TextField(blank=True, default='')
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
+    task_id = models.UUIDField()
     result = models.TextField(blank=True, default='', validators=[validate_json_str_or_blank_str])
 
     class Meta:
@@ -150,6 +151,7 @@ class CobraFva(models.Model):
     fraction_of_optimum = models.FloatField(default=1.0, blank=True)
     pfba_factor = models.NullBooleanField(default=None, blank=True)
     start_time = models.DateTimeField(auto_now_add=True)
+    task_id = models.UUIDField()
     result = models.TextField(blank=True, default='', validators=[validate_json_str_or_blank_str])
 
     class Meta:
