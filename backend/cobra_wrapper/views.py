@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django_celery_results.models import TaskResult
+import cobra
 
 from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFba, CobraFva
 from .forms import CobraReactionForm, CobraModelForm, CobraFvaForm
@@ -144,7 +145,7 @@ class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ModelPkMixin(ListView):
+class ModelPkMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['model_pk'] = self.kwargs['model_pk']
@@ -176,16 +177,12 @@ class CobraFbaCreateView(LoginRequiredMixin, ModelPkMixin, CreateView):
     model = CobraFba
     fields = []
 
-    def get(self, request, *args, **kwargs):
-        self.object = None
-        self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
-        return super().get(request, *args, **kwargs)
-
     def form_valid(self, form):
-        form.instance.model = self.model_object
-        cobra_model = self.model_object.build()
-        task = cobra_fba.delay(cobra_model)
-        form.instance.result_id = task.id
+        model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        form.instance.model = model_object
+        cobra_model = model_object.build()
+        task = cobra_fba.delay(cobra.io.to_json(cobra_model))
+        form.instance.task_id = task.id
         return super().form_valid(form)
 
 
@@ -222,7 +219,7 @@ class CobraFvaCreateView(LoginRequiredMixin, ModelPkMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraFva
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         self.object = None
         self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return super().get(request, *args, **kwargs)
