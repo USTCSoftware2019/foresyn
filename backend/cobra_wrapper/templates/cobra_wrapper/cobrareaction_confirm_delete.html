@@ -3,12 +3,12 @@
 {% block title %}Confirm to Delete {{ object }}{% endblock title %}
 
 {% block content %}
-{% if deletable %}
-<form method="post">{% csrf_token %}
-    <p>Are you sure to delete: {{ object }}?</p>
-    <input type="submit" value="Confirm">
-</form>
-{% else %}
-<p>You can not delete the reaction!</p>
-{% endif %}
+    {% if deletable %}
+        <form method="post">{% csrf_token %}
+            <p>Are you sure to delete: {{ object }}?</p>
+            <input type="submit" value="Confirm">
+        </form>
+    {% else %}
+        <p>You can not delete the reaction!</p>
+    {% endif %}
 {% endblock content %}

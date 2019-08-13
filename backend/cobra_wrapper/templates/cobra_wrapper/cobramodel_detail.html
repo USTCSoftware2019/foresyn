@@ -3,26 +3,42 @@
 {% block title %}{{ object }}{% endblock title %}
 
 {% block content %}
-<table>
-    <tbody>
-        <tr><td>id</td><td>{{ object.id }}</td></tr>
-        <tr><td>cobra_id</td><td>{{ object.cobra_id }}</td></tr>
-        <tr><td>name</td><td>{{ object.name }}</td></tr>
-        <tr><td>objective</td><td>{{ object.objective }}</td></tr>
-        <tr><td>reactions</td><td>[
-        {% for reaction in object.reactions.all %}
-            {% if not forloop.counter == 1 %},{% endif %}
-            <a href="{% url 'cobra_wrapper:cobrareaction_detail' reaction.pk %}">{{ reaction }}</a>
-        {% endfor %}
-        ]</td></tr>
-    </tbody>
-</table>
+    <table>
+        <tbody>
+        <tr>
+            <td>id</td>
+            <td>{{ object.id }}</td>
+        </tr>
+        <tr>
+            <td>cobra_id</td>
+            <td>{{ object.cobra_id }}</td>
+        </tr>
+        <tr>
+            <td>name</td>
+            <td>{{ object.name }}</td>
+        </tr>
+        <tr>
+            <td>objective</td>
+            <td>{{ object.objective }}</td>
+        </tr>
+        <tr>
+            <td>reactions</td>
+            <td>[
+                {% for reaction in object.reactions.all %}
+                    {% if not forloop.counter == 1 %},{% endif %}
+                    <a href="{% url 'cobra_wrapper:cobrareaction_detail' reaction.pk %}">{{ reaction }}</a>
+                {% endfor %}
+                ]
+            </td>
+        </tr>
+        </tbody>
+    </table>
 
-<a href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>
+    <a href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>
 
-<a href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>
+    <a href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>
 
-<a href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
+    <a href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
 
-<a href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
+    <a href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
 {% endblock content %}
