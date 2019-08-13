@@ -13,8 +13,8 @@ class CobraReactionForm(forms.ModelForm):
     class Meta:
         model = CobraReaction
         fields = [
-            'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'objective_coefficient', 'metabolites',
-            'coefficients', 'gene_reaction_rule'
+            'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'metabolites', 'coefficients',
+            'gene_reaction_rule'
         ]
 
     def clean(self):

@@ -1,5 +1,7 @@
 Django>=2.2.3
-cobra>=0.15.3
+ruamel.yaml.clib>=0.1.2  # cobra requires this but in TUNA Pypi source,
+# ruamel.yaml.clib is up to 0.1.0, so use official source to install it
+cobra>=0.16.0
 python-libsbml>=5.18.0
 lxml>=4.3.4
 flake8~=3.6.0

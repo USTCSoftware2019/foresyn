@@ -53,7 +53,6 @@ class CobraReaction(models.Model):
     subsystem = models.CharField(max_length=127, blank=True, null=True, default='')
     lower_bound = models.FloatField(default=0.0)
     upper_bound = models.FloatField(blank=True, null=True, default=None)
-    objective_coefficient = models.FloatField(default=0.0)
     metabolites = models.ManyToManyField(CobraMetabolite, blank=True)
     coefficients = models.TextField(default='', validators=[validate_coefficients_space_splited_text])
     gene_reaction_rule = models.TextField(blank=True, default='')
@@ -116,16 +115,7 @@ class CobraModel(models.Model):
             self.cobra_id,
             name=self.name,
         )
-
-        reaction_pairs = []
-        for reaction in self.reactions.all():
-            cobra_reaction = reaction.build()
-            reaction_pairs.append((cobra_reaction, reaction))
-        cobra_model.add_reactions([pair[0] for pair in reaction_pairs])
-
-        for cobra_reaction, reaction in reaction_pairs:
-            cobra_reaction.objective_coefficient = reaction.objective_coefficient
-
+        cobra_model.add_reactions([reaction.build() for reaction in self.reactions.all()])
         cobra_model.objective = self.objective
         return cobra_model
 
