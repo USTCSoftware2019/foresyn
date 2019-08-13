@@ -38,7 +38,6 @@ INSTALLED_APPS = [
 
     'haystack',
     'corsheaders',
-    'django_celery_results',
 
     'data_wrapper',
     'cobra_wrapper',
