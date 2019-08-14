@@ -5,10 +5,22 @@ dist: xenial
 git:
   depth: 3
 
+env:
+  - ES_VERSION=2.4.6
+  - ES_DOWNLOAD_URL=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.deb
+
+service:
+  - elasticsearch
+
+before_install:
+  - curl -O ${ES_DOWNLOAD_URL} && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
 install:
   - pip3 install --upgrade -r requirements.txt
 
-before_script: cd backend
+before_script:
+  - cd backend
+  - sleep 10  # leave time for elasticsearch to start
+
 script:
   - flake8
   - python3 manage.py test
