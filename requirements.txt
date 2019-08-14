@@ -13,3 +13,5 @@ python-Levenshtein
 django-cors-headers==3.0.2
 django-haystack>=2.8.1
 elasticsearch>=2.0.0,<3.0.0
+
+flake8~=3.6.0
