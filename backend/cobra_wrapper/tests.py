@@ -61,7 +61,7 @@ class CobraWrapperViewTests(TestCase):
 
         self.reaction = CobraReaction.objects.create(
             cobra_id='3OAS140',
-            name='3 oxoacyl acyl carrier protein synthase n C140 ',
+            name='3 oxoacyl acyl carrier protein synthase n C140',
             subsystem='Cell Envelope Biosynthesis',
             lower_bound=0,
             upper_bound=1000,
@@ -82,52 +82,50 @@ class CobraWrapperViewTests(TestCase):
 
     def test_metabolites_list(self):
         response = self.client.get('/cobra/metabolites/')
-        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cobra_wrapper/cobrametabolite_list.html')
-        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobrametabolite_detail.html')
         for comp in ['id', 'cobra_id', 'name']:
             self.assertContains(response, comp)
-        self.assertNotContains(response, 'formula')
-        self.assertContains(response, '<a href="/cobra/metabolites/1/">Detail</a>', html=True)
-        self.assertContains(response, '<a href="/cobra/metabolites/create/">Create</a>', html=True)
+        for comp in ['1', 'ACP_c', 'acyl-carrier-protein']:
+            self.assertContains(response, comp)
+        for comp in ['2', '3omrsACP_c', '3-Oxotetradecanoyl-acyl-carrier-protein']:
+            self.assertContains(response, comp)
+        self.assertContains(response, 'href="/cobra/metabolites/1/"', html=True)
+        self.assertContains(response, 'href="/cobra/metabolites/2/"', html=True)
 
     def test_reactions_list(self):
         response = self.client.get('/cobra/reactions/')
-        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cobra_wrapper/cobrareaction_list.html')
-        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobrareaction_detail.html')
         for comp in ['id', 'cobra_id', 'name']:
             self.assertContains(response, comp)
-        self.assertNotContains(response, 'subsystem')
-        self.assertContains(response, '<a href="/cobra/reactions/1/">Detail</a>', html=True)
-        self.assertContains(response, '<a href="/cobra/reactions/create/">Create</a>', html=True)
+        for comp in ['1', '3OAS140', '3 oxoacyl acyl carrier protein synthase n C140']:
+            self.assertContains(response, comp)
+        self.assertContains(response, 'href="/cobra/reactions/1/"', html=True)
 
     def test_models_list(self):
         response = self.client.get('/cobra/models/')
-        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cobra_wrapper/cobramodel_list.html')
-        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobramodel_detail.html')
         for comp in ['id', 'cobra_id', 'name']:
             self.assertContains(response, comp)
-        self.assertNotContains(response, 'objective')
-        self.assertContains(response, '<a href="/cobra/models/1/">Detail</a>', html=True)
-        self.assertContains(response, '<a href="/cobra/models/create/">Create</a>', html=True)
+        for comp in ['1', 'example_model', 'test']:
+            self.assertContains(response, comp)
+        self.assertContains(response, 'href="/cobra/models/1/"', html=True)
 
     def test_metabolites_detail(self):
         response = self.client.get('/cobra/metabolites/1/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cobra_wrapper/cobrametabolite_detail.html')
-        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobrametabolite_list.html')
         for comp in ['id', 'cobra_id', 'name', 'formula', 'charge', 'compartment']:
             self.assertContains(response, comp)
-        self.assertNotContains(response, 'subsystem')
-        self.assertContains(response, '<a href="/cobra/metabolites/1/delete/">Delete</a>', html=True)
-        self.assertContains(response, '<a href="/cobra/metabolites/1/update/">Edit</a>', html=True)
+        for comp in ['1', 'ACP_c', 'acyl-carrier-protein', 'C11H21N2O7PRS', '1', 'c']:
+            self.assertContains(response, comp)
+        self.assertContains(response, 'href="/cobra/metabolites/1/delete/"', html=True)
+        self.assertContains(response, 'href="/cobra/metabolites/1/update/"', html=True)
 
         response = self.client.get('/cobra/metabolites/7777777/')
         self.assertEqual(response.status_code, 404)
 
     def test_reactions_detail(self):
+        # TODO(myl7): Like above, Remove status_code checking and not used checking, add object fields checking
         response = self.client.get('/cobra/reactions/1/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cobra_wrapper/cobrareaction_detail.html')
@@ -144,6 +142,7 @@ class CobraWrapperViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_models_detail(self):
+        # TODO(myl7): Like above, Remove status_code checking and not used checking, add object fields checking
         response = self.client.get('/cobra/models/1/')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cobra_wrapper/cobramodel_detail.html')
@@ -218,6 +217,7 @@ class CobraWrapperViewTests(TestCase):
         # self.assertContains(model_set_response, 'content')
 
     def test_create_metabolites(self):
+        # TODO(myl7): Get a form, input it, post the form and be redirected to detail. Need a example.
         self.client.post('/cobra/metabolites/create/', dict(
             cobra_id='test',
             name='test',
@@ -299,6 +299,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
 
     def test_update_metabolites(self):
+        # TODO(myl7): Get a form, input it, post the form and be redirected to detail. Need a example.
         response = self.client.post('/cobra/metabolites/7777777/update/', dict(
             cobra_id='test'
         ))
@@ -394,6 +395,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
 
     def test_delete_metabolites(self):
+        # TODO(myl7): Check deletion ok and redirect to list. Need a example.
         response = self.client.post('/cobra/metabolites/7777777/delete/')
         self.assertEqual(response.status_code, 404)
 
