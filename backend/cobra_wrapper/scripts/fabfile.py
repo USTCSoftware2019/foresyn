@@ -6,11 +6,8 @@ import invoke
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-if __name__ == '__main__':
-    connection = fabric.Connection(host='localhost', connect_kwargs={
-        'key_filename': '/home/***/.ssh/id_rsa',  # Temperately input your user name
-        'password': '********'  # Temperately input your ssh keyfile password
-    })
+@fabric.task
+def init_db_for_cobra(connection):
     with connection.cd(BASE_DIR):
         with connection.prefix('source ../venv/bin/activate'):
             connection.run('rm -f db.sqlite3')
@@ -104,4 +101,3 @@ exit()
 '''
             )
             connection.run('./manage.py shell', pty=True, watchers=[create_cobra_example_model_responder])
-            connection.close()
