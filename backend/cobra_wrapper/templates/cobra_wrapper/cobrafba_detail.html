@@ -4,6 +4,8 @@
 
 
 {% block content %}
+    <p>{{ object.desc }}</p>
+
     {% if result %}
         <table>
             <tr>
@@ -55,7 +57,10 @@
             {% endfor %}
             </tbody>
         </table>
+    {% else %}
+        <p>Processing</p>
     {% endif %}
 
+    <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>
     <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>
 {% endblock content %}

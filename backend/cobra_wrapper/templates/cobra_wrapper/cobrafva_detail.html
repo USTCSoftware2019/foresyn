@@ -5,20 +5,57 @@
 {% block title %}FVA Result of {{ object }}{% endblock title %}
 
 {% block content %}
+    <p>{{ object.desc }}</p>
+
     <table>
         <tr>
-            <th>name</th>
-            <th>maximum</th>
-            <th>minimum</th>
+            <th>arg name</th>
+            <th>arg value</th>
         </tr>
-        {% for name in result.maximum.keys %}
-            <tr>
-                <td>{{ name }}</td>
-                <td>{{ result.maximum|get_dict_value_with_key:name }}</td>
-                <td>{{ result.minimum|get_dict_value_with_key:name }}</td>
-            </tr>
-        {% endfor %}
+        <tr>
+            <td>reaction_list</td>
+            <td>
+                [
+                {% for reaction in object.reaction_list.all %}
+                    {% if not forloop.counter == 1 %},{% endif %}
+                    <a href="{% url 'cobra_wrapper:cobrareaction_detail' reaction.pk %}">{{ reaction }}</a>
+                {% endfor %}
+                ]
+            </td>
+        </tr>
+        <tr>
+            <td>loopless</td>
+            <td>{{ object.loopless }}</td>
+        </tr>
+        <tr>
+            <td>fraction_of_optimum</td>
+            <td>{{ object.fraction_of_optimum }}</td>
+        </tr>
+        <tr>
+            <td>pfba_factor</td>
+            <td>{{ object.pfba_factor|default_if_none:"None" }}</td>
+        </tr>
     </table>
 
+    {% if result %}
+        <table>
+            <tr>
+                <th>name</th>
+                <th>maximum</th>
+                <th>minimum</th>
+            </tr>
+            {% for name in result.maximum.keys %}
+                <tr>
+                    <td>{{ name }}</td>
+                    <td>{{ result.maximum|get_dict_value_with_key:name }}</td>
+                    <td>{{ result.minimum|get_dict_value_with_key:name }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Processing</p>
+    {% endif %}
+
+    <a href="{% url 'cobra_wrapper:cobrafva_confirm_delete' model_pk object.pk %}">Delete</a>
     <a href="{% url 'cobra_wrapper:cobrafva_list' model_pk %}">Return</a>
 {% endblock content %}

@@ -35,7 +35,8 @@
         </tr>
         <tr>
             <td>metabolites and coefficients</td>
-            <td>[
+            <td>
+                [
                 {% for metabolite, coefficient in object.get_metabolites_and_coefficients.items %}
                     {% if not forloop.counter == 1 %},{% endif %}
                     <a href="{% url 'cobra_wrapper:cobrametabolite_detail' metabolite.pk %}">{{ metabolite }}</a>:

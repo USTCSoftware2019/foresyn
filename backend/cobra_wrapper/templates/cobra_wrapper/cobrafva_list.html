@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load cobra_wrapper_tags %}
+
 {% block title %}All FVA{% endblock title %}
 
 {% block content %}
@@ -7,12 +9,16 @@
         <table>
             <tbody>
             <tr>
-                <td>task_id</td>
-                <td>{{ object.task_id }}</td>
+                <td>desc</td>
+                <td>{{ object.desc }}</td>
             </tr>
             <tr>
                 <td>start_time</td>
                 <td>{{ object.start_time }}</td>
+            </tr>
+            <tr>
+                <td>status</td>
+                <td>{{ object|check_result_exist }}</td>
             </tr>
             <tr>
                 <td><a href="{% url 'cobra_wrapper:cobrafva_detail' model_pk object.pk %}">Detail</a></td>

@@ -23,7 +23,8 @@
         </tr>
         <tr>
             <td>reactions</td>
-            <td>[
+            <td>
+                [
                 {% for reaction in object.reactions.all %}
                     {% if not forloop.counter == 1 %},{% endif %}
                     <a href="{% url 'cobra_wrapper:cobrareaction_detail' reaction.pk %}">{{ reaction }}</a>

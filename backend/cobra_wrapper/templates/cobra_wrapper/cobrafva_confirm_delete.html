@@ -7,4 +7,6 @@
         <p>Are you sure to delete: {{ object }}?</p>
         <input type="submit" value="Confirm">
     </form>
+
+    <a href="{% url 'cobra_wrapper:cobrafva_detail' model_pk object.pk %}">Return</a>
 {% endblock content %}
