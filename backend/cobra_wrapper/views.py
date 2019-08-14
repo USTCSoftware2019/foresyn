@@ -194,6 +194,9 @@ class CobraFbaCreateView(LoginRequiredMixin, CreateView):
         context['model_pk'] = self.kwargs['model_pk']
         return context
 
+    def get_success_url(self):
+        return reverse('cobra_wrapper:cobrafba_list', kwargs={'model_pk': self.kwargs['model_pk']})
+
 
 class CobraFbaDeleteView(LoginRequiredMixin, DeleteView):
     def get_object(self, queryset=None):
@@ -244,12 +247,16 @@ class CobraFvaCreateView(LoginRequiredMixin, CreateView):
         form.instance.model = model_object
         cobra_model = model_object.build()
         cobra_fva_kwargs = form.cleaned_data.copy()
-        cobra_fva_kwargs['reaction_list'] = [reaction.cobra_id for reaction in cobra_fva_kwargs['reaction_list']]
+        cobra_fva_kwargs.pop('desc')
+        cobra_fva_kwargs['reaction_list'] = (
+            [reaction.cobra_id for reaction in cobra_fva_kwargs['reaction_list']]
+            if cobra_fva_kwargs['reaction_list'] else None
+        )
         result = app.send_task(
             'cobra_computation.tasks.cobra_fva',
             args=[cobra.io.to_json(cobra_model)],
             kwargs=cobra_fva_kwargs,
-            routing_key='cobra_feed.fba'
+            routing_key='cobra_feed.fva'
         )
         form.instance.task_id = result.id
         return super().form_valid(form)
@@ -258,6 +265,9 @@ class CobraFvaCreateView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['model_pk'] = self.kwargs['model_pk']
         return context
+
+    def get_success_url(self):
+        return reverse('cobra_wrapper:cobrafva_list', kwargs={'model_pk': self.kwargs['model_pk']})
 
 
 class CobraFvaDeleteView(LoginRequiredMixin, DeleteView):

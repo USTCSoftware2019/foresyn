@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load cobra_wrapper_tags %}
+
 {% block title %}FVA Result of {{ object }}{% endblock title %}
 
 {% block content %}
@@ -9,11 +11,11 @@
             <th>maximum</th>
             <th>minimum</th>
         </tr>
-        {% for name, max, min in solution %}
+        {% for name in result.maximum.keys %}
             <tr>
                 <td>{{ name }}</td>
-                <td>{{ max }}</td>
-                <td>{{ min }}</td>
+                <td>{{ result.maximum|get_dict_value_with_key:name }}</td>
+                <td>{{ result.minimum|get_dict_value_with_key:name }}</td>
             </tr>
         {% endfor %}
     </table>
