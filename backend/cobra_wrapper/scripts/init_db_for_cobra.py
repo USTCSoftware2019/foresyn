@@ -8,8 +8,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 if __name__ == '__main__':
     connection = fabric.Connection(host='localhost', connect_kwargs={
-        'key_filename': '/home/myl/.ssh/id_rsa',
-        'password': 'myl18010011029dell'
+        'key_filename': '/home/***/.ssh/id_rsa',  # Temperately input your user name
+        'password': '********'  # Temperately input your ssh keyfile password
     })
     with connection.cd(BASE_DIR):
         with connection.prefix('source ../venv/bin/activate'):
