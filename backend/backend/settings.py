@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
+from kombu import Queue
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -155,3 +157,42 @@ else:
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # for email debug
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+CELERY_BROKER_URL = 'amqp://test:test123456@localhost/test'
+CELERY_RESULT_BACKEND = 'rpc://'
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_ROUTES = {
+    'cobra_computation.tasks.cobra_fba': {
+        'queue': 'cobra_feeds',
+        'routing_key': 'cobra_feed.fba',
+    },
+    'cobra_computation.tasks.cobra_fva': {
+        'queue': 'cobra_feeds',
+        'routing_key': 'cobra_feed.fva',
+    },
+    'cobra_wrapper.tasks.cobra_fba_save': {
+        'queue': 'cobra_results',
+        'routing_key': 'cobra_result.fba',
+    },
+    'cobra_wrapper.tasks.cobra_fva_save': {
+        'queue': 'cobra_results',
+        'routing_key': 'cobra_result.fva',
+    },
+}
+CELERY_TASK_QUEUES = (
+    Queue('default', routing_key='task.#'),
+    Queue('cobra_feeds', routing_key='cobra_feed.#'),
+    Queue('cobra_results', routing_key='cobra_result.#'),
+)
+CELERY_TASK_DEFAULT_EXCHANGE = 'tasks'
+CELERY_TASK_DEFAULT_EXCHANGE_TYPE = 'topic'
+CELERY_TASK_DEFAULT_ROUTING_KEY = 'task.default'
+CELERY_TASK_IGNORE_RESULT = True
+# CELERY_TASK_ANNOTATIONS = {
+#     'cobra_wrapper.tasks.cobra_fba_save': {
+#         'rate_limit': '10/s'
+#     },
+#     'cobra_wrapper.tasks.cobra_fva_save': {
+#         'rate_limit': '10/s'
+#     }
+# }

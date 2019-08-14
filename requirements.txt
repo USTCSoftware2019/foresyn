@@ -4,6 +4,7 @@ Django>=2.2.3
 # Can use official source to install it.
 cobra>=0.16.0
 celery>=4.3.0
+kombu>=4.6.3
 
 fuzzywuzzy==0.17.0
 pytz==2019.1

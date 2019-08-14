@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import get_object_or_404, reverse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
@@ -6,7 +8,8 @@ import cobra
 
 from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFba, CobraFva
 from .forms import CobraReactionForm, CobraModelForm, CobraFvaForm
-from .celery import app
+
+from backend.celery import app
 
 
 class CobraMetaboliteListView(LoginRequiredMixin, ListView):
@@ -163,6 +166,7 @@ class CobraFbaDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['model_pk'] = self.kwargs['model_pk']
+        context['result'] = json.loads(self.object.result) if self.object.result else None
         return context
 
 
@@ -175,7 +179,13 @@ class CobraFbaCreateView(LoginRequiredMixin, CreateView):
         model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         form.instance.model = model_object
         cobra_model = model_object.build()
-        result = app.send_task('cobra_computation.tasks.cobra_fba', args=[cobra.io.to_json(cobra_model)])
+        result = app.send_task(
+            'cobra_computation.tasks.cobra_fba',
+            args=[cobra.io.to_json(cobra_model)],
+            kwargs={},
+            queue='cobra_feeds',
+            routing_key='cobra_feed.fba'
+        )
         form.instance.task_id = result.id
         return super().form_valid(form)
 
@@ -218,6 +228,7 @@ class CobraFvaDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['model_pk'] = self.kwargs['model_pk']
+        context['result'] = json.loads(self.object.result) if self.object.result else None
         return context
 
 
@@ -235,7 +246,10 @@ class CobraFvaCreateView(LoginRequiredMixin, CreateView):
         cobra_fva_kwargs = form.cleaned_data.copy()
         cobra_fva_kwargs['reaction_list'] = [reaction.cobra_id for reaction in cobra_fva_kwargs['reaction_list']]
         result = app.send_task(
-            'cobra_computation.tasks.cobra_fva', args=[cobra.io.to_json(cobra_model)], kwargs=cobra_fva_kwargs
+            'cobra_computation.tasks.cobra_fva',
+            args=[cobra.io.to_json(cobra_model)],
+            kwargs=cobra_fva_kwargs,
+            routing_key='cobra_feed.fba'
         )
         form.instance.task_id = result.id
         return super().form_valid(form)
