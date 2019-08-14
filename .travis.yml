@@ -6,8 +6,7 @@ git:
   depth: 3
 
 env:
-  - ES_VERSION=2.4.6
-  - ES_DOWNLOAD_URL=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.deb
+  - ES_VERSION=2.4.6 ES_DOWNLOAD_URL=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.deb
 
 service:
   - elasticsearch
