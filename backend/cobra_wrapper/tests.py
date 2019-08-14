@@ -89,8 +89,8 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
         for comp in ['2', '3omrsACP_c', '3-Oxotetradecanoyl-acyl-carrier-protein']:
             self.assertContains(response, comp)
-        self.assertContains(response, 'href="/cobra/metabolites/1/"', html=True)
-        self.assertContains(response, 'href="/cobra/metabolites/2/"', html=True)
+        self.assertContains(response, 'href="/cobra/metabolites/1/"')
+        self.assertContains(response, 'href="/cobra/metabolites/2/"')
 
     def test_reactions_list(self):
         response = self.client.get('/cobra/reactions/')
@@ -99,7 +99,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
         for comp in ['1', '3OAS140', '3 oxoacyl acyl carrier protein synthase n C140']:
             self.assertContains(response, comp)
-        self.assertContains(response, 'href="/cobra/reactions/1/"', html=True)
+        self.assertContains(response, 'href="/cobra/reactions/1/"')
 
     def test_models_list(self):
         response = self.client.get('/cobra/models/')
@@ -108,7 +108,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
         for comp in ['1', 'example_model', 'test']:
             self.assertContains(response, comp)
-        self.assertContains(response, 'href="/cobra/models/1/"', html=True)
+        self.assertContains(response, 'href="/cobra/models/1/"')
 
     def test_metabolites_detail(self):
         response = self.client.get('/cobra/metabolites/1/')
@@ -118,8 +118,8 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
         for comp in ['1', 'ACP_c', 'acyl-carrier-protein', 'C11H21N2O7PRS', '1', 'c']:
             self.assertContains(response, comp)
-        self.assertContains(response, 'href="/cobra/metabolites/1/delete/"', html=True)
-        self.assertContains(response, 'href="/cobra/metabolites/1/update/"', html=True)
+        self.assertContains(response, 'href="/cobra/metabolites/1/delete/"')
+        self.assertContains(response, 'href="/cobra/metabolites/1/update/"')
 
         response = self.client.get('/cobra/metabolites/7777777/')
         self.assertEqual(response.status_code, 404)
