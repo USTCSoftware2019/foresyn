@@ -164,6 +164,7 @@ class CobraWrapperViewTests(TestCase):
 
     def test_create_metabolites(self):
         # TODO(myl7): Get a form, input it, post the form and be redirected to detail. Need an example.
+        # TODO(lbc12345): Redirect test past, don't know is it OK?
         self.client.post('/cobra/metabolites/create/', dict(
             cobra_id='test',
             name='test',
@@ -172,14 +173,15 @@ class CobraWrapperViewTests(TestCase):
             compartment='test' * 50))
         self.assertRaises(ValidationError)
 
-        self.client.post('/cobra/metabolites/create/', dict(
+        response = self.client.post('/cobra/metabolites/create/', dict(
             cobra_id='test',
             name='test',
             formula='test',
-            charge='test',
+            charge='1',
             compartment='test'))
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_create_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_list.html')
+        self.assertRedirects(response, '/cobra/metabolites/8/')
 
         response = self.client.get('/cobra/metabolites/create/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -189,6 +191,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
 
     def test_create_reactions(self):
+        # TODO(lbc12345): Don't know why Redirect test can not work here
         self.client.post('/cobra/reactions/create/', dict(
             cobra_id='test',
             name='test',
@@ -241,7 +244,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
 
     def test_update_metabolites(self):
-        # TODO(myl7): Get a form, input it, post the form and be redirected to detail. Need a example.
+        # TODO(myl7): Get a form, input it, post the form and be redirected to detail. Need an example.
         response = self.client.post('/cobra/metabolites/7777777/update/', dict(
             cobra_id='test'
         ))
