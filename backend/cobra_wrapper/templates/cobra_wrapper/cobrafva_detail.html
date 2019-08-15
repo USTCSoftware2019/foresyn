@@ -5,7 +5,32 @@
 {% block title %}FVA Result of {{ object }}{% endblock title %}
 
 {% block content %}
-    <p>{{ object.desc }}</p>
+    <table>
+        <tr>
+            <td>id</td>
+            <td>{{ object.id }}</td>
+        </tr>
+        <tr>
+            <td>description</td>
+            <td>{{ object.desc }}</td>
+        </tr>
+        <tr>
+            <td>start_time</td>
+            <td>{{ object.start_time }}</td>
+        </tr>
+        <tr>
+            <td>task_id</td>
+            <td>{{ object.task_id }}</td>
+        </tr>
+        <tr>
+            <td>status</td>
+            <td>{{ object|check_result_status }}</td>
+        </tr>
+        <tr>
+            <td>model</td>
+            <td><a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">{{ object.model }}</a></td>
+        </tr>
+    </table>
 
     <table>
         <tr>
@@ -52,8 +77,6 @@
                 </tr>
             {% endfor %}
         </table>
-    {% else %}
-        <p>Processing</p>
     {% endif %}
 
     <a href="{% url 'cobra_wrapper:cobrafva_confirm_delete' model_pk object.pk %}">Delete</a>

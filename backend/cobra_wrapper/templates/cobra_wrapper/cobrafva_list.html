@@ -18,7 +18,7 @@
             </tr>
             <tr>
                 <td>status</td>
-                <td>{{ object|check_result_exist }}</td>
+                <td>{{ object|check_result_status }}</td>
             </tr>
             <tr>
                 <td><a href="{% url 'cobra_wrapper:cobrafva_detail' model_pk object.pk %}">Detail</a></td>
