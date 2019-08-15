@@ -178,15 +178,6 @@ class CobraFbaCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         form.instance.model = model_object
-        cobra_model = model_object.build()
-        result = app.send_task(
-            'cobra_computation.tasks.cobra_fba',
-            args=[cobra.io.to_json(cobra_model)],
-            kwargs={},
-            queue='cobra_feeds',
-            routing_key='cobra_feed.fba'
-        )
-        form.instance.task_id = result.id
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -245,20 +236,6 @@ class CobraFvaCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         form.instance.model = model_object
-        cobra_model = model_object.build()
-        cobra_fva_kwargs = form.cleaned_data.copy()
-        cobra_fva_kwargs.pop('desc')
-        cobra_fva_kwargs['reaction_list'] = (
-            [reaction.cobra_id for reaction in cobra_fva_kwargs['reaction_list']]
-            if cobra_fva_kwargs['reaction_list'] else None
-        )
-        result = app.send_task(
-            'cobra_computation.tasks.cobra_fva',
-            args=[cobra.io.to_json(cobra_model)],
-            kwargs=cobra_fva_kwargs,
-            routing_key='cobra_feed.fva'
-        )
-        form.instance.task_id = result.id
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):

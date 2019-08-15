@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'data_wrapper',
-    'cobra_wrapper',
+    'cobra_wrapper.apps.CobraWrapperConfig',
     'bigg_database',
     'accounts',
 ]
