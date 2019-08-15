@@ -71,6 +71,16 @@ class CobraWrapperViewTests(TestCase):
         )
         self.reaction.metabolites.set(self.metabolites)
 
+        self.metabolites.append(
+            CobraMetabolite.objects.create(
+                cobra_id='useless',
+                formula='U',
+                name='test',
+                compartment='c',
+                charge='1',
+                owner=self.user
+            ))
+
         self.model = CobraModel.objects.create(
             cobra_id='example_model',
             name='test',
@@ -112,29 +122,27 @@ class CobraWrapperViewTests(TestCase):
 
     def test_metabolites_detail(self):
         response = self.client.get('/cobra/metabolites/1/')
-        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cobra_wrapper/cobrametabolite_detail.html')
         for comp in ['id', 'cobra_id', 'name', 'formula', 'charge', 'compartment']:
             self.assertContains(response, comp)
         for comp in ['1', 'ACP_c', 'acyl-carrier-protein', 'C11H21N2O7PRS', '1', 'c']:
             self.assertContains(response, comp)
-        self.assertContains(response, 'href="/cobra/metabolites/1/delete/"')
-        self.assertContains(response, 'href="/cobra/metabolites/1/update/"')
+        self.assertContains(response, '<a href="/cobra/metabolites/1/delete/">Delete</a>', html=True)
+        self.assertContains(response, '<a href="/cobra/metabolites/1/update/">Edit</a>', html=True)
 
         response = self.client.get('/cobra/metabolites/7777777/')
         self.assertEqual(response.status_code, 404)
 
     def test_reactions_detail(self):
-        # TODO(myl7): Like above, Remove status_code checking and not used checking, add object fields checking
         response = self.client.get('/cobra/reactions/1/')
-        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cobra_wrapper/cobrareaction_detail.html')
         self.assertTemplateNotUsed(response, 'cobra_wrapper/cobrareaction_list.html')
         for comp in ['id', 'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound',
                      'metabolites and coefficients', 'gene_reaction_rule']:
             self.assertContains(response, comp)
-        self.assertNotContains(response, 'formula')
-        self.assertNotContains(response, 'gene_object_rule')
+        for comp in ['1', '3OAS140', '3 oxoacyl acyl carrier protein synthase n C140', 'Cell Envelope Biosynthesis',
+                     0, 1000, '( STM2378 or STM1197 )']:
+            self.assertContains(response, comp)
         self.assertContains(response, '<a href="/cobra/reactions/1/delete/">Delete</a>', html=True)
         self.assertContains(response, '<a href="/cobra/reactions/1/update/">Edit</a>', html=True)
 
@@ -142,14 +150,13 @@ class CobraWrapperViewTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_models_detail(self):
-        # TODO(myl7): Like above, Remove status_code checking and not used checking, add object fields checking
         response = self.client.get('/cobra/models/1/')
-        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cobra_wrapper/cobramodel_detail.html')
         self.assertTemplateNotUsed(response, 'cobra_wrapper/cobramodel_list.html')
         for comp in ['id', 'cobra_id', 'name', 'objective', 'reactions']:
             self.assertContains(response, comp)
-        # self.assertNotContains(response, 'gene')  # FIXME(myl7): Meaning? Test failed here.
+        for comp in ['1', 'example_model', 'test', '3OAS140']:
+            self.assertContains(response, comp)
         self.assertContains(response, '<a href="/cobra/models/1/delete/">Delete</a>', html=True)
         self.assertContains(response, '<a href="/cobra/models/1/fba/">FBA</a>', html=True)
         self.assertContains(response, '<a href="/cobra/models/1/fva/">FVA</a>', html=True)
@@ -157,67 +164,8 @@ class CobraWrapperViewTests(TestCase):
         response = self.client.get('/cobra/reactions/7777777/')
         self.assertEqual(response.status_code, 404)
 
-        # metabolite_0_response = self.client.post('/cobra/metabolites/', dict(
-        #     cobra_id='ACP_c',
-        #     formula='C11H21N2O7PRS',
-        #     name='acyl-carrier-protein',
-        #     compartment='c'))
-        # self.assertEqual(metabolite_0_response.status_code, 302)
-        # metabolite_1_response = self.client.post('/cobra/metabolites/', dict(
-        #     cobra_id='3omrsACP_c',
-        #     formula='C25H45N2O9PRS',
-        #     name='3-Oxotetradecanoyl-acyl-carrier-protein',
-        #     compartment='c'))
-        # self.assertEqual(metabolite_1_response.status_code, 302)
-        # metabolite_2_response = self.client.post('/cobra/metabolites/', dict(
-        #     cobra_id='co2_c',
-        #     formula='CO2',
-        #     name='CO2',
-        #     compartment='c'))
-        # self.assertEqual(metabolite_2_response.status_code, 302)
-        # metabolite_3_response = self.client.post('/cobra/metabolites/', dict(
-        #     cobra_id='malACP_c',
-        #     formula='C14H22N2O10PRS',
-        #     name='Malonyl-acyl-carrier-protein',
-        #     compartment='c'))
-        # self.assertEqual(metabolite_3_response.status_code, 302)
-        # metabolite_4_response = self.client.post('/cobra/metabolites/', dict(
-        #     cobra_id='h_c',
-        #     formula='H',
-        #     name='H',
-        #     compartment='c'))
-        # self.assertEqual(metabolite_4_response.status_code, 302)
-        # metabolite_5_response = self.client.post('/cobra/metabolites/', dict(
-        #     cobra_id='ddcaACP_c',
-        #     formula='C23H43N2O8PRS',
-        #     name='Dodecanoyl-ACP-n-C120ACP',
-        #     compartment='c'))
-        # self.assertEqual(metabolite_5_response.status_code, 302)
-        # metabolite_set_response = self.client.get('/cobra/metabolites/')
-        # self.assertContains(metabolite_set_response, 'content')
-
-        # reaction_response = self.client.post('/cobra/reactions/', dict(
-        #     cobra_id='3OAS140',
-        #     name='3 oxoacyl acyl carrier protein synthase n C140 ',
-        #     subsystem='Cell Envelope Biosynthesis',
-        #     lower_bound=0,
-        #     upper_bound=1000,
-        #     metabolites=[1, 2, 3, 4, 5, 6],
-        #     coefficients=[-1.0, -1.0, -1.0, 1.0, 1.0, 1.0],
-        #     gene_reaction_rule='( STM2378 or STM1197 )'))
-        # self.assertEqual(reaction_response.status_code, 302)
-        # reaction_set_response = self.client.get('/cobra/reactions/')
-        # self.assertContains(reaction_set_response, 'content')
-
-        # model_response = self.client.post('/cobra/models/', dict(
-        #     cobra_id='example_model',
-        #     objective='3OAS140'))
-        # self.assertEqual(model_response.status_code, 302)
-        # model_set_response = self.client.get('/cobra/models/', content_type='application/json')
-        # self.assertContains(model_set_response, 'content')
-
     def test_create_metabolites(self):
-        # TODO(myl7): Get a form, input it, post the form and be redirected to detail. Need a example.
+        # TODO(myl7): Get a form, input it, post the form and be redirected to detail. Need an example.
         self.client.post('/cobra/metabolites/create/', dict(
             cobra_id='test',
             name='test',
@@ -254,7 +202,7 @@ class CobraWrapperViewTests(TestCase):
             gene_reaction_rule='test'))
         self.assertRaises(ValidationError)
 
-        response = self.client.post('/cobra/reactions/create/', dict(
+        self.client.post('/cobra/reactions/create/', dict(
             cobra_id='test',
             name='test',
             subsystem='test',
@@ -262,7 +210,6 @@ class CobraWrapperViewTests(TestCase):
             upper_bound=1000,
             coefficients='-1.0 -1.0 -1.0 1.0 1.0 1.0',
             gene_reaction_rule='test'))
-        self.assertEqual(response.status_code, 200)  # FIXME: why 200 not 302?
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_create_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_list.html')
         self.assertTemplateNotUsed('cobra_wrapper/cobrareaction_detail.html')
@@ -395,7 +342,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
 
     def test_delete_metabolites(self):
-        # TODO(myl7): Check deletion ok and redirect to list. Need a example.
+        # TODO(lbc12345): Does this satisfy the requirement?
         response = self.client.post('/cobra/metabolites/7777777/delete/')
         self.assertEqual(response.status_code, 404)
 
@@ -403,10 +350,16 @@ class CobraWrapperViewTests(TestCase):
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_confirm_delete.html')
         self.assertContains(response, '<p>You can not delete the metabolite!</p>', html=True)
 
+        response = self.client.get('/cobra/metabolites/7/delete/')
+        self.assertTemplateUsed('cobra_wrapper/cobrametabolite_confirm_delete.html')
+        self.assertContains(response, '<p>Are you sure to delete: useless[test]?</p>', html=True)
+        self.assertContains(response, '<input type="submit" value="Confirm">', html=True)
+
         response = self.client.post('/cobra/metabolites/1/delete/')
         self.assertEqual(response.status_code, 302)
 
     def test_delete_reactions(self):
+        # TODO(lbc12345): I don't think the successful deletion way can be tested. Like Are you sure to delete blabla...
         response = self.client.post('/cobra/reactions/7777777/delete/')
         self.assertEqual(response.status_code, 404)
 
@@ -455,3 +408,64 @@ class CobraWrapperViewTests(TestCase):
     #     for comp in ['name', 'maximum', 'minimum']:
     #         self.assertContains(response, comp)
     #     self.assertContains(response, '<a href="/cobra/models/1/">Return</a>', html=True)
+
+# Unused code
+
+        # metabolite_0_response = self.client.post('/cobra/metabolites/', dict(
+        #     cobra_id='ACP_c',
+        #     formula='C11H21N2O7PRS',
+        #     name='acyl-carrier-protein',
+        #     compartment='c'))
+        # self.assertEqual(metabolite_0_response.status_code, 302)
+        # metabolite_1_response = self.client.post('/cobra/metabolites/', dict(
+        #     cobra_id='3omrsACP_c',
+        #     formula='C25H45N2O9PRS',
+        #     name='3-Oxotetradecanoyl-acyl-carrier-protein',
+        #     compartment='c'))
+        # self.assertEqual(metabolite_1_response.status_code, 302)
+        # metabolite_2_response = self.client.post('/cobra/metabolites/', dict(
+        #     cobra_id='co2_c',
+        #     formula='CO2',
+        #     name='CO2',
+        #     compartment='c'))
+        # self.assertEqual(metabolite_2_response.status_code, 302)
+        # metabolite_3_response = self.client.post('/cobra/metabolites/', dict(
+        #     cobra_id='malACP_c',
+        #     formula='C14H22N2O10PRS',
+        #     name='Malonyl-acyl-carrier-protein',
+        #     compartment='c'))
+        # self.assertEqual(metabolite_3_response.status_code, 302)
+        # metabolite_4_response = self.client.post('/cobra/metabolites/', dict(
+        #     cobra_id='h_c',
+        #     formula='H',
+        #     name='H',
+        #     compartment='c'))
+        # self.assertEqual(metabolite_4_response.status_code, 302)
+        # metabolite_5_response = self.client.post('/cobra/metabolites/', dict(
+        #     cobra_id='ddcaACP_c',
+        #     formula='C23H43N2O8PRS',
+        #     name='Dodecanoyl-ACP-n-C120ACP',
+        #     compartment='c'))
+        # self.assertEqual(metabolite_5_response.status_code, 302)
+        # metabolite_set_response = self.client.get('/cobra/metabolites/')
+        # self.assertContains(metabolite_set_response, 'content')
+
+        # reaction_response = self.client.post('/cobra/reactions/', dict(
+        #     cobra_id='3OAS140',
+        #     name='3 oxoacyl acyl carrier protein synthase n C140 ',
+        #     subsystem='Cell Envelope Biosynthesis',
+        #     lower_bound=0,
+        #     upper_bound=1000,
+        #     metabolites=[1, 2, 3, 4, 5, 6],
+        #     coefficients=[-1.0, -1.0, -1.0, 1.0, 1.0, 1.0],
+        #     gene_reaction_rule='( STM2378 or STM1197 )'))
+        # self.assertEqual(reaction_response.status_code, 302)
+        # reaction_set_response = self.client.get('/cobra/reactions/')
+        # self.assertContains(reaction_set_response, 'content')
+
+        # model_response = self.client.post('/cobra/models/', dict(
+        #     cobra_id='example_model',
+        #     objective='3OAS140'))
+        # self.assertEqual(model_response.status_code, 302)
+        # model_set_response = self.client.get('/cobra/models/', content_type='application/json')
+        # self.assertContains(model_set_response, 'content')
