@@ -3,6 +3,7 @@
 {% block title %}{{ object }}{% endblock title %}
 
 {% block content %}
+
 <div class="container">
     <div class="card">
         <div class="card-header">
@@ -47,7 +48,6 @@
                         <a href="{% url 'cobra_wrapper:cobrametabolite_detail' metabolite.pk %}">{{ metabolite }}</a>:
                         {{ coefficient }}
                         {% endfor %}
-                        ]
                     </td>
                 </tr>
                 <tr>
@@ -69,8 +69,9 @@
         </div>
     </div>
 </div>
-{% comment %}
 
+
+{% comment %}
     <table>
         <tbody>
         <tr>
@@ -122,6 +123,5 @@
     <a href="{% url 'cobra_wrapper:cobrareaction_update_form' object.pk %}">Edit</a>
 
     <a href="{% url 'cobra_wrapper:cobrareaction_confirm_delete' object.pk %}">Delete</a>
-
 {% endcomment %}
 {% endblock content %}
