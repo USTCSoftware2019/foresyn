@@ -6,7 +6,34 @@ Search result - {{ query }}
 {% endblock %}
 
 {% block content %}
+<div class="search-result container-fluid">
+    <h3>Search result for {{ query }}</h3>
 
+    {% if model_object_list %}
+    <h4>Models</h4>
+    {% render_list_tag model_object_list "model" "model_detail" %}
+    {% endif %}
+
+    {% if reaction_object_list %}
+    <h4>Reactions</h4>
+    {% render_list_tag reaction_object_list "reaction" "reaction_detail" %}
+    {% endif %}
+
+    {% if metabolite_object_list %}
+    <h4>Metabolites</h4>
+    {% render_list_tag metabolite_object_list "metabolite" "metabolite_detail" %}
+    {% endif %}
+
+    {% if gene_object_list %}
+    <h4>Genes</h4>
+    {% render_list_tag gene_object_list "gene" "gene_detail" %}
+    {% endif %}
+</div>
+
+<style>
+    .search-result h3, .search-result h4{text-align: center; margin-bottom: .5rem;}
+</style>
+{% comment %}
 <h3>Search result for {{ query }}</h3>
 
 {% if model_object_list %}
@@ -28,6 +55,8 @@ Search result - {{ query }}
 <h4>Genes</h4>
 {% render_list_tag gene_object_list "gene" "gene_detail" %}
 {% endif %}
+
+{% endcomment %}
 
 {% comment %}
 {% if page_obj.has_previous or page.has_next %}

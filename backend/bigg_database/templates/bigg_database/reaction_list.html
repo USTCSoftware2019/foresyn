@@ -1,34 +1,39 @@
-<table>
-    <thead>
+<div class="container">
+    <table class="table table-hover table-bordered table-striped text-center">
+        <thead>
         <tr>
-            <th>BiGG ID</th>
-            <th>Name</th>
-            <th>Pseudo Reaction</th>
+            <th scope="col">BiGG ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Pseudo Reaction</th>
             {% if contain_organism %}
-            <th>Organism</th>
+            <th scope="col">Organism</th>
             {% endif %}
             {% if contain_stoichiometry %}
-            <th>Stoichiometry</th>
+            <th scope="col">Stoichiometry</th>
             {% endif %}
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         {% for reaction in list %}
         <tr>
-            <th><a href="{{ reaction.detail_url }}">{{ reaction.bigg_id }}</a></th>
-            <th>{{ reaction.name }}</th>
+            <th scope="row"><a href="{{ reaction.detail_url }}">{{ reaction.bigg_id }}</a></th>
+            <td>{{ reaction.name }}</td>
             {% if reaction.pseudoreaction %}
-            <th>√</th>
+            <td>√</td>
             {% else %}
-            <th>X</th>
+            <td>X</td>
             {% endif %}
             {% if contain_organism %}
-            <th>{{ reaction.organism }}</th>
+            <td>{{ reaction.organism }}</td>
             {% endif %}
             {% if contain_stoichiometry %}
-            <th>{{ reaction.stoichiometry }}</th>
+            <td>{{ reaction.stoichiometry }}</td>
             {% endif %}
         </tr>
         {% endfor %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
+<style>
+    div.container th, div.container td {vertical-align: middle;}
+</style>

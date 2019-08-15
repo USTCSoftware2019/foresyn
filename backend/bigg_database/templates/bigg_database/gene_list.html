@@ -1,18 +1,23 @@
-<table>
-    <thead>
+<div class="container">
+    <table class="table table-hover table-striped table-bordered text-center">
+        <thead>
         <tr>
-            <th>BiGG ID</th>
-            <th>Name</th>
-            <th>Chromosome</th>
+            <th scope="col">BiGG ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Chromosome</th>
         </tr>
-    </thead>
-    <tbody>
-    {% for gene in list %}
+        </thead>
+        <tbody>
+        {% for gene in list %}
         <tr>
-            <th><a href="{{ gene.detail_url }}">{{ gene.bigg_id }}</a></th>
-            <th>{{ gene.name }}</th>
-            <th>{{ gene.chromosome_ncbi_accession }}</th>
+            <th scope="row"><a href="{{ gene.detail_url }}">{{ gene.bigg_id }}</a></th>
+            <td>{{ gene.name }}</td>
+            <td>{{ gene.chromosome_ncbi_accession }}</td>
         </tr>
-    {% endfor %}
-    </tbody>
-</table>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<style>
+    div.container th, div.container td {vertical-align: middle;}
+</style>

@@ -1,12 +1,40 @@
-<header>
-    This is a header!
-    <br>
-    {% if user.is_authenticated %}
-        Hello, {{ user.username }}!
-    {% endif %}
-    <br>
-    <a href="{% url 'bigg_database:search' %}">Search database</a> |
-    <a href="{% url 'cobra_wrapper:cobramodel_list' %}">Your computational models</a> |
-    <a href="{% url 'login' %}">Login your account</a>
-    <hr>
+<header class="mb-3">
+    <!--This is a header!-->
+    <!--<br>-->
+    <!--{% if user.is_authenticated %}-->
+    <!--Hello, {{ user.username }}!-->
+    <!--{% endif %}-->
+    <!--<br>-->
+    <!--<a href="{% url 'bigg_database:search' %}">Search database</a> |-->
+    <!--<a href="{% url 'cobra_wrapper:cobramodel_list' %}">Your computational models</a> |-->
+    <!--<a href="{% url 'login' %}">Login your account</a>-->
+    <!--<hr>-->
+    <div class="container-fluid bg-primary" style="font-size: 1.05rem;">
+        <nav class="navbar navbar-expand-md h-100">
+            <a href="#" class="navbar-brand text-white">LOGO</a>
+            <!-- Toggler/collapsibe Button -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                <span class="fa fa-align-justify text-white fa-fw"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="collapsibleNavbar">
+                <ul class="navbar-nav w-100 justify-content-end">
+                    <li class="nav-item mr-4">
+                        <a href="{% url 'bigg_database:search' %}" class="nav-link text-light ">Search</a>
+                    </li>
+                    <li class="nav-item mr-4">
+                        <a href="{% url 'cobra_wrapper:cobramodel_list' %}" class="nav-link text-light">My Models</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'login' %}" class="nav-link text-light">Log In</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
 </header>
+<style>
+
+    /*header div.collapse li a {transition: all ease-in-out .3s;}*/
+    /*header div.collapse li a:hover {text-decoration: underline;}*/
+</style>

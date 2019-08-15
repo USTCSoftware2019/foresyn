@@ -1,17 +1,22 @@
-<table>
-    <thead>
-    <tr>
-        <th>BiGG ID</th>
-        <th>Compartments</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for model in list %}
-    <tr>
-        <th><a href="{{ model.detail_url }}">{{ model.bigg_id }}</a></th>
-        <th>{{ model.compartments|join:', ' }}</th>
-    </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="container">
+    <table class="table table-bordered table-hover table-striped text-center">
+        <thead>
+        <tr>
+            <th scope="col">BiGG ID</th>
+            <th scope="col">Compartments</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for model in list %}
+        <tr>
+            <th scope="row"><a href="{{ model.detail_url }}">{{ model.bigg_id }}</a></th>
+            <td>{{ model.compartments|join:', ' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<style>
+    div.container th, div.container td {vertical-align: middle;}
+</style>
 

@@ -6,7 +6,43 @@ Metabolite: {{ meta.bigg_id }}
 {% endblock %}
 
 {% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Metabolite: {{ meta.bigg_id }}</h3>
+        </div>
+        <div class="card-body">
+            <h4>Descriptive name</h4>
+            <p>{{ meta.name }}</p>
+            <hr>
+            <h4>Formulae</h4>
+            <p>{{ meta.formulae|join:', ' }}</p>
+            <hr>
+            {% if meta.charges %}
+            <h4>Charges</h4>
+            <p>{{ meta.charges }}</p>
+            <hr>
+            {% endif %}
 
+            {% if meta.database_links%}
+            <h4>External database links</h4>
+            {% include 'bigg_database/db_links.html' with db_links=meta.database_links only %}
+            <hr>
+            {% endif %}
+
+            <h4><a href="{% url 'bigg_database:metabolites_in_model' meta.id %}">
+                Models Containing {{ meta.bigg_id }}</a></h4>
+            {% render_list_tag meta.models.all 'model' 'model_metabolite_relationship_detail' id=meta.id reverse=True %}
+            <hr>
+            <h4><a href="{% url 'bigg_database:metabolite_from_reactions' meta.id %}">
+                Reactions Containing {{ meta.bigg_id }}</a></h4>
+            {% render_list_tag meta.reactions.all 'reaction' 'reaction_metabolite_relationship_detail' id=meta.id reverse=True %}
+
+        </div>
+    </div>
+</div>
+
+{% comment %}
 <h1>Metabolite: {{ meta.bigg_id }}</h1>
 
 <h4>Descriptive name</h4>
@@ -33,4 +69,5 @@ Metabolite: {{ meta.bigg_id }}
     Reactions Containing {{ meta.bigg_id }}</a></h4>
 {% render_list_tag meta.reactions.all 'reaction' 'reaction_metabolite_relationship_detail' id=meta.id reverse=True %}
 
+{% endcomment %}
 {% endblock %}

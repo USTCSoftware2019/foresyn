@@ -1,0 +1,7 @@
+
+header .container-fluid {background-color: #105ae4; }
+header nav a.navbar-brand {color: #fff; line-height: 2em; }
+header nav div a {color: #fff; font-size: 1.2em; font-weight: 500; letter-spacing: 1px;}
+header select.custom-select {border-radius: 3px 0 0 3px; width: 120px;}
+header input.form-control {margin-left: -3px; border-left: 1px solid #ddd;border-radius: 1px;}
+header button.btn {border-left: 1px solid #ddd; }

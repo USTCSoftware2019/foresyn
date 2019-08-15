@@ -3,6 +3,42 @@
 {% block title %}Add a Model{% endblock title %}
 
 {% block content %}
+<div class="container">
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group row">
+            <label for="" class="col-form-label col-2">{{ field.label_tag }}</label>
+            <div class="col-10">
+                {{ field }}
+            </div>
+        </div>
+        {% endfor %}
+        <div class="form-group row d-flex justify-content-center">
+            <div class="col-2">
+                <a href="{% url 'cobra_wrapper:cobramodel_list' %}" class="btn btn-primary w-100">Return</a>
+            </div>
+            <div class="col-2">
+                <input type="reset" value="Reset" class="btn btn-primary">
+            </div>
+            <div class="col-2">
+                <input type="submit" value="Create" class="btn btn-primary">
+            </div>
+
+        </div>
+    </form>
+</div>
+<style>
+    .container div.col-10 input[type="text"] {}
+</style>
+
+<script>
+    $('div.container div.form-group input').addClass('form-control')
+    $('div.container div.form-group select').addClass('form-control')
+</script>
+
+{% comment %}
     <form method="post">{% csrf_token %}
         {{ form.as_p }}
         <input type="reset" value="Reset">
@@ -10,4 +46,6 @@
     </form>
 
     <a href="{% url 'cobra_wrapper:cobramodel_list' %}">Return</a>
+
+{% endcomment %}
 {% endblock content %}

@@ -96,7 +96,7 @@ if os.environ.get('USE_MYSQL'):
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'igem_backend',
             'USER': 'root',
-            'PASSWORD': 'mysql_pwd',
+            'PASSWORD': 'admin',
             'HOST': '127.0.0.1',
             'PORT': '3306',
         }
@@ -143,7 +143,20 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
+# STATIC_URL = '/static/'
+# HERE = os.path.dirname(os.path.abspath(__file__))
+# HERE = os.path.join(HERE, '../')
+# STATICFILES_DIRS = (
+#     # Put strings here, like "/home/html/static" or "C:/www/django/static".
+#     # Always use forward slashes, even on Windows.
+#     # Don't forget to use absolute paths, not relative paths.
+#     os.path.join(HERE, '../../../../../../IGEM/backend-master/backend/static/'),
+# )
+
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
 
 if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True

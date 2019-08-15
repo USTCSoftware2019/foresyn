@@ -7,6 +7,55 @@ Reaction: {{ reaction.bigg_id }}
 
 {% block content %}
 
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Reaction: {{ reaction.bigg_id }}
+                {% if reaction.pseudoreaction %}
+                <span class="badge badge-primary">pseudoreaction</span>
+                {% endif %}
+            </h3>
+        </div>
+        <div class="card-body">
+            <h4>Descriptive name</h4>
+            <p>{{ reaction.name }}</p>
+            <hr>
+            <h4>Reaction</h4>
+            <p>{{ reaction.reaction_string|safe }}</p>
+            <hr>
+            {% if reaction.database_links %}
+            <h4>External database links</h4>
+            {% include 'bigg_database/db_links.html' with db_links=reaction.database_links only %}
+            <hr>
+            {% endif %}
+
+            <h4><a href="{% url 'bigg_database:metabolites_in_reaction' reaction.id %}">
+                Related Metabolites</a></h4>
+            {% render_list_tag reaction.metabolite_set.all 'metabolite' 'reaction_metabolite_relationship_detail' id=reaction.id %}
+            <hr>
+            <h4><a href="{% url 'bigg_database:reaction_from_models' reaction.id %}">
+                Models Containing {{ reaction.bigg_id }}</a></h4>
+            {% render_list_tag reaction.models.all 'model' 'model_reaction_relationship_detail' id=reaction.id reverse=True %}
+            <hr>
+            <h4>Add To My Model</h4>
+            <form method="post" action="{% url 'data_wrapper:add_reactions' %}">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label for="Model ID" class="col-2 col-form-label">Model ID</label>
+                    <div class="col-6">
+                        <input id="Model ID" type="number" name="model_pk" value="{{ model.id }}" class="form-control" placeholder="your model id:">
+                    </div>
+                    <div class="col-3 d-flex justify-content-center">
+                        <input type="number" name="reaction_pk" value="{{ reaction.id }}" hidden>
+                        <input type="submit" value="Add to Model" class="btn btn-primary">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% comment %}
 <h1>Reaction: {{ reaction.bigg_id }}</h1>
 
 <!-- Just a boolean to mark if it's a pseudo reaction or not. -->
@@ -39,5 +88,7 @@ Reaction: {{ reaction.bigg_id }}
     <input type="number" name="reaction_pk" value="{{ reaction.id }}" hidden>
     <input type="submit" value="add to your model">
 </form>
+
+{% endcomment %}
 
 {% endblock %}

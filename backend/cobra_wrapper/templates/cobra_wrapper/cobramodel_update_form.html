@@ -3,11 +3,39 @@
 {% block title %}Add a Model{% endblock title %}
 
 {% block content %}
-    <form method="post">{% csrf_token %}
-        {{ form.as_p }}
-        <input type="reset" value="Reset">
-        <input type="submit" value="Update">
-    </form>
+<div class="container">
 
-    <a href="{% url 'cobra_wrapper:cobramodel_detail' object.pk %}">Return</a>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group row">
+            <label for="" class="col-form-label col-2">{{ field.label_tag }}</label>
+            <div class="col-10">
+                {{ field }}
+            </div>
+        </div>
+        {% endfor %}
+        <div class="form-group row d-flex justify-content-center">
+            <div class="col-2">
+                <a href="{% url 'cobra_wrapper:cobramodel_detail' object.pk %}" class="btn btn-primary w-100">Back</i></a>
+            </div>
+            <div class="col-2">
+                <input type="reset" value="Reset" class="btn btn-primary">
+            </div>
+            <div class="col-2">
+                <input type="submit" value="Update" class="btn btn-primary">
+            </div>
+
+        </div>
+    </form>
+</div>
+<style>
+    .container div.col-10 input[type="text"] {}
+</style>
+
+<script>
+    $('div.container div.form-group input').addClass('form-control')
+    $('div.container div.form-group select').addClass('form-control')
+</script>
+
 {% endblock content %}
