@@ -5,6 +5,42 @@ Model: {{ model.bigg_id }}
 {% endblock %}
 
 {% block content %}
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Model metrics</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-borderless">
+                <h4>Basic Info</h4>
+                <tbody>
+                <!-- Row clickable or count clickable? -->
+                <tr>
+                    <td scope="row">Reactions</td>
+                    <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a></td>
+                </tr>
+                <tr>
+                    <td scope="row">Metabolites</td>
+                    <td><a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a></td>
+                </tr>
+                <tr>
+                    <td scope="row">Genes</td>
+                    <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
+                </tr>
+                </tbody>
+            </table>
+            <hr>
+
+            <!-- need a form -->
+            
+        </div>
+    </div>
+
+</div>
+
+{% comment %}
+
 <h4>Model metrics</h4>
 <table>
     <thead>
@@ -35,5 +71,7 @@ Model: {{ model.bigg_id }}
     <input type="number" name="model_pk" value="{{ model.id }}" hidden>
     <input type="submit" value="add to cobra">
 </form>
+
+{% endcomment %}
 
 {% endblock %}
