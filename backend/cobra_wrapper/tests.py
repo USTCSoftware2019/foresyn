@@ -136,7 +136,6 @@ class CobraWrapperViewTests(TestCase):
     def test_reactions_detail(self):
         response = self.client.get('/cobra/reactions/1/')
         self.assertTemplateUsed(response, 'cobra_wrapper/cobrareaction_detail.html')
-        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobrareaction_list.html')
         for comp in ['id', 'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound',
                      'metabolites and coefficients', 'gene_reaction_rule']:
             self.assertContains(response, comp)
@@ -152,7 +151,6 @@ class CobraWrapperViewTests(TestCase):
     def test_models_detail(self):
         response = self.client.get('/cobra/models/1/')
         self.assertTemplateUsed(response, 'cobra_wrapper/cobramodel_detail.html')
-        self.assertTemplateNotUsed(response, 'cobra_wrapper/cobramodel_list.html')
         for comp in ['id', 'cobra_id', 'name', 'objective', 'reactions']:
             self.assertContains(response, comp)
         for comp in ['1', 'example_model', 'test', '3OAS140']:
@@ -182,7 +180,6 @@ class CobraWrapperViewTests(TestCase):
             compartment='test'))
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_create_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_list.html')
-        self.assertTemplateNotUsed('cobra_wrapper/cobrametabolite_detail.html')
 
         response = self.client.get('/cobra/metabolites/create/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -212,7 +209,6 @@ class CobraWrapperViewTests(TestCase):
             gene_reaction_rule='test'))
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_create_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_list.html')
-        self.assertTemplateNotUsed('cobra_wrapper/cobrareaction_detail.html')
 
         response = self.client.get('/cobra/reactions/create/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -236,7 +232,6 @@ class CobraWrapperViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTemplateUsed('cobra_wrapper/cobramodel_create_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobramodel_list.html')
-        self.assertTemplateNotUsed('cobra_wrapper/cobramodel_detail.html')
 
         response = self.client.get('/cobra/models/create/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -268,7 +263,6 @@ class CobraWrapperViewTests(TestCase):
             compartment='test'))
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_update_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_detail.html')
-        self.assertTemplateNotUsed('cobra_wrapper/cobrametabolite_create_form.html')
 
         response = self.client.get('/cobra/metabolites/1/update/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -304,7 +298,6 @@ class CobraWrapperViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_update_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_detail.html')
-        self.assertTemplateNotUsed('cobra_wrapper/cobrareaction_create_form.html')
 
         response = self.client.get('/cobra/reactions/1/update/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -332,7 +325,6 @@ class CobraWrapperViewTests(TestCase):
             objective='test'))
         self.assertTemplateUsed('cobra_wrapper/cobramodel_update_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobramodel_detail.html')
-        self.assertTemplateNotUsed('cobra_wrapper/cobramodel_create_form.html')
 
         response = self.client.get('/cobra/models/1/update/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
