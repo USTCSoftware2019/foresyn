@@ -3,6 +3,35 @@
 {% block title %}FVA Result of {{ object }}{% endblock title %}
 
 {% block content %}
+<div class="container">
+    <table class="table table-bordered table-hover table-striped text-center">
+        <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Maximum</th>
+            <th scope="col">Minimum</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for name, max, min in solution %}
+        <tr>
+            <td>{{ name }}</td>
+            <td>{{ max }}</td>
+            <td>{{ min }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{% url 'cobra_wrapper:cobrafva_list' model_pk %}" class="btn btn-primary">Return</a>
+        </div>
+    </div>
+</div>
+<style>
+    div.container th, div.container td {vertical-align: middle;}
+</style>
+{% comment }
     <table>
         <tr>
             <th>name</th>
@@ -19,4 +48,6 @@
     </table>
 
     <a href="{% url 'cobra_wrapper:cobrafva_list' model_pk %}">Return</a>
+
+{% endcomment %}
 {% endblock content %}

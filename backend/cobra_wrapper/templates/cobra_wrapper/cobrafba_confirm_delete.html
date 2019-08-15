@@ -3,8 +3,26 @@
 {% block title %}Confirm to Delete {{ object }}{% endblock title %}
 
 {% block content %}
+<div class="container">
+    <div class="card m-auto">
+        <div class="card-body">
+            <form method="post">{% csrf_token %}
+                <p class="text-center text-danger">Are you sure to delete: {{ object }}?</p>
+                <div class="col-12 d-flex justify-content-center">
+                    <input type="submit" value="Confirm" class="btn btn-danger text-center">
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+<style>
+    .container div.card {width: 400px;}
+</style>
+{% comment %}
     <form method="post">{% csrf_token %}
         <p>Are you sure to delete: {{ object }}?</p>
         <input type="submit" value="Confirm">
     </form>
+{% endcomment %}
 {% endblock content %}

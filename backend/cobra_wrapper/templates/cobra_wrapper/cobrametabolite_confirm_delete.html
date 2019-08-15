@@ -3,6 +3,28 @@
 {% block title %}Confirm to Delete {{ object }}{% endblock title %}
 
 {% block content %}
+<div class="container">
+    <div class="card m-auto">
+        <div class="card-body">
+            {% if deletable %}
+            <form method="post">{% csrf_token %}
+                <p class="text-center text-danger">Are you sure to delete: {{ object }}?</p>
+                <div class="col-12 d-flex justify-content-center">
+                    <input type="submit" value="Confirm" class="btn btn-danger text-center">
+                </div>
+            </form>
+            {% else %}
+            <p class="text-info text-center">You can not delete the metabolite!</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+<style>
+    .container div.card {width: 400px;}
+</style>
+
+{% comment %}
     {% if deletable %}
         <form method="post">{% csrf_token %}
             <p>Are you sure to delete: {{ object }}?</p>
@@ -11,4 +33,6 @@
     {% else %}
         <p>You can not delete the metabolite!</p>
     {% endif %}
+
+{% endcomment %}
 {% endblock content %}

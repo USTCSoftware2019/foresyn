@@ -3,6 +3,74 @@
 {% block title %}{{ object }}{% endblock title %}
 
 {% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Reaction: {{ object.name }}</h3>
+        </div>
+        <div class="card-body">
+            <h4>Basic Info</h4>
+            <table class="table table-hover table-borderless">
+                <tbody>
+                <tr>
+                    <td scope="row">ID</td>
+                    <td>{{ object.id }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">Cobra ID</td>
+                    <td>{{ object.cobra_id }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">Name</td>
+                    <td>{{ object.name }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">Subsystem</td>
+                    <td>{{ object.subsystem }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">Lower Bound</td>
+                    <td>{{ object.lower_bound }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">Upper Bound</td>
+                    <td>{{ object.upper_bound|default_if_none:"None" }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">Objective Coefficient</td>
+                    <td>{{ object.objective_coefficient }}</td>
+                </tr>
+                <tr>
+                    <td scope="row">Metabolites and Coefficients</td>
+                    <td>
+                        {% for metabolite, coefficient in object.get_metabolites_and_coefficients.items %}
+                        <a href="{% url 'cobra_wrapper:cobrametabolite_detail' metabolite.pk %}">{{ metabolite }}</a>:
+                        {{ coefficient }}
+                        {% endfor %}
+                        ]
+                    </td>
+                </tr>
+                <tr>
+                    <td scope="row">Gene Reaction Rule</td>
+                    <td>{{ object.gene_reaction_rule }}</td>
+                </tr>
+                </tbody>
+            </table>
+            <hr>
+            <h4>Operations</h4>
+            <div class="row">
+                <div class="col-6 text-center">
+                    <a href="{% url 'cobra_wrapper:cobrareaction_update_form' object.pk %}" class="btn btn-primary w-50">Edit</a>
+                </div>
+                <div class="col-6 text-center">
+                    <a href="{% url 'cobra_wrapper:cobrareaction_confirm_delete' object.pk %}" class="btn btn-danger w-50">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% comment %}
+
     <table>
         <tbody>
         <tr>
@@ -54,4 +122,6 @@
     <a href="{% url 'cobra_wrapper:cobrareaction_update_form' object.pk %}">Edit</a>
 
     <a href="{% url 'cobra_wrapper:cobrareaction_confirm_delete' object.pk %}">Delete</a>
+
+{% endcomment %}
 {% endblock content %}

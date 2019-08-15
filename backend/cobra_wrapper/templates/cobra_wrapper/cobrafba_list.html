@@ -3,6 +3,48 @@
 {% block title %}All FBA{% endblock title %}
 
 {% block content %}
+
+<div class="container">
+    <div class="d-flex flex-row flex-wrap">
+        {% for object in object_list %}
+        <div class="card-wrapper col-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    {{ object.task_id }}
+                </div>
+                <div class="card-body text-center">
+                    <p class="model_info ">Task ID: {{ object.task_id }}</p>
+                    <p class="model_info">Start Time: {{ object.start_time }}</p>
+                    <p class="model_info card-link"><a href="{% url 'cobra_wrapper:cobrafba_detail' model_pk object.pk %}" class="btn btn-primary">See Detail</a></p>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+        <div class="card-wrapper col-4 mb-4">
+            <div class="card">
+                <div class="card-body new">
+                    <a href="{% url 'cobra_wrapper:cobrafba_create_form' model_pk %}" class="border-primary d-block new"></a>
+                    <p class="text-primary">New Metabolite</p>
+                    <p class="text-center">
+                        <a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}" class="btn btn-primary">Return</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<style>
+    .container .card {height: 220px; transition: all ease-in-out .3s;}
+    .container .card:hover {box-shadow: 10px 10px 5px #888888; }
+    .container .card div.new{display: flex; align-items: center; align-content: center; justify-content: center; height: 100%; flex-direction: column;}
+    .container a.new {height: 60px; width:60px; margin: 0 auto; background: url("/static/image/plus.svg") no-repeat center; background-size: 100% 100%; transition: all ease-in-out .3s;}
+    .container div.new:hover a.new{transform: rotate(90deg);}
+</style>
+
+{% comment %}
     {% for object in object_list %}
         <table>
             <tbody>
@@ -23,4 +65,6 @@
 
     <a href="{% url 'cobra_wrapper:cobrafba_create_form' model_pk %}">Create</a>
     <a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">Return</a>
+
+{% endcomment %}
 {% endblock content %}
