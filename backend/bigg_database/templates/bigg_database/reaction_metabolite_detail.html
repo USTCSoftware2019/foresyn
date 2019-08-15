@@ -5,7 +5,43 @@ Metabolite {{to_model.bigg_id}}
 {% endblock %}
 
 {% block content %}
-<h3>Metebolite {{to_model.bigg_id}}</h3>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Metebolite: {{to_model.bigg_id}}</h3>
+        </div>
+        <div class="card-body">
+
+            <h4>Reaction</h4>
+            <p><a href="{% url 'bigg_database:reaction_detail' from_model.id %}">{{ from_model.bigg_id }}</a></p>
+            <hr>
+            <h4>Descriptive name</h4>
+            <p>{{to_model.name}}</p>
+            <hr>
+            <h4>Formulae</h4>
+            <p>{{to_model.formulae|join:', '}}</p>
+            <hr>
+            <h4>Charges</h4>
+            <p>{{to_model.charges}}</p>
+            <hr>
+            <h4>Stoichiometry</h4>
+            <p>{{to_model.stoichiometry}}</p>
+            <hr>
+            
+            {% if gene.database_links %}
+            <h4>External database links</h4>
+            {% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
+            <hr>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% comment %}
+
+<h3>Metebolite: {{to_model.bigg_id}}</h3>
 
 <h4>Reaction</h4>
 <p><a href="{% url 'bigg_database:reaction_detail' from_model.id %}">{{ from_model.bigg_id }}</a></p>
@@ -26,4 +62,7 @@ Metabolite {{to_model.bigg_id}}
 <h4>External database links</h4>
 {% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
 {% endif %}
+
+{% endcomment %}
+
 {% endblock %}

@@ -5,7 +5,49 @@ Gene {{to_model.bigg_id}}
 {% endblock %}
 
 {% block content %}
-<h3>Gene {{to_model.bigg_id}}</h3>
+
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Gene: {{ to_model.bigg_id }}</h3>
+        </div>
+        <div class="card-body">
+            
+            <h4>Model</h4>
+            <p><a href="{% url 'bigg_database:model_detail' from_model.id %}">{{ from_model.bigg_id }}</a></p>
+            <hr>
+            <h4>Descriptive name</h4>
+            <p>{{ to_model.name }}</p>
+            <hr>
+            <h4>Position</h4>
+            <p>{{ to_model.leftpos }} ~ {{ to_model.rightpos }}</p>
+            <hr>
+            <h4>Strand</h4>
+            <p>{{ to_model.strand }}</p>
+            <hr>
+            <h4>Chromosome</h4>
+            <p>{{ to_model.chromosome_ncbi_accession }}</p>
+            <hr>
+            <h4>DNA Sequence</h4>
+            <p>{{ to_model.dna_sequence }}</p>
+            <hr>
+            <h4>Protein Sequence</h4>
+            <p>{{ to_model.protein_sequence }}</p>
+            <hr>
+
+            {% if gene.database_links %}
+            <h4>External database links</h4>
+            {% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
+            <hr>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% comment %}
+
+<h3>Gene: {{ to_model.bigg_id }}</h3>
 
 <h4>Model</h4>
 <p><a href="{% url 'bigg_database:model_detail' from_model.id %}">{{ from_model.bigg_id }}</a></p>
@@ -32,4 +74,7 @@ Gene {{to_model.bigg_id}}
 <h4>External database links</h4>
 {% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
 {% endif %}
+
+{% endcomment %}
+
 {% endblock %}
