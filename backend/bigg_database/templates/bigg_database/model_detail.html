@@ -31,12 +31,21 @@ Model: {{ model.bigg_id }}
                 </tbody>
             </table>
             <hr>
-
-            <!-- need a form -->
-            
+            <h4>Add To Cobra</h4>
+            <form method="post" action="{% url 'data_wrapper:add_models' %}">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label for="Model ID" class="col-2 col-form-label">Model ID</label>
+                    <div class="col-6">
+                        <input id="Model ID" type="number" name="model_pk" value="{{ model.id }}" class="form-control" placeholder="your model id:" hidden>
+                    </div>
+                    <div class="col-3 d-flex justify-content-center">
+                        <input type="submit" value="Add to Cobra" class="btn btn-primary">
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
-
 </div>
 
 {% comment %}
