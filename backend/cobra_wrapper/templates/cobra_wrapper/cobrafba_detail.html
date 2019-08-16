@@ -20,18 +20,12 @@
             <td>{{ object.start_time }}</td>
         </tr>
         <tr>
-            <td>task_id</td>
-            <td>{{ object.task_id }}</td>
-        </tr>
-        <tr>
-            <td>status</td>
-            <td>{{ object|check_result_status }}</td>
-        </tr>
-        <tr>
             <td>model</td>
             <td><a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">{{ object.model }}</a></td>
         </tr>
     </table>
+
+    <p>Status: {{ object|check_result_status }}</p>
 
     {% if result %}
         <table>

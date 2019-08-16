@@ -12,5 +12,7 @@ def get_dict_value_with_key(dic, key):
 def check_result_status(fva_obj):
     if fva_obj.result:
         return 'OK'
-    else:
+    elif fva_obj.task_id:
         return 'Processing'
+    else:
+        return 'Failed'
