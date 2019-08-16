@@ -1,27 +1,37 @@
 import os
+import logging
 
-import fabric
-import invoke
+from fabric import task
+from invoke import Responder
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+logger = logging.getLogger(__name__)
 
-@fabric.task
-def init_db_for_cobra(connection):
-    with connection.cd(BASE_DIR):
-        with connection.prefix('source ../venv/bin/activate'):
-            connection.run('rm -f db.sqlite3')
-            connection.run('find cobra_wrapper/migrations -name \'000*.py\' -delete')
-            connection.run('./manage.py makemigrations')
-            connection.run('./manage.py migrate')
+
+def ensure_bash(c):
+    if os.path.basename(c.run('echo $0').stdout.strip())[-2:] != 'sh':
+        logger.critical('The script can only be run in bash-like shell!')
+        exit(1)
+
+
+@task
+def init_db_for_cobra(c):
+    ensure_bash(c)
+    with c.cd(BASE_DIR):
+        with c.prefix('source ../venv/bin/activate'):
+            c.run('rm -f db.sqlite3')
+            c.run('find cobra_wrapper/migrations -name \'000*.py\' -delete')
+            c.run('./manage.py makemigrations')
+            c.run('./manage.py migrate')
             super_user_watchers = [
-                invoke.Responder(pattern=r'Username.*:', response='test\n'),
-                invoke.Responder(pattern=r'Email address:', response='\n'),
-                invoke.Responder(pattern=r'Password:', response='test123456\n'),
-                invoke.Responder(pattern=r'Password \(again\):', response='test123456\n')
+                Responder(pattern=r'Username.*:', response='test\n'),
+                Responder(pattern=r'Email address:', response='\n'),
+                Responder(pattern=r'Password:', response='test123456\n'),
+                Responder(pattern=r'Password \(again\):', response='test123456\n')
             ]
-            connection.run('./manage.py createsuperuser', pty=True, watchers=super_user_watchers)
-            create_cobra_example_model_responder = invoke.Responder(
+            c.run('./manage.py createsuperuser', pty=True, watchers=super_user_watchers)
+            create_cobra_example_model_responder = Responder(
                 pattern=r'Python.*\(InteractiveConsole\)',
                 response='''
 from django.contrib.auth.models import User
@@ -100,4 +110,4 @@ model.reactions.set([reaction])
 exit()
 '''
             )
-            connection.run('./manage.py shell', pty=True, watchers=[create_cobra_example_model_responder])
+            c.run('./manage.py shell', pty=True, watchers=[create_cobra_example_model_responder])
