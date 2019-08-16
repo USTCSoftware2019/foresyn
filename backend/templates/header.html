@@ -24,8 +24,13 @@
                     <li class="nav-item mr-4">
                         <a href="{% url 'cobra_wrapper:cobramodel_list' %}" class="nav-link text-light">My Models</a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{% url 'login' %}" class="nav-link text-light">Log In</a>
+                    <li class="nav-item d-flex align-items-center">
+                        {% if user.is_authenticated %}
+                        <span class="greet mr-4 text-light align-items-center">Hello, {{ user.username }}!</span>
+                        <span><a href="/accounts/logout" class="mr-4 btn btn-warning ">Log Out</a></span>
+                        {% else %}
+                        <a href="/accounts/login" class="signin mr-4 btn btn-info"> Sign in</a>
+                        {% endif %}
                     </li>
                 </ul>
             </div>

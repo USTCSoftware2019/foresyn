@@ -5,7 +5,20 @@ Logged out
 {% endblock %}
 
 {% block content %}
+<div class="container">
+    <div class="card w-75 m-auto">
+        <div class="card-body text-center">
+            <p>Logged out.</p>
+        </div>
+        <div class="card-footer text-center">
+            <a href="{% url 'login' %}" class="btn btn-primary">Click here to login again.</a>
+        </div>
+    </div>
+</div>
+
+{% comment %}
     <p>Logged out.</p>
 
     <a href="{% url 'login' %}">Click here to login again.</a>
+{% endcomment %}
 {% endblock %}
