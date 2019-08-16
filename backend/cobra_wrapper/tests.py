@@ -99,8 +99,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
         for comp in ['2', '3omrsACP_c', '3-Oxotetradecanoyl-acyl-carrier-protein']:
             self.assertContains(response, comp)
-        self.assertContains(response, 'href="/cobra/metabolites/1/"')
-        self.assertContains(response, 'href="/cobra/metabolites/2/"')
+        self.assertContains(response, '<a href="/cobra/metabolites/1/">Detail</a>')
 
     def test_reactions_list(self):
         response = self.client.get('/cobra/reactions/')
@@ -109,7 +108,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
         for comp in ['1', '3OAS140', '3 oxoacyl acyl carrier protein synthase n C140']:
             self.assertContains(response, comp)
-        self.assertContains(response, 'href="/cobra/reactions/1/"')
+        self.assertContains(response, '<a href="/cobra/reactions/1/">Detail</a>')
 
     def test_models_list(self):
         response = self.client.get('/cobra/models/')
@@ -118,7 +117,7 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
         for comp in ['1', 'example_model', 'test']:
             self.assertContains(response, comp)
-        self.assertContains(response, 'href="/cobra/models/1/"')
+        self.assertContains(response, '<a href="/cobra/models/1/">Detail</a>')
 
     def test_metabolites_detail(self):
         response = self.client.get('/cobra/metabolites/1/')
@@ -162,7 +161,7 @@ class CobraWrapperViewTests(TestCase):
         response = self.client.get('/cobra/reactions/7777777/')
         self.assertEqual(response.status_code, 404)
 
-    def test_create_metabolites(self):
+    def test_metabolites_create(self):
         # TODO(myl7): Get a form, input it, post the form and be redirected to detail. Need an example.
         # TODO(lbc12345): Redirect test past, don't know is it OK?
         self.client.post('/cobra/metabolites/create/', dict(
@@ -190,7 +189,7 @@ class CobraWrapperViewTests(TestCase):
         for comp in ['cobra_id', 'name', 'formula', 'charge', 'compartment']:
             self.assertContains(response, comp)
 
-    def test_create_reactions(self):
+    def test_reactions_create(self):
         self.client.post('/cobra/reactions/create/', dict(
             cobra_id='test',
             name='test',
@@ -221,7 +220,7 @@ class CobraWrapperViewTests(TestCase):
                      'metabolites', 'coefficients', 'gene_reaction_rule']:
             self.assertContains(response, comp)
 
-    def test_create_models(self):
+    def test_models_create(self):
         self.client.post('/cobra/models/create/', dict(
             cobra_id='test',
             name='test',
@@ -243,7 +242,7 @@ class CobraWrapperViewTests(TestCase):
         for comp in ['cobra_id', 'name', 'reactions', 'objective']:
             self.assertContains(response, comp)
 
-    def test_update_metabolites(self):
+    def test_metabolites_update(self):
         response = self.client.post('/cobra/metabolites/7777777/update/', dict(
             cobra_id='test'
         ))
@@ -274,7 +273,7 @@ class CobraWrapperViewTests(TestCase):
         for comp in ['cobra_id', 'name', 'formula', 'charge', 'compartment']:
             self.assertContains(response, comp)
 
-    def test_update_reactions(self):
+    def test_reactions_update(self):
         response = self.client.post('/cobra/reactions/7777777/update/', dict(
             cobra_id='test'
         ))
@@ -310,7 +309,7 @@ class CobraWrapperViewTests(TestCase):
                      'metabolites', 'coefficients', 'gene_reaction_rule']:
             self.assertContains(response, comp)
 
-    def test_update_models(self):
+    def test_models_update(self):
         response = self.client.post('/cobra/models/7777777/update/', dict(
             cobra_id='test'
         ))
@@ -337,7 +336,7 @@ class CobraWrapperViewTests(TestCase):
         for comp in ['cobra_id', 'name', 'reactions', 'objective']:
             self.assertContains(response, comp)
 
-    def test_delete_metabolites(self):
+    def test_metabolites_delete(self):
         # TODO(lbc12345): Does this satisfy the requirement?
         response = self.client.post('/cobra/metabolites/7777777/delete/')
         self.assertEqual(response.status_code, 404)
@@ -354,8 +353,8 @@ class CobraWrapperViewTests(TestCase):
         response = self.client.post('/cobra/metabolites/1/delete/')
         self.assertRedirects(response, '/cobra/metabolites/')
 
-    def test_delete_reactions(self):
-        # TODO(lbc12345): I don't think the successful deletion way can be tested. Like Are you sure to delete blabla...
+    def test_reactions_delete(self):
+        # TODO(lbc12345): I don't think the successful deletion way can be tested. Like Are you sure to delete blabla
         response = self.client.post('/cobra/reactions/7777777/delete/')
         self.assertEqual(response.status_code, 404)
 
@@ -366,7 +365,7 @@ class CobraWrapperViewTests(TestCase):
         response = self.client.post('/cobra/reactions/1/delete/')
         self.assertRedirects(response, '/cobra/reactions/')
 
-    def test_delete_models(self):
+    def test_models_delete(self):
         response = self.client.post('/cobra/models/7777777/delete/')
         self.assertEqual(response.status_code, 404)
 
@@ -377,6 +376,26 @@ class CobraWrapperViewTests(TestCase):
 
         response = self.client.post('/cobra/models/1/delete/')
         self.assertRedirects(response, '/cobra/models/')
+
+    def test_fba_create(self):
+        response = self.client.post('/cobra/models/1/fba/create/', dict(desc='This is a test'))
+        self.assertTemplateUsed('cobra_wrapper/cobrafba_create_form.html')
+        # self.assertContains()
+
+# This is the fake test for celery, not used now.
+# class CobraCeleryTests(TestCase):
+#
+#     @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+#                        CELERY_ALWAYS_EAGER=True,
+#                        BROKER_BACKEND='memory',
+#                        TEST_RUNNER='djcelery.contrib.test_runner.CeleryTestSuiteRunner')
+
+    # def test_fba_list(self):
+    #     response = self.client.get('/cobra/models/1/fba/')
+    #     print(response.content)
+    #     self.assertTemplateUsed(response, 'cobra_wrapper/cobrafba_list.html')
+    #     for comp in ['desc', 'start_time', 'status']:
+    #         self.assertContains(response, comp)
 
     # def test_fba(self):
     #     response = self.client.get('/cobra/models/1/fba/')
