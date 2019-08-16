@@ -19,7 +19,7 @@ class CobraReactionForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        coefficients = cleaned_data.get('coefficients', []).split()
+        coefficients = cleaned_data.get('coefficients', '').split()
         metabolites = cleaned_data.get('metabolites', [])
 
         if len(coefficients) != len(metabolites):

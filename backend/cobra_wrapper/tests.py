@@ -191,7 +191,6 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
 
     def test_create_reactions(self):
-        # TODO(lbc12345): Don't know why Redirect test can not work here
         self.client.post('/cobra/reactions/create/', dict(
             cobra_id='test',
             name='test',
@@ -202,16 +201,17 @@ class CobraWrapperViewTests(TestCase):
             gene_reaction_rule='test'))
         self.assertRaises(ValidationError)
 
-        self.client.post('/cobra/reactions/create/', dict(
+        response = self.client.post('/cobra/reactions/create/', dict(
             cobra_id='test',
             name='test',
             subsystem='test',
             lower_bound=0,
             upper_bound=1000,
-            coefficients='-1.0 -1.0 -1.0 1.0 1.0 1.0',
+            coefficients='',
             gene_reaction_rule='test'))
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_create_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_list.html')
+        self.assertRedirects(response, '/cobra/reactions/2/')
 
         response = self.client.get('/cobra/reactions/create/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -232,9 +232,9 @@ class CobraWrapperViewTests(TestCase):
             cobra_id='test',
             name='test',
             objective='test'))
-        self.assertEqual(response.status_code, 302)
         self.assertTemplateUsed('cobra_wrapper/cobramodel_create_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobramodel_list.html')
+        self.assertRedirects(response, '/cobra/models/2/')
 
         response = self.client.get('/cobra/models/create/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)

@@ -51,7 +51,7 @@ class CobraReaction(models.Model):
     lower_bound = models.FloatField(default=0.0)
     upper_bound = models.FloatField(blank=True, null=True, default=None)
     metabolites = models.ManyToManyField(CobraMetabolite, blank=True)
-    coefficients = models.TextField(default='', validators=[validate_coefficients_space_splited_text])
+    coefficients = models.TextField(blank=True, default='', validators=[validate_coefficients_space_splited_text])
     gene_reaction_rule = models.TextField(blank=True, default='')
 
     class Meta:
