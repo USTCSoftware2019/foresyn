@@ -244,7 +244,6 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
 
     def test_update_metabolites(self):
-        # TODO(myl7): Get a form, input it, post the form and be redirected to detail. Need an example.
         response = self.client.post('/cobra/metabolites/7777777/update/', dict(
             cobra_id='test'
         ))
@@ -258,14 +257,15 @@ class CobraWrapperViewTests(TestCase):
             compartment='test' * 50))
         self.assertRaises(ValidationError)
 
-        self.client.post('/cobra/metabolites/1/update/', dict(
+        response = self.client.post('/cobra/metabolites/1/update/', dict(
             cobra_id='test',
             name='test',
             formula='test',
-            charge='test',
+            charge='0',
             compartment='test'))
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_update_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_detail.html')
+        self.assertRedirects(response, '/cobra/metabolites/1/')
 
         response = self.client.get('/cobra/metabolites/1/update/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -275,12 +275,12 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
 
     def test_update_reactions(self):
-        response = self.client.post('/cobra/models/7777777/update/', dict(
+        response = self.client.post('/cobra/reactions/7777777/update/', dict(
             cobra_id='test'
         ))
         self.assertEqual(response.status_code, 404)
 
-        self.client.post('/cobra/models/1/update/', dict(
+        self.client.post('/cobra/reactions/1/update/', dict(
             cobra_id='test',
             name='test',
             subsystem='test',
@@ -296,11 +296,11 @@ class CobraWrapperViewTests(TestCase):
             subsystem='test',
             lower_bound=0,
             upper_bound=1000,
-            coefficients='-1.0 -1.0 -1.0 1.0 1.0 1.0',
+            coefficients='',
             gene_reaction_rule='test'))
-        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_update_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_detail.html')
+        self.assertRedirects(response, '/cobra/reactions/1/')
 
         response = self.client.get('/cobra/reactions/1/update/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -311,23 +311,24 @@ class CobraWrapperViewTests(TestCase):
             self.assertContains(response, comp)
 
     def test_update_models(self):
-        response = self.client.post('/cobra/metabolites/7777777/update/', dict(
+        response = self.client.post('/cobra/models/7777777/update/', dict(
             cobra_id='test'
         ))
         self.assertEqual(response.status_code, 404)
 
-        self.client.post('/cobra/metabolites/1/update/', dict(
+        self.client.post('/cobra/models/1/update/', dict(
             cobra_id='test',
             name='test',
             objective='test' * 50))
         self.assertRaises(ValidationError)
 
-        self.client.post('/cobra/metabolites/1/update/', dict(
+        response = self.client.post('/cobra/models/1/update/', dict(
             cobra_id='test',
             name='test',
             objective='test'))
         self.assertTemplateUsed('cobra_wrapper/cobramodel_update_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobramodel_detail.html')
+        self.assertRedirects(response, '/cobra/models/1/')
 
         response = self.client.get('/cobra/models/1/update/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -351,7 +352,7 @@ class CobraWrapperViewTests(TestCase):
         self.assertContains(response, '<input type="submit" value="Confirm">', html=True)
 
         response = self.client.post('/cobra/metabolites/1/delete/')
-        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/cobra/metabolites/')
 
     def test_delete_reactions(self):
         # TODO(lbc12345): I don't think the successful deletion way can be tested. Like Are you sure to delete blabla...
@@ -363,7 +364,7 @@ class CobraWrapperViewTests(TestCase):
         self.assertContains(response, '<p>You can not delete the reaction!</p>', html=True)
 
         response = self.client.post('/cobra/reactions/1/delete/')
-        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/cobra/reactions/')
 
     def test_delete_models(self):
         response = self.client.post('/cobra/models/7777777/delete/')
@@ -375,7 +376,7 @@ class CobraWrapperViewTests(TestCase):
         self.assertContains(response, '<input type="submit" value="Confirm">', html=True)
 
         response = self.client.post('/cobra/models/1/delete/')
-        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/cobra/models/')
 
     # def test_fba(self):
     #     response = self.client.get('/cobra/models/1/fba/')
