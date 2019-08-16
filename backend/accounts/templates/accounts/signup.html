@@ -6,6 +6,55 @@ Login
 
 {% block content %}
 
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+
+            {% if form.errors %}
+            <p class="text-center">Your input does not correspond with our requirements. Please try again.</p>
+            {% endif %}
+
+            {% if next %}
+                {% if user.is_authenticated %}
+                <p class="text-center">Your account doesn't have access to this page. To proceed,
+                please login with an account that has access.</p>
+                {% else %}
+                <p class="text-center">Please login to see this page.</p>
+                {% endif %}
+            {% endif %}
+
+            <form method="post" action="{% url 'accounts:signup' %}">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group row">
+                    <label for="" class="col-form-label col-4">{{ field.label_tag }}</label>
+                    <div class="col-8">
+                        {{ field }}
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="form-group row d-flex justify-content-center">
+                    <div class="col-2">
+                        <input type="submit" value="Submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .container div.col-10 input[type="text"] {}
+</style>
+
+<script>
+    $('div.container div.form-group input').addClass('form-control')
+    $('div.container div.form-group select').addClass('form-control')
+</script>
+
+{% comment %}
+
 {% if form.errors %}
 <p>Your input does not correspond with our requirements. Please try again.</p>
 {% endif %}
@@ -24,4 +73,7 @@ Login
     {{ form.as_p }}
     <input type="submit" value="Submit">
 </form>
+
+{% endcomment %}
+
 {% endblock %}

@@ -5,9 +5,27 @@ Account activation successful
 {% endblock %}
 
 {% block content %}
+
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            {% if success %}
+                <p class="text-center">Now you can login your account.</p>
+            {% else %}
+                <p class="text-center">This activation link is invalid.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% comment %}
+
     {% if success %}
         <p>Now you can login your account.</p>
     {% else %}
         <p>This activation link is invalid.</p>
     {% endif %}
+
+{% endcomment %}
+
 {% endblock %}
