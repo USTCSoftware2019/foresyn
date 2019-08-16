@@ -4,20 +4,32 @@ from .models import CobraFba, CobraFva
 
 
 @shared_task
-def cobra_fba_save(result, task_id):
+def cobra_fba_save(pk, result, task_id):
     try:
-        model_object = CobraFba.objects.get(task_id=task_id)
+        instance = CobraFba.objects.get(pk=pk)
     except CobraFba.DoesNotExist:
         return
-    model_object.result = result
-    model_object.save()
+
+    if str(instance.task_id) != task_id:
+        return
+
+    instance.result = result
+    instance.task_id = None
+    instance.full_clean()
+    instance.save()
 
 
 @shared_task
-def cobra_fva_save(result, task_id):
+def cobra_fva_save(pk, result, task_id):
     try:
-        model_object = CobraFva.objects.get(task_id=task_id)
+        instance = CobraFva.objects.get(pk=pk)
     except CobraFba.DoesNotExist:
         return
-    model_object.result = result
-    model_object.save()
+
+    if str(instance.task_id) != task_id:
+        return
+
+    instance.result = result
+    instance.task_id = None
+    instance.full_clean()
+    instance.save()
