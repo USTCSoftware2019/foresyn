@@ -12,7 +12,7 @@ def revoke_cobra_fba(sender, **kwargs):
     instance = kwargs['instance']
     if not instance.result:
         result = AsyncResult(instance.task_id, app=app)
-        result.revoke(terminate=True)
+        result.revoke()
 
 
 @receiver(pre_delete, sender=CobraFva)
@@ -20,4 +20,4 @@ def revoke_cobra_fva(sender, **kwargs):
     instance = kwargs['instance']
     if not instance.result:
         result = AsyncResult(instance.task_id, app=app)
-        result.revoke(terminate=True)
+        result.revoke()
