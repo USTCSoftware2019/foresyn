@@ -21,8 +21,8 @@ def init_db_for_cobra(c):
     with c.cd(BASE_DIR):
         with c.prefix('source ../venv/bin/activate'):
             c.run('rm -f db.sqlite3')
-            c.run('find cobra_wrapper/migrations -name \'000*.py\' -delete')
-            c.run('./manage.py makemigrations')
+            # c.run('find cobra_wrapper/migrations -name \'000*.py\' -delete')
+            c.run('./manage.py makemigrations cobra_wrapper')
             c.run('./manage.py migrate')
             super_user_watchers = [
                 Responder(pattern=r'Username.*:', response='test\n'),
