@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from .models import CobraModel, CobraReaction, CobraMetabolite
+from .models import CobraModel, CobraReaction, CobraMetabolite, CobraFba, CobraFva
 
 
 class CobraWrapperViewTests(TestCase):
@@ -88,6 +88,12 @@ class CobraWrapperViewTests(TestCase):
             owner=self.user
         )
         self.model.reactions.set([self.reaction])
+
+        # self.fba = CobraFba.objects.create(
+        #     desc='This is a test'
+        # )
+        # self.fba.model.set(self.model)
+
         self.client.login(username='test', password='test123456')
 
     def test_metabolites_list(self):
@@ -377,35 +383,49 @@ class CobraWrapperViewTests(TestCase):
         response = self.client.post('/cobra/models/1/delete/')
         self.assertRedirects(response, '/cobra/models/')
 
-    def test_fba_create(self):
-        response = self.client.post('/cobra/models/1/fba/create/', dict(desc='This is a test'))
-        self.assertTemplateUsed('cobra_wrapper/cobrafba_create_form.html')
-        # self.assertContains()
-
-# This is the fake test for celery, not used now.
-# class CobraCeleryTests(TestCase):
-#
-#     @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
-#                        CELERY_ALWAYS_EAGER=True,
-#                        BROKER_BACKEND='memory',
-#                        TEST_RUNNER='djcelery.contrib.test_runner.CeleryTestSuiteRunner')
-
+    # TODO: how to create a fba result
     # def test_fba_list(self):
     #     response = self.client.get('/cobra/models/1/fba/')
-    #     print(response.content)
     #     self.assertTemplateUsed(response, 'cobra_wrapper/cobrafba_list.html')
     #     for comp in ['desc', 'start_time', 'status']:
     #         self.assertContains(response, comp)
-
-    # def test_fba(self):
-    #     response = self.client.get('/cobra/models/1/fba/')
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed('cobra_wrapper/cobrafba_detail.html')
+    #     self.assertContains(response, '<a href="/cobra/models/1/fba/1/">Detail</a>', html=True)
+    #     self.assertContains(response, '<a href="/cobra/models/1/fba/create/">Create</a>', html=True)
+    #     self.assertContains(response, '<a href="/cobra/models/1/">Return</a>', html=True)
+    #
+    # def test_fba_detail(self):
+    #     response = self.client.get('/cobra/models/1/fba/1/')
+    #     self.assertTemplateUsed(response, 'cobra_wrapper/cobrafba_detail.html')
+    #     for comp in ['id', 'description', 'start_time', 'model']:
+    #         self.assertContains(response, comp)
+    #     # if success
     #     for comp in ['objective_value', 'status', 'fluxes', 'shadow_price']:
     #         self.assertContains(response, comp)
-    #     self.assertContains(response, '<a href="/cobra/models/1/">Return</a>', html=True)
-    #     self.assertNotContains(response, 'maximum')
+    #     self.assertContains(response, '<a href="/cobra/models/1/fba/1/">Detail</a>', html=True)
+    #     self.assertContains(response, '<a href="/cobra/models/1/fba/create/">Create</a>', html=True)
+    #     self.assertContains(response, '<a href="/cobra/models/1/fba/">Return</a>', html=True)
     #
+    # def test_fba_create(self):
+    #     response = self.client.get('/cobra/models/1/fba/create/')
+    #     self.assertTemplateUsed(response, 'cobra_wrapper/cobrafba_create_form.html')
+    #     self.assertContains(response, '<input type="submit" value="Create">', html=True)
+    #     self.assertContains(response, '<a href="/cobra/models/1/fba/">Return</a>')
+    #
+    # def test_fba_delete(self):
+    #     response = self.client.post('/cobra/models/1/fba/7777777/delete/')
+    #     self.assertEqual(response.status_code, 404)
+    #     response = self.client.post('/cobra/models/7777777/fba/1/delete/')
+    #     self.assertEqual(response.status_code, 404)
+    #
+    #     response = self.client.get('/cobra/models/1/fba/1/delete/')
+    #     self.assertTemplateUsed('cobra_wrapper/cobrafba_confirm_delete.html')
+    #     self.assertContains(response, '<p>Are you sure to delete: This is a test.[fba]?</p>', html=True)
+    #     self.assertContains(response, '<input type="submit" value="Confirm">', html=True)
+    #     self.assertContains(response, '<a href="/cobra/models/1/fba/1/">Return</a>')
+    #
+    #     response = self.client.post('/cobra/models/1/fba/1/delete/')
+    #     self.assertRedirects(response, '/cobra/models/1/fba/')
+
     # def test_fva_create(self):
     #     response = self.client.get('/cobra/models/1/fva/create/')
     #     self.assertTemplateUsed('cobra_wrapper/cobrafva_create_form.html')
