@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ object.model.name }} - {{ object.model.owner }}
+{% endblock %}
+
+{% block content %}
+<h3>Name</h3>
+<p>{{ object.model.name }}</p>
+
+<h3>Objective</h3>
+<p>{{ object.model.objective }}</p>
+
+<h3>Reactions</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Owner</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reaction in object.reactions.all %}
+        <tr>
+            <td>
+                <a href="{% url 'share:shared_cobra_reaction' %}?id={{ reaction.id }}">{{ reaction.name }}</a>
+            </td>
+            <td>{{ reaction.owner }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

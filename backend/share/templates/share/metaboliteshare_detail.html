@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ object.metabolite.name }} - {{ object.metabolite.owner }}
+{% endblock %}
+
+{% block content %}
+<h3>Name</h3>
+<p>{{ object.metabolite.name }}</p>
+
+<h3>Formula</h3>
+<p>{{ object.metabolite.formula }}</p>
+
+<h3>Charge</h3>
+<p>{{ object.metabolite.charge }}</p>
+
+<h3>Compartment</h3>
+<p>{{ object.metabolite.compartment }}</p>
+
+<h3>Owner</h3>
+<p>{{ object.metabolite.owner }}</p>
+
+{% endblock %}

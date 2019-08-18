@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     'data_wrapper',
     'cobra_wrapper.apps.CobraWrapperConfig',
+    'share',
     'bigg_database',
     'accounts',
 ]
