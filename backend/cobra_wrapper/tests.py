@@ -1,8 +1,11 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+import cobra
 
 from .models import CobraModel, CobraReaction, CobraMetabolite, CobraFba, CobraFva
+
+from backend.celery import app
 
 
 class CobraWrapperViewTests(TestCase):
@@ -404,13 +407,31 @@ class CobraWrapperViewTests(TestCase):
     #     self.assertContains(response, '<a href="/cobra/models/1/fba/1/">Detail</a>', html=True)
     #     self.assertContains(response, '<a href="/cobra/models/1/fba/create/">Create</a>', html=True)
     #     self.assertContains(response, '<a href="/cobra/models/1/fba/">Return</a>', html=True)
-    #
-    # def test_fba_create(self):
-    #     response = self.client.get('/cobra/models/1/fba/create/')
-    #     self.assertTemplateUsed(response, 'cobra_wrapper/cobrafba_create_form.html')
-    #     self.assertContains(response, '<input type="submit" value="Create">', html=True)
-    #     self.assertContains(response, '<a href="/cobra/models/1/fba/">Return</a>')
-    #
+
+    def test_fba_create(self):
+        # response = self.client.get('/cobra/models/1/fba/create/')
+        # self.assertTemplateUsed(response, 'cobra_wrapper/cobrafba_create_form.html')
+        # self.assertContains(response, '<input type="submit" value="Create">', html=True)
+        # self.assertContains(response, '<a href="/cobra/models/1/fba/">Return</a>')
+
+        response = self.client.post('/cobra/models/1/fba/create/', dict(
+            desc='test'
+        ))  # Create a fba from frontend
+
+        model_object = CobraModel.objects.get(pk=1)
+        fba = CobraFba.objects.create(desc='test', model=model_object)
+        fba.save()
+        cobra_model = model_object.build()
+        result = app.send_task(
+            'cobra_computation.tasks.cobra_fba',
+            args=[fba.pk, cobra.io.to_json(cobra_model)],
+            kwargs={},
+            queue='cobra_feeds',
+            routing_key='cobra_feed.fba'
+        )
+        fba.task_id = result.id
+        fba.save()  # Create a fba from backend
+
     # def test_fba_delete(self):
     #     response = self.client.post('/cobra/models/1/fba/7777777/delete/')
     #     self.assertEqual(response.status_code, 404)
@@ -426,16 +447,45 @@ class CobraWrapperViewTests(TestCase):
     #     response = self.client.post('/cobra/models/1/fba/1/delete/')
     #     self.assertRedirects(response, '/cobra/models/1/fba/')
 
-    # def test_fva_create(self):
-    #     response = self.client.get('/cobra/models/1/fva/create/')
-    #     self.assertTemplateUsed('cobra_wrapper/cobrafva_create_form.html')
-    #     for comp in ['loopless', 'fraction_of_optimum', 'pfba_factor', 'reaction_list']:
-    #         self.assertContains(response, comp)
-    #     self.assertContains(response, '<input type="reset" value="Reset">', html=True)
-    #     self.assertContains(response, '<input type="submit" value="Submit">', html=True)
-    #     self.assertContains(response, '<a href="/cobra/models/1/">Return</a>', html=True)
-    #     self.assertNotContains(response, 'minimum')
-    #
+    def test_fva_create(self):
+        # response = self.client.get('/cobra/models/1/fva/create/')
+        # self.assertTemplateUsed('cobra_wrapper/cobrafva_create_form.html')
+        # for comp in ['loopless', 'fraction_of_optimum', 'pfba_factor', 'reaction_list']:
+        #     self.assertContains(response, comp)
+        # self.assertContains(response, '<input type="reset" value="Reset">', html=True)
+        # self.assertContains(response, '<input type="submit" value="Submit">', html=True)
+        # self.assertContains(response, '<a href="/cobra/models/1/">Return</a>', html=True)
+        # self.assertNotContains(response, 'minimum')
+        reaction_object = CobraReaction.objects.get(pk=1)
+
+        response = self.client.post('/cobra/models/1/fva/create/', dict(
+            desc='test',
+            reaction_list=[reaction_object.pk],
+            loopless='',
+            fraction_of_optimum='1.0',
+            pfba_factor='unknown'
+        ))  # Create a fva from frontend
+
+        model_object = CobraModel.objects.get(pk=1)
+        fva = CobraFba.objects.create(desc='test', model=model_object)
+        fva.save()
+        cobra_fva_kwargs = {
+            'reaction_list': [reaction_object.cobra_id],
+            'loopless': False,
+            'fraction_of_optimum': 1.0,
+            'pfba_factor': None
+        }
+        cobra_model = model_object.build()
+        result = app.send_task(
+            'cobra_computation.tasks.cobra_fva',
+            args=[fva.pk, cobra.io.to_json(cobra_model)],
+            kwargs=cobra_fva_kwargs,
+            queue='cobra_feeds',
+            routing_key='cobra_feed.fva'
+        )
+        fva.task_id = result.id
+        fva.save()  # Create a fva from backend
+
     # def test_fva(self):
     #     response = self.client.get('/cobra/models/1/fva/')
     #     self.assertEqual(response.status_code, 200)
