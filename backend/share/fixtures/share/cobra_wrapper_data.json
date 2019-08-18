@@ -1,0 +1,121 @@
+[
+    {
+        "model": "cobra_wrapper.cobrametabolite",
+        "pk": 1,
+        "fields": {
+            "owner": 1,
+            "cobra_id": "ACP_c",
+            "name": "acyl-carrier-protein",
+            "formula": "C11H21N2O7PRS",
+            "charge": 1.0,
+            "compartment": "c"
+        }
+    },
+    {
+        "model": "cobra_wrapper.cobrametabolite",
+        "pk": 2,
+        "fields": {
+            "owner": 1,
+            "cobra_id": "3omrsACP_c",
+            "name": "3-Oxotetradecanoyl-acyl-carrier-protein",
+            "formula": "C25H45N2O9PRS",
+            "charge": 1.0,
+            "compartment": "c"
+        }
+    },
+    {
+        "model": "cobra_wrapper.cobrametabolite",
+        "pk": 3,
+        "fields": {
+            "owner": 1,
+            "cobra_id": "co2_c",
+            "name": "CO2",
+            "formula": "CO2",
+            "charge": 1.0,
+            "compartment": "c"
+        }
+    },
+    {
+        "model": "cobra_wrapper.cobrametabolite",
+        "pk": 4,
+        "fields": {
+            "owner": 1,
+            "cobra_id": "malACP_c",
+            "name": "Malonyl-acyl-carrier-protein",
+            "formula": "C14H22N2O10PRS",
+            "charge": 1.0,
+            "compartment": "c"
+        }
+    },
+    {
+        "model": "cobra_wrapper.cobrametabolite",
+        "pk": 5,
+        "fields": {
+            "owner": 1,
+            "cobra_id": "h_c",
+            "name": "H",
+            "formula": "H",
+            "charge": 1.0,
+            "compartment": "c"
+        }
+    },
+    {
+        "model": "cobra_wrapper.cobrametabolite",
+        "pk": 6,
+        "fields": {
+            "owner": 1,
+            "cobra_id": "ddcaACP_c",
+            "name": "Dodecanoyl-ACP-n-C120ACP",
+            "formula": "C23H43N2O8PRS",
+            "charge": 1.0,
+            "compartment": "c"
+        }
+    },
+    {
+        "model": "cobra_wrapper.cobrametabolite",
+        "pk": 7,
+        "fields": {
+            "owner": 1,
+            "cobra_id": "useless",
+            "name": "test",
+            "formula": "U",
+            "charge": 1.0,
+            "compartment": "c"
+        }
+    },
+    {
+        "model": "cobra_wrapper.cobrareaction",
+        "pk": 1,
+        "fields": {
+            "owner": 1,
+            "cobra_id": "3OAS140",
+            "name": "3 oxoacyl acyl carrier protein synthase n C140",
+            "subsystem": "Cell Envelope Biosynthesis",
+            "lower_bound": 0.0,
+            "upper_bound": 1000.0,
+            "coefficients": "-1.0 -1.0 -1.0 1.0 1.0 1.0",
+            "gene_reaction_rule": "( STM2378 or STM1197 )",
+            "metabolites": [
+                2,
+                1,
+                3,
+                6,
+                5,
+                4
+            ]
+        }
+    },
+    {
+        "model": "cobra_wrapper.cobramodel",
+        "pk": 1,
+        "fields": {
+            "owner": 1,
+            "cobra_id": "example_model",
+            "name": "test",
+            "objective": "3OAS140",
+            "reactions": [
+                1
+            ]
+        }
+    }
+]

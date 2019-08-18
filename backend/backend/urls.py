@@ -23,4 +23,5 @@ urlpatterns = [
     path('cobra/', include('cobra_wrapper.urls')),
     path('database/', include('bigg_database.urls')),
     path('data/', include('data_wrapper.urls')),
+    path('share/', include('share.urls')),
 ]

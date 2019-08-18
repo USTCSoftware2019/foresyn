@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ object.reaction.name }} - {{ object.reaction.owner }}
+{% endblock %}
+
+{% block content %}
+<h3>Name</h3>
+<p>{{ object.reaction.name }}</p>
+
+<h3>Subsystem</h3>
+<p>{{ object.reaction.subsystem }}</p>
+
+<h3>Bound</h3>
+<p>{{ object.reaction.lower_bound }} ~ {{ object.reaction.upper_bound }}</p>
+
+<h3>Coefficients</h3>
+<p>{{ object.reaction.coefficients }}</p>
+
+<h3>Gene reaction rule</h3>
+<p>{{ object.reaction.gene_reaction_rule }}</p>
+
+<h3>Metabolites</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Owner</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for metabolite in object.metabolites %}
+        <tr>
+            <td><a href="{% url 'shared_cobra_metabolite' metabolite.id %}">{{ metabolite.name }}</a></td>
+            <td>{{ metabolite.owner }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
