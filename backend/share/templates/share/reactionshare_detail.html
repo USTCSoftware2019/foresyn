@@ -29,9 +29,9 @@
         </tr>
     </thead>
     <tbody>
-        {% for metabolite in object.metabolites %}
+        {% for metabolite in object.metabolites.all %}
         <tr>
-            <td><a href="{% url 'shared_cobra_metabolite' metabolite.id %}">{{ metabolite.name }}</a></td>
+            <td><a href="{% url 'share:shared_cobra_metabolite' %}?={{ metabolite.id }}">{{ metabolite.name }}</a></td>
             <td>{{ metabolite.owner }}</td>
         </tr>
         {% endfor %}

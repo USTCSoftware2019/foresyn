@@ -58,18 +58,18 @@ class CreateShareLinkView(View):
             shared_model_object.save()
             return shared_model_object
 
-    def post(self, requsts, *args, **kwargs):
-        share_type = requsts.POST['type']
-        self.public = requsts.POST.get('public')
-        self.owner = requsts.user
-        self.can_edit = requsts.POST.get('can_edit')
+    def post(self, request, *args, **kwargs):
+        share_type = request.POST['type']
+        self.public = request.POST.get('public')
+        self.owner = request.user
+        self.can_edit = request.POST.get('can_edit')
 
         if share_type == 'model':
-            shared_object = self.recursive_create_link_for_model(requsts.POST['id'])
+            shared_object = self.recursive_create_link_for_model(request.POST['id'])
         elif share_type == 'reaction':
-            shared_object = self.recursive_create_link_for_reaction(requsts.POST['id'])
+            shared_object = self.recursive_create_link_for_reaction(request.POST['id'])
         elif share_type == 'metabolite':
-            shared_object = self.create_link_for_metabolite(requsts.POST['id'])
+            shared_object = self.create_link_for_metabolite(request.POST['id'])
         else:
             # TODO
             # return an error page
@@ -78,14 +78,19 @@ class CreateShareLinkView(View):
         return redirect(reverse('share:shared_cobra_{}'.format(share_type)) + '?id={}'.format(shared_object.id))
 
 
-class ModelShareView(DetailView):
+class CustomDetailView(DetailView):
+    def get_object(self, queryset=None):
+        requested_id = self.request.GET['id']
+        return self.model.objects.get(id=requested_id)
+
+
+class ModelShareView(CustomDetailView):
     model = ModelShare
-    pk_url_kwarg = 'id'
 
 
-class MetaboliteShareView(DetailView):
-    pass
+class MetaboliteShareView(CustomDetailView):
+    model = MetaboliteShare
 
 
-class ReactionShareView(DetailView):
-    pass
+class ReactionShareView(CustomDetailView):
+    model = ReactionShare

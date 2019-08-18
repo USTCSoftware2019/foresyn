@@ -20,10 +20,10 @@
         </tr>
     </thead>
     <tbody>
-        {% for reaction in object.reactions %}
+        {% for reaction in object.reactions.all %}
         <tr>
             <td>
-                <a href="{% url 'share:shared_reaction_detail' reaction.id %}">{{ reaction.name }}</a>
+                <a href="{% url 'share:shared_cobra_reaction' %}?id={{ reaction.id }}">{{ reaction.name }}</a>
             </td>
             <td>{{ reaction.owner }}</td>
         </tr>
