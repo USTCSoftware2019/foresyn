@@ -18,7 +18,9 @@ install:
 
 before_script:
   - cd backend
-  - sleep 10  # leave time for elasticsearch to start
+  - celery worker -l info -A backend -Q cobra_results &
+  - (cd cobra_wrapper/remote && celery worker -l info -A cobra_computation -Q cobra_feeds &)
+  - sleep 10  # leave time for elasticsearch and celery workers to start
 
 script:
   - flake8
