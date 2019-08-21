@@ -10,6 +10,7 @@ env:
 
 service:
   - elasticsearch
+  - rabbitmq
 
 before_install:
   - curl -O ${ES_DOWNLOAD_URL} && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart

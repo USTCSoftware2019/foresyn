@@ -1,6 +1,6 @@
 from kombu import Queue
 
-broker_url = 'amqp://test:test123456@localhost:5672/test'
+broker_url = 'amqp://guest:guest@localhost//'
 result_backend = 'rpc://'
 imports = ('cobra_computation.tasks',)
 timezone = 'Asia/Shanghai'

@@ -159,7 +159,7 @@ else:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # for email debug
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
-CELERY_BROKER_URL = 'amqp://test:test123456@localhost/test'
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
 CELERY_RESULT_BACKEND = 'rpc://'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_ROUTES = {

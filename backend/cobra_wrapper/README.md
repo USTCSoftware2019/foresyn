@@ -12,7 +12,9 @@ GNU/Linux x86_64
 
 ## Setup
 
-Create a user and vhost of RabbitMQ to provide the app with a broker
+Broker settings in `settings.py` is RabbitMQ default user, password and vhost. To make a test, no more setup is required except installation of RabbitMQ
+
+If required, create a user and vhost of RabbitMQ to provide the app with a broker
 
 ```bash
 sudo rabbitmqctl add_user myuser mypassword
