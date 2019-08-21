@@ -17,12 +17,15 @@ Create a user and vhost of RabbitMQ to provide the app with a broker
 ```bash
 sudo rabbitmqctl add_user myuser mypassword
 sudo rabbitmqctl add_vhost myvhost
-sudo rabbitmqctl set_user_tags myuser mytag
 sudo rabbitmqctl set_permissions -p myvhost myuser ".*" ".*" ".*"
 sudo systemctl restart rabbitmq
 ``` 
 
+In the situation, the broker url should be `amqp://myuser:mypassword@localhost/myvhost`
+
 Don't forget to change `myuser`, `mypassword`, `myvhost` to respective names
+
+Move the broker to another host is OK, just change `localhost` in the broker url to respective host IP
 
 ## Usage
 
