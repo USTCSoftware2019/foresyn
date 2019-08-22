@@ -40,8 +40,6 @@ def main(meta_path):
                         charges=charges, database_links=database_links)
                 except Exception as e:
                     print(e)
-                    print(content)
-                    exit(-1)
 
 
 class Command(BaseCommand):
