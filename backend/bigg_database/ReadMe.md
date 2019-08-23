@@ -1,3 +1,29 @@
+### MySQL Database
+
+Create database
+
+```
+CREATE DATABASE igem_backend CHARACTER SET utf8 COLLATE utf8_bin;
+```
+
+### Temporary solution for pymysql
+
+In ```site-packages\django\db\backends\mysql\operations.py#34```
+
+Comment #34, #35, #36
+
+```
+version = Database.version_info
+if version < (1, 3, 13):
+    raise ImproperlyConfigured('mysqlclient 1.3.13 or newer is required; you have %s.' % Database.__version__)
+```
+
+In ```site-packages\django\db\backends\mysql\operations.py#146```
+
+Change ```query = query.decode(errors='replace')``` to ```query = query.encode(errors='replace')```
+
+
+
 ### haystack and elasticsearch
 
 Due to the limit from the haystack, the version of elasticsearch must lower than 3.0.0

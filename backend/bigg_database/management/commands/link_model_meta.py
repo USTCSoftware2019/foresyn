@@ -4,13 +4,19 @@ import os
 from django.core.management.base import BaseCommand
 
 from bigg_database.models import Metabolite, Model, ModelMetabolite
+from .progressbar import print_progressbar
 
 
 def main(meta_path):
-    for file in os.listdir(meta_path):
-        if os.path.isdir(file):
-            continue
-        with open(os.path.join(meta_path, file), 'r', encoding='utf-8') as f:
+    files_list = [os.path.join(meta_path, file)
+                  for file in os.listdir(meta_path)
+                  if not os.path.isdir(os.path.join(meta_path, file))]
+
+    file_cnt = len(files_list)
+    print_progressbar(0, file_cnt)
+    for count, file in enumerate(files_list):
+        print_progressbar(count + 1, file_cnt)
+        with open(file, 'r', encoding='utf-8') as f:
             try:
                 content = json.loads(f.read())
             except json.decoder.JSONDecodeError as e:

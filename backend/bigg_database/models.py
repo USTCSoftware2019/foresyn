@@ -33,7 +33,7 @@ class Model(_models.Model):
 
 class Reaction(_models.Model):
     bigg_id = _models.CharField(max_length=127, unique=True, db_index=True)
-    name = _models.CharField(max_length=127, blank=True)
+    name = _models.CharField(max_length=255, blank=True)
     models = _models.ManyToManyField(
         Model, through='ModelReaction', through_fields=('reaction', 'model'))
 
