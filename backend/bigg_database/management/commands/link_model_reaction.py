@@ -46,7 +46,7 @@ def link(model, reaction, reaction_info):
                                      subsystem=subsystem,
                                      gene_reaction_rule=gene_reaction_rule)
     except Exception as e:
-        print(e, model.id, reaction_info)
+        print(e, model.id, reaction.id)
 
 
 def organism_lookup(reaction, model, reactions):

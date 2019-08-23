@@ -2,10 +2,12 @@
 import asyncio
 import json
 import os
-import aiofiles
+
 from django.core.management.base import BaseCommand
-from .progressbar import print_progressbar
+
 from bigg_database.models import Gene
+
+from .progressbar import print_progressbar
 
 
 def get_from_content(content, *argv):
