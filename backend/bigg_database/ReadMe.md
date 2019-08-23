@@ -2,6 +2,8 @@
 
 Create database
 
+**Don't import the sql file directly into an existing database which character set is default, latin1.**
+
 ```
 CREATE DATABASE igem_backend CHARACTER SET utf8 COLLATE utf8_bin;
 ```
