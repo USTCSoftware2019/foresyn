@@ -1,6 +1,7 @@
+{% load static %}
 {#<link rel="stylesheet" href="/static/css/common.css" />#}
 {#<link rel="stylesheet" href="/static/css/default.css" />#}
-<link rel="stylesheet" href="/static/css/header.css" />
+<link rel="stylesheet" href="{% static "css/header.css" %}" />
 <header class="mb-4">
     <div class="container-fluid">
         <nav class="navbar navbar-expand-md">
@@ -13,7 +14,7 @@
             </button>
             <div class="collapse navbar-collapse" id="collapsibleNavbar">
                 <div class="navbar-nav ml-4 m-auto">
-                    <form action="/database/search" class="row form-inline">
+                    <form action="{% url "bigg_database:search" %}" class="row form-inline">
                         <select name="search_model" class="custom-select">
                             <option value="gene">Gene</option>
                             <option value="reaction">Reactions</option>
@@ -32,9 +33,9 @@
                 <div class="header-right ">
                     {% if user.is_authenticated %}
                         <span class="greet mr-4 text-light">Hello, {{ user.username }}!</span>
-                        <span><a href="/accounts/logout" class="mr-4 btn btn-warning">Log Out</a></span>
+                        <span><a href="{% url "logout" %}" class="mr-4 btn btn-warning">Log Out</a></span>
                     {% else %}
-                    <a href="/accounts/login" class="signin mr-4 btn btn-info"> Sign in</a>
+                    <a href="{% url "login" %}" class="signin mr-4 btn btn-info"> Sign in</a>
                     {% endif %}
                 </div>
             </div>

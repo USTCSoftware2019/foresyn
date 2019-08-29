@@ -148,6 +148,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+    '/var/www/static/',
+]
+
 if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
     DATA_UPLOAD_MAX_NUMBER_FIELDS = None
