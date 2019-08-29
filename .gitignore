@@ -21,7 +21,7 @@ venv/
 bigg_database/db.sqlite3.bak
 
 # Docker
-Dockerfile
-docker-compose.yml
+# Dockerfile
+# docker-compose.yml
 
 .pylintrc
