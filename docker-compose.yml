@@ -1,0 +1,18 @@
+version: '3'
+services:
+    main:
+        build: .
+        ports:
+            - "8000:8000"
+        command: python backend/manage.py runserver
+        links:
+            - mysql
+            - elasticsearch
+    mysql:
+        image: mysql:8.0.17
+        ports:
+            - "3306:3306"
+    elasticsearch:
+        image: elasticsearch:2.4.6
+        ports:
+            - "9200:9200"
