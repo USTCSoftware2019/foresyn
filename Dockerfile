@@ -4,4 +4,4 @@ RUN mkdir /app
 WORKDIR /app
 COPY requirements.txt /app/
 RUN pip install -r requirements.txt
-COPY backend /app/
+RUN sed -i '34 s/^/#/; 35 s/^/#/; 36 s/^/#/' /usr/local/lib/python3.6/site-packages/django/db/backends/mysql/base.py && sed -i 's/.decode(errors/.encode(errors/g' /usr/local/lib/python3.6/site-packages/django/db/backends/mysql/operations.py
