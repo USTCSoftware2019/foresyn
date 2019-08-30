@@ -4,12 +4,20 @@ services:
         build: .
         ports:
             - "8000:8000"
-        command: python backend/manage.py runserver
+        environment:
+            USE_MYSQL: "TRUE"
+            PYTHONUNBUFFERED: 1
+        command: python manage.py runserver
         links:
             - mysql
             - elasticsearch
+        volumes:
+            - "./backend/:/app/"
     mysql:
         image: mysql:8.0.17
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
+        environment:
+            MYSQL_ROOT_PASSWORD: mysql_pwd
         ports:
             - "3306:3306"
     elasticsearch:
