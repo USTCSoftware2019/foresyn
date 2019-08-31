@@ -48,10 +48,14 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
+
+haystack_host = "127.0.0.1"
+if os.environ.get("HAYSTACK_HOST"):
+    haystack_host = os.environ.get("HAYSTACK_HOST")
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'bigg_database.haystack_engine.FuzzyEngine',
-        'URL': 'http://127.0.0.1:9200/',
+        'URL': 'http://{}:9200/'.format(haystack_host),
         'INDEX_NAME': 'haystack',
     },
 }
