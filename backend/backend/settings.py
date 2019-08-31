@@ -93,6 +93,9 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 if os.environ.get('USE_MYSQL'):
+    mysql_host = "127.0.0.1"
+    if os.environ.get("MYSQL_HOST"):
+        mysql_host = os.environ.get("MYSQL_HOST")
     # Testing mysql
     DATABASES = {
         'default': {
@@ -100,7 +103,7 @@ if os.environ.get('USE_MYSQL'):
             'NAME': 'igem_backend',
             'USER': 'root',
             'PASSWORD': 'mysql_pwd',
-            'HOST': '127.0.0.1',
+            'HOST': mysql_host,
             'PORT': '3306',
         }
     }

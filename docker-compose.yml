@@ -6,8 +6,9 @@ services:
             - "8000:8000"
         environment:
             USE_MYSQL: "TRUE"
+            MYSQL_HOST: mysql
             PYTHONUNBUFFERED: 1
-        command: python manage.py runserver
+        command: ["/wait.sh", "mysql:3306", "--", "python", "manage.py", "runserver"]
         links:
             - mysql
             - elasticsearch
@@ -18,6 +19,9 @@ services:
         command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin
         environment:
             MYSQL_ROOT_PASSWORD: mysql_pwd
+            MYSQL_DATABASE: igem_backend
+        volumes:
+            - "./data:/docker-entrypoint-initdb.d"
         ports:
             - "3306:3306"
     elasticsearch:
