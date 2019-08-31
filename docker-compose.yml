@@ -7,8 +7,9 @@ services:
         environment:
             USE_MYSQL: "TRUE"
             MYSQL_HOST: mysql
+            HAYSTACK_HOST: elasticsearch
             PYTHONUNBUFFERED: 1
-        command: ["/wait.sh", "mysql:3306", "--", "python", "manage.py", "runserver"]
+        command: /run.sh 
         links:
             - mysql
             - elasticsearch
