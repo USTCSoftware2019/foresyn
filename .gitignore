@@ -25,3 +25,5 @@ bigg_database/db.sqlite3.bak
 # docker-compose.yml
 
 .pylintrc
+
+Data/
