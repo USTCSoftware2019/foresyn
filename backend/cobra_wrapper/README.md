@@ -35,7 +35,7 @@ Start two workers first
 
 ```bash
 cd ./remote
-celery worker -l info -A cobra_computation -Q cobra_feeds
+PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds
 ```
 
 ```bash
