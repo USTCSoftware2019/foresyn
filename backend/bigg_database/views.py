@@ -67,7 +67,7 @@ class SearchView(View):
 
         if form.is_valid():
             keyword = form.cleaned_data['q']
-            queryset = SearchQuerySet().filter(SQ(content__fuzzy=keyword))
+            queryset = SearchQuerySet().filter(SQ(content__fuzzy=keyword)).order_by('-_score')
 
             context = {}
 
