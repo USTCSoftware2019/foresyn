@@ -1,7 +1,19 @@
 from django.shortcuts import render, redirect, reverse
-from django.views.generic import View, DetailView
-from share.models import ModelShare, ReactionShare, MetaboliteShare, CobraModel, CobraReaction, CobraMetabolite
-from django.core.exceptions import ObjectDoesNotExist
+from django.views.generic import View, DetailView, FormView
+from share.models import (ModelShare, ReactionShare, MetaboliteShare, CobraModel, CobraReaction, CobraMetabolite,
+                          ShareAuthorization)
+from django.contrib.auth.hashers import check_password
+
+from .forms import PasswordConfirmForm
+
+
+def create_share_auth(public, password=None):
+    auth = ShareAuthorization.objects.create(public=public)
+    if not public:
+        # if password is None, it will be an unusable password
+        auth.set_password(password)
+        auth.save()
+    return auth
 
 
 class CreateShareLinkView(View):
@@ -18,51 +30,53 @@ class CreateShareLinkView(View):
         'metabolite': CobraMetabolite
     }
 
-    def create_link_for_metabolite(self, metabolite_id):
+    def create_link_for_metabolite(self, metabolite_id, auth=None):
         cobra_metabolite = CobraMetabolite.objects.get(id=metabolite_id)
-        try:
-            return cobra_metabolite.metaboliteshare
-        except CobraMetabolite.metaboliteshare.RelatedObjectDoesNotExist:
-            return MetaboliteShare.objects.create(metabolite=cobra_metabolite,
-                                                  public=self.public,
-                                                  can_edit=self.can_edit,
-                                                  owner=self.owner)
 
-    def recursive_create_link_for_reaction(self, reaction_id):
+        if auth is None:
+            auth = create_share_auth(self.public, self.password)
+
+        return MetaboliteShare.objects.create(metabolite=cobra_metabolite,
+                                              can_edit=self.can_edit,
+                                              owner=self.owner,
+                                              auth=auth)
+
+    def recursive_create_link_for_reaction(self, reaction_id, auth=None):
         cobra_reaction = CobraReaction.objects.get(id=reaction_id)
-        try:
-            return cobra_reaction.reactionshare
-        except CobraReaction.reactionshare.RelatedObjectDoesNotExist:
-            shared_reaction_object = ReactionShare(reaction=cobra_reaction,
-                                                   public=self.public,
-                                                   can_edit=self.can_edit,
-                                                   owner=self.owner)
-            shared_reaction_object.save()
-            for metabolite in cobra_reaction.metabolites.all():
-                shared_reaction_object.metabolites.add(self.create_link_for_metabolite(metabolite.id))
-            shared_reaction_object.save()
-            return shared_reaction_object
 
-    def recursive_create_link_for_model(self, model_id):
+        if auth is None:
+            auth = create_share_auth(self.public, self.password)
+
+        shared_reaction_object = ReactionShare.objects.create(reaction=cobra_reaction,
+                                                              can_edit=self.can_edit,
+                                                              owner=self.owner,
+                                                              auth=auth)
+        for metabolite in cobra_reaction.metabolites.all():
+            shared_reaction_object.metabolites.add(self.create_link_for_metabolite(metabolite.id, auth))
+        shared_reaction_object.save()
+        return shared_reaction_object
+
+    def recursive_create_link_for_model(self, model_id, auth=None):
         cobra_model = CobraModel.objects.get(id=model_id)
-        try:
-            return cobra_model.modelshare
-        except CobraModel.modelshare.RelatedObjectDoesNotExist:
-            shared_model_object = ModelShare(model=cobra_model,
-                                             public=self.public,
-                                             can_edit=self.can_edit,
-                                             owner=self.owner)
-            shared_model_object.save()
-            for reaction in cobra_model.reactions.all():
-                shared_model_object.reactions.add(self.recursive_create_link_for_reaction(reaction.id))
-            shared_model_object.save()
-            return shared_model_object
+
+        if auth is None:
+            auth = create_share_auth(self.public, self.password)
+
+        shared_model_object = ModelShare.objects.create(model=cobra_model,
+                                                        can_edit=self.can_edit,
+                                                        owner=self.owner,
+                                                        auth=auth)
+        for reaction in cobra_model.reactions.all():
+            shared_model_object.reactions.add(self.recursive_create_link_for_reaction(reaction.id, auth))
+        shared_model_object.save()
+        return shared_model_object
 
     def post(self, request, *args, **kwargs):
         share_type = request.POST['type']
         self.public = request.POST.get('public')
         self.owner = request.user
         self.can_edit = request.POST.get('can_edit')
+        self.password = request.POST.get('password')
 
         if share_type == 'model':
             shared_object = self.recursive_create_link_for_model(request.POST['id'])
@@ -78,19 +92,42 @@ class CreateShareLinkView(View):
         return redirect(reverse('share:shared_cobra_{}'.format(share_type)) + '?id={}'.format(shared_object.id))
 
 
-class CustomDetailView(DetailView):
-    def get_object(self, queryset=None):
-        requested_id = self.request.GET['id']
-        return self.model.objects.get(id=requested_id)
+class PasswordRequiredDetailView(DetailView):
+    def get(self, request, *args, **kwargs):
+        authorized = request.session.setdefault([])
+
+        self.object = self.get_object()
+        auth = self.object.auth
+        if auth.public or auth.id in authorized:
+            context = self.get_context_data(object=self.object)
+            return self.render_to_response(context)
+
+        kwargs['expect_password'] = auth.password
+        kwargs['auth_id'] = auth.id
+
+        return PasswordConfirmView.as_view()(request, *args, **kwargs)
 
 
-class ModelShareView(CustomDetailView):
+class ModelShareView(PasswordRequiredDetailView):
     model = ModelShare
 
 
-class MetaboliteShareView(CustomDetailView):
+class MetaboliteShareView(PasswordRequiredDetailView):
     model = MetaboliteShare
 
 
-class ReactionShareView(CustomDetailView):
+class ReactionShareView(PasswordRequiredDetailView):
     model = ReactionShare
+
+
+class PasswordConfirmView(FormView):
+    form_class = PasswordConfirmForm
+    template_name = 'share/password_confirm.html'
+
+    def get_success_url(self):
+        return self.request.get_full_path()
+
+    def form_valid(self, form):
+        raw_password = form.cleaned_data['password']
+        if check_password(raw_password, self.kwargs['expect_password']):
+            self.request.session['authorized'].append(self.kwargs['auth_id'])
