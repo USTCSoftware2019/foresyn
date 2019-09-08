@@ -22,7 +22,8 @@ class ShareAuthorization(models.Model):
 class AbstractBaseShare(models.Model):
     can_edit = models.BooleanField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    auth = models.ForeignKey(ShareAuthorization, on_delete=models.CASCADE)
+    # default=None, blank=False. Just to populate existing database
+    auth = models.ForeignKey(ShareAuthorization, on_delete=models.CASCADE, default=None)
 
     class Meta:
         abstract = True

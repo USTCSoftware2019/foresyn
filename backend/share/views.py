@@ -98,7 +98,7 @@ class PasswordRequiredDetailView(DetailView):
 
         self.object = self.get_object()
         auth = self.object.auth
-        if auth.public or auth.id in authorized:
+        if auth is None or auth.public or auth.id in authorized:
             context = self.get_context_data(object=self.object)
             return self.render_to_response(context)
 
