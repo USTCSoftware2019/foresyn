@@ -6,6 +6,10 @@ from django.contrib.auth.hashers import check_password
 
 from .forms import PasswordConfirmForm
 
+import json
+
+from django.http import JsonResponse
+
 
 def create_share_auth(public, password=None):
     auth = ShareAuthorization.objects.create(public=public)
@@ -72,18 +76,27 @@ class CreateShareLinkView(View):
         return shared_model_object
 
     def post(self, request, *args, **kwargs):
-        share_type = request.POST['type']
-        self.public = request.POST.get('public')
+        request_dict = json.loads(request.body)
+
+        try:
+            share_type = request_dict['type']
+            self.public = request_dict['public']
+            self.can_edit = request_dict['can_edit']
+            object_id = request_dict['id']
+        except KeyError:
+            # TODO
+            # return an error page
+            raise TypeError('Field public, can_edit and id is required')
+
         self.owner = request.user
-        self.can_edit = request.POST.get('can_edit')
-        self.password = request.POST.get('password')
+        self.password = request_dict.get('password')
 
         if share_type == 'model':
-            shared_object = self.recursive_create_link_for_model(request.POST['id'])
+            shared_object = self.recursive_create_link_for_model(object_id)
         elif share_type == 'reaction':
-            shared_object = self.recursive_create_link_for_reaction(request.POST['id'])
+            shared_object = self.recursive_create_link_for_reaction(object_id)
         elif share_type == 'metabolite':
-            shared_object = self.create_link_for_metabolite(request.POST['id'])
+            shared_object = self.create_link_for_metabolite(object_id)
         else:
             # TODO
             # return an error page
@@ -98,6 +111,19 @@ class PasswordRequiredDetailView(DetailView):
 
         self.object = self.get_object()
         auth = self.object.auth
+
+        if auth is None or auth.public or auth.id in authorized:
+            context = self.get_context_data(object=self.object)
+            return self.render_to_response(context)
+
+        return PasswordConfirmView.as_view()(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        authorized = request.session.setdefault('authorized', [])
+
+        self.object = self.get_object()
+        auth = self.object.auth
+
         if auth is None or auth.public or auth.id in authorized:
             context = self.get_context_data(object=self.object)
             return self.render_to_response(context)
@@ -131,3 +157,6 @@ class PasswordConfirmView(FormView):
         raw_password = form.cleaned_data['password']
         if check_password(raw_password, self.kwargs['expect_password']):
             self.request.session['authorized'].append(self.kwargs['auth_id'])
+            self.request.session.save()
+
+        return super().form_valid(form)

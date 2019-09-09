@@ -15,9 +15,9 @@ class CreateShareLinkTest(TestCase):
             'id': 1,
             'public': True,
             'can_edit': False
-        })
+        }, content_type='application/json')
 
-        self.assertEqual(resp.url, '/share/metabolite?id=1')
+        self.assertEqual(resp.url, '/share/metabolite/1')
 
         shared_object = MetaboliteShare.objects.get(id=1)
         cobra_object = CobraMetabolite.objects.get(id=1)
@@ -32,14 +32,16 @@ class CreateShareLinkTest(TestCase):
             'id': 1,
             'public': True,
             'can_edit': False
-        })
+        }, content_type='application/json')
 
-        self.assertEqual(resp.url, '/share/reaction?id=1')
+        self.assertEqual(resp.url, '/share/reaction/1')
 
         cobra_object = CobraReaction.objects.get(id=1)
-        self.assertEqual(cobra_object.reactionshare.reaction.name, cobra_object.name)
 
-        for shared_metabolite_object in cobra_object.reactionshare.metabolites.all():
+        shared_object = ReactionShare.objects.get(id=1)
+        self.assertEqual(shared_object.reaction.name, cobra_object.name)
+
+        for shared_metabolite_object in shared_object.metabolites.all():
             self.assertTrue(shared_metabolite_object.metabolite.name in [
                             o.name for o in cobra_object.metabolites.all()])
 
@@ -52,8 +54,8 @@ class CreateShareLinkTest(TestCase):
             'id': 1,
             'public': True,
             'can_edit': False
-        })
-        self.assertEqual(resp.url, '/share/model?id=1')
+        }, content_type='application/json')
+        self.assertEqual(resp.url, '/share/model/1')
 
         cobra_object = CobraModel.objects.get(id=1)
         modelshare = cobra_object.modelshare_set.first()
@@ -74,7 +76,7 @@ class DetailViewTest(TestCase):
             'id': 1,
             'public': True,
             'can_edit': False
-        })
+        }, content_type='application/json')
 
         resp = c.get(resp.url)
         self.assertContains(resp, 'acyl-carrier-protein')
@@ -88,7 +90,7 @@ class DetailViewTest(TestCase):
             'id': 1,
             'public': True,
             'can_edit': False
-        })
+        }, content_type='application/json')
 
         resp = c.get(resp.url)
 
@@ -112,10 +114,80 @@ class DetailViewTest(TestCase):
             'id': 1,
             'public': True,
             'can_edit': False
-        })
+        }, content_type='application/json')
 
         resp = c.get(resp.url)
 
         self.assertContains(resp, 'test')
         self.assertContains(resp, '3OAS140')
         self.assertContains(resp, '/share/reaction/1')
+
+    def test_password_required(self):
+        c = self.client
+        c.login(username='test', password='test123456')
+
+        resp = c.post('/share/create', data={
+            'type': 'model',
+            'id': 1,
+            'public': False,
+            'password': '123456',
+            'can_edit': False,
+        }, content_type='application/json')
+
+        c.logout()
+
+        url = resp.url
+        resp = c.get(url)
+        self.assertTemplateUsed(resp, 'share/password_confirm.html')
+
+        resp = c.post(url, data={
+            'password': '123456',
+        })
+        self.assertEqual(resp.url, url)
+
+        resp = c.get(url)
+        self.assertTemplateUsed(resp, 'share/modelshare_detail.html')
+
+    def test_unusable_password(self):
+        c = self.client
+        c.login(username='test', password='test123456')
+
+        resp = c.post('/share/create', data={
+            'type': 'model',
+            'id': 1,
+            'public': False,
+            'can_edit': False,
+        }, content_type='application/json')
+
+        c.logout()
+
+        url = resp.url
+        resp = c.get(url)
+
+        resp = c.post(url, data={})
+
+        resp = c.get(url)
+        self.assertTemplateNotUsed(resp, 'share/modelshare_detail.html')
+
+    def test_access_child_reaction_without_password(self):
+        c = self.client
+        c.login(username='test', password='test123456')
+
+        resp = c.post('/share/create', data={
+            'type': 'model',
+            'id': 1,
+            'public': False,
+            'password': '123456',
+            'can_edit': False,
+        }, content_type='application/json')
+
+        c.logout()
+
+        url = resp.url
+        resp = c.get(url)
+        resp = c.post(url, data={
+            'password': '123456',
+        })
+
+        resp = c.get('/share/reaction/1')
+        self.assertTemplateUsed(resp, 'share/reactionshare_detail.html')
