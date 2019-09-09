@@ -89,7 +89,7 @@ class CreateShareLinkView(View):
             # return an error page
             raise TypeError('The share_type must be one of model, reaction or metabolite')
 
-        return redirect(reverse('share:shared_cobra_{}'.format(share_type)) + '?id={}'.format(shared_object.id))
+        return redirect(reverse('share:shared_cobra_{}'.format(share_type), args=(shared_object.id,)))
 
 
 class PasswordRequiredDetailView(DetailView):

@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.urls import reverse
 
 from .models import MetaboliteShare, ModelShare, ReactionShare, CobraMetabolite, CobraModel, CobraReaction
 
@@ -20,7 +21,7 @@ class CreateShareLinkTest(TestCase):
 
         shared_object = MetaboliteShare.objects.get(id=1)
         cobra_object = CobraMetabolite.objects.get(id=1)
-        self.assertEqual(shared_object, cobra_object.metaboliteshare)
+        self.assertEqual(shared_object, cobra_object.metaboliteshare_set.first())
 
     def test_create_share_reaction_link(self):
         c = self.client
@@ -55,9 +56,10 @@ class CreateShareLinkTest(TestCase):
         self.assertEqual(resp.url, '/share/model?id=1')
 
         cobra_object = CobraModel.objects.get(id=1)
-        self.assertEqual(cobra_object.modelshare.model.name, cobra_object.name)
+        modelshare = cobra_object.modelshare_set.first()
+        self.assertEqual(modelshare.model.name, cobra_object.name)
 
-        for shared_model_object in cobra_object.modelshare.reactions.all():
+        for shared_model_object in modelshare.reactions.all():
             self.assertTrue(shared_model_object.reaction.name in [o.name for o in cobra_object.reactions.all()])
 
 
@@ -95,12 +97,12 @@ class DetailViewTest(TestCase):
         self.assertContains(resp, '-1.0 -1.0 -1.0 1.0 1.0 1.0')
         self.assertContains(resp, '( STM2378 or STM1197 )')
 
-        self.assertContains(resp, '/share/metabolite?=1')
-        self.assertContains(resp, '/share/metabolite?=2')
-        self.assertContains(resp, '/share/metabolite?=3')
-        self.assertContains(resp, '/share/metabolite?=4')
-        self.assertContains(resp, '/share/metabolite?=5')
-        self.assertContains(resp, '/share/metabolite?=6')
+        self.assertContains(resp, '/share/metabolite/1')
+        self.assertContains(resp, '/share/metabolite/2')
+        self.assertContains(resp, '/share/metabolite/3')
+        self.assertContains(resp, '/share/metabolite/4')
+        self.assertContains(resp, '/share/metabolite/5')
+        self.assertContains(resp, '/share/metabolite/6')
 
     def test_model_detail(self):
         c = self.client
@@ -116,4 +118,4 @@ class DetailViewTest(TestCase):
 
         self.assertContains(resp, 'test')
         self.assertContains(resp, '3OAS140')
-        self.assertContains(resp, '/share/reaction?id=1')
+        self.assertContains(resp, '/share/reaction/1')
