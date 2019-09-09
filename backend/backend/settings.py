@@ -48,13 +48,23 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'bigg_database.haystack_engine.FuzzyEngine',
-        'URL': 'http://127.0.0.1:9200/',
-        'INDEX_NAME': 'haystack',
-    },
-}
+
+if os.environ.get("USE_ELASTICSEARCH"):
+    default_elasticsearch_host = '127.0.0.1'
+    elasticsearch_host = os.environ.get("ELASTICSEARCH_HOST") or default_elasticsearch_host
+    HAYSTACK_CONNECTIONS = {
+        'default': {
+            'ENGINE': 'bigg_database.haystack_engine.FuzzyEngine',
+            'URL': 'http://{}:9200/'.format(elasticsearch_host),
+            'INDEX_NAME': 'haystack',
+        },
+    }
+else:
+    HAYSTACK_CONNECTIONS = {
+        'default': {
+            'ENGINE': 'haystack.backends.simple_backend.SimpleEngine'
+        }
+    }
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -93,6 +103,9 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 if os.environ.get('USE_MYSQL'):
+    mysql_host = "127.0.0.1"
+    if os.environ.get("MYSQL_HOST"):
+        mysql_host = os.environ.get("MYSQL_HOST")
     # Testing mysql
     DATABASES = {
         'default': {
@@ -100,7 +113,7 @@ if os.environ.get('USE_MYSQL'):
             'NAME': 'igem_backend',
             'USER': 'root',
             'PASSWORD': 'mysql_pwd',
-            'HOST': '127.0.0.1',
+            'HOST': mysql_host,
             'PORT': '3306',
         }
     }
