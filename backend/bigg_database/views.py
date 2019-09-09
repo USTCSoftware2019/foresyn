@@ -10,22 +10,12 @@ from django.shortcuts import Http404, render, reverse
 from django.utils.translation import gettext as _
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.detail import SingleObjectMixin
-from fuzzywuzzy import fuzz
 from haystack.generic_views import SearchView as HaystackSearchView
 from haystack.query import SQ, SearchQuerySet
 from .common import TopKHeap
 from .forms import ModifiedModelSearchForm
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
                      Reaction, ReactionGene, ReactionMetabolite)
-
-
-def fuzzy_search(query_set, request_name, request_data):
-    request_name = request_name.lower()
-    request_data = request_data.lower()
-    t = TopKHeap(10)
-    for instance in query_set:
-        t.push((fuzz.partial_ratio(getattr(instance, request_name).lower(), request_data), instance))
-    return t.top_k()
 
 
 class ModelSearchInfo:
