@@ -94,7 +94,7 @@ class CreateShareLinkView(View):
 
 class PasswordRequiredDetailView(DetailView):
     def get(self, request, *args, **kwargs):
-        authorized = request.session.setdefault([])
+        authorized = request.session.setdefault('authorized', [])
 
         self.object = self.get_object()
         auth = self.object.auth
