@@ -7,13 +7,13 @@ services:
         environment:
             USE_MYSQL: "TRUE"
             MYSQL_HOST: mysql
-            USE_ELASTICSEARCH: "TRUE"
-            ELASTICSEARCH_HOST: elasticsearch
+            # USE_ELASTICSEARCH: "TRUE"
+            # ELASTICSEARCH_HOST: elasticsearch
             PYTHONUNBUFFERED: 1
         command: /run.sh 
         links:
             - mysql
-            - elasticsearch
+            # - elasticsearch
         volumes:
             - "./backend/:/app/"
     mysql:
@@ -26,7 +26,7 @@ services:
             - "./data:/docker-entrypoint-initdb.d"
         ports:
             - "3306:3306"
-    elasticsearch:
-        image: elasticsearch:2.4.6
-        ports:
-            - "9200:9200"
+    # elasticsearch:
+    #    image: elasticsearch:2.4.6
+    #    ports:
+    #        - "9200:9200"
