@@ -23,7 +23,7 @@ def cobra_fba_save(pk, result, task_id):
 def cobra_fva_save(pk, result, task_id):
     try:
         instance = CobraFva.objects.get(pk=pk)
-    except CobraFba.DoesNotExist:
+    except CobraFva.DoesNotExist:
         return
 
     if str(instance.task_id) != task_id:
