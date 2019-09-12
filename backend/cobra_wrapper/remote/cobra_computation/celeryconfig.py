@@ -1,6 +1,10 @@
 from kombu import Queue
+import os
 
-broker_url = 'amqp://guest:guest@localhost//'
+# FIXME: duplicate with backend/settings.py/CELERY_xxx
+
+celery_host = os.environ.get("CELERY_HOST") or "localhost"
+broker_url = 'amqp://guest:guest@{}//'.format(celery_host)
 result_backend = 'rpc://'
 imports = ('cobra_computation.tasks',)
 timezone = 'Asia/Shanghai'

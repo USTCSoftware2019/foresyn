@@ -9,11 +9,13 @@ services:
             MYSQL_HOST: mysql
             # USE_ELASTICSEARCH: "TRUE"
             # ELASTICSEARCH_HOST: elasticsearch
+            CELERY_HOST: rabbitmq
             PYTHONUNBUFFERED: 1
         command: /run.sh 
         links:
             - mysql
             # - elasticsearch
+            - rabbitmq
         volumes:
             - "./backend/:/app/"
     mysql:
@@ -22,6 +24,7 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: mysql_pwd
             MYSQL_DATABASE: igem_backend
+            MYSQL_ROOT_HOST: "%" 
         volumes:
             - "./data:/docker-entrypoint-initdb.d"
         ports:
@@ -30,3 +33,10 @@ services:
     #    image: elasticsearch:2.4.6
     #    ports:
     #        - "9200:9200"
+    rabbitmq:
+        image: rabbitmq:3.7.17
+        environment:
+            - RABBITMQ_DEFAULT_USER=guest
+            - RABBITMQ_DEFAULT_PASS=guest
+        ports:
+            - "5672:5672"
