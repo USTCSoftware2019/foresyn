@@ -163,3 +163,60 @@ class CobraFva(models.Model):
 
     def get_absolute_url(self):
         return reverse('cobra_wrapper:cobrafva_detail', kwargs={'model_pk': self.model.pk, 'pk': self.pk})
+
+
+class CobraMetaboliteChange(models.Model):
+    field = models.CharField(max_length=20)
+    previous_value = models.TextField()
+    value = models.TextField()
+    time = models.DateTimeField(auto_now_add=True)
+    model = models.ForeignKey(CobraMetabolite, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'metabolite_change'
+        ordering = ['-time']
+
+    def __str__(self):
+        return '{} is changed from {} to {} at {}'.format(
+            self.field,
+            self.previous_value if len(self.previous_value) < 20 else self.previous_value[:17] + '...',
+            self.value if len(self.value) < 20 else self.value[:17] + '...',
+            self.time.isoformat())
+
+
+class CobraReactionChange(models.Model):
+    field = models.CharField(max_length=20)
+    previous_value = models.TextField()
+    value = models.TextField()
+    time = models.DateTimeField(auto_now_add=True)
+    model = models.ForeignKey(CobraReaction, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'reaction_change'
+        ordering = ['-time']
+
+    def __str__(self):
+        return '{} is changed from {} to {} at {}'.format(
+            self.field,
+            self.previous_value if len(self.previous_value) < 20 else self.previous_value[:17] + '...',
+            self.value if len(self.value) < 20 else self.value[:17] + '...',
+            self.time.isoformat())
+
+
+class CobraModelChange(models.Model):
+    field = models.CharField(max_length=20)
+    previous_value = models.TextField()
+    value = models.TextField()
+    time = models.DateTimeField(auto_now_add=True)
+    model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'model_change'
+        ordering = ['-time']
+
+    def __str__(self):
+        return '{} is changed from {} to {} at {}'.format(
+            self.field,
+            self.previous_value if len(self.previous_value) < 20 else self.previous_value[:17] + '...',
+            self.value if len(self.value) < 20 else self.value[:17] + '...',
+            self.time.isoformat())
