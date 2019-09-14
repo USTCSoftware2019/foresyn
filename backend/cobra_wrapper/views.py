@@ -32,15 +32,30 @@ class CobraMetaboliteDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['changes'] = CobraMetaboliteChange.objects.filter(instance=self.object)
+        return context
+
 
 class CobraReactionDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['changes'] = CobraReactionChange.objects.filter(instance=self.object)
+        return context
+
 
 class CobraModelDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['changes'] = CobraModelChange.objects.filter(instance=self.object)
+        return context
 
 
 class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
