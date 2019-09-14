@@ -1,14 +1,15 @@
-from django.shortcuts import render, redirect, reverse
-from django.views.generic import View, DetailView, FormView
-from share.models import (ModelShare, ReactionShare, MetaboliteShare, CobraModel, CobraReaction, CobraMetabolite,
-                          ShareAuthorization)
-from django.contrib.auth.hashers import check_password
-
-from .forms import PasswordConfirmForm
-
 import json
 
+from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse
+from django.shortcuts import redirect, render, reverse
+from django.views.generic import DetailView, FormView, View
+
+from share.models import (CobraMetabolite, CobraModel, CobraReaction,
+                          MetaboliteShare, ModelShare, ReactionShare,
+                          ShareAuthorization)
+
+from .forms import PasswordConfirmForm
 
 
 def create_share_auth(public, password=None):
@@ -84,9 +85,10 @@ class CreateShareLinkView(View):
             self.can_edit = request_dict['can_edit']
             object_id = request_dict['id']
         except KeyError:
-            # TODO
-            # return an error page
-            raise TypeError('Field public, can_edit and id is required')
+            return JsonResponse({
+                'err': 1,
+                'msg': 'Field public, can_edit and id is required'
+            })
 
         self.owner = request.user
         self.password = request_dict.get('password')
@@ -98,11 +100,15 @@ class CreateShareLinkView(View):
         elif share_type == 'metabolite':
             shared_object = self.create_link_for_metabolite(object_id)
         else:
-            # TODO
-            # return an error page
-            raise TypeError('The share_type must be one of model, reaction or metabolite')
+            return JsonResponse({
+                'err': 2,
+                'msg': 'The share_type must be one of model, reaction or metabolite'
+            })
 
-        return redirect(reverse('share:shared_cobra_{}'.format(share_type), args=(shared_object.id,)))
+        return JsonResponse({
+            'err': 0,
+            'link': reverse('share:shared_cobra_{}'.format(share_type), args=(shared_object.id,))
+        })
 
 
 class PasswordRequiredDetailView(DetailView):

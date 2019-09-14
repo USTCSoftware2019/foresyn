@@ -1,7 +1,10 @@
+import json
+
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import MetaboliteShare, ModelShare, ReactionShare, CobraMetabolite, CobraModel, CobraReaction
+from .models import (CobraMetabolite, CobraModel, CobraReaction,
+                     MetaboliteShare, ModelShare, ReactionShare)
 
 
 class CreateShareLinkTest(TestCase):
@@ -16,8 +19,10 @@ class CreateShareLinkTest(TestCase):
             'public': True,
             'can_edit': False
         }, content_type='application/json')
+        content = json.loads(resp.content)
 
-        self.assertEqual(resp.url, '/share/metabolite/1')
+        self.assertEqual(content['err'], 0)
+        self.assertEqual(content['link'], '/share/metabolite/1')
 
         shared_object = MetaboliteShare.objects.get(id=1)
         cobra_object = CobraMetabolite.objects.get(id=1)
@@ -33,8 +38,9 @@ class CreateShareLinkTest(TestCase):
             'public': True,
             'can_edit': False
         }, content_type='application/json')
+        content = json.loads(resp.content)
 
-        self.assertEqual(resp.url, '/share/reaction/1')
+        self.assertEqual(content['link'], '/share/reaction/1')
 
         cobra_object = CobraReaction.objects.get(id=1)
 
@@ -55,7 +61,9 @@ class CreateShareLinkTest(TestCase):
             'public': True,
             'can_edit': False
         }, content_type='application/json')
-        self.assertEqual(resp.url, '/share/model/1')
+        content = json.loads(resp.content)
+
+        self.assertEqual(content['link'], '/share/model/1')
 
         cobra_object = CobraModel.objects.get(id=1)
         modelshare = cobra_object.modelshare_set.first()
@@ -77,8 +85,9 @@ class DetailViewTest(TestCase):
             'public': True,
             'can_edit': False
         }, content_type='application/json')
+        content = json.loads(resp.content)
 
-        resp = c.get(resp.url)
+        resp = c.get(content['link'])
         self.assertContains(resp, 'acyl-carrier-protein')
         self.assertContains(resp, 'C11H21N2O7PRS')
 
@@ -91,8 +100,9 @@ class DetailViewTest(TestCase):
             'public': True,
             'can_edit': False
         }, content_type='application/json')
+        content = json.loads(resp.content)
 
-        resp = c.get(resp.url)
+        resp = c.get(content['link'])
 
         self.assertContains(resp, '3 oxoacyl acyl carrier protein synthase n C140')
         self.assertContains(resp, 'Cell Envelope Biosynthesis')
@@ -115,8 +125,9 @@ class DetailViewTest(TestCase):
             'public': True,
             'can_edit': False
         }, content_type='application/json')
+        content = json.loads(resp.content)
 
-        resp = c.get(resp.url)
+        resp = c.get(content['link'])
 
         self.assertContains(resp, 'test')
         self.assertContains(resp, '3OAS140')
@@ -133,10 +144,11 @@ class DetailViewTest(TestCase):
             'password': '123456',
             'can_edit': False,
         }, content_type='application/json')
+        content = json.loads(resp.content)
 
         c.logout()
 
-        url = resp.url
+        url = content['link']
         resp = c.get(url)
         self.assertTemplateUsed(resp, 'share/password_confirm.html')
 
@@ -158,10 +170,11 @@ class DetailViewTest(TestCase):
             'public': False,
             'can_edit': False,
         }, content_type='application/json')
+        content = json.loads(resp.content)
 
         c.logout()
 
-        url = resp.url
+        url = content['link']
         resp = c.get(url)
 
         resp = c.post(url, data={})
@@ -180,10 +193,11 @@ class DetailViewTest(TestCase):
             'password': '123456',
             'can_edit': False,
         }, content_type='application/json')
+        content = json.loads(resp.content)
 
         c.logout()
 
-        url = resp.url
+        url = content['link']
         resp = c.get(url)
         resp = c.post(url, data={
             'password': '123456',
