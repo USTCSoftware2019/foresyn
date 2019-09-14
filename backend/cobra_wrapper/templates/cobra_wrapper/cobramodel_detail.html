@@ -35,6 +35,12 @@
         </tbody>
     </table>
 
+    <ol>
+        {% for change in changes %}
+            <li>{{ change }}</li>
+        {% endfor %}
+    </ol>
+
     <a href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>
 
     <a href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>
