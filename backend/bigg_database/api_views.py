@@ -6,7 +6,6 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.utils.translation import gettext as _
 from django.views.generic import View
-from fuzzywuzzy import fuzz
 
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
                      Reaction, ReactionGene, ReactionMetabolite)
@@ -15,13 +14,7 @@ MATCH_RATIO = 80
 
 
 def fuzzy_search(query_set, request_name, request_data):
-    request_name = request_name.lower()
-    request_data = request_data.lower()
-    return [
-        instance
-        for instance in query_set
-        if fuzz.partial_ratio(getattr(instance, request_name).lower(), request_data) >= MATCH_RATIO
-    ]
+    raise RuntimeError('fuzzy_search unavailable now')
 
 
 def custom_model_to_dict(instance, fields=None, count_number_fields=None, exclude=None):
