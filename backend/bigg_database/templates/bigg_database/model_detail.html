@@ -1,39 +1,63 @@
 {% extends 'base.html' %}
+{% load render_list_tag %}
 
 {% block title %}
 Model: {{ model.bigg_id }}
 {% endblock %}
 
 {% block content %}
-<h4>Model metrics</h4>
-<table>
-    <thead>
-    <tr>
-        <th>Component</th>
-        <th>Count</th>
-    </tr>
-    </thead>
-    <tbody>
-    <!-- Row clickable or count clickable? -->
-    <tr>
-        <td>Reactions</td>
-        <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a></td>
-    </tr>
-    <tr>
-        <td>Metabolites</td>
-        <td><a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a></td>
-    </tr>
-    <tr>
-        <td>Genes</td>
-        <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
-    </tr>
-    </tbody>
-</table>
 
-<form method="post" action="{% url 'data_wrapper:add_models' %}">
-    {% csrf_token %}
-    <input type="number" name="model_pk" value="{{ model.id }}" hidden>
-    <input type="submit" value="add to cobra">
-</form>
-
+<div id="content" class="container mt-4">
+    <div class="w-100 d-flex justify-content-between">
+      <h4>Model: {{ model.bigg_id }}</h4>
+      <form method="post" action="{% url 'data_wrapper:add_models' %}">
+        {% csrf_token %}
+        <input type="number" name="model_pk" value="{{ model.id }}" hidden>
+        <input type="submit" value="add to cobra">
+      </form>
+      <a href="#" data-toggle="modal" data-target="#exampleModal">
+        <h5><i class="fa fa-star-o"></i></h5>
+      </a>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Are You Sure</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Add the model to your pack?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-info">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <table class="table table-hover table-bordered mt-3">
+      <tbody>
+        <tr>
+          <td>BIGG ID</td>
+          <td>{{ model.bigg_id }}</td>
+        </tr>
+        <tr>
+            <td>Reactions</td>
+            <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a></td>
+        </tr>
+        <tr>
+            <td>Metabolites</td>
+            <td><a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a></td>
+        </tr>
+        <tr>
+            <td>Genes</td>
+            <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 {% endblock %}

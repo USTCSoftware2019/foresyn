@@ -1,3 +1,62 @@
+{% extends 'base.html' %}
+{% load render_list_tag %}
+
+{% block title %}
+Gene {{to_model.bigg_id}}
+{% endblock %}
+
+{% block content %}
+
+<div id="content" class="container mt-4">
+    <div class="w-100 d-flex justify-content-between">
+      <h4>Gene {{to_model.bigg_id}}</h4>
+    </div>
+    <table class="table table-hover table-bordered mt-3">
+      <tbody>
+        <tr>
+          <td>Reaction</td>
+          <td><a href="{% url 'bigg_database:model_detail' from_model.id %}">{{ from_model.bigg_id }}</a></td>
+        </tr>
+        <tr>
+          <td>Descriptive name</td>
+          <td>{{ to_model.name }}</td>
+        </tr>
+        <tr>
+          <td>Position</td>
+          <td>{{ to_model.leftpos }} ~ {{ to_model.rightpos }}</td>
+        </tr>
+        <tr>
+          <td>Strand</td>
+          <td>{{ to_model.strand }}</td>
+        </tr>
+        <tr>
+            <td>Chromosome</td>
+            <td>{{ to_model.chromosome_ncbi_accession }}</td>
+        </tr>
+        <tr>
+            <td>DNA Sequence</td>
+            <td>{{ to_model.dna_sequence }}</td>
+        </tr>
+        <tr>
+            <td>Protein Sequence</td>
+            <td>{{ to_model.protein_sequence }}</td>
+        </tr>
+        <tr>
+            <td>Gene reaction rule</td>
+            <td>{{ to_model.gene_reaction_rule }}</td>
+        </tr>
+        {% if gene.database_links %}
+        <tr>
+          <td>External database links</td>
+          <td>{% include 'bigg_database/db_links.html' with db_links=meta.database_links only %}</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+{% comment %}
 {% extends "base.html" %}
 
 {% block title %}
@@ -39,3 +98,5 @@ Gene {{to_model.bigg_id}}
 {% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
 {% endif %}
 {% endblock %}
+
+{% endcomment %}

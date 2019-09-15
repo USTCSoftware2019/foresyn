@@ -6,8 +6,10 @@ Relationship lookup for {{ from_model_name }}
 {% endblock %}
 
 {% block content %}
-<h2>The {{ to_model_name }} contain {{ from_model.bigg_id }}</h2>
-
+<div id="content" class="container mt-4">
+  <div class="w-100 d-flex justify-content-between">
+    <h4>The {{ to_model_name }} contain {{ from_model.bigg_id }}</h4>
+  </div>
 {% if to_model_name == 'models' %}
     {% if from_model_name == 'gene' %}
         {% render_list_tag result_list 'model' 'model_gene_relationship_detail' id=from_model.id reverse=True %}
@@ -23,4 +25,5 @@ Relationship lookup for {{ from_model_name }}
         {% render_list_tag result_list 'reaction' 'reaction_metabolite_relationship_detail' id=from_model.id contain_stoichiometry=True reverse=True %}
     {% endif %}
 {% endif %}
+</div>
 {% endblock %}
