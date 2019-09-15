@@ -192,6 +192,10 @@ class CobraWrapperViewTests(TestCase):
         for comp in ['cobra_id', 'name', 'formula', 'charge', 'compartment']:
             self.assertContains(response, comp)
 
+        # test for change
+        response = self.client.get('/cobra/metabolites/8/')
+        self.assertContains(response, 'the instance is created at')
+
     def test_reactions_create(self):
         self.client.post('/cobra/reactions/create/', dict(
             cobra_id='test',
@@ -223,6 +227,10 @@ class CobraWrapperViewTests(TestCase):
                      'metabolites', 'coefficients', 'gene_reaction_rule']:
             self.assertContains(response, comp)
 
+        # test for change
+        response = self.client.get('/cobra/reactions/2/')
+        self.assertContains(response, 'the instance is created at')
+
     def test_models_create(self):
         self.client.post('/cobra/models/create/', dict(
             cobra_id='test',
@@ -245,6 +253,10 @@ class CobraWrapperViewTests(TestCase):
         for comp in ['cobra_id', 'name', 'reactions', 'objective']:
             self.assertContains(response, comp)
 
+        # test for change
+        response = self.client.get('/cobra/models/2/')
+        self.assertContains(response, 'the instance is created at')
+
     def test_metabolites_update(self):
         response = self.client.post('/cobra/metabolites/7777777/update/', dict(
             cobra_id='test'
@@ -264,10 +276,27 @@ class CobraWrapperViewTests(TestCase):
             name='test',
             formula='test',
             charge='0',
-            compartment='test'))
+            compartment='test'
+        ))
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_update_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobrametabolite_detail.html')
         self.assertRedirects(response, '/cobra/metabolites/1/')
+
+        # test for change
+        response = self.client.get('/cobra/metabolites/1/')
+        changed_data = 'cobra_id, name, formula, charge, compartment'
+        changed_data += ' is changed from ACP_c, acyl-carri... to test, test, test,... at'
+        self.assertContains(response, changed_data)
+
+        self.client.post('/cobra/metabolites/1/update/', dict(
+            cobra_id='test',
+            name='test',
+            formula='test',
+            charge='1',
+            compartment='test'
+        ))
+        response = self.client.get('/cobra/metabolites/1/')
+        self.assertContains(response, 'charge is changed from 0.0 to 1.0 at')
 
         response = self.client.get('/cobra/metabolites/1/update/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
@@ -304,6 +333,23 @@ class CobraWrapperViewTests(TestCase):
         self.assertTemplateUsed('cobra_wrapper/cobrareaction_detail.html')
         self.assertRedirects(response, '/cobra/reactions/1/')
 
+        # test for change
+        response = self.client.get('/cobra/reactions/1/')
+        changed_data = 'cobra_id, name, subsystem, metabolites, coefficients, gene_reaction_rule'
+        changed_data += ' is changed from 3OAS140, 3 oxoacy... to test, test, test,... at'
+        self.assertContains(response, changed_data)
+
+        self.client.post('/cobra/reactions/1/update/', dict(
+            cobra_id='test',
+            name='test',
+            subsystem='test',
+            lower_bound=1,
+            upper_bound=1000,
+            coefficients='',
+            gene_reaction_rule='test'))
+        response = self.client.get('/cobra/reactions/1/')
+        self.assertContains(response, 'lower_bound is changed from 0.0 to 1.0 at')
+
         response = self.client.get('/cobra/reactions/1/update/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
         self.assertContains(response, '<input type="submit" value="Update">', html=True)
@@ -331,6 +377,20 @@ class CobraWrapperViewTests(TestCase):
         self.assertTemplateUsed('cobra_wrapper/cobramodel_update_form.html')
         self.assertTemplateUsed('cobra_wrapper/cobramodel_detail.html')
         self.assertRedirects(response, '/cobra/models/1/')
+
+        # test for change
+        response = self.client.get('/cobra/models/1/')
+        changed_data = 'cobra_id, reactions, objective'
+        changed_data += ' is changed from example_model, co... to test'
+        self.assertContains(response, changed_data)
+
+        self.client.post('/cobra/models/1/update/', dict(
+            cobra_id='test',
+            name='test1',
+            objective='test'))
+
+        response = self.client.get('/cobra/models/1/')
+        self.assertContains(response, 'name is changed from test to test1 at')
 
         response = self.client.get('/cobra/models/1/update/')
         self.assertContains(response, '<input type="reset" value="Reset">', html=True)
