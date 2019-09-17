@@ -1,0 +1,5 @@
+{% for item in page_items %}
+<li class="page-item{% if item.active %} active{% elif item.disable %} disable{% endif %}">
+    <a class="page-link" href="{{ item.url }}">{{ item.display_stuff }}</a>
+</li>
+{% endfor %}

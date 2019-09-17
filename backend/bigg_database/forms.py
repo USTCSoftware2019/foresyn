@@ -11,3 +11,11 @@ class ModifiedModelSearchForm(ModelSearchForm):
     """
     q = forms.CharField(required=True, label='Search',
                         widget=forms.TextInput(attrs={'type': 'search'}))
+    MODEL_CHOICES = [
+        ('model', 'Model'),
+        ('metabolite', 'Metabolite'),
+        ('reaction', 'Reaction'),
+        ('gene', 'Gene')
+    ]
+    model = forms.ChoiceField(choices=MODEL_CHOICES, required=False)
+    page = forms.IntegerField(required=False)

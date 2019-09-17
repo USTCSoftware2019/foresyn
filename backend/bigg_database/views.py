@@ -4,6 +4,7 @@ from functools import reduce
 
 import django.core.exceptions
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import Http404, render, reverse
@@ -12,6 +13,7 @@ from django.views.generic import DetailView, ListView, View
 from django.views.generic.detail import SingleObjectMixin
 from haystack.generic_views import SearchView as HaystackSearchView
 from haystack.query import SQ, SearchQuerySet
+
 from .common import TopKHeap
 from .forms import ModifiedModelSearchForm
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
@@ -41,6 +43,7 @@ class GeneSearchInfo:
     by = ['bigg_id', 'name']
     view_name = 'gene_detail'
 
+
 # TODO
 # For now, the maximum allowed Levenshtein Edit Distance
 # is set to 2, fixed.
@@ -49,40 +52,56 @@ class GeneSearchInfo:
 # between the user's query and the data in the database, we want
 # the best match ones. Even though the similarity is extremely
 # low
+model_map = {
+    'model': Model,
+    'reaction': Reaction,
+    'metabolite': Metabolite,
+    'gene': Gene
+}
 
 
 class SearchView(View):
+    default_model_to_search = 'model'
+
     def get(self, request, *args, **kwargs):
         form = ModifiedModelSearchForm(request.GET)
 
         if form.is_valid():
             keyword = form.cleaned_data['q']
-            queryset = SearchQuerySet().filter(SQ(content__fuzzy=keyword)).order_by('-_score')
+            model_to_search = form.cleaned_data.get('model') or self.default_model_to_search
+            requested_page_num = form.cleaned_data.get('page') or 1
 
-            context = {}
+            queryset = SearchQuerySet() \
+                .models(model_map[model_to_search]) \
+                .filter(SQ(content__fuzzy=keyword)) \
+                .order_by('-_score')
+            search_result = [obj.object for obj in queryset]
 
-            # TODO
-            # The results need to paged
+            paginated = Paginator(search_result, 10)
+            requested_page_num = min(requested_page_num, paginated.num_pages)
+            current_page = paginated.page(requested_page_num)
 
-            model_object_list = []
-            reaction_object_list = []
-            metabolite_object_list = []
-            gene_object_list = []
-            for obj in queryset:
-                if isinstance(obj.object, Model):
-                    model_object_list.append(obj.object)
-                elif isinstance(obj.object, Reaction):
-                    reaction_object_list.append(obj.object)
-                elif isinstance(obj.object, Metabolite):
-                    metabolite_object_list.append(obj.object)
-                elif isinstance(obj.object, Gene):
-                    gene_object_list.append(obj.object)
-            context['model_object_list'] = model_object_list
-            context['reaction_object_list'] = reaction_object_list
-            context['metabolite_object_list'] = metabolite_object_list
-            context['gene_object_list'] = gene_object_list
+            total_number = {
+                '{}_count'.format(model_name): len(SearchQuerySet()
+                                                   .models(model_map[model_name])
+                                                   .filter(SQ(content__fuzzy=keyword)))
+                for model_name in model_map
+                if model_name != model_to_search
+            }
+            total_number['{}_count'.format(model_to_search)] = len(search_result)
 
-            context['query'] = form.cleaned_data['q']
+            # TODO starred model
+
+            context = {
+                'requested_model_object_list': current_page.object_list,
+                'current_search_type_count': len(search_result),
+                'paginator': paginated,
+                'query': form.cleaned_data['q'],
+                'total_count': sum([count for _, count in total_number.items()]),
+                'search_type': model_to_search,
+                'search_url_prefix': '?q={keyword}&model={model}'.format(keyword=keyword, model=model_to_search),
+                **total_number
+            }
 
             return render(request, 'bigg_database/search_result.html', context=context)
         else:
