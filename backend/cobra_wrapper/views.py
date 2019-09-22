@@ -6,7 +6,8 @@ from django.views.generic import ListView, DetailView, CreateView, DeleteView, U
 from django.contrib.auth.mixins import LoginRequiredMixin
 import cobra
 
-from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFba, CobraFva
+from .models import (CobraMetabolite, CobraReaction, CobraModel, CobraFba, CobraFva, CobraMetaboliteChange,
+                     CobraReactionChange, CobraModelChange)
 from .forms import CobraReactionForm, CobraModelForm, CobraFvaForm
 
 from backend.celery import app
@@ -31,15 +32,30 @@ class CobraMetaboliteDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['changes'] = CobraMetaboliteChange.objects.filter(instance=self.object)
+        return context
+
 
 class CobraReactionDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['changes'] = CobraReactionChange.objects.filter(instance=self.object)
+        return context
+
 
 class CobraModelDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['changes'] = CobraModelChange.objects.filter(instance=self.object)
+        return context
 
 
 class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
@@ -49,7 +65,9 @@ class CobraMetaboliteCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        CobraMetaboliteChange.objects.create(fields='', previous_values='', values='', instance=form.instance)
+        return response
 
 
 class CobraReactionCreateView(LoginRequiredMixin, CreateView):
@@ -61,7 +79,9 @@ class CobraReactionCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        CobraReactionChange.objects.create(fields='', previous_values='', values='', instance=form.instance)
+        return response
 
 
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
@@ -73,7 +93,9 @@ class CobraModelCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        CobraModelChange.objects.create(fields='', previous_values='', values='', instance=form.instance)
+        return response
 
 
 class CobraMetaboliteDeleteView(LoginRequiredMixin, DeleteView):
@@ -111,40 +133,79 @@ class CobraMetaboliteUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
     fields = ['cobra_id', 'name', 'formula', 'charge', 'compartment']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.changed_field_pre_values = ''
+
     def get_object(self, queryset=None):
         return get_object_or_404(CobraMetabolite, owner=self.request.user, pk=self.kwargs['pk'])
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        self.changed_field_pre_values = ', '.join([str(getattr(form.instance, field)) for field in form.changed_data])
+        return form
+
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        CobraMetaboliteChange.objects.create(
+            fields=', '.join(form.changed_data),
+            previous_values=self.changed_field_pre_values,
+            values=', '.join([str(form.cleaned_data[field]) for field in form.changed_data]),
+            instance=form.instance)
+        return response
 
 
 class CobraReactionUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.changed_field_pre_values = ''
+
     def get_object(self, queryset=None):
         return get_object_or_404(CobraReaction, owner=self.request.user, pk=self.kwargs['pk'])
 
     def get_form(self, form_class=None):
-        return CobraReactionForm(self.request.user, **self.get_form_kwargs())
+        form = CobraReactionForm(self.request.user, **self.get_form_kwargs())
+        self.changed_field_pre_values = ', '.join([str(getattr(form.instance, field)) for field in form.changed_data])
+        return form
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        CobraReactionChange.objects.create(
+            fields=', '.join(form.changed_data),
+            previous_values=self.changed_field_pre_values,
+            values=', '.join([str(form.cleaned_data[field]) for field in form.changed_data]),
+            instance=form.instance)
+        return response
 
 
 class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.changed_field_pre_values = ''
+
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
     def get_form(self, form_class=None):
-        return CobraModelForm(self.request.user, **self.get_form_kwargs())
+        form = CobraModelForm(self.request.user, **self.get_form_kwargs())
+        self.changed_field_pre_values = ', '.join([str(getattr(form.instance, field)) for field in form.changed_data])
+        return form
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        CobraModelChange.objects.create(
+            fields=', '.join(form.changed_data),
+            previous_values=self.changed_field_pre_values,
+            values=', '.join([str(form.cleaned_data[field]) for field in form.changed_data]),
+            instance=form.instance)
+        return response
 
 
 class CobraFbaListView(LoginRequiredMixin, ListView):

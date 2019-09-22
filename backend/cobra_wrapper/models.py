@@ -163,3 +163,69 @@ class CobraFva(models.Model):
 
     def get_absolute_url(self):
         return reverse('cobra_wrapper:cobrafva_detail', kwargs={'model_pk': self.model.pk, 'pk': self.pk})
+
+
+class CobraMetaboliteChange(models.Model):
+    fields = models.CharField(max_length=200, blank=True)
+    previous_values = models.TextField(blank=True)
+    values = models.TextField(blank=True)
+    time = models.DateTimeField(auto_now_add=True)
+    instance = models.ForeignKey(CobraMetabolite, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'metabolite_change'
+        ordering = ['-time']
+
+    def __str__(self):
+        if self.fields:
+            return '{} is changed from {} to {} at {}'.format(
+                self.fields,
+                self.previous_values if len(self.previous_values) < 20 else self.previous_values[:17] + '...',
+                self.values if len(self.values) < 20 else self.values[:17] + '...',
+                self.time.isoformat())
+        else:
+            return 'the instance is created at {}'.format(self.time.isoformat())
+
+
+class CobraReactionChange(models.Model):
+    fields = models.CharField(max_length=200, blank=True)
+    previous_values = models.TextField(blank=True)
+    values = models.TextField(blank=True)
+    time = models.DateTimeField(auto_now_add=True)
+    instance = models.ForeignKey(CobraReaction, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'reaction_change'
+        ordering = ['-time']
+
+    def __str__(self):
+        if self.fields:
+            return '{} is changed from {} to {} at {}'.format(
+                self.fields,
+                self.previous_values if len(self.previous_values) < 20 else self.previous_values[:17] + '...',
+                self.values if len(self.values) < 20 else self.values[:17] + '...',
+                self.time.isoformat())
+        else:
+            return 'the instance is created at {}'.format(self.time.isoformat())
+
+
+class CobraModelChange(models.Model):
+    fields = models.CharField(max_length=200, blank=True)
+    previous_values = models.TextField(blank=True)
+    values = models.TextField(blank=True)
+    time = models.DateTimeField(auto_now_add=True)
+    instance = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'model_change'
+        ordering = ['-time']
+
+    def __str__(self):
+        if self.fields:
+            return '{} is changed from {} to {} at {}'.format(
+                self.fields,
+                self.previous_values if len(self.previous_values) < 20 else self.previous_values[:17] + '...',
+                self.values if len(self.values) < 20 else self.values[:17] + '...',
+                self.time.isoformat())
+        else:
+            return 'the instance is created at {}'.format(self.time.isoformat())

@@ -40,7 +40,7 @@ PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds
 
 ```bash
 cd ..
-celery worker -l info -A backend -Q cobra_results
+PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results
 ```
 
 Then start Django to use the app
