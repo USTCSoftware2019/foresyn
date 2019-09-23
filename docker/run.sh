@@ -1,5 +1,5 @@
 #!/bin/bash
-#/wait.sh -t 120 elasticsearch:9200 -- python manage.py rebuild_index --noinput
+/wait.sh -t 120 elasticsearch:9200 -- python manage.py update_index --noinput
 cd cobra_wrapper/remote
 /wait.sh -t 120 rabbitmq:5672
 celery worker -l info -A cobra_computation -Q cobra_feeds &
