@@ -8,6 +8,12 @@ from cobra_wrapper.models import CobraMetabolite, CobraModel, CobraReaction
 User = get_user_model()
 
 
+class OneTimeShareLink(models.Model):
+    key = models.CharField(max_length=127)
+    shared_type = models.CharField(max_length=15)
+    shared_id = models.CharField(max_length=127)
+
+
 class ShareAuthorization(models.Model):
     public = models.BooleanField()
     password = models.CharField(max_length=128)

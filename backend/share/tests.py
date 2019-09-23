@@ -3,6 +3,7 @@ import json
 from django.test import TestCase
 from django.urls import reverse
 
+from .common import OneTimeShareLinkManager
 from .models import (CobraMetabolite, CobraModel, CobraReaction,
                      MetaboliteShare, ModelShare, ReactionShare)
 
@@ -71,6 +72,31 @@ class CreateShareLinkTest(TestCase):
 
         for shared_model_object in modelshare.reactions.all():
             self.assertTrue(shared_model_object.reaction.name in [o.name for o in cobra_object.reactions.all()])
+
+
+class OneTimeShareLinkTest(TestCase):
+    fixtures = ['share/cobra_wrapper_data', 'share/user']
+
+    def test_one_time_share_link(self):
+        c = self.client
+        c.login(username='test', password='test123456')
+
+        resp = c.post('/share/create', data={
+            'type': 'model',
+            'id': 1,
+            'public': False,
+            'can_edit': False,
+            'password': True
+        }, content_type='application/json')
+        content = json.loads(resp.content)
+        self.assertEqual(content['link'], '/share/model/1')
+        shared_id = content['link'][-1]
+        shared_type = 'model'
+        key = OneTimeShareLinkManager.acquire_key(shared_type, shared_id)
+
+        resp = c.get('/share/model/1?key={}'.format(key))
+        self.assertTemplateUsed(resp, 'share/modelshare_detail.html')
+        self.assertTemplateNotUsed(resp, 'share/password_confirm.html')
 
 
 class DetailViewTest(TestCase):

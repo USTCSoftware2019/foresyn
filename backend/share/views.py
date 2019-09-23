@@ -11,14 +11,7 @@ from share.models import (CobraMetabolite, CobraModel, CobraReaction,
 
 from .forms import PasswordConfirmForm
 
-
-def create_share_auth(public, password=None):
-    auth = ShareAuthorization.objects.create(public=public)
-    if not public:
-        # if password is None, it will be an unusable password
-        auth.set_password(password)
-        auth.save()
-    return auth
+from .common import OneTimeShareLinkManager
 
 
 class CreateShareLinkView(View):
@@ -35,11 +28,19 @@ class CreateShareLinkView(View):
         'metabolite': CobraMetabolite
     }
 
+    def create_share_auth(self):
+        auth = ShareAuthorization.objects.create(public=self.public)
+        if not self.public:
+            # if password is None, it will be an unusable password
+            auth.set_password(self.password)
+            auth.save()
+        return auth
+
     def create_link_for_metabolite(self, metabolite_id, auth=None):
         cobra_metabolite = CobraMetabolite.objects.get(id=metabolite_id)
 
         if auth is None:
-            auth = create_share_auth(self.public, self.password)
+            auth = self.create_share_auth()
 
         return MetaboliteShare.objects.create(metabolite=cobra_metabolite,
                                               can_edit=self.can_edit,
@@ -50,7 +51,7 @@ class CreateShareLinkView(View):
         cobra_reaction = CobraReaction.objects.get(id=reaction_id)
 
         if auth is None:
-            auth = create_share_auth(self.public, self.password)
+            auth = self.create_share_auth()
 
         shared_reaction_object = ReactionShare.objects.create(reaction=cobra_reaction,
                                                               can_edit=self.can_edit,
@@ -65,7 +66,7 @@ class CreateShareLinkView(View):
         cobra_model = CobraModel.objects.get(id=model_id)
 
         if auth is None:
-            auth = create_share_auth(self.public, self.password)
+            auth = self.create_share_auth()
 
         shared_model_object = ModelShare.objects.create(model=cobra_model,
                                                         can_edit=self.can_edit,
@@ -112,6 +113,8 @@ class CreateShareLinkView(View):
 
 
 class PasswordRequiredDetailView(DetailView):
+    http_method_names = ['get', 'post']
+
     def get(self, request, *args, **kwargs):
         authorized = request.session.setdefault('authorized', [])
 
@@ -119,6 +122,13 @@ class PasswordRequiredDetailView(DetailView):
         auth = self.object.auth
 
         if auth is None or auth.public or auth.id in authorized:
+            context = self.get_context_data(object=self.object)
+            return self.render_to_response(context)
+
+        share_type = 'model' if hasattr(self, 'model') else ('reaction' if hasattr(self, 'reaction') else 'metabolite')
+        if OneTimeShareLinkManager.check_key(request.GET.get('key'), share_type, kwargs['pk']):
+            self.request.session['authorized'].append(auth.id)
+            self.request.session.save()
             context = self.get_context_data(object=self.object)
             return self.render_to_response(context)
 
@@ -131,6 +141,13 @@ class PasswordRequiredDetailView(DetailView):
         auth = self.object.auth
 
         if auth is None or auth.public or auth.id in authorized:
+            context = self.get_context_data(object=self.object)
+            return self.render_to_response(context)
+
+        share_type = 'model' if hasattr(self, 'model') else ('reaction' if hasattr(self, 'reaction') else 'metabolite')
+        if OneTimeShareLinkManager.check_key(request.GET.get('key'), share_type, kwargs['pk']):
+            self.request.session['authorized'].append(auth.id)
+            self.request.session.save()
             context = self.get_context_data(object=self.object)
             return self.render_to_response(context)
 
