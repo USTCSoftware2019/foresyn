@@ -1,146 +1,30 @@
 from django.template import Library
-from django.urls import reverse
 
 register = Library()
 
-search_url_construction = '{base_url}{prefix}?page={page}'
 
+@register.inclusion_tag('bigg_database/page_index_display.html', takes_context=True)
+def calc_index_display_tag(context, adjacent_pages=2):
+    start_page = context['page_obj'].number - adjacent_pages
+    display_first = True
+    display_last = True
 
-@register.inclusion_tag('bigg_database/page_index_display.html')
-def calc_index_display_tag(paginator, search_url_prefix, **kwargs):
-    page_item_list = []
-    if paginator.num_pages >= 13:
-        if paginator.number <= 5:
-            for index in range(1, paginator.number + 4):
-                page_item_list.append({
-                    'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                          prefix=search_url_prefix,
-                                                          page=index),
-                    'active': False if index != paginator.number else True,
-                    'display_stuff': index,
-                    'disable': False
-                })
-            page_item_list.append({
-                'url': '#',
-                'active': False,
-                'display_stuff': '...',
-                'disable': True
-            })
-            page_item_list.append({
-                'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                      prefix=search_url_prefix,
-                                                      page=paginator.num_pages - 1),
-                'active': False,
-                'display_stuff': paginator.num_pages - 1,
-                'disable': False
-            })
-            page_item_list.append({
-                'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                      prefix=search_url_prefix,
-                                                      page=paginator.num_pages),
-                'active': False,
-                'display_stuff': paginator.num_pages,
-                'disable': False
-            })
-        elif paginator.number >= paginator.num_pages - 5:
-            page_item_list.append({
-                'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                      prefix=search_url_prefix,
-                                                      page=1),
-                'active': False,
-                'display_stuff': 1,
-                'disable': False
-            })
-            page_item_list.append({
-                'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                      prefix=search_url_prefix,
-                                                      page=2),
-                'active': False,
-                'display_stuff': 2,
-                'disable': False
-            })
-            page_item_list.append({
-                'url': '#',
-                'active': False,
-                'display_stuff': '...',
-                'disable': True
-            })
-            for index in range(paginator.number - 3, paginator.num_pages + 1):
-                page_item_list.append({
-                    'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                          prefix=search_url_prefix,
-                                                          page=index),
-                    'active': False if index != paginator.number else True,
-                    'display_stuff': index,
-                    'disable': False
-                })
-        else:
-            page_item_list.append({
-                'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                      prefix=search_url_prefix,
-                                                      page=1),
-                'active': False,
-                'display_stuff': 1,
-                'disable': False
-            })
-            page_item_list.append({
-                'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                      prefix=search_url_prefix,
-                                                      page=2),
-                'active': False,
-                'display_stuff': 2,
-                'disable': False
-            })
-            page_item_list.append({
-                'url': '#',
-                'active': False,
-                'display_stuff': '...',
-                'disable': True
-            })
-            for index in range(paginator.number - 3, paginator.number + 4):
-                page_item_list.append({
-                    'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                          prefix=search_url_prefix,
-                                                          page=index),
-                    'active': False if index != paginator.number else True,
-                    'display_stuff': index,
-                    'disable': False
-                })
-            page_item_list.append({
-                'url': '#',
-                'active': False,
-                'display_stuff': '...',
-                'disable': True
-            })
-            page_item_list.append({
-                'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                      prefix=search_url_prefix,
-                                                      page=paginator.num_pages - 1),
-                'active': False,
-                'display_stuff': paginator.num_pages - 1,
-                'disable': False
-            })
+    if start_page <= 2:
+        start_page = 1
+        display_first = False
 
-            page_item_list.append({
-                'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                      prefix=search_url_prefix,
-                                                      page=paginator.num_pages),
-                'active': False,
-                'display_stuff': paginator.num_pages,
-                'disable': False
-            })
-    else:
-        for index in range(1, paginator.num_pages + 1):
-            page_item_list.append({
-                'url': search_url_construction.format(base_url=reverse('bigg_database:search'),
-                                                      prefix=search_url_prefix,
-                                                      page=index),
-                'active': False if index != paginator.num_pages else True,
-                'display_stuff': index,
-                'disable': False
-            })
+    end_page = context['page_obj'].number + adjacent_pages
 
+    if end_page >= context['paginator'].num_pages - 1:
+        end_page = context['paginator'].num_pages
+        display_last = False
+
+    page_numbers = range(start_page, end_page + 1)
     return {
-        'page_items': page_item_list,
-        **kwargs
+        'page_obj': context['page_obj'],
+        'paginator': context['paginator'],
+        'page_numbers': page_numbers,
+        'display_first': display_first,
+        'display_last': display_last,
+        'request': context['request'],
     }

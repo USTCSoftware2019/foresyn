@@ -118,6 +118,7 @@ class BiggSearchView(HaystackSearchView):
     """
     form_class = ModifiedModelSearchForm
     template_name = 'bigg_database/search_result.html'
+    paginate_by = 10  # you can also set paginate_by in settings.py
 
     def form_valid(self, form):
         self.queryset = form.search()
