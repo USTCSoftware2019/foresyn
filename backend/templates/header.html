@@ -24,7 +24,8 @@
                         </select>
                         {% endcomment %}
                         <div class="input-group">
-                            <input type="text" name="q" class="form-control bg-white col-xs-3" placeholder="Search Text">
+                            <input type="text" name="q" class="form-control bg-white col-xs-3"
+                                   placeholder="Search Text" value="{{ request.GET.q }}">
                             <div class="input-group-append">
                                 <input type="submit" value="Search" class="btn btn-info">
                             </div>
