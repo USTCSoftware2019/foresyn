@@ -112,6 +112,35 @@ class SearchView(View):
                           })
 
 
+class BiggSearchView(HaystackSearchView):
+    """
+    this will cache count of each search type
+    """
+    form_class = ModifiedModelSearchForm
+    template_name = 'bigg_database/search_result.html'
+
+    def form_valid(self, form):
+        self.queryset = form.search()
+        model_to_search = form.model_to_search
+        model_name = model_to_search.__name__.lower()
+
+        total_number = form.search_count()
+        current_search_type_count = len(self.queryset)
+        total_number['{}_count'.format(model_name)] = current_search_type_count
+
+        context = {
+            self.form_name: form,
+            'query': form.cleaned_data.get(self.search_field),
+            'object_list': self.queryset,
+            'search_type': model_name,
+            'current_search_type_count': current_search_type_count,
+            'total_count': sum(count for _, count in total_number.items()),
+            **total_number
+        }
+        context = self.get_context_data(**context)
+        return self.render_to_response(context)
+
+
 class ModelDetailView(DetailView):
     model = Model
     context_object_name = 'model'
