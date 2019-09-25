@@ -60,58 +60,6 @@ model_map = {
 }
 
 
-class SearchView(View):
-    default_model_to_search = 'model'
-
-    def get(self, request, *args, **kwargs):
-        form = ModifiedModelSearchForm(request.GET)
-
-        if form.is_valid():
-            keyword = form.cleaned_data['q']
-            model_to_search = form.cleaned_data.get('model') or self.default_model_to_search
-            requested_page_num = form.cleaned_data.get('page') or 1
-
-            queryset = SearchQuerySet() \
-                .models(model_map[model_to_search]) \
-                .filter(SQ(content__fuzzy=keyword)) \
-                .order_by('-_score')
-            search_result = [obj.object for obj in queryset]
-
-            paginated = Paginator(search_result, 10)
-            requested_page_num = min(requested_page_num, paginated.num_pages)
-            current_page = paginated.page(requested_page_num)
-
-            total_number = {
-                '{}_count'.format(model_name): len(SearchQuerySet()
-                                                   .models(model_map[model_name])
-                                                   .filter(SQ(content__fuzzy=keyword)))
-                for model_name in model_map
-                if model_name != model_to_search
-            }
-            total_number['{}_count'.format(model_to_search)] = len(search_result)
-
-            # TODO starred model
-
-            context = {
-                'requested_model_object_list': current_page.object_list,
-                'current_search_type_count': len(search_result),
-                'paginator': paginated,
-                'query': form.cleaned_data['q'],
-                'total_count': sum([count for _, count in total_number.items()]),
-                'search_type': model_to_search,
-                'search_url_prefix': '?q={keyword}&model={model}'.format(keyword=keyword, model=model_to_search),
-                **total_number
-            }
-
-            return render(request, 'bigg_database/search_result.html', context=context)
-        else:
-            return render(request,
-                          'bigg_database/search.html',
-                          context={
-                              'form': form
-                          })
-
-
 class BiggSearchView(HaystackSearchView):
     """
     this will cache count of each search type
@@ -140,6 +88,11 @@ class BiggSearchView(HaystackSearchView):
         }
         context = self.get_context_data(**context)
         return self.render_to_response(context)
+
+    def form_invalid(self, form):
+        return render(self.request, 'bigg_database/search.html', context={
+            'form': form
+        })
 
 
 class ModelDetailView(DetailView):
