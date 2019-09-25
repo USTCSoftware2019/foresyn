@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load render_list_tag %}
 {% load calc_index_display_tag %}
+{% load render_link_tag %}
 
 {% block title %}
 Search result - {{ query }}
@@ -38,7 +39,7 @@ Search result - {{ query }}
         {% for search_result in object_list %}
         <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
           <div class="d-flex w-100 justify-content-between">
-            <a class="mb-1" href="#">
+            <a class="mb-1" href="{% render_link_tag search_result %}">
               <h5>
                 {{ search_result.bigg_id }}
               </h5>

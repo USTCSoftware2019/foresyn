@@ -80,8 +80,3 @@ class ModifiedModelSearchForm(ModelSearchForm):
                 if model != model_to_search
             }
         return total_number
-
-
-
-
-
