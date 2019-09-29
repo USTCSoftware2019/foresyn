@@ -44,6 +44,8 @@ def data_metabolite_to_cobra_metabolite(key, value, user):
     cobra_metabolite_object.name = data_metabolite_object.name
     if data_metabolite_object.charges:
         cobra_metabolite_object.charge = data_metabolite_object.charges
+    else:
+        cobra_metabolite_object.charge = 0
     cobra_metabolite_object.compartment = data_metabolite_object.bigg_id[-1]
     cobra_metabolite_object.owner = user
     return cobra_metabolite_object
