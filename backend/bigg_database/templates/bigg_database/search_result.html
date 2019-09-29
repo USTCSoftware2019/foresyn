@@ -2,52 +2,83 @@
 {% load render_list_tag %}
 
 {% block title %}
-Search result - {{ query }}
+    Search result - {{ query }}
 {% endblock %}
 
 {% block content %}
+    <div id="content" class="container mt-4">
+        <div class="row">
+            <div class="left_index col-3">
+                <ul class="list-group text-primary">
+                    <a href="?q={{ query }}&type=gene" class="list-group-item {% if type == "gene" %} chosen {% endif %}">Gene<span class="badge badge-info badge-search">{{ counts.gene }}</span></a>
+                    <a href="?q={{ query }}&type=reaction" class="list-group-item {% if type == "reaction" %} chosen {% endif %}">Reaction<span class="badge badge-info badge-search">{{ counts.reaction }}</span></a>
+                    <a href="?q={{ query }}&type=metabolite" class="list-group-item {% if type == "metabolite" %} chosen {% endif %}">Metabolite<span class="badge badge-info badge-search">{{ counts.metabolite }}</span></a>
+                    <a href="?q={{ query }}&type=model" class="list-group-item {% if type == "model" %} chosen {% endif %}">Model<span class="badge badge-info badge-search">{{ counts.model }}</span></a>
+                </ul>
+            </div>
+            <div class="right_content col-9">
+                <h5 class="result_num">Searched for "{{ query }}": {{ this_cnt }} results</h5>
+                <div class="list-group list-group-flush mb-5">
+                    {% for result in results %}
+                        <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div class="d-flex w-100 justify-content-between">
+                            <a class="mb-1" href="{% url 'bigg_database:model_detail' result.pk  %}"><h5>{{ result.name }}</h5></a>
+                            <i class="fa fa-star-o mr-2"></i>
+                        </div>
+                        <p class="mb-1">Some basic information here. For example, its ID, function and chromosome.</p>
+                        <small>Where it from?</small>
+                        </div>
+                    {% endfor %}
 
-<h3>Search result for {{ query }}</h3>
 
-{% if model_object_list %}
-<h4>Models</h4>
-{% render_list_tag model_object_list "model" "model_detail" %}
-{% endif %}
+                </div>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center mb-5">
+                        {% if results.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ results.previous_page_number }}" tabindex="-1">Previous</a>
+                            </li>
+                        {% endif %}
+                        <li class="page-item"><a class="page-link" href="?q={{ query }}&type={{ type }}&page=1">1</a>
+                        </li>
+                    {% if results.paginator.num_pages >= 2 %}
+                        <li class="page-item"><a class="page-link" href="?q={{ query }}&type={{ type }}&page=2">2</a>
+                        </li>
+                        {% if results.paginator.num_pages >= 3 %}
+                            <li class="page-item active"><a class="page-link"
+                                                            href="?q={{ query }}&type={{ type }}&page=3">3</a></li>
+                            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                            <li class="page-item"><a class="page-link"
+                                                     href="?q={{ query }}&type={{ type }}&page={{ results.paginator.num_pages }}">{{ results.paginator.num_pages }}</a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                        {% if results.has_next %}
+                            <li class="page-item">
+                                <a class="page-link"
+                                   href="?q={{ query }}&type={{ type }}&page={{ results.next_page_number }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                <div class="pagination">
+                        <span class="step-links">
+                            {% if results.has_previous %}
+                                <a href="?page=1">&laquo; first</a>
+                                <a href="?page={{ results.previous_page_number }}">previous</a>
+                            {% endif %}
 
-{% if reaction_object_list %}
-<h4>Reactions</h4>
-{% render_list_tag reaction_object_list "reaction" "reaction_detail" %}
-{% endif %}
+                            <span class="current">
+                                Page {{ results.number }} of {{ results.paginator.num_pages }}.
+                            </span>
 
-{% if metabolite_object_list %}
-<h4>Metabolites</h4>
-{% render_list_tag metabolite_object_list "metabolite" "metabolite_detail" %}
-{% endif %}
-
-{% if gene_object_list %}
-<h4>Genes</h4>
-{% render_list_tag gene_object_list "gene" "gene_detail" %}
-{% endif %}
-
-{% comment %}
-{% if page_obj.has_previous or page.has_next %}
-<div>
-    {% if page_obj.has_previous %}
-    <a href="?q={{ query }}&amp;page={{ page_obj.previous_page_number }}">
-        {% endif %}&laquo;Previous
-        {% if page_obj.has_previous %}
-    </a>
-    {% endif %}
-    |
-    {% if page_obj.has_next %}
-    <a href="?q={{ query }}&amp;page={{ page_obj.next_page_number }}">
-        {% endif %}
-        Next&raquo;
-        {% if page_obj.has_next %}
-    </a>
-    {% endif %}
-</div>
-{% endif %}
-
-{% endcomment %}
+                            {% if results.has_next %}
+                                <a href="?page={{ results.next_page_number }}">next</a>
+                                <a href="?page={{ results.paginator.num_pages }}">last &raquo;</a>
+                            {% endif %}
+                        </span>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

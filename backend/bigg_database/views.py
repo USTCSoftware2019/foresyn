@@ -4,9 +4,10 @@ from functools import reduce
 
 import django.core.exceptions
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from django.shortcuts import Http404, render, reverse
+from django.shortcuts import Http404, render, reverse, redirect
 from django.utils.translation import gettext as _
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.detail import SingleObjectMixin
@@ -57,40 +58,67 @@ class SearchView(View):
 
         if form.is_valid():
             keyword = form.cleaned_data['q']
+
+            query_type = request.GET.get("type")
+            if not query_type:
+                query_type = "model"
+
             queryset = SearchQuerySet().filter(SQ(content__fuzzy=keyword)).order_by('-_score')
+
+            counts = {
+                "gene": queryset.models(Gene).count(),
+                "reaction": queryset.models(Reaction).count(),
+                "metabolite": queryset.models(Metabolite).count(),
+                "model": queryset.models(Model).count()
+            }
+
+            if query_type == "gene":
+                queryset = queryset.models(Gene)
+            elif query_type == "reaction":
+                queryset = queryset.models(Reaction)
+            elif query_type == "metabolite":
+                queryset = queryset.models(Metabolite)
+            else:
+                queryset = queryset.models(Model)
+
+            all_results = queryset.all()
+
+            paginator = Paginator(all_results, 10)
+            page = request.GET.get('page')
+            results = paginator.get_page(page)
 
             context = {}
 
             # TODO
             # The results need to paged
 
-            model_object_list = []
-            reaction_object_list = []
-            metabolite_object_list = []
-            gene_object_list = []
-            for obj in queryset:
-                if isinstance(obj.object, Model):
-                    model_object_list.append(obj.object)
-                elif isinstance(obj.object, Reaction):
-                    reaction_object_list.append(obj.object)
-                elif isinstance(obj.object, Metabolite):
-                    metabolite_object_list.append(obj.object)
-                elif isinstance(obj.object, Gene):
-                    gene_object_list.append(obj.object)
-            context['model_object_list'] = model_object_list
-            context['reaction_object_list'] = reaction_object_list
-            context['metabolite_object_list'] = metabolite_object_list
-            context['gene_object_list'] = gene_object_list
+            # model_object_list = []
+            # reaction_object_list = []
+            # metabolite_object_list = []
+            # gene_object_list = []
+            # for obj in queryset:
+            #     if isinstance(obj.object, Model):
+            #         model_object_list.append(obj.object)
+            #     elif isinstance(obj.object, Reaction):
+            #         reaction_object_list.append(obj.object)
+            #     elif isinstance(obj.object, Metabolite):
+            #         metabolite_object_list.append(obj.object)
+            #     elif isinstance(obj.object, Gene):
+            #         gene_object_list.append(obj.object)
+            # context['model_object_list'] = model_object_list
+            # context['reaction_object_list'] = reaction_object_list
+            # context['metabolite_object_list'] = metabolite_object_list
+            # context['gene_object_list'] = gene_object_list
 
             context['query'] = form.cleaned_data['q']
+            context['results'] = results
+            context['type'] = query_type
+            context['counts'] = counts
+            context['this_cnt'] = counts[query_type]
 
             return render(request, 'bigg_database/search_result.html', context=context)
         else:
-            return render(request,
-                          'bigg_database/search.html',
-                          context={
-                              'form': form
-                          })
+            return redirect("/")
 
 
 class ModelDetailView(DetailView):

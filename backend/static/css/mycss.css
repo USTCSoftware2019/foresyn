@@ -66,5 +66,10 @@ div.banner div.des div {color: #B6B4B4; }
 .left_index ul li span {float: right;}
 .left_index ul li:hover {background: #f1f1f1;}
 .left_index li.chosen {background: #dddddd;}
+.left_index a.chosen {background: #dddddd;}
 .result_num {line-height: 35px;}
 .list-group div.list-group-item {padding: 2em 0;}
+
+.badge-search {
+    float: right
+}
