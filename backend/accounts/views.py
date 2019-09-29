@@ -1,4 +1,5 @@
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, redirect
@@ -65,3 +66,25 @@ class UserActivation(View):
         return render(request, "accounts/activate_done.html", {
             "success": success
         })
+
+
+class UserProfile(LoginRequiredMixin, View):
+    def get(self, request):
+        user = request.user
+        return render(request, "accounts/profile.html", {
+            "first": user.first_name,
+            "last": user.last_name,
+            "username": user.username,
+        })
+
+    def post(self, request):
+        first = request.POST.get("first")
+        last = request.POST.get("last")
+        user = request.user
+
+        if first and last:
+            user.first_name = first
+            user.last_name = last
+            user.save()
+
+        return redirect("accounts:profile")
