@@ -9,7 +9,7 @@
         Foresyn
       </span>
       <form class="form-inline" action="{% url "bigg_database:search" %}">
-        <input class="form-control form-control-sm mr-sm-2 form-circle" type="search" placeholder="Search" aria-label="Search">
+        <input class="form-control form-control-sm mr-sm-2 form-circle" type="search" placeholder="Search" aria-label="Search" name="q">
       </form>
 
       <!-- Toggler/collapsibe Button -->
@@ -24,7 +24,7 @@
             <a class="nav-link" href="{% url 'accounts:profile' %}">My Profile</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="mymodels.html">My Models</a>
+            <a class="nav-link" href="{% url 'cobra_wrapper:cobramodel_list' %}">My Models</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="guide_book.html">Guide Book</a>
