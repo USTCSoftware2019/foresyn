@@ -95,27 +95,6 @@ class SearchView(View):
 
             context = {}
 
-            # TODO
-            # The results need to paged
-
-            # model_object_list = []
-            # reaction_object_list = []
-            # metabolite_object_list = []
-            # gene_object_list = []
-            # for obj in queryset:
-            #     if isinstance(obj.object, Model):
-            #         model_object_list.append(obj.object)
-            #     elif isinstance(obj.object, Reaction):
-            #         reaction_object_list.append(obj.object)
-            #     elif isinstance(obj.object, Metabolite):
-            #         metabolite_object_list.append(obj.object)
-            #     elif isinstance(obj.object, Gene):
-            #         gene_object_list.append(obj.object)
-            # context['model_object_list'] = model_object_list
-            # context['reaction_object_list'] = reaction_object_list
-            # context['metabolite_object_list'] = metabolite_object_list
-            # context['gene_object_list'] = gene_object_list
-
             context['query'] = form.cleaned_data['q']
             context['results'] = results
             context['type'] = query_type

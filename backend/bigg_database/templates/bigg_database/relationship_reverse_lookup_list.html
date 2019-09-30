@@ -6,6 +6,7 @@ Relationship lookup for {{ from_model_name }}
 {% endblock %}
 
 {% block content %}
+    <div id="content" class="container mt-4">
 <h2>The {{ to_model_name }} contain {{ from_model.bigg_id }}</h2>
 
 {% if to_model_name == 'models' %}
@@ -23,4 +24,5 @@ Relationship lookup for {{ from_model_name }}
         {% render_list_tag result_list 'reaction' 'reaction_metabolite_relationship_detail' id=from_model.id contain_stoichiometry=True reverse=True %}
     {% endif %}
 {% endif %}
+    </div>
 {% endblock %}
