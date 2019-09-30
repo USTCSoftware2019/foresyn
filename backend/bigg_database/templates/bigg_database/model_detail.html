@@ -5,8 +5,9 @@ Model: {{ model.bigg_id }}
 {% endblock %}
 
 {% block content %}
-<h4>Model metrics</h4>
-<table>
+    <div id="content" class="container mt-4">
+<h4>Model {{ model.bigg_id }} contains</h4>
+<table class="table table-hover table-bordered mt-3">
     <thead>
     <tr>
         <th>Component</th>
@@ -33,7 +34,9 @@ Model: {{ model.bigg_id }}
 <form method="post" action="{% url 'data_wrapper:add_models' %}">
     {% csrf_token %}
     <input type="number" name="model_pk" value="{{ model.id }}" hidden>
-    <input type="submit" value="add to cobra">
+    <input type="submit" value="add to computation">
 </form>
+
+    </div>
 
 {% endblock %}

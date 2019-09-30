@@ -2,42 +2,87 @@
 {% load render_list_tag %}
 
 {% block title %}
-Reaction: {{ reaction.bigg_id }}
+    Reaction: {{ reaction.bigg_id }}
 {% endblock %}
 
 {% block content %}
 
-<h1>Reaction: {{ reaction.bigg_id }}</h1>
-
-<!-- Just a boolean to mark if it's a pseudo reaction or not. -->
-{% if reaction.pseudoreaction %}
-<span>pseudoreaction</span>
-{% endif %}
-
-<h4>Descriptive name</h4>
-<p>{{ reaction.name }}</p>
-
-<h4>Reaction</h4>
-<p>{{ reaction.reaction_string|safe }}</p>
-
-{% if reaction.database_links %}
-<h4>External database links</h4>
-{% include 'bigg_database/db_links.html' with db_links=reaction.database_links only %}
-{% endif %}
-
-<h4><a href="{% url 'bigg_database:metabolites_in_reaction' reaction.id %}">
-    Related Metabolites</a></h4>
-{% render_list_tag reaction.metabolite_set.all 'metabolite' 'reaction_metabolite_relationship_detail' id=reaction.id %}
-
-<h4><a href="{% url 'bigg_database:reaction_from_models' reaction.id %}">
-    Models Containing {{ reaction.bigg_id }}</a></h4>
-{% render_list_tag reaction.models.all 'model' 'model_reaction_relationship_detail' id=reaction.id reverse=True %}
-
-<form method="post" action="{% url 'data_wrapper:add_reactions' %}">
-    {% csrf_token %}
-    <input type="number" name="model_pk" value="{{ model.id }}">
-    <input type="number" name="reaction_pk" value="{{ reaction.id }}" hidden>
-    <input type="submit" value="add to your model">
-</form>
+    <div id="content" class="container mt-4">
+        <div class="w-100 d-flex justify-content-between">
+            <h4>{{ reaction.name }} Reaction</h4>
+            {% if user.is_authenticated %}
+                <a href="#" data-toggle="modal" data-target="#exampleModal"><h5><i class="fa fa-star-o">Add to my
+                    pack</i></h5></a>
+            {% endif %}
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Are You Sure</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Add the reaction to your pack?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-info">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form method="post" action="{% url 'data_wrapper:add_reactions' %}">
+            {% csrf_token %}
+            <input type="number" name="model_pk" value="{{ model.id }}">
+            <input type="number" name="reaction_pk" value="{{ reaction.id }}" hidden>
+            <input type="submit" value="add to your model">
+        </form>
+        <table class="table table-hover table-bordered mt-3">
+            <tbody>
+            <tr>
+                <td>BIGG ID</td>
+                <td>{{ reaction.bigg_id }}</td>
+            </tr>
+            <tr>
+                <td>Descriptive Name</td>
+                <td>{{ reaction.name }}</td>
+            </tr>
+            <tr>
+                <td>Reaction</td>
+                <td>{{ reaction.reaction_string|safe }}</td>
+            </tr>
+            <tr>
+                <td>Is pseudoreaction?</td>
+                <td>{{ reaction.pseudoreaction }}</td>
+            </tr>
+            {% if reaction.database_links %}
+                <tr>
+                    <td>External Database Links</td>
+                    <td>
+                        {% include 'bigg_database/db_links.html' with db_links=reaction.database_links only %}
+                    </td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td><a href="{% url 'bigg_database:metabolites_in_reaction' reaction.id %}">
+                    Related Metabolites</a></td>
+                <td>
+                    <p>{% render_list_tag reaction.metabolite_set.all 'metabolite' 'reaction_metabolite_relationship_detail' id=reaction.id %}</p>
+                </td>
+            </tr>
+            <tr>
+                <td><a href="{% url 'bigg_database:reaction_from_models' reaction.id %}">
+                    Models Containing {{ reaction.bigg_id }}</a></td>
+                <td>
+                    {% render_list_tag reaction.models.all 'model' 'model_reaction_relationship_detail' id=reaction.id reverse=True %}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 
 {% endblock %}

@@ -71,5 +71,13 @@ div.banner div.des div {color: #B6B4B4; }
 .list-group div.list-group-item {padding: 2em 0;}
 
 .badge-search {
-    float: right
+    float: right;
+}
+
+.table {
+    table-layout: fixed;
+}
+
+.table td {
+    word-wrap: break-word;
 }
