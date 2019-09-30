@@ -5,25 +5,71 @@ Metabolite {{to_model.bigg_id}}
 {% endblock %}
 
 {% block content %}
-<h3>Metebolite {{to_model.bigg_id}}</h3>
-
-<h4>Reaction</h4>
-<p><a href="{% url 'bigg_database:reaction_detail' from_model.id %}">{{ from_model.bigg_id }}</a></p>
-
-<h4>Descriptive name</h4>
-<p>{{to_model.name}}</p>
-
-<h4>Formulae</h4>
-<p>{{to_model.formulae|join:', '}}</p>
-
-<h4>Charges</h4>
-<p>{{to_model.charges}}</p>
-
-<h4>Stoichiometry</h4>
-<p>{{to_model.stoichiometry}}</p>
-
-{% if gene.database_links %}
-<h4>External database links</h4>
-{% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
-{% endif %}
+    <div id="content" class="container mt-4">
+        <div class="w-100 d-flex justify-content-between">
+            <h4>{{ to_model.name }} Metabolite</h4>
+            {% if user.is_authenticated %}
+                <a href="#" data-toggle="modal" data-target="#exampleModal"><h5><i class="fa fa-star-o">Add to my
+                    pack</i></h5></a>
+            {% endif %}
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Are You Sure</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Add the metabolite to your pack?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-info">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table class="table table-hover table-bordered mt-3">
+            <tbody>
+            <tr>
+                <td>Reaction</td>
+                <td><a href="{% url 'bigg_database:reaction_detail' from_model.id %}">{{ from_model.bigg_id }}</a></td>
+            </tr>
+            <tr>
+                <td>BIGG ID</td>
+                <td>{{ to_model.bigg_id }}</td>
+            </tr>
+            <tr>
+                <td>Descriptive Name</td>
+                <td>{{ to_model.name }}</td>
+            </tr>
+            <tr>
+                <td>Formulae</td>
+                <td>{{ to_model.formulae|join:', ' }}</td>
+            </tr>
+            {% if to_model.charges %}
+            <tr>
+                <td>Charges</td>
+                <td>{{ to_model.charges }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td>Stoichiometry</td>
+                <td>{{ to_model.stoichiometry }}</td>
+            </tr>
+            {% if to_model.database_links %}
+                <tr>
+                    <td>External Database Links</td>
+                    <td>
+                        {% include 'bigg_database/db_links.html' with db_links=to_model.database_links only %}
+                    </td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
