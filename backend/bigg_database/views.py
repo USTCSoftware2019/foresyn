@@ -60,8 +60,6 @@ class SearchView(View):
             keyword = form.cleaned_data['q']
 
             query_type = request.GET.get("type")
-            if not query_type:
-                query_type = "model"
 
             queryset = SearchQuerySet().filter(SQ(content__fuzzy=keyword)).order_by('-_score')
 
@@ -72,6 +70,16 @@ class SearchView(View):
                 "model": queryset.models(Model).count()
             }
 
+            if not query_type:
+                if counts["model"]:
+                    query_type = "model"
+                elif counts["gene"]:
+                    query_type = "gene"
+                elif counts["reaction"]:
+                    query_type = "metabolite"
+                else:
+                    query_type = "reaction"
+
             if query_type == "gene":
                 queryset = queryset.models(Gene)
             elif query_type == "reaction":
@@ -81,9 +89,7 @@ class SearchView(View):
             else:
                 queryset = queryset.models(Model)
 
-            all_results = queryset.all()
-
-            paginator = Paginator(all_results, 10)
+            paginator = Paginator(queryset, 10)
             page = request.GET.get('page')
             results = paginator.get_page(page)
 
