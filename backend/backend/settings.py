@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'haystack',
     'corsheaders',
 
+    'biobricks',
     'data_wrapper',
     'cobra_wrapper.apps.CobraWrapperConfig',
     'share',
