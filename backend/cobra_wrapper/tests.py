@@ -116,11 +116,14 @@ class CobraWrapperViewTests(TestCase):
     def test_models_list(self):
         response = self.client.get('/cobra/models/')
         self.assertTemplateUsed(response, 'cobra_wrapper/cobramodel_list.html')
-        for comp in ['id', 'cobra_id', 'name']:
+        # for comp in ['id', 'cobra_id', 'name']:
+        #     self.assertContains(response, comp)
+        # for comp in ['1', 'example_model', 'test']:
+        #     self.assertContains(response, comp)
+        for comp in ['example_model', 'test']:
             self.assertContains(response, comp)
-        for comp in ['1', 'example_model', 'test']:
-            self.assertContains(response, comp)
-        self.assertContains(response, '<a href="/cobra/models/1/">Detail</a>')
+        # self.assertContains(response, '<a href="/cobra/models/1/">Detail</a>')
+        self.assertContains(response, '/cobra/models/1/')
 
     def test_metabolites_detail(self):
         response = self.client.get('/cobra/metabolites/1/')
