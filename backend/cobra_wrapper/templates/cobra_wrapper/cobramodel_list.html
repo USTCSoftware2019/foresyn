@@ -11,16 +11,14 @@
             </div>
             <div class="des ml-3">
                 <h5>My Models</h5>
-                <div>Here contains things you like.</div>
+                <div>Here contains your computational models.</div>
             </div>
         </div>
     </div>
     <div id="my-models" class="container" style="padding: 0px"><br>
-        <h3>My Models</h3>
-        <br>
         {% for object in object_list %}
             {% if forloop.counter0|divisibleby:3 %}
-                <div class="row show_card">
+                <div class="row show_card pt-3">
             {% endif %}
         <div class="col-4">
             <div class="card text-center">
@@ -37,7 +35,7 @@
             </div>
         </div>
 
-            {% if forloop.counter|divisibleby:3 %}
+            {% if forloop.counter0|add:1|divisibleby:3 %}
                 </div>
             {% endif %}
 
