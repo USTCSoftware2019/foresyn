@@ -21,13 +21,13 @@
       <div class="collapse navbar-collapse" id="collapsibleNavbar">
         <ul class="nav navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounts:profile' %}">My Profile</a>
+            <a class="nav-link {% if request.resolver_match.url_name == "profile" %}active{% endif %}" href="{% url 'accounts:profile' %}">My Profile</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'cobra_wrapper:cobramodel_list' %}">My Models</a>
+            <a class="nav-link {% if 'cobra' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'cobra_wrapper:cobramodel_list' %}">My Models</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="guide_book.html">Guide Book</a>
+            <a class="nav-link {% if request.resolver_match.url_name == "guide" %}active{% endif %}" href="{% url 'accounts:guide' %}">Guide Book</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="mypack.html">My Pack</a>
