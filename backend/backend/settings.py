@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'haystack',
     'corsheaders',
+    'crispy_forms',  # add django template cache before deployment
 
     'biobricks',
     'data_wrapper',
@@ -216,3 +217,5 @@ CELERY_TASK_IGNORE_RESULT = True
 #         'rate_limit': '10/s'
 #     }
 # }
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

@@ -59,8 +59,10 @@
               {% for metabolite, coefficient in object.get_metabolites_and_coefficients.items %}
                     <p><a href="{% url 'cobra_wrapper:cobrametabolite_detail' metabolite.pk %}">{{ metabolite }}</a>, {{ coefficient }}</p>
                 {% endfor %}
+
           <h5 class="card-title">Gene Reaction Rule</h5>
-          <p>{{ object.gene_reaction_rule }}</p>
+          <p>{{ object.gene_reaction_rule|default:"None" }}</p>
+
             <br>
             <div class="row justify-content-around">
               <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green" href="{% url 'cobra_wrapper:cobrareaction_update_form' object.pk %}">Edit</a>
