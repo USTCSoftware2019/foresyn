@@ -25,3 +25,6 @@ Dockerfile
 docker-compose.yml
 
 .pylintrc
+
+# vim
+*.swp

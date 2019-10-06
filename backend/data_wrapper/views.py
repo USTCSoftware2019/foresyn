@@ -18,7 +18,6 @@ class AddDataModelToCobra(View):
             model_pk = request.POST["model_pk"]
         except KeyError:
             return JsonResponse({"messages": "pk required"}, status=400)
-        # print(time.time())
         try:
             data_model_object = DataModel.objects.get(pk=model_pk)
         except ObjectDoesNotExist:
@@ -34,7 +33,7 @@ class AddDataModelToCobra(View):
         cobra_model_object.save()
 
         # add reactions & metabolites
-        for data_reaction in data_model_object.reaction_set.all():
+        for data_reaction in data_model_object.reaction_set.all().iterator():
             try:
                 data_model_reaction = ModelReaction.objects.get(model=data_model_object, reaction=data_reaction)
             except ObjectDoesNotExist:
@@ -53,7 +52,6 @@ class AddDataModelToCobra(View):
             cobra_reaction_object.save()
             cobra_model_object.reactions.add(cobra_reaction_object)
 
-        # print(time.time())
         return JsonResponse({"messages": "OK"}, status=200)
 
 
