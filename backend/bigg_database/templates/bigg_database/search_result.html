@@ -1,86 +1,72 @@
 {% extends "base.html" %}
 {% load render_list_tag %}
+{% load calc_index_display_tag %}
+{% load render_link_tag %}
 
 {% block title %}
-    Search result - {{ query }}
+Search result - {{ query }}
 {% endblock %}
 
 {% block content %}
-    <div id="content" class="container mt-4">
-        <div class="row">
-            <div class="left_index col-3">
-                <ul class="list-group text-primary">
-                    <a {% if counts.gene != 0 %} href="?q={{ query }}&type=gene" {% else %} href="#" {% endif %}
-                       class="list-group-item {% if type == "gene" %} chosen {% endif %}
-                                {% if counts.gene == 0 %} disabled {% endif %}">Gene<span
-                            class="badge badge-info badge-search">{{ counts.gene }}</span></a>
-                    <a {% if counts.reaction != 0 %} href="?q={{ query }}&type=reaction" {% else %} href="#" {% endif %}
-                       class="list-group-item {% if type == "reaction" %} chosen {% endif %}
-                                {% if counts.reaction == 0 %} disabled {% endif %}">Reaction<span
-                            class="badge badge-info badge-search">{{ counts.reaction }}</span></a>
-                    <a {% if counts.metabolite != 0 %} href="?q={{ query }}&type=metabolite" {% else %} href="#" {% endif %}
-                       class="list-group-item {% if type == "metabolite" %} chosen {% endif %}
-                                {% if counts.metabolite == 0 %} disabled {% endif %}">Metabolite<span
-                            class="badge badge-info badge-search">{{ counts.metabolite }}</span></a>
-                    <a {% if counts.model != 0 %} href="?q={{ query }}&type=model" {% else %} href="#" {% endif %}
-                       class="list-group-item {% if type == "model" %} chosen {% endif %}
-                            {% if counts.model == 0 %} disabled {% endif %}">Model<span
-                            class="badge badge-info badge-search">{{ counts.model }}</span></a>
-                </ul>
-            </div>
-            <div class="right_content col-9">
-                <h5 class="result_num">Searched for "{{ query }}": {{ this_cnt }} results</h5>
-                <div class="list-group list-group-flush mb-5">
-                    {% if this_cnt == 0 %}
-                        <h3>No results.</h3>
-                    {% else %}
-                        {% for result in results %}
-                            <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
-                                <div class="d-flex w-100 justify-content-between">
-                                    <a class="mb-1" href="{% if type == "model" %}
-{% url 'bigg_database:model_detail' result.pk %} {% elif type == "reaction" %}
-{% url 'bigg_database:reaction_detail' result.pk %} {% elif type == "metabolite" %}
-{% url 'bigg_database:metabolite_detail' result.pk %} {% else %}
-{% url 'bigg_database:gene_detail' result.pk %} {% endif %}"><h5>{{ result.name }}</h5></a>
-                                    <i class="fa fa-star-o mr-2"></i>
-                                </div>
-                                <p class="mb-1">Some basic information here. For example, its ID, function and
-                                    chromosome.</p>
-                                <small>Where it from?</small>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
 
-                </div>
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-center mb-5">
-                        {% if results.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link"
-                                   href="?q={{ query }}&type={{ type }}&page={{ results.previous_page_number }}"
-                                   tabindex="-1">Previous</a>
-                            </li>
-                            <li class="page-item"><a class="page-link"
-                                                     href="?q={{ query }}&type={{ type }}&page=1">1</a></li>
-                            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-                        {% endif %}
+<div id="content" class="container mt-4">
+  <div class="row">
+    <div class="left_index col-3">
+      <ul class="list-group text-primary">
+        <a {% if counts.gene != 0 %} href="?q={{ query }}&model=gene" {% else %} href="#" {% endif %}
+           class="list-group-item {% if type == "gene" %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">
+           Gene<span class="badge badge-info badge-search">{{ counts.gene }}</span>
+        </a>
+        <a {% if counts.reaction != 0 %} href="?q={{ query }}&model=reaction" {% else %} href="#" {% endif %}
+           class="list-group-item {% if type == "reaction" %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">
+           Reaction<span class="badge badge-info badge-search">{{ counts.reaction }}</span>
+        </a>
+        <a {% if counts.metabolite != 0 %} href="?q={{ query }}&model=metabolite" {% else %} href="#" {% endif %} 
+           class="list-group-item {% if type == "metabolite" %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">
+           Metabolite<span class="badge badge-info badge-search">{{ counts.metabolite }}</span>
+        </a>
+        <a {% if counts.model != 0 %} href="?q={{ query }}&model=model" {% else %} href="#" {% endif %}
+           class="list-group-item {% if type == "model" %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">
+           Model<span class="badge badge-info badge-search">{{ counts.model }}</span>
+        </a>
 
-                        <li class="page-item active"><a class="page-link"
-                                                        href="?q={{ query }}&type={{ type }}&page={{ results.number }}">{{ results.number }}</a>
-                        </li>
-                        {% if results.has_next %}
-                            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-                            <li class="page-item"><a class="page-link"
-                                                     href="?q={{ query }}&type={{ type }}&page={{ results.paginator.num_pages }}">{{ results.paginator.num_pages }}</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link"
-                                   href="?q={{ query }}&type={{ type }}&page={{ results.next_page_number }}">Next</a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            </div>
-        </div>
+      </ul>
     </div>
+    <div class="right_content col-9">
+
+      <h5 class="result_num">{{ this_cnt }} result{% if this_cnt <= 1 %}{% else %}s{% endif %} in
+        {{ search_type }}, {{ total_count }} result{% if total_count <= 1 %}{% else %}s{% endif %} in total</h5>
+      <div class="list-group list-group-flush mb-5">
+        {% if this_cnt == 0 %}
+          <h3>No results.</h3>
+        {% else %}
+          {% for search_result in object_list %}
+          <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <a class="mb-1" href="{% render_link_tag search_result %}">
+                <h5>
+                  {{ search_result.bigg_id }}
+                </h5>
+              </a>
+              <i class="fa fa-star-o mr-2"></i>
+            </div>
+            <p class="mb-1">
+              {% ifequal search_type 'model' %}
+              {# **Please determine what to put here** #}
+              {% else %}
+              {{ search_result.name }}
+              {% endifequal %}</p>
+            <small>Bigg Database</small>
+          </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      {% if is_paginated %}
+      {% calc_index_display_tag %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
 {% endblock %}
