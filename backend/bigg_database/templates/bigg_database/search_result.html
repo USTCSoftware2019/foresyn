@@ -14,19 +14,19 @@ Search result - {{ query }}
     <div class="left_index col-3">
       <ul class="list-group text-primary">
         <a {% if counts.gene != 0 %} href="?q={{ query }}&model=gene" {% else %} href="#" {% endif %}
-           class="list-group-item {% if type == "gene" %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">
+           class="list-group-item {% if search_type == "gene" %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">
            Gene<span class="badge badge-info badge-search">{{ counts.gene }}</span>
         </a>
         <a {% if counts.reaction != 0 %} href="?q={{ query }}&model=reaction" {% else %} href="#" {% endif %}
-           class="list-group-item {% if type == "reaction" %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">
+           class="list-group-item {% if search_type == "reaction" %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">
            Reaction<span class="badge badge-info badge-search">{{ counts.reaction }}</span>
         </a>
         <a {% if counts.metabolite != 0 %} href="?q={{ query }}&model=metabolite" {% else %} href="#" {% endif %} 
-           class="list-group-item {% if type == "metabolite" %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">
+           class="list-group-item {% if search_type == "metabolite" %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">
            Metabolite<span class="badge badge-info badge-search">{{ counts.metabolite }}</span>
         </a>
         <a {% if counts.model != 0 %} href="?q={{ query }}&model=model" {% else %} href="#" {% endif %}
-           class="list-group-item {% if type == "model" %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">
+           class="list-group-item {% if search_type == "model" %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">
            Model<span class="badge badge-info badge-search">{{ counts.model }}</span>
         </a>
 
