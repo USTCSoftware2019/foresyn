@@ -19,7 +19,9 @@
     <link rel="stylesheet" href="{% static "css/mycss.css" %}">
 </head>
 <body>
+{% if not ignore_header %}
     {% include "header.html" %}
+{% endif %}
     <div id="content">
         {% block content %}{% endblock %}
     </div>
