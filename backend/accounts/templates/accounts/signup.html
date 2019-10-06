@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block title %}
 Login
 {% endblock %}
 
 {% block content %}
-
-{% if form.errors %}
-<p>Your input does not correspond with our requirements. Please try again.</p>
-{% endif %}
 
 {% if next %}
     {% if user.is_authenticated %}
@@ -19,9 +17,11 @@ Login
     {% endif %}
 {% endif %}
 
+    <div class="container mt-4">
 <form method="post" action="{% url 'accounts:signup' %}">
     {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Submit">
+    {{ form|crispy }}
+    <input type="submit" value="Submit" class="btn btn-primary">
 </form>
+    </div>
 {% endblock %}

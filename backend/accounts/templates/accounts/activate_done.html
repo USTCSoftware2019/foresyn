@@ -5,9 +5,11 @@ Account activation successful
 {% endblock %}
 
 {% block content %}
-    {% if success %}
-        <p>Now you can login your account.</p>
-    {% else %}
-        <p>This activation link is invalid.</p>
-    {% endif %}
+    <div class="container mt-4">
+        {% if success %}
+            <p>Now you can login your account.</p>
+        {% else %}
+            <p>This activation link is invalid.</p>
+        {% endif %}
+    </div>
 {% endblock %}
