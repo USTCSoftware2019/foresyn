@@ -7,22 +7,22 @@ Relationship lookup for {{ from_model_name }}
 
 {% block content %}
     <div id="content" class="container mt-4">
-<h2>The {{ to_model_name }}s in {{ from_model.bigg_id }}</h2>
+        <h2>The {{ to_model_name }}s in {{ from_model.bigg_id }}</h2>
 
-{% if to_model_name == 'metabolite' %}
-    {% if from_model_name == 'model' %}
-        {% render_list_tag result_list 'metabolite' 'model_metabolite_relationship_detail' id=from_model.id contain_organism=True %}
-    {% elif from_model_name == 'reaction' %}
-        {% render_list_tag result_list 'metabolite' 'reaction_metabolite_relationship_detail' id=from_model.id contain_stoichiometry=True %}
-    {% endif %}
-{% elif to_model_name == 'reaction' %}
-    {% render_list_tag result_list 'reaction' 'model_reaction_relationship_detail' id=from_model.id contain_organism=True %}
-{% elif to_model_name == 'gene' %}
-    {% if from_model_name == 'model' %}
-        {% render_list_tag result_list 'gene' 'model_gene_relationship_detail' id=from_model.id %}
-    {% elif from_model_name == 'reaction' %}
-        {% render_list_tag result_list 'gene' 'reaction_gene_relationship_detail' id=from_model.id %}
-    {% endif %}
-{% endif %}
+        {% if to_model_name == 'metabolite' %}
+            {% if from_model_name == 'model' %}
+                {% render_list_tag result_list 'metabolite' 'model_metabolite_relationship_detail' id=from_model.id contain_organism=True %}
+            {% elif from_model_name == 'reaction' %}
+                {% render_list_tag result_list 'metabolite' 'reaction_metabolite_relationship_detail' id=from_model.id contain_stoichiometry=True %}
+            {% endif %}
+        {% elif to_model_name == 'reaction' %}
+            {% render_list_tag result_list 'reaction' 'model_reaction_relationship_detail' id=from_model.id contain_organism=True %}
+        {% elif to_model_name == 'gene' %}
+            {% if from_model_name == 'model' %}
+                {% render_list_tag result_list 'gene' 'model_gene_relationship_detail' id=from_model.id %}
+            {% elif from_model_name == 'reaction' %}
+                {% render_list_tag result_list 'gene' 'reaction_gene_relationship_detail' id=from_model.id %}
+            {% endif %}
+        {% endif %}
     </div>
 {% endblock %}

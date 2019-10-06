@@ -13,6 +13,7 @@ from django.views.generic import DetailView, ListView, View
 from django.views.generic.detail import SingleObjectMixin
 from haystack.generic_views import SearchView as HaystackSearchView
 from haystack.query import SQ, SearchQuerySet
+
 from .common import TopKHeap
 from .forms import ModifiedModelSearchForm
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
@@ -42,6 +43,7 @@ class GeneSearchInfo:
     by = ['bigg_id', 'name']
     view_name = 'gene_detail'
 
+
 # TODO
 # For now, the maximum allowed Levenshtein Edit Distance
 # is set to 2, fixed.
@@ -50,60 +52,46 @@ class GeneSearchInfo:
 # between the user's query and the data in the database, we want
 # the best match ones. Even though the similarity is extremely
 # low
+model_map = {
+    'model': Model,
+    'reaction': Reaction,
+    'metabolite': Metabolite,
+    'gene': Gene
+}
 
 
-class SearchView(View):
-    def get(self, request, *args, **kwargs):
-        form = ModifiedModelSearchForm(request.GET)
+class BiggSearchView(HaystackSearchView):
+    """
+    this will cache count of each search type
+    """
+    form_class = ModifiedModelSearchForm
+    template_name = 'bigg_database/search_result.html'
+    paginate_by = 10  # you can also set paginate_by in settings.py
 
-        if form.is_valid():
-            keyword = form.cleaned_data['q']
+    def form_valid(self, form):
+        self.queryset = form.search()
+        model_to_search = form.model_to_search
+        model_name = form.model_name
 
-            query_type = request.GET.get("type")
+        total_number = form.search_count()
+        current_search_type_count = len(self.queryset)
 
-            queryset = SearchQuerySet().filter(SQ(content__fuzzy=keyword)).order_by('-_score')
+        context = {
+            self.form_name: form,
+            'query': form.cleaned_data.get(self.search_field),
+            'object_list': self.queryset,
+            'search_type': model_name,
+            'this_cnt': current_search_type_count,
+            'total_count': sum(count for _, count in total_number.items()),
+            'counts': total_number
+        }
+        context = self.get_context_data(**context)
+        return self.render_to_response(context)
 
-            counts = {
-                "gene": queryset.models(Gene).count(),
-                "reaction": queryset.models(Reaction).count(),
-                "metabolite": queryset.models(Metabolite).count(),
-                "model": queryset.models(Model).count()
-            }
-
-            if not query_type:
-                if counts["model"]:
-                    query_type = "model"
-                elif counts["gene"]:
-                    query_type = "gene"
-                elif counts["reaction"]:
-                    query_type = "metabolite"
-                else:
-                    query_type = "reaction"
-
-            if query_type == "gene":
-                queryset = queryset.models(Gene)
-            elif query_type == "reaction":
-                queryset = queryset.models(Reaction)
-            elif query_type == "metabolite":
-                queryset = queryset.models(Metabolite)
-            else:
-                queryset = queryset.models(Model)
-
-            paginator = Paginator(queryset, 10)
-            page = request.GET.get('page')
-            results = paginator.get_page(page)
-
-            context = {}
-
-            context['query'] = form.cleaned_data['q']
-            context['results'] = results
-            context['type'] = query_type
-            context['counts'] = counts
-            context['this_cnt'] = counts[query_type]
-
-            return render(request, 'bigg_database/search_result.html', context=context)
-        else:
-            return redirect("/")
+    def form_invalid(self, form):
+        return render(self.request, 'bigg_database/search.html', context={
+            'form': form
+        })
 
 
 class ModelDetailView(DetailView):

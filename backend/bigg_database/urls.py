@@ -5,7 +5,7 @@ from . import api_views
 
 app_name = 'bigg_database'
 urlpatterns = [
-    path('search', views.SearchView.as_view(),
+    path('search', views.BiggSearchView.as_view(),
          name='search'),
     path('model/<int:pk>', views.ModelDetailView.as_view(),
          name='model_detail'),

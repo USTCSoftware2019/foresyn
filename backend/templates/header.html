@@ -9,7 +9,7 @@
         Foresyn
       </span>
       <form class="form-inline" action="{% url "bigg_database:search" %}">
-        <input class="form-control form-control-sm mr-sm-2 form-circle" type="search" placeholder="Search" aria-label="Search" name="q">
+        <input class="form-control form-control-sm mr-sm-2 form-circle" type="search" placeholder="Search" aria-label="Search" name="q" value="{{ request.GET.q }}">
       </form>
 
       <!-- Toggler/collapsibe Button -->

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load render_list_tag %}
 
 {% block title %}
 Model: {{ model.bigg_id }}
@@ -6,36 +7,36 @@ Model: {{ model.bigg_id }}
 
 {% block content %}
     <div id="content" class="container mt-4">
-<h4>Model {{ model.bigg_id }} contains</h4>
-<table class="table table-hover table-bordered mt-3">
-    <thead>
-    <tr>
-        <th>Component</th>
-        <th>Count</th>
-    </tr>
-    </thead>
-    <tbody>
-    <!-- Row clickable or count clickable? -->
-    <tr>
-        <td>Reactions</td>
-        <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a></td>
-    </tr>
-    <tr>
-        <td>Metabolites</td>
-        <td><a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a></td>
-    </tr>
-    <tr>
-        <td>Genes</td>
-        <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
-    </tr>
-    </tbody>
-</table>
+        <h4>Model {{ model.bigg_id }} contains</h4>
+        <table class="table table-hover table-bordered mt-3">
+            <thead>
+            <tr>
+                <th>Component</th>
+                <th>Count</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Row clickable or count clickable? -->
+            <tr>
+                <td>Reactions</td>
+                <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a></td>
+            </tr>
+            <tr>
+                <td>Metabolites</td>
+                <td><a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a></td>
+            </tr>
+            <tr>
+                <td>Genes</td>
+                <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
+            </tr>
+            </tbody>
+        </table>
 
-<form method="post" action="{% url 'data_wrapper:add_models' %}">
-    {% csrf_token %}
-    <input type="number" name="model_pk" value="{{ model.id }}" hidden>
-    <input type="submit" value="add to computation">
-</form>
+        <form method="post" action="{% url 'data_wrapper:add_models' %}">
+            {% csrf_token %}
+            <input type="number" name="model_pk" value="{{ model.id }}" hidden>
+            <input type="submit" value="add to computation">
+        </form>
 
     </div>
 
