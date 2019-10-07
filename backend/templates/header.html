@@ -30,7 +30,7 @@
             <a class="nav-link {% if request.resolver_match.url_name == "guide" %}active{% endif %}" href="{% url 'accounts:guide' %}">Guide Book</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="mypack.html">My Pack</a>
+            <a class="nav-link {% if request.resolver_match.url_name == "pack" %}active{% endif %}" href="{% url 'accounts:pack' %}">My Pack</a>
           </li>
           <!-- <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

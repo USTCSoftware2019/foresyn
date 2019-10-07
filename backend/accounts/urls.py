@@ -10,4 +10,5 @@ urlpatterns = [
     path('activate/<str:uidb64>/<str:token>', views.UserActivation.as_view(), name='activate'),
     path('profile/', views.UserProfile.as_view(), name='profile'),
     path('guide/', TemplateView.as_view(template_name="accounts/guide_book.html"), name="guide"),
+    path('pack/', TemplateView.as_view(template_name="accounts/pack.html"), name='pack')
 ]

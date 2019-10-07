@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}
+My Pack
+{% endblock %}
+
+{% block content %}
+    <div class="banner w-100">
+    <div class="container d-flex align-items-center">
+      <div class="icon bg-info text-white d-flex justify-content-center align-items-center">
+        <i class="fa fa-star fa-2x"></i>
+      </div>
+      <div class="des ml-3">
+        <h5>My Pack</h5>
+        <div>Here contains things you like.</div>
+      </div>
+    </div>
+  </div>
+  <div class="container mt-4">
+    <div class="row">
+      <div class="left_index col-3">
+        <ul class="list-group text-primary">
+          <li class="list-group-item chosen">Gene<span class="badge badge-info">56</span></li>
+          <li class="list-group-item">Reaction<span class="badge badge-info">56</span></li>
+          <li class="list-group-item">Metabolite<span class="badge badge-info">56</span></li>
+          <li class="list-group-item">Model<span class="badge badge-info">56</span></li>
+          <li class="list-group-item">Biobricks<span class="badge badge-info">56</span></li>
+        </ul>
+      </div>
+      <div class="right_content col-9">
+
+        <h5 class="result_num">234 results</h5>
+        <div class="list-group list-group-flush mb-5">
+          <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <a class="mb-1" href="#"><h5>Gene Name</h5></a>
+              <i class="fa fa-star-o mr-2"></i>
+            </div>
+            <p class="mb-1">Some basic information here. For example, its ID, function and chromosome.</p>
+            <small>Where it from?</small>
+          </div>
+          <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <a class="mb-1" href="#"><h5>Gene Name</h5></a>
+              <i class="fa fa-star mr-2"></i>
+            </div>
+            <p class="mb-1">Some basic information here. For example, its ID, function and chromosome.</p>
+            <small>Where it from?</small>
+          </div>
+          <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <a class="mb-1" href="#"><h5>Gene Name</h5></a>
+              <i class="fa fa-star mr-2"></i>
+            </div>
+            <p class="mb-1">Some basic information here. For example, its ID, function and chromosome.</p>
+            <small>Where it from?</small>
+          </div>
+          <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <a class="mb-1" href="#"><h5>Gene Name</h5></a>
+              <i class="fa fa-star-o mr-2"></i>
+            </div>
+            <p class="mb-1">Some basic information here. For example, its ID, function and chromosome.</p>
+            <small>Where it from?</small>
+          </div>
+        </div>
+        <nav aria-label="Page navigation example">
+          <ul class="pagination justify-content-center mb-5">
+            <li class="page-item">
+              <a class="page-link" href="#" tabindex="-1">Previous</a>
+            </li>
+            <li class="page-item"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item active"><a class="page-link" href="#">3</a></li>
+            <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+            <li class="page-item"><a class="page-link" href="#">99</a></li>
+            <li class="page-item"><a class="page-link" href="#">100</a></li>
+            <li class="page-item">
+              <a class="page-link" href="#">Next</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+{% endblock %}
