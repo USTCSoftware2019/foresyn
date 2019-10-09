@@ -29,13 +29,15 @@ class CobraReactionForm(forms.ModelForm):
 class CobraModelForm(forms.ModelForm):
     def __init__(self, owner, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['reactions'] = forms.ModelMultipleChoiceField(
-            CobraReaction.objects.filter(owner=owner), required=False
-        )
+        # self.fields['reactions'] = forms.ModelMultipleChoiceField(
+        #     CobraReaction.objects.filter(owner=owner), required=False
+        # )
 
     class Meta:
         model = CobraModel
-        fields = ['cobra_id', 'name', 'reactions', 'objective']
+        fields = ['cobra_id', 'name',
+                  # 'reactions',
+                  'objective']
 
 
 class CobraFvaForm(forms.ModelForm):
