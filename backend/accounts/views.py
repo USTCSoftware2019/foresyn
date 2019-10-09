@@ -2,15 +2,19 @@ from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View, CreateView
 from .forms import UserSignUpForm
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
+from .models import PackModel, PackReaction, PackGene, PackMetabolite, PackComputationalModel
 
 
 class UserSignUp(CreateView):
@@ -88,3 +92,88 @@ class UserProfile(LoginRequiredMixin, View):
             user.save()
 
         return redirect("accounts:profile")
+
+
+@method_decorator(csrf_exempt, name='dispatch')  # temporary workaround
+class UserPack(LoginRequiredMixin, View):
+    def get_obj(self, user, obj_type, pk):
+        if obj_type == "model":
+            return PackModel.objects.filter(user=user, model=pk)
+        elif obj_type == "usermodel":
+            return PackComputationalModel.objects.filter(user=user, model=pk)  # FIXME
+        elif obj_type == "reaction":
+            return PackReaction.objects.filter(user=user, reaction=pk)
+        elif obj_type == "gene":
+            return PackGene.objects.filter(user=user, gene=pk)
+        elif obj_type == "metabolite":
+            return PackMetabolite.objects.filter(user=user, metabolite=pk)
+        elif obj_type == "biobrick":
+            raise NotImplemented
+
+    def get(self, request):
+        obj_type = request.POST.get("type")
+
+        counts = {
+            "model": PackModel.objects.filter(user=request.user).count(),
+            "usermodel": PackComputationalModel.objects.filter(user=request.user).count(),
+            "reaction": PackReaction.objects.filter(user=request.user).count(),
+            "gene": PackGene.objects.filter(user=request.user).count(),
+            "metabolite": PackMetabolite.objects.filter(user=request.user).count()
+        }
+
+        if not obj_type:
+            obj_type = "model"
+
+        queryset = None
+        if obj_type == "model":
+            queryset = PackModel.objects.filter(user=request.user)
+        elif obj_type == "usermodel":
+            queryset = PackComputationalModel.objects.filter(user=request.user)
+        elif obj_type == "reaction":
+            queryset = PackReaction.objects.filter(user=request.user)
+        elif obj_type == "gene":
+            queryset = PackGene.objects.filter(user=request.user)
+        elif obj_type == "metabolite":
+            queryset = PackMetabolite.objects.filter(user=request.user)
+        elif obj_type == "biobrick":
+            raise NotImplemented
+
+        return render(request, "accounts/pack.html", {
+            "type": obj_type,
+            "counts": counts,
+            "this_cnt": queryset.count(),
+            "queryset": queryset
+        })
+
+    def post(self, request):
+        obj_type = request.POST.get("type")
+        action = request.POST.get("action")
+        pk = request.POST.get("pk")
+        obj = self.get_obj(request.user, obj_type, pk)
+        if action == "query":
+            if not obj:
+                return JsonResponse({"result": 0})
+            else:
+                return JsonResponse({"result": 1})
+            pass
+        elif action == "add":
+            if not obj:
+                if obj_type == "model":
+                    return PackModel.objects.create(user=request.user, model=pk)
+                elif obj_type == "usermodel":
+                    return PackComputationalModel.objects.create(user=request.user, model=pk)  # FIXME
+                elif obj_type == "reaction":
+                    return PackReaction.objects.filter(user=request.user, reaction=pk)
+                elif obj_type == "gene":
+                    return PackGene.objects.filter(user=request.user, gene=pk)
+                elif obj_type == "metabolite":
+                    return PackMetabolite.objects.filter(user=request.user, metabolite=pk)
+                elif obj_type == "biobrick":
+                    raise NotImplemented
+        elif action == "delete":
+            if obj:
+                obj.delete()
+        else:
+            return HttpResponse("error")
+
+        return HttpResponse("ok")
