@@ -7,114 +7,25 @@ from django.core.exceptions import ValidationError
 import cobra
 
 
-class CobraMetabolite(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    cobra_id = models.CharField(max_length=511)
-    name = models.CharField(max_length=511, blank=True, default='')
-    formula = models.CharField(max_length=127)
-    charge = models.FloatField()
-    compartment = models.CharField(max_length=50, blank=True, default='')
-
-    class Meta:
-        verbose_name = "metabolite"
-        ordering = ['cobra_id', 'name']
-
-    def __str__(self):
-        return '{}[{}]'.format(self.cobra_id, self.name)
-
-    def get_absolute_url(self):
-        return reverse("cobra_wrapper:cobrametabolite_detail", kwargs={"pk": self.pk})
-
-    def build(self):
-        return cobra.Metabolite(
-            self.cobra_id,
-            name=self.name,
-            formula=self.formula,
-            charge=self.charge,
-            compartment=(self.compartment if self.compartment else None)
-        )
-
-
-def validate_coefficients_space_splited_text(value):
-    for coefficient in value.split():
-        try:
-            float(coefficient)
-        except ValueError:
-            raise ValidationError('%(value)s in coefficients is not a float', params={'value': coefficient})
-
-
-class CobraReaction(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    cobra_id = models.CharField(max_length=511)
-    name = models.CharField(max_length=511, blank=True, default='')
-    subsystem = models.CharField(max_length=127, blank=True, null=True, default='')
-    lower_bound = models.FloatField(default=0.0)
-    upper_bound = models.FloatField(blank=True, null=True, default=None)
-    metabolites = models.ManyToManyField(CobraMetabolite, blank=True)
-    coefficients = models.TextField(blank=True, default='', validators=[validate_coefficients_space_splited_text])
-    gene_reaction_rule = models.TextField(blank=True, default='')
-
-    class Meta:
-        verbose_name = "reaction"
-        ordering = ['cobra_id', 'name']
-
-    def __str__(self):
-        return '{}[{}]'.format(self.cobra_id, self.name)
-
-    def get_absolute_url(self):
-        return reverse('cobra_wrapper:cobrareaction_detail', kwargs={'pk': self.pk})
-
-    def build(self):
-        cobra_reaction = cobra.Reaction(
-            self.cobra_id,
-            name=self.name,
-            subsystem=self.subsystem,
-            lower_bound=self.lower_bound,
-            upper_bound=self.upper_bound
-        )
-        cobra_reaction.add_metabolites(self._get_metabolites_and_coefficients())
-        cobra_reaction.gene_reaction_rule = self.gene_reaction_rule
-        return cobra_reaction
-
-    def get_metabolites_and_coefficients(self):
-        """Used in templates"""
-        return dict(zip(
-            self.metabolites.all(),
-            [float(coefficient) for coefficient in self.coefficients.split()]
-        ))
-
-    def _get_metabolites_and_coefficients(self):
-        return dict(zip(
-            [metabolite.build() for metabolite in self.metabolites.all()],
-            [float(coefficient) for coefficient in self.coefficients.split()]
-        ))
-
-
 class CobraModel(models.Model):
+    sbml_content = models.TextField()
+    name = models.CharField(max_length=127)
+    objective = models.CharField(max_length=50)
+
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    cobra_id = models.CharField(max_length=127)
-    name = models.CharField(max_length=127, blank=True, default='')
-    reactions = models.ManyToManyField(CobraReaction, blank=True)
-    objective = models.CharField(max_length=50, default='', blank=True)
 
     class Meta:
         verbose_name = 'model'
-        ordering = ['cobra_id', 'name']
+        ordering = ['name']
 
     def __str__(self):
-        return '{}[{}]'.format(self.cobra_id, self.name)
+        return self.name
 
     def get_absolute_url(self):
         return reverse('cobra_wrapper:cobramodel_detail', kwargs={'pk': self.pk})
 
     def build(self):
-        cobra_model = cobra.Model(
-            self.cobra_id,
-            name=self.name,
-        )
-        cobra_model.add_reactions([reaction.build() for reaction in self.reactions.all()])
-        cobra_model.objective = self.objective
-        return cobra_model
+        return cobra.io.read_sbml_model(self.sbml_content)
 
 
 def validate_json_str_or_blank_str(value):
@@ -127,6 +38,7 @@ def validate_json_str_or_blank_str(value):
 
 class CobraFba(models.Model):
     desc = models.TextField(blank=True, default='')
+
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     task_id = models.UUIDField(null=True, blank=True, default=None)
@@ -145,11 +57,12 @@ class CobraFba(models.Model):
 
 class CobraFva(models.Model):
     desc = models.TextField(blank=True, default='')
+    reaction_list = models.TextField()
+    loopless = models.BooleanField(default=False)
+    fraction_of_optimum = models.FloatField(default=1.0)
+    pfba_factor = models.BooleanField(blank=True)
+
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
-    reaction_list = models.ManyToManyField(CobraReaction, blank=True)
-    loopless = models.BooleanField(default=False, blank=True)
-    fraction_of_optimum = models.FloatField(default=1.0, blank=True)
-    pfba_factor = models.NullBooleanField(default=None, blank=True)
     start_time = models.DateTimeField(auto_now_add=True)
     task_id = models.UUIDField(null=True, blank=True, default=None)
     result = models.TextField(blank=True, default='', validators=[validate_json_str_or_blank_str])
@@ -165,67 +78,21 @@ class CobraFva(models.Model):
         return reverse('cobra_wrapper:cobrafva_detail', kwargs={'model_pk': self.model.pk, 'pk': self.pk})
 
 
-class CobraMetaboliteChange(models.Model):
-    fields = models.CharField(max_length=200, blank=True)
-    previous_values = models.TextField(blank=True)
-    values = models.TextField(blank=True)
-    time = models.DateTimeField(auto_now_add=True)
-    instance = models.ForeignKey(CobraMetabolite, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = 'metabolite_change'
-        ordering = ['-time']
-
-    def __str__(self):
-        if self.fields:
-            return '{} is changed from {} to {} at {}'.format(
-                self.fields,
-                self.previous_values if len(self.previous_values) < 20 else self.previous_values[:17] + '...',
-                self.values if len(self.values) < 20 else self.values[:17] + '...',
-                self.time.isoformat())
-        else:
-            return 'the instance is created at {}'.format(self.time.isoformat())
-
-
-class CobraReactionChange(models.Model):
-    fields = models.CharField(max_length=200, blank=True)
-    previous_values = models.TextField(blank=True)
-    values = models.TextField(blank=True)
-    time = models.DateTimeField(auto_now_add=True)
-    instance = models.ForeignKey(CobraReaction, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = 'reaction_change'
-        ordering = ['-time']
-
-    def __str__(self):
-        if self.fields:
-            return '{} is changed from {} to {} at {}'.format(
-                self.fields,
-                self.previous_values if len(self.previous_values) < 20 else self.previous_values[:17] + '...',
-                self.values if len(self.values) < 20 else self.values[:17] + '...',
-                self.time.isoformat())
-        else:
-            return 'the instance is created at {}'.format(self.time.isoformat())
-
-
 class CobraModelChange(models.Model):
+    # When `fields` is blank, the change is actually a creation record of the model
+    model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
     fields = models.CharField(max_length=200, blank=True)
     previous_values = models.TextField(blank=True)
     values = models.TextField(blank=True)
     time = models.DateTimeField(auto_now_add=True)
-    instance = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'model_change'
         ordering = ['-time']
 
     def __str__(self):
+        """Use the method to get shown text of the change"""
         if self.fields:
-            return '{} is changed from {} to {} at {}'.format(
-                self.fields,
-                self.previous_values if len(self.previous_values) < 20 else self.previous_values[:17] + '...',
-                self.values if len(self.values) < 20 else self.values[:17] + '...',
-                self.time.isoformat())
+            return '{} is changed from {} to {}'.format(self.fields, self.previous_values, self.values)
         else:
-            return 'the instance is created at {}'.format(self.time.isoformat())
+            return 'created'
