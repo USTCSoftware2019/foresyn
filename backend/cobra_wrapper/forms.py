@@ -3,7 +3,7 @@ from django import forms
 from .models import CobraModel, CobraFva
 
 
-# TODO(myl7): Fix all forms
+# TODO(myl7): Reaction creation forms
 # class CobraReactionForm(forms.ModelForm):
 #     def __init__(self, owner, *args, **kwargs):
 #         super().__init__(*args, **kwargs)
@@ -27,25 +27,14 @@ from .models import CobraModel, CobraFva
 #             self.add_error('coefficients', 'len of coefficients and metabolites are not the same')
 
 
+# TODO(myl7): Limit choices
 class CobraModelForm(forms.ModelForm):
-    def __init__(self, owner, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # self.fields['reactions'] = forms.ModelMultipleChoiceField(
-        #     CobraReaction.objects.filter(owner=owner), required=False
-        # )
-
     class Meta:
         model = CobraModel
-        fields = ['name', 'objective']
+        fields = ['sbml_content', 'name', 'objective']
 
 
 class CobraFvaForm(forms.ModelForm):
-    def __init__(self, owner, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # self.fields['reaction_list'] = forms.ModelMultipleChoiceField(
-        #     CobraReaction.objects.filter(owner=owner), required=False
-        # )
-
     class Meta:
         model = CobraFva
         fields = ['desc', 'reaction_list', 'loopless', 'fraction_of_optimum', 'pfba_factor']

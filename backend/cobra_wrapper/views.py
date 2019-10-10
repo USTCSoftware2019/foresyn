@@ -21,26 +21,19 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['changes'] = CobraModelChange.objects.filter(instance=self.object)
-        return context
-
 
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraModel
-
-    def get_form(self, form_class=None):
-        return CobraModelForm(self.request.user, **self.get_form_kwargs())
+    form_class = CobraModelForm
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
         response = super().form_valid(form)
-        CobraModelChange.objects.create(fields='', previous_values='', values='', instance=form.instance)
+        CobraModelChange.objects.create(fields='', model=form.instance)
         return response
 
-# TODO(myl7): Deletion for reactions
+# TODO(myl7): Creation and deletion for reactions
 
 
 class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
@@ -50,6 +43,7 @@ class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
+# FIXME(myl7): As we use sbml to store models, the changes should be reaction deletion or creation changes
 class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
     template_name_suffix = '_update_form'
 
@@ -76,30 +70,34 @@ class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
         return response
 
 
-class CobraFbaListView(LoginRequiredMixin, ListView):
-    def get_queryset(self):
-        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
-        return model.cobrafba_set.all()
-
+class TemplateAddModelPkMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['model_pk'] = self.kwargs['model_pk']
         return context
 
 
-class CobraFbaDetailView(LoginRequiredMixin, DetailView):
-    def get_object(self, queryset=None):
-        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
-        return get_object_or_404(model.cobrafba_set.all(), pk=self.kwargs['pk'])
-
+class TemplateAddResultMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['model_pk'] = self.kwargs['model_pk']
         context['result'] = json.loads(self.object.result) if self.object.result else None
         return context
 
 
-class CobraFbaCreateView(LoginRequiredMixin, CreateView):
+class CobraFbaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView):
+    def get_queryset(self):
+        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return model.cobrafba_set.all()
+
+
+class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAddResultMixin, DetailView):
+    def get_object(self, queryset=None):
+        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return get_object_or_404(model.cobrafba_set.all(), pk=self.kwargs['pk'])
+
+
+# TODO(myl7): New creation view
+class CobraFbaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraFba
     fields = ['desc']
@@ -120,53 +118,33 @@ class CobraFbaCreateView(LoginRequiredMixin, CreateView):
         self.object.save()
         return response
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['model_pk'] = self.kwargs['model_pk']
-        return context
-
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrafba_list', kwargs={'model_pk': self.kwargs['model_pk']})
 
 
-class CobraFbaDeleteView(LoginRequiredMixin, DeleteView):
+class CobraFbaDeleteView(LoginRequiredMixin, TemplateAddModelPkMixin, DeleteView):
     def get_object(self, queryset=None):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.cobrafba_set.all(), pk=self.kwargs['pk'])
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['model_pk'] = self.kwargs['model_pk']
-        return context
-
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrafba_list', kwargs={'model_pk': self.kwargs['model_pk']})
 
 
-class CobraFvaListView(LoginRequiredMixin, ListView):
+class CobraFvaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView):
     def get_queryset(self):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return model.cobrafva_set.all()
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['model_pk'] = self.kwargs['model_pk']
-        return context
 
-
-class CobraFvaDetailView(LoginRequiredMixin, DetailView):
+class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAddResultMixin, DetailView):
     def get_object(self, queryset=None):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.cobrafva_set.all(), pk=self.kwargs['pk'])
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['model_pk'] = self.kwargs['model_pk']
-        context['result'] = json.loads(self.object.result) if self.object.result else None
-        return context
 
-
-class CobraFvaCreateView(LoginRequiredMixin, CreateView):
+# TODO(myl7): New creation view
+class CobraFvaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraFva
 
@@ -198,24 +176,14 @@ class CobraFvaCreateView(LoginRequiredMixin, CreateView):
         self.object.save()
         return response
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['model_pk'] = self.kwargs['model_pk']
-        return context
-
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrafva_list', kwargs={'model_pk': self.kwargs['model_pk']})
 
 
-class CobraFvaDeleteView(LoginRequiredMixin, DeleteView):
+class CobraFvaDeleteView(LoginRequiredMixin, TemplateAddModelPkMixin, DeleteView):
     def get_object(self, queryset=None):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.cobrafva_set.all(), pk=self.kwargs['pk'])
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['model_pk'] = self.kwargs['model_pk']
-        return context
 
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrafva_list', kwargs={'model_pk': self.kwargs['model_pk']})
