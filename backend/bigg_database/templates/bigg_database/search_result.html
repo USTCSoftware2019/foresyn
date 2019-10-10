@@ -7,8 +7,17 @@
 Search result - {{ query }}
 {% endblock %}
 
-{% block content %}
+{% block page_style %}
+.left_index ul li {cursor: pointer;}
+.left_index ul li span {float: right;}
+.left_index ul li:hover {background: #f1f1f1;}
+.left_index li.chosen {background: #dddddd;}
+.result_num {line-height: 35px;}
+.list-group div.list-group-item {padding: 2em 0;}
+.list-group div.list-group-item:hover {background: #ffffff;}
+{% endblock %}
 
+{% block content %}
 <div id="content" class="container mt-4">
   <div class="row">
     <div class="left_index col-3">

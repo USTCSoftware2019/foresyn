@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -17,14 +18,20 @@
     <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
 
     <link rel="stylesheet" href="{% static "css/mycss.css" %}">
+    <style>
+        {% block page_style %}
+        {% endblock %}
+    </style>
 </head>
+
 <body>
-{% if not ignore_header %}
+    {% if not ignore_header %}
     {% include "header.html" %}
-{% endif %}
-{#    <div id="content">#}
-        {% block content %}{% endblock %}
-{#    </div>#}
+    {% endif %}
+    {#    <div id="content">#}
+    {% block content %}{% endblock %}
+    {#    </div>#}
     {% include "footer.html" %}
 </body>
+
 </html>
