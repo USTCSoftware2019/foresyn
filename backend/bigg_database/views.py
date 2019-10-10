@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from django.shortcuts import Http404, render, reverse, redirect
+from django.shortcuts import Http404, redirect, render, reverse
 from django.utils.translation import gettext as _
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.detail import SingleObjectMixin
@@ -15,83 +15,8 @@ from haystack.generic_views import SearchView as HaystackSearchView
 from haystack.query import SQ, SearchQuerySet
 
 from .common import TopKHeap
-from .forms import ModifiedModelSearchForm
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
                      Reaction, ReactionGene, ReactionMetabolite)
-
-
-class ModelSearchInfo:
-    search_model = Model
-    by = ['bigg_id']
-    view_name = 'model_detail'
-
-
-class MetaboliteSearchInfo:
-    search_model = Metabolite
-    by = ['bigg_id', 'name']
-    view_name = 'metabolite_detail'
-
-
-class ReactionSearchInfo:
-    search_model = Reaction
-    by = ['bigg_id', 'name']
-    view_name = 'reaction_detail'
-
-
-class GeneSearchInfo:
-    search_model = Gene
-    by = ['bigg_id', 'name']
-    view_name = 'gene_detail'
-
-
-# TODO
-# For now, the maximum allowed Levenshtein Edit Distance
-# is set to 2, fixed.
-# See: http://en.wikipedia.org/wiki/Levenshtein_distance
-# However, what we want is that, no matter how much difference
-# between the user's query and the data in the database, we want
-# the best match ones. Even though the similarity is extremely
-# low
-model_map = {
-    'model': Model,
-    'reaction': Reaction,
-    'metabolite': Metabolite,
-    'gene': Gene
-}
-
-
-class BiggSearchView(HaystackSearchView):
-    """
-    this will cache count of each search type
-    """
-    form_class = ModifiedModelSearchForm
-    template_name = 'bigg_database/search_result.html'
-    paginate_by = 10  # you can also set paginate_by in settings.py
-
-    def form_valid(self, form):
-        self.queryset = form.search()
-        model_to_search = form.model_to_search
-        model_name = form.model_name
-
-        total_number = form.search_count()
-        current_search_type_count = len(self.queryset)
-
-        context = {
-            self.form_name: form,
-            'query': form.cleaned_data.get(self.search_field),
-            'object_list': self.queryset,
-            'search_type': model_name,
-            'this_cnt': current_search_type_count,
-            'total_count': sum(count for _, count in total_number.items()),
-            'counts': total_number
-        }
-        context = self.get_context_data(**context)
-        return self.render_to_response(context)
-
-    def form_invalid(self, form):
-        return render(self.request, 'bigg_database/search.html', context={
-            'form': form
-        })
 
 
 class ModelDetailView(DetailView):

@@ -30,6 +30,9 @@ class Model(_models.Model):
     compartments = JSONField()
     version = _models.CharField(max_length=127)
 
+    class Meta:
+        verbose_name = 'Model'
+
 
 class Reaction(_models.Model):
     bigg_id = _models.CharField(max_length=127, unique=True, db_index=True)
@@ -41,6 +44,9 @@ class Reaction(_models.Model):
     pseudoreaction = _models.BooleanField()
 
     database_links = JSONField()
+
+    class Meta:
+        verbose_name = 'Reaction'
 
 
 class Metabolite(_models.Model):
@@ -56,6 +62,9 @@ class Metabolite(_models.Model):
     charges = _models.IntegerField(blank=True, null=True)
 
     database_links = JSONField()
+
+    class Meta:
+        verbose_name = 'Metabolite'
 
 
 class Gene(_models.Model):
@@ -84,6 +93,8 @@ class Gene(_models.Model):
             _models.CheckConstraint(check=_models.Q(rightpos__gte=_models.F('leftpos')),
                                     name='right_gte_left')
         ]
+
+        verbose_name = 'Gene'
 
 
 class ReactionGene(_models.Model):
