@@ -7,8 +7,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import Form
 import cobra
 
-from .models import CobraModel, CobraFba, CobraFva, CobraModelChange
-from .forms import CobraModelCreateForm, CobraModelUpdateForm, CobraFvaForm
+from .models import CobraModel, CobraFba, CobraFva
+from .forms import CobraModelCreateForm, cobra_model_update_forms, CobraFvaForm
 
 from backend.celery import app
 
@@ -21,6 +21,11 @@ class CobraModelListView(LoginRequiredMixin, ListView):
 class CobraModelDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data()
+        context_data['cobra_model'] = self.object.build()
+        return context_data
 
 
 class CobraModelCreateView(LoginRequiredMixin, CreateView):
@@ -49,24 +54,20 @@ class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
-    def get_form(self, form_class=None):
-        return CobraModelUpdateForm(self.get_object().build(), **self.get_form_kwargs())
+    def get_forms(self):
+        return [form() for form in cobra_model_update_forms]
 
-    def form_valid(self, form: CobraModelUpdateForm):
+    def get_context_data(self, **kwargs):
+        kwargs['form'] = None  # Disable get_form
+        context_data = super().get_context_data(**kwargs)
+        context_data['forms'] = self.get_forms()
+        return context_data
+
+    def form_valid(self, form: Form):
         response = super().form_valid(form)
-        instance = self.get_object()
-        change = CobraModelChange(change_type=form.cleaned_data['change_type'], model=instance)
-        if form.cleaned_data['change_type'] != 'sbml_content':
-            change.pre_info = getattr(self.object, form.cleaned_data['change_type'])
-            change.new_info = getattr(form, form.cleaned_data['change_type'])
-        change.save()
-        setattr(instance, form.cleaned_data['change_type'], form.cleaned_data[form.cleaned_data['change_type']])
-        instance.save()
+        model = self.get_object()
+        form.save(model)
         return response
-
-
-class CobraModelReactionUpdateView(LoginRequiredMixin, UpdateView):  # TODO(myl7)
-    pass
 
 
 class TemplateAddModelPkMixin:

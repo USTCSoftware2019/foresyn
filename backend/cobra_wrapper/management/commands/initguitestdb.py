@@ -1,8 +1,10 @@
+import io
 import os
 import subprocess
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
+import cobra.test
 
 from backend.settings import BASE_DIR
 from cobra_wrapper.models import CobraModel
@@ -17,7 +19,10 @@ def main():
 
     user = User.objects.create_superuser('test', '', 'test123456')
 
-    # TODO(myl7): Create model
+    sbml_file = io.StringIO()
+    # The func in libsbml can actually accept file-like object
+    cobra.io.write_sbml_model(cobra.test.create_test_model(), sbml_file)
+    CobraModel.objects.create(name='example_model', objective='', sbml_content=sbml_file.read(), owner=user)
 
 
 class Command(BaseCommand):

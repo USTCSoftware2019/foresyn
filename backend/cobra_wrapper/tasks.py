@@ -3,14 +3,17 @@ from celery import shared_task
 from .models import CobraFba, CobraFva
 
 
+def get_object_or_none(model_class, pk):
+    try:
+        return model_class.objects.get(pk=pk)
+    except CobraFba.DoesNotExist:
+        return None
+
+
 @shared_task
 def cobra_fba_save(pk, result, task_id):
-    try:
-        instance = CobraFba.objects.get(pk=pk)
-    except CobraFba.DoesNotExist:
-        return
-
-    if str(instance.task_id) != task_id:
+    instance = get_object_or_none(CobraFba, pk)
+    if instance is None or str(instance.task_id) != task_id:
         return
 
     instance.result = result
@@ -21,12 +24,8 @@ def cobra_fba_save(pk, result, task_id):
 
 @shared_task
 def cobra_fva_save(pk, result, task_id):
-    try:
-        instance = CobraFva.objects.get(pk=pk)
-    except CobraFba.DoesNotExist:
-        return
-
-    if str(instance.task_id) != task_id:
+    instance = get_object_or_none(CobraFva, pk)
+    if instance is None or str(instance.task_id) != task_id:
         return
 
     instance.result = result
