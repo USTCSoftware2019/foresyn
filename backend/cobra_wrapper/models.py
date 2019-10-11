@@ -10,7 +10,6 @@ import cobra
 class CobraModel(models.Model):
     sbml_content = models.TextField()
     name = models.CharField(max_length=200)
-    objective = models.CharField(max_length=200)
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 

@@ -1,7 +1,7 @@
 from django import forms
 import cobra
 
-from .models import CobraModel, CobraFva
+from .models import CobraFva
 
 
 class CleanSbmlContentMixin:
@@ -16,11 +16,13 @@ class CleanSbmlContentMixin:
 class CobraModelCreateForm(CleanSbmlContentMixin, forms.Form):
     sbml_content = forms.FileField()
     name = forms.CharField(max_length=200)
-    objective = forms.CharField(max_length=50)
 
 
+# TODO(myl7)
 class CobraModelUpdateForm(CleanSbmlContentMixin, forms.Form):
     sbml_content = forms.FileField()
+    objective = forms.CharField(max_length=1000)
+
     change_type = forms.ChoiceField(choices=[
         ('Use a new sbml file', 'sbml_content'),
         ('Change name', 'name'),
@@ -29,14 +31,10 @@ class CobraModelUpdateForm(CleanSbmlContentMixin, forms.Form):
 
     def __init__(self, cobra_model: cobra.Model, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['objective'] = forms.ChoiceField(choices=[
-            *[(reaction.id, reaction.id) for reaction in cobra_model.reactions],
-            *[(metabolite.id, metabolite.id) for metabolite in cobra_model.metabolites],
-            *[(gene.id, gene.id) for gene in cobra_model.genes],
-        ], initial=cobra_model.objective)
         self.fields['name'] = forms.CharField(max_length=200, initial=cobra_model.name)
 
 
+# TODO(myl7)
 class CobraFvaForm(forms.ModelForm):
     class Meta:
         model = CobraFva
