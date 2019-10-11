@@ -9,8 +9,8 @@ import cobra
 
 class CobraModel(models.Model):
     sbml_content = models.TextField()
-    name = models.CharField(max_length=127)
-    objective = models.CharField(max_length=50)
+    name = models.CharField(max_length=200)
+    objective = models.CharField(max_length=200)
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -37,12 +37,12 @@ def validate_json_str_or_blank_str(value):
 
 
 class CobraFba(models.Model):
-    desc = models.TextField(blank=True, default='')
+    desc = models.TextField(blank=True)
 
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     task_id = models.UUIDField(null=True, blank=True, default=None)
-    result = models.TextField(blank=True, default='', validators=[validate_json_str_or_blank_str])
+    result = models.TextField(blank=True, validators=[validate_json_str_or_blank_str])
 
     class Meta:
         verbose_name = 'fba'
@@ -56,7 +56,7 @@ class CobraFba(models.Model):
 
 
 class CobraFva(models.Model):
-    desc = models.TextField(blank=True, default='')
+    desc = models.TextField(blank=True)
     reaction_list = models.TextField()
     loopless = models.BooleanField(default=False)
     fraction_of_optimum = models.FloatField(default=1.0)
@@ -65,7 +65,7 @@ class CobraFva(models.Model):
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     task_id = models.UUIDField(null=True, blank=True, default=None)
-    result = models.TextField(blank=True, default='', validators=[validate_json_str_or_blank_str])
+    result = models.TextField(blank=True, validators=[validate_json_str_or_blank_str])
 
     class Meta:
         verbose_name = 'fva'
@@ -79,20 +79,36 @@ class CobraFva(models.Model):
 
 
 class CobraModelChange(models.Model):
-    # When `fields` is blank, the change is actually a creation record of the model
+    change_type = models.CharField(max_length=50, choices=[
+        ('created', 'created'),
+        ('add_reaction', 'add_reaction'),
+        ('del_reaction', 'del_reaction'),
+        ('sbml_content', 'sbml_content'),
+        ('name', 'name'),
+        ('objective', 'objective'),
+    ])
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
-    fields = models.CharField(max_length=200, blank=True)
-    previous_values = models.TextField(blank=True)
-    values = models.TextField(blank=True)
-    time = models.DateTimeField(auto_now_add=True)
+    # pre_sbml_content = models.TextField(blank=True)  # The field may take much memory and disk space
+    # `pre_info` is deleted reaction id, pre name or pre objective
+    # The same to `new_info`, but it could also be new reaction id
+    pre_info = models.CharField(max_length=600, blank=True)
+    new_info = models.CharField(max_length=600, blank=True)
+    created_time = models.DateTimeField(auto_now_add=True)
+
+    SHOWN_TEXT_TEMPLATE_CHOICES = {
+        'created': 'Created',
+        'add-reaction': 'Add reaction {new_info}',
+        'del-reaction': 'Delete reaction {pre_info}',
+        'sbml-content': 'Use new SBML file',
+        'name': 'Change name from {pre_info} to {new_info}',
+        'objective': 'Change objective from {pre_info} to {new_info}',
+    }
 
     class Meta:
         verbose_name = 'model_change'
-        ordering = ['-time']
+        ordering = ['-created_time']
 
     def __str__(self):
         """Use the method to get shown text of the change"""
-        if self.fields:
-            return '{} is changed from {} to {}'.format(self.fields, self.previous_values, self.values)
-        else:
-            return 'created'
+        return self.SHOWN_TEXT_TEMPLATE_CHOICES[self.change_type].format(
+            pre_info=self.pre_info, new_info=self.new_info)
