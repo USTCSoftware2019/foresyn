@@ -6,6 +6,8 @@ from django.shortcuts import reverse
 from django.core.exceptions import ValidationError
 import cobra
 
+from .utils import load_sbml
+
 
 class CobraModel(models.Model):
     sbml_content = models.TextField()
@@ -24,7 +26,7 @@ class CobraModel(models.Model):
         return reverse('cobra_wrapper:cobramodel_detail', kwargs={'pk': self.pk})
 
     def build(self):
-        cobra_model: cobra.Model = cobra.io.read_sbml_model(self.sbml_content)
+        cobra_model: cobra.Model = load_sbml(self.sbml_content)
         cobra_model.name = self.name
         return cobra_model
 

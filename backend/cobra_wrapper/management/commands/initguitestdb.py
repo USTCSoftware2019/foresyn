@@ -1,4 +1,3 @@
-import io
 import os
 import subprocess
 
@@ -8,6 +7,7 @@ import cobra.test
 
 from backend.settings import BASE_DIR
 from cobra_wrapper.models import CobraModel
+from cobra_wrapper.utils import dump_sbml
 
 
 def main():
@@ -16,13 +16,8 @@ def main():
     except FileNotFoundError:
         pass
     subprocess.run([os.path.join(BASE_DIR, 'manage.py'), 'migrate'], env=os.environ)
-
     user = User.objects.create_superuser('test', '', 'test123456')
-
-    sbml_file = io.StringIO()
-    # The func in libsbml can actually accept file-like object
-    cobra.io.write_sbml_model(cobra.test.create_test_model(), sbml_file)
-    CobraModel.objects.create(name='example_model', objective='', sbml_content=sbml_file.read(), owner=user)
+    CobraModel.objects.create(name='example', sbml_content=dump_sbml(cobra.test.create_test_model()), owner=user)
 
 
 class Command(BaseCommand):
