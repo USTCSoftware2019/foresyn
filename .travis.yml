@@ -1,12 +1,20 @@
 language: python
 python: "3.6"
 dist: xenial
+sudo: required
 
 git:
   depth: 3
 
+branches:
+  only:
+    - master
+
 env:
-  - ES_VERSION=2.4.6 ES_DOWNLOAD_URL=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.deb
+  global:
+    - ES_VERSION=2.4.6
+    - ES_DOWNLOAD_URL=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.deb
+    - ES_DEB_PATH=$HOME/.cache/elasticsearch/elasticsearch-${ES_VERSION}.deb
 
 addons:
   apt:
@@ -18,27 +26,23 @@ service:
   - rabbitmq
 
 before_install:
-  - curl -O ${ES_DOWNLOAD_URL} && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
+  - \[ -f ${ES_DEB_PATH} \] || curl --create-dirs -Oo ${ES_DEB_PATH} ${ES_DOWNLOAD_URL}
+  - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
+
 install:
   - pip3 install --upgrade -r requirements.txt
 
 before_script:
   - cd backend
-  - celery worker -l info -A backend -Q cobra_results &
-  - (cd cobra_wrapper/remote && celery worker -l info -A cobra_computation -Q cobra_feeds &)
-  - sleep 10  # leave time for elasticsearch and celery workers to start
+  - PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results &
+  - (cd cobra_wrapper/remote && PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds &)
+  - sleep 5  # Leave time for elasticsearch and celery workers to start
 
 script:
   - flake8
   - python3 manage.py test
 
-before_cache:
-  - rm -rf $HOME/.cache/pip/http $HOME/.cache/pip/log
 cache:
+  pip: true
   directories:
-    - $HOME/virtualenv/python3.6.*
-    - $HOME/.cache/pip
-
-branches:
-  only:
-    - master
+    - $HOME/.cache/elasticsearch
