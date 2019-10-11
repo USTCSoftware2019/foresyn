@@ -1,52 +1,43 @@
 from django import forms
+import cobra
 
-from .models import CobraMetabolite, CobraReaction, CobraModel, CobraFva
+from .models import CobraModel, CobraFva
 
 
-class CobraReactionForm(forms.ModelForm):
-    def __init__(self, owner, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['metabolites'] = forms.ModelMultipleChoiceField(
-            CobraMetabolite.objects.filter(owner=owner), required=False
-        )
-
-    class Meta:
-        model = CobraReaction
-        fields = [
-            'cobra_id', 'name', 'subsystem', 'lower_bound', 'upper_bound', 'metabolites', 'coefficients',
-            'gene_reaction_rule'
-        ]
-
-    def clean(self):
+class CleanSbmlContentMixin:
+    def clean(self: forms.Form):
         cleaned_data = super().clean()
-        coefficients = cleaned_data.get('coefficients', '').split()
-        metabolites = cleaned_data.get('metabolites', [])
+        try:
+            cleaned_data['sbml_content'] = cleaned_data['sbml_content'].read()
+        except UnicodeDecodeError:
+            self.add_error('sbml_content', 'Can not decode SBML file with utf-8')
 
-        if len(coefficients) != len(metabolites):
-            self.add_error('coefficients', 'len of coefficients and metabolites are not the same')
+
+class CobraModelCreateForm(CleanSbmlContentMixin, forms.Form):
+    sbml_content = forms.FileField()
+    name = forms.CharField(max_length=200)
+    objective = forms.CharField(max_length=50)
 
 
-class CobraModelForm(forms.ModelForm):
-    def __init__(self, owner, *args, **kwargs):
+class CobraModelUpdateForm(CleanSbmlContentMixin, forms.Form):
+    sbml_content = forms.FileField()
+    change_type = forms.ChoiceField(choices=[
+        ('Use a new sbml file', 'sbml_content'),
+        ('Change name', 'name'),
+        ('Change objective', 'objective'),
+    ])
+
+    def __init__(self, cobra_model: cobra.Model, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.fields['reactions'] = forms.ModelMultipleChoiceField(
-        #     CobraReaction.objects.filter(owner=owner), required=False
-        # )
-
-    class Meta:
-        model = CobraModel
-        fields = ['cobra_id', 'name',
-                  # 'reactions',
-                  'objective']
+        self.fields['objective'] = forms.ChoiceField(choices=[
+            *[(reaction.id, reaction.id) for reaction in cobra_model.reactions],
+            *[(metabolite.id, metabolite.id) for metabolite in cobra_model.metabolites],
+            *[(gene.id, gene.id) for gene in cobra_model.genes],
+        ], initial=cobra_model.objective)
+        self.fields['name'] = forms.CharField(max_length=200, initial=cobra_model.name)
 
 
 class CobraFvaForm(forms.ModelForm):
-    def __init__(self, owner, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['reaction_list'] = forms.ModelMultipleChoiceField(
-            CobraReaction.objects.filter(owner=owner), required=False
-        )
-
     class Meta:
         model = CobraFva
         fields = ['desc', 'reaction_list', 'loopless', 'fraction_of_optimum', 'pfba_factor']
