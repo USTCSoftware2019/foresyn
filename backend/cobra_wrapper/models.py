@@ -24,7 +24,9 @@ class CobraModel(models.Model):
         return reverse('cobra_wrapper:cobramodel_detail', kwargs={'pk': self.pk})
 
     def build(self):
-        return cobra.io.read_sbml_model(self.sbml_content)
+        cobra_model: cobra.Model = cobra.io.read_sbml_model(self.sbml_content)
+        cobra_model.name = self.name
+        return cobra_model
 
 
 def validate_json_str_or_blank_str(value):
@@ -38,7 +40,7 @@ def validate_json_str_or_blank_str(value):
 class CobraFba(models.Model):
     desc = models.TextField(blank=True)
 
-    model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
+    model = models.ForeignKey(CobraModel, on_delete=models.CASCADE, related_name='fba_list')
     start_time = models.DateTimeField(auto_now_add=True)
     task_id = models.UUIDField(null=True, blank=True, default=None)
     result = models.TextField(blank=True, validators=[validate_json_str_or_blank_str])
@@ -61,7 +63,7 @@ class CobraFva(models.Model):
     fraction_of_optimum = models.FloatField(default=1.0)
     pfba_factor = models.BooleanField(blank=True)
 
-    model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
+    model = models.ForeignKey(CobraModel, on_delete=models.CASCADE, related_name='fva_list')
     start_time = models.DateTimeField(auto_now_add=True)
     task_id = models.UUIDField(null=True, blank=True, default=None)
     result = models.TextField(blank=True, validators=[validate_json_str_or_blank_str])
@@ -86,7 +88,7 @@ class CobraModelChange(models.Model):
         ('name', 'name'),
         ('objective', 'objective'),
     ])
-    model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
+    model = models.ForeignKey(CobraModel, on_delete=models.CASCADE, related_name='changes')
     # pre_sbml_content = models.TextField(blank=True)  # The field may take much memory and disk space
     # `pre_info` is deleted reaction id, pre name or pre objective
     # The same to `new_info`, but it could also be new reaction id
@@ -100,7 +102,7 @@ class CobraModelChange(models.Model):
         'del-reaction': 'Delete reaction {pre_info}',
         'sbml-content': 'Use new SBML file',
         'name': 'Change name from {pre_info} to {new_info}',
-        'objective': 'Change objective from {pre_info} to {new_info}',
+        'objective': 'Change objective to {new_info}',
     }
 
     class Meta:
