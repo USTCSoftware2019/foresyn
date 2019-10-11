@@ -108,7 +108,7 @@ class UserPack(LoginRequiredMixin, View):
         elif obj_type == "metabolite":
             return PackMetabolite.objects.filter(user=user, metabolite=pk)
         elif obj_type == "biobrick":
-            raise NotImplemented
+            raise NotImplementedError()
 
     def get(self, request):
         obj_type = request.POST.get("type")
@@ -136,7 +136,7 @@ class UserPack(LoginRequiredMixin, View):
         elif obj_type == "metabolite":
             queryset = PackMetabolite.objects.filter(user=request.user)
         elif obj_type == "biobrick":
-            raise NotImplemented
+            raise NotImplementedError()
 
         return render(request, "accounts/pack.html", {
             "type": obj_type,
@@ -169,7 +169,7 @@ class UserPack(LoginRequiredMixin, View):
                 elif obj_type == "metabolite":
                     return PackMetabolite.objects.filter(user=request.user, metabolite=pk)
                 elif obj_type == "biobrick":
-                    raise NotImplemented
+                    raise NotImplementedError()
         elif action == "delete":
             if obj:
                 obj.delete()
