@@ -14,6 +14,7 @@ class CobraModel(models.Model):
     name = models.CharField(max_length=200)
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'model'
@@ -83,7 +84,6 @@ class CobraFva(models.Model):
 
 class CobraModelChange(models.Model):
     change_type = models.CharField(max_length=50, choices=[
-        ('created', 'created'),
         ('add_reaction', 'add_reaction'),
         ('del_reaction', 'del_reaction'),
         ('sbml_content', 'sbml_content'),
@@ -99,7 +99,6 @@ class CobraModelChange(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     SHOWN_TEXT_TEMPLATE_CHOICES = {
-        'created': 'Created',
         'add-reaction': 'Add reaction {new_info}',
         'del-reaction': 'Delete reaction {pre_info}',
         'sbml-content': 'Use new SBML file',

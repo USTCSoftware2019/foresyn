@@ -33,13 +33,6 @@ class CobraModelCreateView(LoginRequiredMixin, CreateView):
     model = CobraModel
     form_class = CobraModelCreateForm
 
-    def form_valid(self, form: CobraModelCreateForm):
-        super().form_valid(form)
-        model = CobraModel.objects.create(sbml_content=form.cleaned_data['sbml_content'],
-                                          name=form.cleaned_data['name'], objective=form.cleaned_data['objective'],
-                                          owner=self.request.user)
-        return reverse(model)
-
 
 class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('cobra_wrapper:cobramodel_list')
