@@ -1,11 +1,10 @@
-import io
-
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 import cobra.test
 
-from .models import CobraModel, CobraFba, CobraFva
+from .models import CobraModel, CobraFba
+from .utils import dump_sbml
 
 from backend.celery import app
 
@@ -13,10 +12,8 @@ from backend.celery import app
 class CobraWrapperViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='test', password='test123456')
-        sbml_file = io.StringIO()
-        # The func in libsbml can actually accept file-like object
-        cobra.io.write_sbml_model(cobra.test.create_test_model(), sbml_file)
-        self.model = CobraModel.objects.create(name='example_model', objective='', sbml_content=sbml_file.read(), owner=user)
+        self.model = CobraModel.objects.create(name='example_model',
+                                               sbml_content=dump_sbml(cobra.test.create_test_model()), owner=self.user)
         self.client.login(username='test', password='test123456')
 
     # TODO(myl7): `setUp` now is OK, but all tests are required to be recheck

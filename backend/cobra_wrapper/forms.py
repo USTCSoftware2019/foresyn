@@ -1,10 +1,10 @@
-import io
 import json
 
 from django import forms
 import cobra
 
-from .models import CobraModel, CobraFva, CobraModelChange
+from .models import CobraFva, CobraModelChange
+from .utils import dump_sbml
 
 
 class CleanSbmlContentMixin:
@@ -44,13 +44,6 @@ class CobraModelSbmlContentUpdateForm(CleanSbmlContentMixin, forms.Form):
             model.save()
 
 
-def update_sbml_content_field(model, cobra_model):
-    sbml_file = io.StringIO()
-    cobra.io.write_sbml_model(cobra_model, sbml_file)
-    model.sbml_content = sbml_file.read()
-    model.save()
-
-
 class CobraModelObjectiveUpdateForm(forms.Form):
     objective = forms.CharField()
     change_type = forms.CharField(disabled=True, initial='objective')
@@ -61,7 +54,8 @@ class CobraModelObjectiveUpdateForm(forms.Form):
                                             new_info=self.cleaned_data['objective'])
             cobra_model: cobra.Model = model.build()
             cobra_model.objective = self.cleaned_data['objective']
-            update_sbml_content_field(model, cobra_model)
+            model.sbml_content = dump_sbml(cobra_model)
+            model.save()
 
 
 class CobraModelReactionDeleteForm(forms.Form):
@@ -74,7 +68,8 @@ class CobraModelReactionDeleteForm(forms.Form):
                                             pre_info=', '.join(pre_reaction_id_list))
             cobra_model: cobra.Model = model.build()
             cobra_model.remove_reactions(pre_reaction_id_list)
-            update_sbml_content_field(model, cobra_model)
+            model.sbml_content = dump_sbml(cobra_model)
+            model.save()
 
 
 class CobraModelReactionCreateForm(forms.Form):
@@ -103,7 +98,8 @@ class CobraModelReactionCreateForm(forms.Form):
                                             upper_bound=self.cleaned_data['upper_bound'])
             cobra_reaction.add_metabolites(metabolites_with_coefficients_dict)
             cobra_model.add_reactions([cobra_reaction])
-            update_sbml_content_field(model, cobra_model)
+            model.sbml_content = dump_sbml(cobra_model)
+            model.save()
 
 
 cobra_model_update_forms = {

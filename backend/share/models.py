@@ -3,7 +3,9 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.db import models
 
 # Create your models here.
-from cobra_wrapper.models import CobraMetabolite, CobraModel, CobraReaction
+# FIXME(myl7): Remove metabolites and reactions
+# from cobra_wrapper.models import CobraMetabolite, CobraModel, CobraReaction
+from cobra_wrapper.models import CobraModel
 
 User = get_user_model()
 
@@ -41,14 +43,15 @@ class AbstractBaseShare(models.Model):
 class ModelShare(AbstractBaseShare):
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
 
-    reactions = models.ManyToManyField('ReactionShare')
+    # reactions = models.ManyToManyField('ReactionShare')
 
 
-class ReactionShare(AbstractBaseShare):
-    reaction = models.ForeignKey(CobraReaction, on_delete=models.CASCADE)
-
-    metabolites = models.ManyToManyField('MetaboliteShare')
-
-
-class MetaboliteShare(AbstractBaseShare):
-    metabolite = models.ForeignKey(CobraMetabolite, on_delete=models.CASCADE)
+# FIXME(myl7): Remove metabolites and reactions
+# class ReactionShare(AbstractBaseShare):
+#     reaction = models.ForeignKey(CobraReaction, on_delete=models.CASCADE)
+#
+#     metabolites = models.ManyToManyField('MetaboliteShare')
+#
+#
+# class MetaboliteShare(AbstractBaseShare):
+#     metabolite = models.ForeignKey(CobraMetabolite, on_delete=models.CASCADE)

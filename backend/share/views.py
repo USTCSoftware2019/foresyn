@@ -5,9 +5,11 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import DetailView, FormView, View
 
-from share.models import (CobraMetabolite, CobraModel, CobraReaction,
-                          MetaboliteShare, ModelShare, ReactionShare,
-                          ShareAuthorization)
+# FIXME(myl7): Remove metabolites and reactions
+# from share.models import (CobraMetabolite, CobraModel, CobraReaction,
+#                           MetaboliteShare, ModelShare, ReactionShare,
+#                           ShareAuthorization)
+from share.models import CobraModel, ModelShare, ShareAuthorization
 
 from .forms import PasswordConfirmForm
 
@@ -19,13 +21,13 @@ class CreateShareLinkView(View):
 
     share_type_map = {
         'model': ModelShare,
-        'reaction': ReactionShare,
-        'metabolite': MetaboliteShare
+        # 'reaction': ReactionShare,
+        # 'metabolite': MetaboliteShare
     }
     cobra_type_map = {
         'model': CobraModel,
-        'reaction': CobraReaction,
-        'metabolite': CobraMetabolite
+        # 'reaction': CobraReaction,
+        # 'metabolite': CobraMetabolite
     }
 
     def create_share_auth(self):
@@ -36,31 +38,31 @@ class CreateShareLinkView(View):
             auth.save()
         return auth
 
-    def create_link_for_metabolite(self, metabolite_id, auth=None):
-        cobra_metabolite = CobraMetabolite.objects.get(id=metabolite_id)
+    # def create_link_for_metabolite(self, metabolite_id, auth=None):
+    #     cobra_metabolite = CobraMetabolite.objects.get(id=metabolite_id)
+    #
+    #     if auth is None:
+    #         auth = self.create_share_auth()
+    #
+    #     return MetaboliteShare.objects.create(metabolite=cobra_metabolite,
+    #                                           can_edit=self.can_edit,
+    #                                           owner=self.owner,
+    #                                           auth=auth)
 
-        if auth is None:
-            auth = self.create_share_auth()
-
-        return MetaboliteShare.objects.create(metabolite=cobra_metabolite,
-                                              can_edit=self.can_edit,
-                                              owner=self.owner,
-                                              auth=auth)
-
-    def recursive_create_link_for_reaction(self, reaction_id, auth=None):
-        cobra_reaction = CobraReaction.objects.get(id=reaction_id)
-
-        if auth is None:
-            auth = self.create_share_auth()
-
-        shared_reaction_object = ReactionShare.objects.create(reaction=cobra_reaction,
-                                                              can_edit=self.can_edit,
-                                                              owner=self.owner,
-                                                              auth=auth)
-        for metabolite in cobra_reaction.metabolites.all():
-            shared_reaction_object.metabolites.add(self.create_link_for_metabolite(metabolite.id, auth))
-        shared_reaction_object.save()
-        return shared_reaction_object
+    # def recursive_create_link_for_reaction(self, reaction_id, auth=None):
+    #     cobra_reaction = CobraReaction.objects.get(id=reaction_id)
+    #
+    #     if auth is None:
+    #         auth = self.create_share_auth()
+    #
+    #     shared_reaction_object = ReactionShare.objects.create(reaction=cobra_reaction,
+    #                                                           can_edit=self.can_edit,
+    #                                                           owner=self.owner,
+    #                                                           auth=auth)
+    #     for metabolite in cobra_reaction.metabolites.all():
+    #         shared_reaction_object.metabolites.add(self.create_link_for_metabolite(metabolite.id, auth))
+    #     shared_reaction_object.save()
+    #     return shared_reaction_object
 
     def recursive_create_link_for_model(self, model_id, auth=None):
         cobra_model = CobraModel.objects.get(id=model_id)
@@ -161,12 +163,12 @@ class ModelShareView(PasswordRequiredDetailView):
     model = ModelShare
 
 
-class MetaboliteShareView(PasswordRequiredDetailView):
-    model = MetaboliteShare
-
-
-class ReactionShareView(PasswordRequiredDetailView):
-    model = ReactionShare
+# class MetaboliteShareView(PasswordRequiredDetailView):
+#     model = MetaboliteShare
+#
+#
+# class ReactionShareView(PasswordRequiredDetailView):
+#     model = ReactionShare
 
 
 class PasswordConfirmView(FormView):

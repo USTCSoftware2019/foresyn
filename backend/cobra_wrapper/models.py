@@ -6,12 +6,15 @@ from django.shortcuts import reverse
 from django.core.exceptions import ValidationError
 import cobra
 
+from .utils import load_sbml
+
 
 class CobraModel(models.Model):
     sbml_content = models.TextField()
     name = models.CharField(max_length=200)
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'model'
@@ -24,7 +27,7 @@ class CobraModel(models.Model):
         return reverse('cobra_wrapper:cobramodel_detail', kwargs={'pk': self.pk})
 
     def build(self):
-        cobra_model: cobra.Model = cobra.io.read_sbml_model(self.sbml_content)
+        cobra_model: cobra.Model = load_sbml(self.sbml_content)
         cobra_model.name = self.name
         return cobra_model
 
@@ -81,7 +84,6 @@ class CobraFva(models.Model):
 
 class CobraModelChange(models.Model):
     change_type = models.CharField(max_length=50, choices=[
-        ('created', 'created'),
         ('add_reaction', 'add_reaction'),
         ('del_reaction', 'del_reaction'),
         ('sbml_content', 'sbml_content'),
@@ -97,7 +99,6 @@ class CobraModelChange(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
 
     SHOWN_TEXT_TEMPLATE_CHOICES = {
-        'created': 'Created',
         'add-reaction': 'Add reaction {new_info}',
         'del-reaction': 'Delete reaction {pre_info}',
         'sbml-content': 'Use new SBML file',

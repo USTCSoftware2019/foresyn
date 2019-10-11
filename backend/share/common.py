@@ -1,16 +1,17 @@
-
 from datetime import datetime
 from hashlib import sha256
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import (MetaboliteShare, ModelShare, OneTimeShareLink,
-                     ReactionShare)
+# FIXME(myl7): Remove metabolites and reactions
+# from .models import (MetaboliteShare, ModelShare, OneTimeShareLink,
+#                      ReactionShare)
+from .models import ModelShare, OneTimeShareLink
 
 share_type_map = {
     'model': ModelShare,
-    'reaction': ReactionShare,
-    'metabolite': MetaboliteShare
+    # 'reaction': ReactionShare,
+    # 'metabolite': MetaboliteShare
 }
 
 
