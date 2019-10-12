@@ -3,6 +3,8 @@ import json
 from django.shortcuts import get_object_or_404, reverse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, TemplateView
+from django.views.generic.edit import ProcessFormView
+from django.views.generic.detail import SingleObjectMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import Form
 import cobra
@@ -32,6 +34,10 @@ class CobraModelCreateView(LoginRequiredMixin, CreateView):
     template_name_suffix = '_create_form'
     model = CobraModel
     form_class = CobraModelCreateForm
+
+    def form_valid(self, form: CobraModelCreateForm):
+        form.save(self.request.user)
+        return super().form_valid(form)
 
 
 class CobraModelDeleteView(LoginRequiredMixin, DeleteView):

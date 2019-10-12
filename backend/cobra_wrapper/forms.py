@@ -3,22 +3,57 @@ import json
 from django import forms
 import cobra
 
-from .models import CobraFva, CobraModelChange
+from .models import CobraModel, CobraFva, CobraModelChange
 from .utils import dump_sbml
 
 
 class CleanSbmlContentMixin:
     def clean(self: forms.Form):
         cleaned_data = super().clean()
+        sbml_content = cleaned_data['sbml_content'].read()
+
+        if isinstance(sbml_content, bytes):
+            try:
+                sbml_content = sbml_content.decode('utf-8')
+            except UnicodeDecodeError:
+                self.add_error('sbml_content', 'Can not decode SBML file with UTF-8')
+                return cleaned_data
+
         try:
-            cleaned_data['sbml_content'] = cleaned_data['sbml_content'].read()
-        except UnicodeDecodeError:
-            self.add_error('sbml_content', 'Can not decode SBML file with utf-8')
+            cobra.io.validate_sbml_model(sbml_content)
+        except cobra.io.sbml.CobraSBMLError:
+            self.add_error('sbml_content', 'validation for SBML file failed')
+            return cleaned_data
+
+        cleaned_data['sbml_content'] = sbml_content
+        return cleaned_data
 
 
-class CobraModelCreateForm(CleanSbmlContentMixin, forms.Form):
+class InstanceSaveFormMixin:
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.pop('instance', None)
+        super().__init__(*args, **kwargs)
+        self.instance = instance
+
+    def save(self):
+        try:
+            self.instance.save()
+        except AttributeError:
+            pass
+        return self.instance
+
+
+class CobraModelCreateForm(InstanceSaveFormMixin, CleanSbmlContentMixin, forms.Form):
     sbml_content = forms.FileField()
     name = forms.CharField(max_length=200)
+
+    def save(self, owner=None):
+        if owner:
+            if not self.is_valid():
+                raise ValueError()
+            self.instance = CobraModel.objects.create(name=self.cleaned_data['name'],
+                                                      sbml_content=self.cleaned_data['sbml_content'], owner=owner)
+        return super().save()
 
 
 class CobraModelNameUpdateForm(forms.Form):
