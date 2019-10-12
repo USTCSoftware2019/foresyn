@@ -7,6 +7,20 @@ from .models import CobraModel, CobraFva, CobraModelChange
 from .utils import dump_sbml
 
 
+class InstanceForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.pop('instance', None)
+        super().__init__(*args, **kwargs)
+        self.instance = instance
+
+    def save(self):
+        try:
+            self.instance.save()
+        except AttributeError:
+            pass
+        return self.instance
+
+
 class CleanSbmlContentMixin:
     def clean(self: forms.Form):
         cleaned_data = super().clean()
@@ -29,21 +43,7 @@ class CleanSbmlContentMixin:
         return cleaned_data
 
 
-class InstanceSaveFormMixin:
-    def __init__(self, *args, **kwargs):
-        instance = kwargs.pop('instance', None)
-        super().__init__(*args, **kwargs)
-        self.instance = instance
-
-    def save(self):
-        try:
-            self.instance.save()
-        except AttributeError:
-            pass
-        return self.instance
-
-
-class CobraModelCreateForm(InstanceSaveFormMixin, CleanSbmlContentMixin, forms.Form):
+class CobraModelCreateForm(CleanSbmlContentMixin, InstanceForm):
     sbml_content = forms.FileField()
     name = forms.CharField(max_length=200)
 
@@ -56,48 +56,63 @@ class CobraModelCreateForm(InstanceSaveFormMixin, CleanSbmlContentMixin, forms.F
         return super().save()
 
 
-class CobraModelNameUpdateForm(forms.Form):
+class CobraModelNameUpdateForm(InstanceForm):
     name = forms.CharField(max_length=200)
-    change_type = forms.CharField(disabled=True, initial='name')
+    change_type = forms.CharField(widget=forms.HiddenInput(), initial='name')
 
-    def save(self, model):
-        if self.is_valid():
+    def save(self, model=None):
+        if model:
+            if not self.is_valid():
+                raise ValueError()
             CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
                                             pre_info=model.name, new_info=self.cleaned_data['name'])
             model.name = self.cleaned_data['name']
             model.save()
+            self.instance = model
+        return super().save()
 
 
-class CobraModelSbmlContentUpdateForm(CleanSbmlContentMixin, forms.Form):
+class CobraModelSbmlContentUpdateForm(CleanSbmlContentMixin, InstanceForm):
     sbml_content = forms.FileField(required=False)
-    change_type = forms.CharField(disabled=True, initial='sbml_content')
+    change_type = forms.CharField(widget=forms.HiddenInput(), initial='sbml_content')
 
-    def save(self, model):
-        if self.is_valid():
+    def save(self, model=None):
+        if model:
+            if self.errors:
+                raise ValueError()
             CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model)
             model.sbml_content = self.cleaned_data['sbml_content']
             model.save()
+            self.instance = model
+        return super().save()
 
 
-class CobraModelObjectiveUpdateForm(forms.Form):
+class CobraModelObjectiveUpdateForm(InstanceForm):
     objective = forms.CharField()
-    change_type = forms.CharField(disabled=True, initial='objective')
+    change_type = forms.CharField(widget=forms.HiddenInput(), initial='objective')
 
-    def save(self, model):
-        if self.is_valid():
+    def save(self, model=None):
+        if model:
+            if self.errors:
+                raise ValueError()
             CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
                                             new_info=self.cleaned_data['objective'])
             cobra_model: cobra.Model = model.build()
             cobra_model.objective = self.cleaned_data['objective']
             model.sbml_content = dump_sbml(cobra_model)
             model.save()
+            self.instance = model
+        return super().save()
 
 
-class CobraModelReactionDeleteForm(forms.Form):
+class CobraModelReactionDeleteForm(InstanceForm):
     pre_reaction_id = forms.CharField()
+    change_type = forms.CharField(widget=forms.HiddenInput(), initial='del_reaction')
 
-    def save(self, model):
-        if self.is_valid():
+    def save(self, model=None):
+        if model:
+            if self.errors:
+                raise ValueError()
             pre_reaction_id_list = self.cleaned_data['pre_reaction_id'].split(',')
             CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
                                             pre_info=', '.join(pre_reaction_id_list))
@@ -105,9 +120,11 @@ class CobraModelReactionDeleteForm(forms.Form):
             cobra_model.remove_reactions(pre_reaction_id_list)
             model.sbml_content = dump_sbml(cobra_model)
             model.save()
+            self.instance = model
+        return super().save()
 
 
-class CobraModelReactionCreateForm(forms.Form):
+class CobraModelReactionCreateForm(InstanceForm):
     cobra_id = forms.CharField(max_length=600)
     name = forms.CharField(max_length=600)
     subsystem = forms.CharField(max_length=200)
@@ -115,10 +132,12 @@ class CobraModelReactionCreateForm(forms.Form):
     upper_bound = forms.FloatField(initial=1000.0)
     gene_reaction_rule = forms.CharField()
     metabolites_with_coefficients = forms.CharField()
-    change_type = forms.CharField(disabled=True, initial='add_reaction')
+    change_type = forms.CharField(widget=forms.HiddenInput(), initial='add_reaction')
 
-    def save(self, model):
-        if self.is_valid():
+    def save(self, model=None):
+        if model:
+            if self.errors:
+                raise ValueError()
             CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
                                             new_info=self.cleaned_data['cobra_id'])
             cobra_model: cobra.Model = model.build()
@@ -135,6 +154,8 @@ class CobraModelReactionCreateForm(forms.Form):
             cobra_model.add_reactions([cobra_reaction])
             model.sbml_content = dump_sbml(cobra_model)
             model.save()
+            self.instance = model
+        return super().save()
 
 
 cobra_model_update_forms = {
