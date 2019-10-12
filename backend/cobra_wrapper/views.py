@@ -1,8 +1,9 @@
 import json
 
-from django.shortcuts import get_object_or_404, reverse
+from django.shortcuts import get_object_or_404, reverse, Http404
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, TemplateView, FormView
+from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateResponseMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import Form
 import cobra
@@ -33,6 +34,10 @@ class CobraModelCreateView(LoginRequiredMixin, CreateView):
     model = CobraModel
     form_class = CobraModelCreateForm
 
+    def form_valid(self, form: CobraModelCreateForm):
+        form.save(self.request.user)
+        return super().form_valid(form)
+
 
 class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('cobra_wrapper:cobramodel_list')
@@ -41,26 +46,45 @@ class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
-class CobraModelUpdateView(LoginRequiredMixin, UpdateView):
+class CobraModelUpdateView(LoginRequiredMixin, SingleObjectMixin, SingleObjectTemplateResponseMixin, FormView):
     template_name_suffix = '_update_form'
 
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
     def get_forms(self):
-        return [form() for form in cobra_model_update_forms]
+        return [form() for form in cobra_model_update_forms.values()]
+
+    def get_form_class(self):
+        change_type = self.request.POST.get('change_type', None)
+        try:
+            return cobra_model_update_forms[change_type]
+        except KeyError:
+            if self.request.method == 'GET':
+                return None
+            else:
+                raise Http404()
+
+    def get_form(self, form_class=None):
+        self.form_class = self.get_form_class()
+        if self.form_class is None:
+            return None
+        else:
+            return super().get_form()
 
     def get_context_data(self, **kwargs):
-        kwargs['form'] = None  # Disable get_form
+        self.object = self.get_object()
         context_data = super().get_context_data(**kwargs)
         context_data['forms'] = self.get_forms()
         return context_data
 
-    def form_valid(self, form: Form):
-        response = super().form_valid(form)
-        model = self.get_object()
-        form.save(model)
-        return response
+    def form_valid(self, form):
+        self.object = self.get_object()
+        form.save(self.object)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('cobra_wrapper:cobramodel_detail', kwargs={'pk': self.object.pk})
 
 
 class TemplateAddModelPkMixin:

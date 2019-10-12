@@ -7,10 +7,15 @@
 {% block content %}
     {% for form in forms %}
         <div class="container mt-4">
-            <form method="post">{% csrf_token %}
-                {{ form|crispy }}
-                <button type="reset" class="btn btn-primary">Reset</button>
-                <button type="submit" class="btn btn-primary">Submit</button>
+            {% if form.fields.change_type.initial == 'sbml_content' %}
+                <form method="post" enctype="multipart/form-data">
+            {% else %}
+                <form method="post">
+            {% endif %}
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="reset" class="btn btn-primary">Reset</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>
     {% endfor %}
