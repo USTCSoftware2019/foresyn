@@ -5,9 +5,15 @@ from .celery import app
 
 
 @app.task
-def cobra_fba(pk, cobra_model_json):
+def cobra_fba(pk, cobra_model_json, delete_genes):  # TODO(lbc12345): add delete
     cobra_model = cobra.io.from_json(cobra_model_json)
+    if delete_genes != ['']:
+        cobra.manipulation.delete_model_genes(
+            cobra_model, delete_genes, cumulative_deletions=True  # TODO(lbc12345): add delete
+        )
     result = cobra_model.optimize().to_frame().to_json()
+    if delete_genes != ['']:
+        cobra.manipulation.undelete_model_genes(cobra_model)  # TODO(lbc12345): add delete
     app.send_task(
         'cobra_wrapper.tasks.cobra_fba_save',
         args=[pk, result, app.current_task.request.id],

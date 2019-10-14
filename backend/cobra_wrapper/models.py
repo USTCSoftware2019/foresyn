@@ -42,6 +42,7 @@ def validate_json_str_or_blank_str(value):
 
 class CobraFba(models.Model):
     desc = models.TextField(blank=True)
+    genes = models.TextField(blank=True)
 
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE, related_name='fba_list')
     start_time = models.DateTimeField(auto_now_add=True)

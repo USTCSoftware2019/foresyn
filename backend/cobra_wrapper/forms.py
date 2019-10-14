@@ -3,7 +3,7 @@ import json
 from django import forms
 import cobra
 
-from .models import CobraModel, CobraFva, CobraModelChange
+from .models import CobraModel, CobraFba, CobraFva, CobraModelChange
 from .utils import dump_sbml
 
 
@@ -165,6 +165,15 @@ cobra_model_update_forms = {
     'del_reaction': CobraModelReactionDeleteForm,
     'add_reaction': CobraModelReactionCreateForm,
 }
+
+
+class CobraFbaForm(forms.ModelForm):
+    class Meta:
+        model = CobraFba
+        fields = ['desc', 'genes']
+
+    def clean(self):
+        cleaned_data = super().clean()
 
 
 # TODO(myl7)

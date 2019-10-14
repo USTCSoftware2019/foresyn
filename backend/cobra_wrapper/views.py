@@ -124,9 +124,10 @@ class CobraFbaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView
         form.instance.model = model_object
         response = super().form_valid(form)
         cobra_model = model_object.build()
+        delete_genes = cobra_model.genes.split(',')  # TODO(lbc12345):add delete
         result = app.send_task(
             'cobra_computation.tasks.cobra_fba',
-            args=[self.object.pk, cobra.io.to_json(cobra_model)],
+            args=[self.object.pk, cobra.io.to_json(cobra_model), delete_genes],  # TODO(lbc12345): add delete
             kwargs={},
             queue='cobra_feeds',
             routing_key='cobra_feed.fba'
