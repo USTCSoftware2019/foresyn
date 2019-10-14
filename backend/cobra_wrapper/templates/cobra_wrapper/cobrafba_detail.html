@@ -80,6 +80,10 @@
         </table>
     {% endif %}
 
+    {% for fba in latest_fba_list %}
+        {{ fba }}
+    {% endfor %}
+
     <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>
     <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>
 {% endblock content %}

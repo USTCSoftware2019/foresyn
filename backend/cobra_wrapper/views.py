@@ -108,8 +108,13 @@ class CobraFbaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView):
 
 class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAddResultMixin, DetailView):
     def get_object(self, queryset=None):
-        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
-        return get_object_or_404(model.fba_list.all(), pk=self.kwargs['pk'])
+        self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return get_object_or_404(self.model_object.fba_list.all(), pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['latest_fba_list'] = CobraFba.objects.filter(model=self.model_object)[:5]
+        return context_data
 
 
 class CobraFbaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView):
@@ -156,8 +161,13 @@ class CobraFvaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView):
 
 class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAddResultMixin, DetailView):
     def get_object(self, queryset=None):
-        model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
-        return get_object_or_404(model.fva_list.all(), pk=self.kwargs['pk'])
+        self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        return get_object_or_404(self.model_object.fva_list.all(), pk=self.kwargs['pk'])
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['latest_fva_list'] = CobraFva.objects.filter(model=self.model_object)[:5]
+        return context_data
 
 
 class CobraFvaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView):
