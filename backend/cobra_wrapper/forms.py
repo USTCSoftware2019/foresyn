@@ -1,4 +1,6 @@
 import json
+import re
+from typing import List
 
 from django import forms
 import cobra
@@ -167,17 +169,33 @@ cobra_model_update_forms = {
 }
 
 
-class CobraFbaForm(forms.ModelForm):
+def clean_comma_separated_str(form, value: str) -> str:
+    return ','.join([item.strip() for item in value.split(',') if re.fullmatch(r'[a-zA-Z0-9_-]+', item.strip())])
+
+
+def load_comma_separated_str(value: str) -> List[str]:
+    return value.split(',') if value else []
+
+
+class CleanDeletedGenesMixin:
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_data['deleted_genes'] = clean_comma_separated_str(self, cleaned_data.get('deleted_data', ''))
+        return cleaned_data
+
+
+class CobraFbaForm(CleanDeletedGenesMixin, forms.ModelForm):
     class Meta:
         model = CobraFba
-        fields = ['desc', 'genes']
+        fields = ['desc', 'deleted_genes']
+
+
+class CobraFvaForm(CleanDeletedGenesMixin, forms.ModelForm):
+    class Meta:
+        model = CobraFva
+        fields = ['desc', 'reaction_list', 'loopless', 'fraction_of_optimum', 'pfba_factor', 'deleted_genes']
 
     def clean(self):
         cleaned_data = super().clean()
-
-
-# TODO(myl7)
-class CobraFvaForm(forms.ModelForm):
-    class Meta:
-        model = CobraFva
-        fields = ['desc', 'reaction_list', 'loopless', 'fraction_of_optimum', 'pfba_factor']
+        cleaned_data['reaction_list'] = clean_comma_separated_str(self, cleaned_data.get('reaction_list', ''))
+        return cleaned_data

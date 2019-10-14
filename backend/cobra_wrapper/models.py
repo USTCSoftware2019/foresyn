@@ -41,8 +41,8 @@ def validate_json_str_or_blank_str(value):
 
 
 class CobraFba(models.Model):
-    desc = models.TextField(blank=True)
-    genes = models.TextField(blank=True)
+    desc = models.CharField(max_length=600, blank=True)
+    deleted_genes = models.TextField(blank=True)
 
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE, related_name='fba_list')
     start_time = models.DateTimeField(auto_now_add=True)
@@ -61,11 +61,12 @@ class CobraFba(models.Model):
 
 
 class CobraFva(models.Model):
-    desc = models.TextField(blank=True)
+    desc = models.CharField(max_length=600, blank=True)
     reaction_list = models.TextField()
     loopless = models.BooleanField(default=False)
     fraction_of_optimum = models.FloatField(default=1.0)
-    pfba_factor = models.BooleanField(blank=True)
+    pfba_factor = models.FloatField(default=1.0)
+    deleted_genes = models.TextField(blank=True)
 
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE, related_name='fva_list')
     start_time = models.DateTimeField(auto_now_add=True)

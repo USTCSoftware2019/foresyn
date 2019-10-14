@@ -1,38 +1,47 @@
-import cobra
+import json
+
+import cobra.manipulation
 from cobra.flux_analysis import flux_variability_analysis
 
 from .celery import app
+from .utils import load_sbml
 
 
 @app.task
-def cobra_fba(pk, cobra_model_json, delete_genes):  # TODO(lbc12345): add delete
-    cobra_model = cobra.io.from_json(cobra_model_json)
-    if delete_genes != ['']:
-        cobra.manipulation.delete_model_genes(
-            cobra_model, delete_genes, cumulative_deletions=True  # TODO(lbc12345): add delete
-        )
-    result = cobra_model.optimize().to_frame().to_json()
-    if delete_genes != ['']:
-        cobra.manipulation.undelete_model_genes(cobra_model)  # TODO(lbc12345): add delete
+def cobra_fba(pk, model_sbml, deleted_genes):
+    cobra_model = load_sbml(model_sbml)
+    if len(deleted_genes) > 0:
+        cobra.manipulation.delete_model_genes(cobra_model, deleted_genes, cumulative_deletions=True)
+    result_object = cobra_model.optimize()
+    result: dict = json.loads(result_object.to_frame().to_json())
+    result['objective_value'] = result_object.objective_value
+    result['status'] = result_object.status
     app.send_task(
         'cobra_wrapper.tasks.cobra_fba_save',
-        args=[pk, result, app.current_task.request.id],
-        kwargs={},
+        kwargs={
+            'pk': pk,
+            'result': json.dumps(result),
+            'task_id': app.current_task.request.id,
+        },
         queue='cobra_results',
-        routing_key='cobra_result.fba'
+        routing_key='cobra_result.fba',
     )
 
 
 @app.task
-def cobra_fva(pk, cobra_model_json, reaction_list=None, loopless=False, fraction_of_optimum=1.0, pfba_factor=None):
-    cobra_model = cobra.io.from_json(cobra_model_json)
+def cobra_fva(pk, model_sbml, reaction_list, loopless, fraction_of_optimum, pfba_factor, deleted_genes):
+    cobra_model = load_sbml(model_sbml)
+    if len(deleted_genes) > 0:
+        cobra.manipulation.delete_model_genes(cobra_model, deleted_genes, cumulative_deletions=True)
     result = flux_variability_analysis(
-        cobra_model, reaction_list, loopless, fraction_of_optimum, pfba_factor
-    ).to_json()
+        cobra_model, reaction_list, loopless, fraction_of_optimum, pfba_factor).to_json()
     app.send_task(
         'cobra_wrapper.tasks.cobra_fva_save',
-        args=[pk, result, app.current_task.request.id],
-        kwargs={},
+        kwargs={
+            'pk': pk,
+            'result': result,
+            'task_id': app.current_task.request.id,
+        },
         queue='cobra_results',
-        routing_key='cobra_result.fva'
+        routing_key='cobra_result.fva',
     )

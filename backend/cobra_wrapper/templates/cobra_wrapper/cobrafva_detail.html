@@ -33,9 +33,9 @@
             <td>reaction_list</td>
             <td>
                 [
-                {% for reaction in object.reaction_list.all %}
+                {% for reaction in object.reaction_list|split_with_comma %}
                     {% if not forloop.counter == 1 %},{% endif %}
-                    <a href="{% url 'cobra_wrapper:cobrareaction_detail' reaction.pk %}">{{ reaction }}</a>
+                    {{ reaction }}
                 {% endfor %}
                 ]
             </td>
