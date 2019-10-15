@@ -1,18 +1,15 @@
 import cobra
-# from .common import (
-#     data_metabolite_to_cobra_metabolite, data_reaction_to_cobra_reaction, reaction_string_to_metabolites
-# )
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.views import View
-from cobra.io.sbml import _model_to_sbml
-import libsbml
-# FIXME(myl7): Remove metabolites and reactions
-# from cobra_wrapper.models import CobraModel, CobraMetabolite
+
+from cobra_wrapper.utils import load_sbml, dump_sbml
 from bigg_database.models import Model as DataModel, Reaction as DataReaction
 from cobra_wrapper.models import CobraModel
 from .common import reaction_string_to_metabolites
 from .models import DataModel
+
 
 class AddDataModelToCobra(View):
     def post(self, request):
@@ -60,11 +57,9 @@ class AddDataReactionToCobra(View):
         reaction = cobra.Reaction(data_reaction_object.bigg_id)
         metabolites_dict = reaction_string_to_metabolites(data_reaction_object.reaction_string)
         reaction.add_metabolites(metabolites_dict)
-        cobra_object = cobra.io.read_sbml_model(cobra_model_object.sbml_content)
+        cobra_object = load_sbml(cobra_model_object.sbml_content)
         reaction.gene_reaction_rule = [gene.gene_reaction_rule for gene in data_reaction_object.reactiongene_set.all()]
-        cobra_object.add_reaction(reaction)
-        doc = _model_to_sbml(cobra_object)
-        writer = libsbml.SBMLWriter()
-        sbml_content = writer.writeSBMLToString(doc)
+        cobra_object.add_reactions([reaction])
+        sbml_content = dump_sbml(cobra_object)
         cobra_model_object.sbml_content = sbml_content
-
+        return JsonResponse({"messages": "OK"}, status=200)

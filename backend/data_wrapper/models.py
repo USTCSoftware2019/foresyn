@@ -1,5 +1,4 @@
 from django.db import models
-from bigg_database.models import Model
 
 
 # Create your models here.
