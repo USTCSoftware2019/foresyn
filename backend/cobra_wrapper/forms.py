@@ -109,17 +109,19 @@ class CobraModelObjectiveUpdateForm(InstanceForm):
 
 def get_reaction_json(reaction: cobra.Reaction) -> Dict[str, Any]:
     return {
-        'cobra_id': reaction.id,
+        # 'cobra_id': reaction.id,
         'name': reaction.name,
-        'subsystem': reaction.subsystem,
-        'lower_bound': reaction.lower_bound,
-        'upper_bound': reaction.upper_bound,
-        'gene_reaction_rule': reaction.gene_reaction_rule,
-        'gene_name_reaction_rule': reaction.gene_name_reaction_rule,
-        'metabolites_with_coefficients': dict(zip(
-            [metabolite.id for metabolite in reaction.metabolites],
-            reaction.get_coefficients([metabolite.id for metabolite in reaction.metabolites])
-        ))
+        # 'subsystem': reaction.subsystem,
+        # 'lower_bound': reaction.lower_bound,
+        # 'upper_bound': reaction.upper_bound,
+        # 'gene_reaction_rule': reaction.gene_reaction_rule,
+        # 'gene_name_reaction_rule': reaction.gene_name_reaction_rule,
+        # 'metabolites_with_coefficients': dict(zip(
+        #     [metabolite.id for metabolite in reaction.metabolites],
+        #     reaction.get_coefficients([metabolite.id for metabolite in reaction.metabolites])
+        # )),
+        'metabolites': [metabolite.name for metabolite in reaction.metabolites],
+        'genes': [gene.name for gene in reaction.genes],
     }
 
 

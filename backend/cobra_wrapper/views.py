@@ -11,6 +11,7 @@ from .models import CobraModel, CobraFba, CobraFva, CobraModelChange
 from .forms import CobraModelCreateForm, cobra_model_update_forms, CobraFbaForm, CobraFvaForm, load_comma_separated_str
 
 from backend.celery import app
+from search.internal_api import search_biobricks
 
 
 class CobraModelListView(LoginRequiredMixin, ListView):
@@ -26,7 +27,15 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data = super().get_context_data()
         context_data['cobra_model'] = self.object.build()
         context_data['latest_changes'] = CobraModelChange.objects.filter(model=self.object)[:10]
-        context_data['recommendations'] = [change for change in []]
+        keywords = []
+        for reaction_dict in [
+            *[json.loads(change.new_info) for change in CobraModelChange.objects.filter(model=self.object, change_type='add_reaction')[:10]],
+            *[json.loads(change.pre_info) for change in CobraModelChange.objects.filter(model=self.object, change_type='del_reaction')[:10]],
+        ]:
+            keywords.append(reaction_dict['name'])
+            keywords.extend(reaction_dict['metabolites'])
+            keywords.extend(reaction_dict['genes'])
+        context_data['recommendations'] = search_biobricks(*keywords)
         return context_data
 
 
