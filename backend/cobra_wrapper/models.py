@@ -96,14 +96,14 @@ class CobraModelChange(models.Model):
     # pre_sbml_content = models.TextField(blank=True)  # The field may take much memory and disk space
     # `pre_info` is deleted reaction id, pre name or pre objective
     # The same to `new_info`, but it could also be new reaction id
-    pre_info = models.CharField(max_length=600, blank=True)
-    new_info = models.CharField(max_length=600, blank=True)
+    pre_info = models.TextField(blank=True)
+    new_info = models.TextField(blank=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
     SHOWN_TEXT_TEMPLATE_CHOICES = {
-        'add-reaction': 'Add reaction {new_info}',
-        'del-reaction': 'Delete reaction {pre_info}',
-        'sbml-content': 'Use new SBML file',
+        'add_reaction': 'Add reaction {new_info}',
+        'del_reaction': 'Delete reaction {pre_info}',
+        'sbml_content': 'Use new SBML file',
         'name': 'Change name from {pre_info} to {new_info}',
         'objective': 'Change objective to {new_info}',
     }

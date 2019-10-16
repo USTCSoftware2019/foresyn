@@ -7,7 +7,7 @@ from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateR
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import Form
 
-from .models import CobraModel, CobraFba, CobraFva
+from .models import CobraModel, CobraFba, CobraFva, CobraModelChange
 from .forms import CobraModelCreateForm, cobra_model_update_forms, CobraFbaForm, CobraFvaForm, load_comma_separated_str
 
 from backend.celery import app
@@ -25,6 +25,8 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data()
         context_data['cobra_model'] = self.object.build()
+        context_data['latest_changes'] = CobraModelChange.objects.filter(model=self.object)[:10]
+        context_data['recommendations'] = [change for change in []]
         return context_data
 
 

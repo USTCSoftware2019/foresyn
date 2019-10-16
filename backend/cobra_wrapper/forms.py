@@ -1,6 +1,6 @@
 import json
 import re
-from typing import List
+from typing import List, Dict, Any
 
 from django import forms
 import cobra
@@ -107,6 +107,22 @@ class CobraModelObjectiveUpdateForm(InstanceForm):
         return super().save()
 
 
+def get_reaction_json(reaction: cobra.Reaction) -> Dict[str, Any]:
+    return {
+        'cobra_id': reaction.id,
+        'name': reaction.name,
+        'subsystem': reaction.subsystem,
+        'lower_bound': reaction.lower_bound,
+        'upper_bound': reaction.upper_bound,
+        'gene_reaction_rule': reaction.gene_reaction_rule,
+        'gene_name_reaction_rule': reaction.gene_name_reaction_rule,
+        'metabolites_with_coefficients': dict(zip(
+            [metabolite.id for metabolite in reaction.metabolites],
+            reaction.get_coefficients([metabolite.id for metabolite in reaction.metabolites])
+        ))
+    }
+
+
 class CobraModelReactionDeleteForm(InstanceForm):
     pre_reaction_id = forms.CharField()
     change_type = forms.CharField(widget=forms.HiddenInput(), initial='del_reaction')
@@ -115,10 +131,16 @@ class CobraModelReactionDeleteForm(InstanceForm):
         if model:
             if self.errors:
                 raise ValueError()
-            pre_reaction_id_list = self.cleaned_data['pre_reaction_id'].split(',')
-            CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
-                                            pre_info=', '.join(pre_reaction_id_list))
             cobra_model: cobra.Model = model.build()
+            pre_reaction_id_list = self.cleaned_data['pre_reaction_id'].split(',')
+            pre_reaction_info = {
+                'reactions': [
+                    get_reaction_json(cobra_model.reactions.get_by_id(reaction_id))
+                    for reaction_id in pre_reaction_id_list
+                ],
+            }
+            CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
+                                            pre_info=json.dumps(pre_reaction_info))
             cobra_model.remove_reactions(pre_reaction_id_list)
             model.sbml_content = dump_sbml(cobra_model)
             model.save()
@@ -140,8 +162,6 @@ class CobraModelReactionCreateForm(InstanceForm):
         if model:
             if self.errors:
                 raise ValueError()
-            CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
-                                            new_info=self.cleaned_data['cobra_id'])
             cobra_model: cobra.Model = model.build()
             metabolites_with_coefficients_dict = {
                 cobra_model.metabolites.get_by_id(metabolite_id): coefficient
@@ -154,6 +174,8 @@ class CobraModelReactionCreateForm(InstanceForm):
                                             upper_bound=self.cleaned_data['upper_bound'])
             cobra_reaction.add_metabolites(metabolites_with_coefficients_dict)
             cobra_model.add_reactions([cobra_reaction])
+            CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
+                                            new_info=json.dumps(get_reaction_json(cobra_reaction)))
             model.sbml_content = dump_sbml(cobra_model)
             model.save()
             self.instance = model
