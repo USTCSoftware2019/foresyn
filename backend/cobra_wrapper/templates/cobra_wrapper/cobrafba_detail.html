@@ -28,60 +28,64 @@
     <p>Status: {{ object|check_result_status }}</p>
 
     {% if result %}
-        <table>
-            <tr>
-                <th>objective_value</th>
-                <th>status</th>
-            </tr>
-            <tr>
-                <td>{{ result.objective_value }}</td>
-                <td>{{ result.status }}</td>
-            </tr>
-        </table>
-
-        <table>
-            <thead>
-            <tr>
-                <th>fluxes</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th>name</th>
-                <th>value</th>
-            </tr>
-            {% for name, value in result.fluxes.items %}
+        {% if result.ok %}
+            <table>
                 <tr>
-                    <td>{{ name }}</td>
-                    <td>{{ value }}</td>
+                    <th>objective_value</th>
+                    <th>status</th>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-        <table>
-            <thead>
-            <tr>
-                <th>shadow_price</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th>name</th>
-                <th>value</th>
-            </tr>
-            {% for name, value in result.shadow_prices.items %}
                 <tr>
-                    <td>{{ name }}</td>
-                    <td>{{ value }}</td>
+                    <td>{{ result.objective_value }}</td>
+                    <td>{{ result.status }}</td>
                 </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+            </table>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>fluxes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th>name</th>
+                    <th>value</th>
+                </tr>
+                {% for name, value in result.fluxes.items %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>shadow_price</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <th>name</th>
+                    <th>value</th>
+                </tr>
+                {% for name, value in result.shadow_prices.items %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            {{ result }}
+        {% endif %}
     {% endif %}
 
     {% for fba in latest_fba_list %}
-        {{ fba }}
+        <div>{{ fba }}</div>
     {% endfor %}
 
     <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>

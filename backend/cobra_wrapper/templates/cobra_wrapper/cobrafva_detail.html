@@ -57,25 +57,31 @@
     <p>Status: {{ object|check_result_status }}</p>
 
     {% if result %}
-        <table>
-            <tr>
-                <th>name</th>
-                <th>maximum</th>
-                <th>minimum</th>
-            </tr>
-            {% for name in result.maximum.keys %}
+        {% if result.ok %}
+            <table>
                 <tr>
-                    <td>{{ name }}</td>
-                    <td>{{ result.maximum|get_dict_value_with_key:name }}</td>
-                    <td>{{ result.minimum|get_dict_value_with_key:name }}</td>
+                    <th>name</th>
+                    <th>maximum</th>
+                    <th>minimum</th>
                 </tr>
-            {% endfor %}
-        </table>
+                {% for name in result.maximum.keys %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ result.maximum|get_dict_value_with_key:name }}</td>
+                        <td>{{ result.minimum|get_dict_value_with_key:name }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div>{{ result }}</div>
+        {% endif %}
     {% endif %}
 
-    {% for fva in latest_fva_list %}
-        {{ fva }}
-    {% endfor %}
+    <div>
+        {% for fva in latest_fva_list %}
+            {{ fva }}
+        {% endfor %}
+    </div>
 
     <a href="{% url 'cobra_wrapper:cobrafva_confirm_delete' model_pk object.pk %}">Delete</a>
     <a href="{% url 'cobra_wrapper:cobrafva_list' model_pk %}">Return</a>

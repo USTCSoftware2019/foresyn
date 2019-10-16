@@ -180,7 +180,7 @@ def load_comma_separated_str(value: str) -> List[str]:
 class CleanDeletedGenesMixin:
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_data['deleted_genes'] = clean_comma_separated_str(self, cleaned_data.get('deleted_data', ''))
+        cleaned_data['deleted_genes'] = clean_comma_separated_str(self, cleaned_data.get('deleted_genes', ''))
         return cleaned_data
 
 
