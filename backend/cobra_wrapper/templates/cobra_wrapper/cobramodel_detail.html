@@ -3,91 +3,146 @@
 {% block title %}{{ object }}{% endblock title %}
 
 {% block content %}
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-3">
-                <div class="bar-left" style="width: 3px; height: 280px; background-color:#20c997"></div>
-                <div class="bar-btn-group col-1">
-                    <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
-                    <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
-                    <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
-                    <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
-                </div>
-                <div class="col-11">
-                    <div class="row">
-                        {% for change in objects.changes.all|slice:":3" %}
-                            <div class="text ml-4 bar-text">
-                                {{ change }}<br>
-                                {{ change.crated_time }}
-                            </div>
-                        {% endfor %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-3">
+            <div class="bar-left" style="width: 3px; height: 280px; background-color:#20c997"></div>
+            <div class="bar-btn-group col-1">
+                <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+                <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+                <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+                <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+            </div>
+            <div class="col-11">
+                <div class="row">
+                    {% for change in objects.changes.all|slice:":3" %}
+                    <div class="text ml-4 bar-text">
+                        {{ change }}<br>
+                        {{ change.crated_time }}
                     </div>
+                    {% endfor %}
                 </div>
             </div>
-            <div class="col-9">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-content-between">
-                        <h5 style="padding-top: 5px;">Model: {{ object.cobra_id }}</h5>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-                            <i class="fa fa-share-alt "></i>
-                        </button>
-                        <!-- Modal -->
-                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
-                             aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Share</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form>
-                                            <div class="form-group row">
-                                                <div class="col-12">
-                                                    <input type="password" class="form-control" id="inputPassword"
-                                                           placeholder="Password">
-                                                </div>
+        </div>
+        <div class="col-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-content-between">
+                    <h5 style="padding-top: 5px;">Model: {{ object.cobra_id }}</h5>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                        <i class="fa fa-share-alt "></i>
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+                         aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Share</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form>
+                                        <div class="form-group row">
+                                            <div class="col-12">
+                                                <input type="password" class="form-control" id="inputPassword"
+                                                       placeholder="Password">
                                             </div>
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
-                                        </button>
-                                        <button type="button" class="btn btn-primary">Share</button>
-                                    </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                    </button>
+                                    <button type="button" class="btn btn-primary">Share</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <h5 class="card-title">Description</h5>
-                        <p>{{ object.name }}</p>
-                        <h5 class="card-title">Objective</h5>
-                        <p>{{ cobra_model.objective.to_json }}</p>
-                        <h5 class="card-title">Reactions</h5>
-                        <div class="list-group">
-                            {% for reaction in cobra_model.reactions %}
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    {{ reaction.name }}[{{ reaction.id }}]
-                                </a>
-                            {% endfor %}
-                        </div>
-                        <br>
-                        <div class="row justify-content-around">
-                            <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
-                               href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>
-                            <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
-                               href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>
-                            <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
-                               href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
-                            <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
-                               href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
-                        </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Description</h5>
+                    <p>{{ object.name }}</p>
+                    <h5 class="card-title">Objective</h5>
+                    <p>{{ cobra_model.objective.to_json }}</p>
+                    <h5 class="card-title">Reactions</h5>
+                    <div class="list-group">
+                        {% for reaction in cobra_model.reactions %}
+                        <a href="#" class="list-group-item list-group-item-action">
+                            {{ reaction.name }}[{{ reaction.id }}]
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <br>
+                    <div class="row justify-content-around">
+
+<!--                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"-->
+<!--                           href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>-->
+<!--                        edit the model button-->
+                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button" data-toggle="modal" data-target="#ModalEditForm">Edit</button>
+                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
+                           href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>
+                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
+                           href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
+                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
+                           href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- when click the `Edit`, modal show -->
+<div class="modal fade" id="ModalEditForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Model</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="#">
+                    <div class="form-group row">
+                        <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="staticEmail" placeholder="Username">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" placeholder="Password">
+                        </div>
+                    </div>
+                    <div class="form-group row d-flex justify-content-center">
+                        <input type="submit" class="btn btn-info col-2" value="Edit">
+                    </div>
+<!--                    {% for form in forms %}-->
+<!--                    <div class="container mt-4">-->
+<!--                        {% if form.fields.change_type.initial == 'sbml_content' %}-->
+<!--                        <form method="post" enctype="multipart/form-data">-->
+<!--                            {% else %}-->
+<!--                            <form method="post">-->
+<!--                                {% endif %}-->
+<!--                                {% csrf_token %}-->
+<!--                                {{ form|crispy }}-->
+<!--                                <button type="reset" class="btn btn-primary">Reset</button>-->
+<!--                                <button type="submit" class="btn btn-primary">Submit</button>-->
+<!--                            </form>-->
+<!--                    </div>-->
+<!--                    {% endfor %}-->
+                </form>
+            </div>
+            <!-- <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Save changes</button>
+            </div> -->
+        </div>
+    </div>
+</div>
 {% endblock content %}
