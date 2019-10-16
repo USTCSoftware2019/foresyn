@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load cobra_wrapper_tags %}
+{% load mathfilters %}
 
 {% block title %}FBA Result of {{ object }}{% endblock title %}
 
@@ -84,9 +85,36 @@
         {% endif %}
     {% endif %}
 
-    {% for fba in latest_fba_list %}
-        <div>{{ fba }}</div>
-    {% endfor %}
+    <table>
+        <tr>
+            <td>Objective_value_change</td>
+            <td>{{ result.objective_value }}</td>
+            {% for fba in latest_fba_results %}
+                {% if fba.ok %}
+                    <td>{{ result.objective_value }}({{ result.objective_value|sub:fba.objective_value }})</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        <tr>
+            <td>Fluxes_name</td>
+        </tr>
+        {% for name, value in result.fluxes.items %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ value }}</td>
+                {% for fba in latest_fba_results %}
+                    {% if fba.ok %}
+                        {% if name in fba.fluxes.index %}
+                            <td>{{ fba.fluxes|getattr_template:name }}({{ value|sub:fba.fluxes|getattr_template:name }})</td>
+                        {% else %}
+                            <td>None</td>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </tr>
+        {% endfor %}
+
+    </table>
 
     <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>
     <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>

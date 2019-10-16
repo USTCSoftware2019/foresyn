@@ -9,6 +9,11 @@ def get_dict_value_with_key(dic, key):
 
 
 @register.filter
+def getattr_template(obj, field):
+    return getattr(obj, field)
+
+
+@register.filter
 def check_result_status(fva_obj):
     if fva_obj.result:
         return 'OK'

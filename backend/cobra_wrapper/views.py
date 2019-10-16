@@ -11,6 +11,7 @@ from .models import CobraModel, CobraFba, CobraFva, CobraModelChange
 from .forms import CobraModelCreateForm, cobra_model_update_forms, CobraFbaForm, CobraFvaForm, load_comma_separated_str
 
 from backend.celery import app
+from search.internal_api import search_biobricks
 
 
 class CobraModelListView(LoginRequiredMixin, ListView):
@@ -26,7 +27,17 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data = super().get_context_data()
         context_data['cobra_model'] = self.object.build()
         context_data['latest_changes'] = CobraModelChange.objects.filter(model=self.object)[:10]
-        context_data['recommendations'] = [change for change in []]
+        keywords = set()
+        for reaction_dict in [
+            *[json.loads(change.new_info) for change in
+              CobraModelChange.objects.filter(model=self.object, change_type='add_reaction')[:10]],
+            *[json.loads(change.pre_info) for change in
+              CobraModelChange.objects.filter(model=self.object, change_type='del_reaction')[:10]],
+        ]:
+            keywords.update([reaction_dict['name']])
+            keywords.update(reaction_dict['metabolites'])
+            keywords.update(reaction_dict['genes'])
+        context_data['recommendations'] = search_biobricks(*keywords)
         return context_data
 
 
@@ -115,7 +126,8 @@ class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAd
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        context_data['latest_fba_list'] = CobraFba.objects.filter(model=self.model_object)[:5]
+        context_data['latest_fba_results'] = [json.loads(fba.result)
+                                              for fba in CobraFba.objects.filter(model=self.model_object)[:5]]
         return context_data
 
 
@@ -168,7 +180,8 @@ class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAd
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        context_data['latest_fva_list'] = CobraFva.objects.filter(model=self.model_object)[:5]
+        context_data['latest_fva_results'] = [json.loads(fba.result)
+                                              for fba in CobraFva.objects.filter(model=self.model_object)[:5]]
         return context_data
 
 
