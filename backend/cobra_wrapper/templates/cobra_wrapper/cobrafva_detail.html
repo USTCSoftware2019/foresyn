@@ -7,10 +7,6 @@
 {% block content %}
     <table>
         <tr>
-            <td>id</td>
-            <td>{{ object.id }}</td>
-        </tr>
-        <tr>
             <td>description</td>
             <td>{{ object.desc }}</td>
         </tr>
@@ -26,8 +22,8 @@
 
     <table>
         <tr>
-            <th>arg name</th>
-            <th>arg value</th>
+            <th>argument name</th>
+            <th>argument value</th>
         </tr>
         <tr>
             <td>reaction_list</td>
@@ -67,8 +63,8 @@
                 {% for name in result.maximum.keys %}
                     <tr>
                         <td>{{ name }}</td>
-                        <td>{{ result.maximum|get_dict_value_with_key:name }}</td>
-                        <td>{{ result.minimum|get_dict_value_with_key:name }}</td>
+                        <td>{{ result.maximum|access_dict:name }}</td>
+                        <td>{{ result.minimum|access_dict:name }}</td>
                     </tr>
                 {% endfor %}
             </table>
