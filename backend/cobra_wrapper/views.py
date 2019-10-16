@@ -29,8 +29,10 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data['latest_changes'] = CobraModelChange.objects.filter(model=self.object)[:10]
         keywords = set()
         for reaction_dict in [
-            *[json.loads(change.new_info) for change in CobraModelChange.objects.filter(model=self.object, change_type='add_reaction')[:10]],
-            *[json.loads(change.pre_info) for change in CobraModelChange.objects.filter(model=self.object, change_type='del_reaction')[:10]],
+            *[json.loads(change.new_info) for change in
+              CobraModelChange.objects.filter(model=self.object, change_type='add_reaction')[:10]],
+            *[json.loads(change.pre_info) for change in
+              CobraModelChange.objects.filter(model=self.object, change_type='del_reaction')[:10]],
         ]:
             keywords.update([reaction_dict['name']])
             keywords.update(reaction_dict['metabolites'])
@@ -124,7 +126,8 @@ class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAd
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        context_data['latest_fba_list'] = CobraFba.objects.filter(model=self.model_object)[:5]
+        context_data['latest_fba_results'] = [json.loads(fba.result)
+                                              for fba in CobraFba.objects.filter(model=self.model_object)[:5]]
         return context_data
 
 
@@ -177,7 +180,8 @@ class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAd
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
-        context_data['latest_fva_list'] = CobraFva.objects.filter(model=self.model_object)[:5]
+        context_data['latest_fva_results'] = [json.loads(fba.result)
+                                              for fba in CobraFva.objects.filter(model=self.model_object)[:5]]
         return context_data
 
 
