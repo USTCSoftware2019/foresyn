@@ -5,7 +5,7 @@ import random
 
 
 def search_biobricks(*keywords, num=5):
-    if Biobrick.objects.count() < 5:
+    if Biobrick.objects.count() < num:
         return sr2obj(Biobrick.objects.all())
 
     if not keywords:
@@ -15,18 +15,21 @@ def search_biobricks(*keywords, num=5):
     sqs = SearchQuerySet().models(Biobrick).filter(sq).order_by('-_score')
 
     count = sqs.count()
-    if count < 5:
-        return fill_with_randoms(sr2obj(sqs), 5 - count)
+    if count < num:
+        return fill_with_randoms(sr2obj(sqs), num)
     else:
-        return sr2obj(sqs[0:5])
+        return sr2obj(sqs[0:num])
 
 
 def fill_with_randoms(initial, num):
-    count = Biobrick.objects.count()
+    """
+    return a list filled with initial data and random objects until reaching size of `num`
+    """
+    biobricks = Biobrick.objects.all()
     result = initial[:]
 
-    while len(result) < 5:
-        random_obj = Biobrick.objects.get(id=random.randint(1, count))
+    while len(result) < num:
+        random_obj = random.choice(biobricks)
         if random_obj not in result:
             result.append(random_obj)
 
