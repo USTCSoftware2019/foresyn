@@ -16,12 +16,15 @@ def search_biobricks(*keywords, num=5):
 
     count = sqs.count()
     if count < num:
-        return fill_with_randoms(sqs, num - count)
+        return fill_with_randoms(sr2obj(sqs), num)
     else:
         return sr2obj(sqs[0:num])
 
 
 def fill_with_randoms(initial, num):
+    """
+    return a list filled with initial data and random objects until reaching size of `num`
+    """
     biobricks = Biobrick.objects.all()
     result = initial[:]
 
