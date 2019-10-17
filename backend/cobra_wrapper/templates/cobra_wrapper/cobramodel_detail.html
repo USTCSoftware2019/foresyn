@@ -77,14 +77,22 @@
                     <br>
                     <div class="row justify-content-around">
 
+                        <!--                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"-->
+                        <!--                           href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>-->
+                        <!--                        edit the model button-->
+                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
+                                data-toggle="modal" data-target="#ModalEditForm">Edit
+                        </button>
 <!--                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"-->
-<!--                           href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>-->
-<!--                        edit the model button-->
-                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button" data-toggle="modal" data-target="#ModalEditForm">Edit</button>
-                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
-                           href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>
+<!--                           href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>-->
+                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
+                                data-toggle="modal" data-target="#ModalDeleteForm">Delete
+                        </button>
                         <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
                            href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
+<!--                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"-->
+<!--                                data-toggle="modal" data-target="#ModalFBAForm">FBA-->
+<!--                        </button>-->
                         <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
                            href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
                     </div>
@@ -105,43 +113,102 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
+
             <div class="modal-body">
-                <form action="#">
+                <form method="post">
+                    {% csrf_token %}
+
+
+                    {% for hidden_field in form.hidden_fields %}
+                    {{ hidden_field }}
+                    {% endfor %}
+
+                    {% for field in form.visible_fields %}
                     <div class="form-group row">
-                        <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" id="staticEmail" placeholder="Username">
+                        {{ render_field field.label_tag class="col-3 col-form-label"}}
+                        <div class="col-9">
+                            {% render_field field class="form-control" %}
                         </div>
+                        {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
                     </div>
-                    <div class="form-group row">
-                        <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
-                        <div class="col-sm-10">
-                            <input type="password" class="form-control" placeholder="Password">
-                        </div>
-                    </div>
+                    {% endfor %}
+
                     <div class="form-group row d-flex justify-content-center">
                         <input type="submit" class="btn btn-info col-2" value="Edit">
                     </div>
-<!--                    {% for form in forms %}-->
-<!--                    <div class="container mt-4">-->
-<!--                        {% if form.fields.change_type.initial == 'sbml_content' %}-->
-<!--                        <form method="post" enctype="multipart/form-data">-->
-<!--                            {% else %}-->
-<!--                            <form method="post">-->
-<!--                                {% endif %}-->
-<!--                                {% csrf_token %}-->
-<!--                                {{ form|crispy }}-->
-<!--                                <button type="reset" class="btn btn-primary">Reset</button>-->
-<!--                                <button type="submit" class="btn btn-primary">Submit</button>-->
-<!--                            </form>-->
-<!--                    </div>-->
-<!--                    {% endfor %}-->
                 </form>
             </div>
-            <!-- <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
-            </div> -->
+        </div>
+    </div>
+</div>
+
+<!--when click the delete btn, this modal shows-->
+<div class="modal fade" id="ModalDeleteForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Model</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <p class="font-weight-bold">Are you sure to delete: {{ object }}?</p>
+                    </div>
+                    <div class="form-group row d-flex justify-content-center">
+                        <input type="submit" class="btn btn-info col-2" value="Confirm">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--when click fba btn, this modal shows-->
+<div class="modal fade" id="ModalFBAForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Model</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+
+
+                    {% for hidden_field in form.hidden_fields %}
+                    {{ hidden_field }}
+                    {% endfor %}
+
+                    {% for field in form.visible_fields %}
+                    <div class="form-group row">
+                        {{ render_field field.label_tag class="col-3 col-form-label"}}
+                        <div class="col-9">
+                            {% render_field field class="form-control" %}
+                        </div>
+                        {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="form-group row d-flex justify-content-center">
+                        <input type="submit" class="btn btn-info col-2" value="Edit">
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
