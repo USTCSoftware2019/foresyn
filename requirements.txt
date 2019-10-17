@@ -5,7 +5,6 @@ celery>=4.3.0
 kombu>=4.6.3
 lxml>=4.4.1
 python-libsbml>=5.18.0
-django-mathfilters>=0.4.0
 
 pytz==2019.1
 sqlparse==0.3.0

@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% load cobra_wrapper_tags %}
-{% load mathfilters %}
 
 {% block title %}FBA Result of {{ object }}{% endblock title %}
 
@@ -25,44 +24,7 @@
 
     {% if result %}
         {% if result.ok %}
-            <table>
-                <tr>
-                    <th>objective_value</th>
-                    <td>{{ result.objective_value }}</td>
-                    {% for fba in latest_fba_results %}
-                        {% if fba.ok %}
-                            <td>{{ result.objective_value }}({{ result.objective_value|sub:fba.objective_value }})</td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                <tr>
-                    <th>status</th>
-                    <td>{{ result.status }}</td>
-                    {% for fba in latest_fba_results %}
-                        {% if fba.ok %}
-                            <td>{{ result.status }}</td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                <tr>
-                    <td>fluxes</td>
-                </tr>
-                {% for name, value in result.fluxes.items %}
-                    <tr>
-                        <th>{{ name }}</th>
-                        <td>{{ value }}</td>
-                        {% for fba in latest_fba_results %}
-                            {% if fba.ok %}
-                                {% if name in fba.fluxes.keys %}
-                                    <td>{{ fba.fluxes|access_dict:name }}({{ fba.fluxes|access_dict:name|sub:value }})</td>
-                                {% else %}
-                                    <td>none</td>
-                                {% endif %}
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </table>
+            <div>{{ result }}</div>
         {% else %}
             <div>{{ result }}</div>
         {% endif %}

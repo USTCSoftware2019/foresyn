@@ -48,6 +48,7 @@ class CobraFba(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     task_id = models.UUIDField(null=True, blank=True, default=None)
     result = models.TextField(blank=True, validators=[validate_json_str_or_blank_str])
+    ok = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'fba'
@@ -72,6 +73,7 @@ class CobraFva(models.Model):
     start_time = models.DateTimeField(auto_now_add=True)
     task_id = models.UUIDField(null=True, blank=True, default=None)
     result = models.TextField(blank=True, validators=[validate_json_str_or_blank_str])
+    ok = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'fva'
