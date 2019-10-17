@@ -6,4 +6,3 @@ class Biobrick(models.Model):
     description = models.TextField(null=True)
     keywords = models.TextField(null=True)
     uses = models.IntegerField(null=True)
-    url = models.URLField(null=True)
