@@ -4,13 +4,8 @@ register = template.Library()
 
 
 @register.filter
-def get_dict_value_with_key(dic, key):
+def access_dict(dic, key):
     return dic[key]
-
-
-@register.filter
-def getattr_template(obj, field):
-    return getattr(obj, field)
 
 
 @register.filter

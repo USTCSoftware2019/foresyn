@@ -71,7 +71,7 @@ class RelationshipLookupView(ListView):
 
         context['to_model_name'] = self.to_model_name.replace('_set', '')
         context['from_model'] = self.object
-        context['from_model_name'] = self.from_model._meta.verbose_name
+        context['from_model_name'] = self.from_model._meta.verbose_name.lower()
 
         return context
 

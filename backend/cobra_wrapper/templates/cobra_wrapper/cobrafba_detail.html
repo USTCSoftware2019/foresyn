@@ -5,13 +5,8 @@
 
 {% block title %}FBA Result of {{ object }}{% endblock title %}
 
-
 {% block content %}
     <table>
-        <tr>
-            <td>id</td>
-            <td>{{ object.id }}</td>
-        </tr>
         <tr>
             <td>description</td>
             <td>{{ object.desc }}</td>
@@ -33,88 +28,45 @@
             <table>
                 <tr>
                     <th>objective_value</th>
-                    <th>status</th>
-                </tr>
-                <tr>
                     <td>{{ result.objective_value }}</td>
+                    {% for fba in latest_fba_results %}
+                        {% if fba.ok %}
+                            <td>{{ result.objective_value }}({{ result.objective_value|sub:fba.objective_value }})</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th>status</th>
                     <td>{{ result.status }}</td>
+                    {% for fba in latest_fba_results %}
+                        {% if fba.ok %}
+                            <td>{{ result.status }}</td>
+                        {% endif %}
+                    {% endfor %}
                 </tr>
-            </table>
-
-            <table>
-                <thead>
                 <tr>
-                    <th>fluxes</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <th>name</th>
-                    <th>value</th>
+                    <td>fluxes</td>
                 </tr>
                 {% for name, value in result.fluxes.items %}
                     <tr>
-                        <td>{{ name }}</td>
+                        <th>{{ name }}</th>
                         <td>{{ value }}</td>
+                        {% for fba in latest_fba_results %}
+                            {% if fba.ok %}
+                                {% if name in fba.fluxes.keys %}
+                                    <td>{{ fba.fluxes|access_dict:name }}({{ fba.fluxes|access_dict:name|sub:value }})</td>
+                                {% else %}
+                                    <td>none</td>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
                     </tr>
                 {% endfor %}
-                </tbody>
-            </table>
-
-            <table>
-                <thead>
-                <tr>
-                    <th>shadow_price</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <th>name</th>
-                    <th>value</th>
-                </tr>
-                {% for name, value in result.shadow_prices.items %}
-                    <tr>
-                        <td>{{ name }}</td>
-                        <td>{{ value }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
             </table>
         {% else %}
-            {{ result }}
+            <div>{{ result }}</div>
         {% endif %}
     {% endif %}
-
-    <table>
-        <tr>
-            <td>Objective_value_change</td>
-            <td>{{ result.objective_value }}</td>
-            {% for fba in latest_fba_results %}
-                {% if fba.ok %}
-                    <td>{{ result.objective_value }}({{ result.objective_value|sub:fba.objective_value }})</td>
-                {% endif %}
-            {% endfor %}
-        </tr>
-        <tr>
-            <td>Fluxes_name</td>
-        </tr>
-        {% for name, value in result.fluxes.items %}
-            <tr>
-                <td>{{ name }}</td>
-                <td>{{ value }}</td>
-                {% for fba in latest_fba_results %}
-                    {% if fba.ok %}
-                        {% if name in fba.fluxes.index %}
-                            <td>{{ fba.fluxes|getattr_template:name }}({{ value|sub:fba.fluxes|getattr_template:name }})</td>
-                        {% else %}
-                            <td>None</td>
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-            </tr>
-        {% endfor %}
-
-    </table>
 
     <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>
     <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, reverse
 from django.views.generic import FormView
 from haystack.generic_views import SearchMixin
 
@@ -58,6 +58,4 @@ class DatabaseSearchView(BaseSearchView):
         return self.render_to_response(context)
 
     def form_invalid(self, form):
-        return render(self.request, 'bigg_database/search.html', context={
-            'form': form
-        })
+        return redirect(reverse('accounts:profile'))
