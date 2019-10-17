@@ -37,7 +37,7 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
             keywords.update([reaction_dict['name']])
             keywords.update(reaction_dict['metabolites'])
             keywords.update(reaction_dict['genes'])
-        context_data['recommendations'] = search_biobricks(*keywords)
+        context_data['biobricks'] = search_biobricks(*keywords)
         return context_data
 
 
