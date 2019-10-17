@@ -21,3 +21,6 @@ fabric>=2.5.0
 pymysql>=0.9.3
 
 django-crispy-forms==1.7.2
+
+fuzzywuzzy==0.17.0
+python-Levenshtein==0.12.0

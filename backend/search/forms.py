@@ -1,7 +1,11 @@
+import heapq
+
 from django import forms
+from django.apps import apps
+from fuzzywuzzy import fuzz
 from haystack.forms import ModelSearchForm
 from haystack.query import SQ
-from django.apps import apps
+from bigg_database.models import Gene, Reaction
 
 
 class ModifiedModelSearchForm(ModelSearchForm):
@@ -86,10 +90,31 @@ class ModifiedModelSearchForm(ModelSearchForm):
             }
 
         if self.queryset is not None:
-            this_cnt = self.queryset.count()
+            this_cnt = len(self.queryset)
         else:
-            this_cnt = self.search().count()
+            this_cnt = len(self.search())
 
         total_number[self.search_model._meta.verbose_name] = this_cnt
 
         return total_number
+
+
+class BiggOptimizedSearchForm(ModifiedModelSearchForm):
+    Score_Threshold = 50
+
+    def fuzzywuzzy_search(self, model):
+        keyword = self.cleaned_data['q']
+        data = []
+        for ins in model.objects.all():
+            score = fuzz.partial_ratio(ins.bigg_id, keyword)
+            if score >= self.Score_Threshold:
+                heapq.heappush(data, (score, ins.id, ins))
+        data_len = len(data)
+        return [element[2] for element in reversed([heapq.heappop(data) for _ in range(data_len)])]
+
+    def _search_model(self, model=None):
+        model = model or self.search_model
+        if model in [Gene, Reaction] or model != self.search_model:
+            return super()._search_model(model)
+        else:
+            return self.fuzzywuzzy_search(model)

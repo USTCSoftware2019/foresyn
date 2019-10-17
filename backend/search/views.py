@@ -7,7 +7,7 @@ from bigg_database.models import Metabolite as BiggMetabolite
 from bigg_database.models import Model as BiggModel
 from bigg_database.models import Reaction as BiggReaction
 
-from .forms import ModifiedModelSearchForm
+from .forms import ModifiedModelSearchForm, BiggOptimizedSearchForm
 
 
 class BaseSearchView(SearchMixin, FormView):
@@ -41,6 +41,7 @@ class BaseSearchView(SearchMixin, FormView):
 
 
 class DatabaseSearchView(BaseSearchView):
+    form_class = BiggOptimizedSearchForm
     models = [BiggModel, BiggReaction, BiggMetabolite, BiggGene]
     template_name = 'bigg_database/search_result.html'
     paginate_by = 10
