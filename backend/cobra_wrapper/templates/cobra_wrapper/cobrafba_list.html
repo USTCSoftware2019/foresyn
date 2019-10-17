@@ -48,8 +48,6 @@
       </div>
     </div>
     {% endfor %}
-    <a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">Return</a>
-
     <div class="btn-group-fixed">
       <div class="row changeable">
         <a role="button" class="btn btn-outline-light btn-circle text-hover-green text-light"
@@ -58,9 +56,14 @@
         </a>
       </div>
       <div class="row">
-        <button type="button" class="btn btn-outline-light btn-circle text-hover-green slide"
-          style="transition: all .3s ease-in-out">
+        <button type="button" class="btn btn-outline-light btn-circle text-hover-green slide">
           <i class="fa fa-angle-double-down" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="row">
+        <button type="button" class="btn btn-outline-light btn-circle text-hover-green slide"
+        href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">
+          <i class="fa fa-reply" aria-hidden="true"></i>
         </button>
       </div>
     </div>
