@@ -3,213 +3,298 @@
 {% block title %}{{ object }}{% endblock title %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-3">
-            <div class="bar-left" style="width: 3px; height: 280px; background-color:#20c997"></div>
-            <div class="bar-btn-group col-1">
-                <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
-                <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
-                <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
-                <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
-            </div>
-            <div class="col-11">
-                <div class="row">
-                    {% for change in objects.changes.all|slice:":3" %}
-                    <div class="text ml-4 bar-text">
-                        {{ change }}<br>
-                        {{ change.crated_time }}
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        <div class="col-9">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-content-between">
-                    <h5 style="padding-top: 5px;">Model: {{ object.cobra_id }}</h5>
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-                        <i class="fa fa-share-alt "></i>
-                    </button>
-                    <!-- Modal -->
-                    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
-                         aria-labelledby="exampleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Share</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <form>
-                                        <div class="form-group row">
-                                            <div class="col-12">
-                                                <input type="password" class="form-control" id="inputPassword"
-                                                       placeholder="Password">
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
-                                    </button>
-                                    <button type="button" class="btn btn-primary">Share</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title">Description</h5>
-                    <p>{{ object.name }}</p>
-                    <h5 class="card-title">Objective</h5>
-                    <p>{{ cobra_model.objective.to_json }}</p>
-                    <h5 class="card-title">Reactions</h5>
-                    <div class="list-group">
-                        {% for reaction in cobra_model.reactions %}
-                        <a href="#" class="list-group-item list-group-item-action">
-                            {{ reaction.name }}[{{ reaction.id }}]
-                        </a>
-                        {% endfor %}
-                    </div>
-                    <br>
-                    <div class="row justify-content-around">
 
-                        <!--                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"-->
-                        <!--                           href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>-->
-                        <!--                        edit the model button-->
-                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
-                                data-toggle="modal" data-target="#ModalEditForm">Edit
-                        </button>
-<!--                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"-->
-<!--                           href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>-->
-                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
-                                data-toggle="modal" data-target="#ModalDeleteForm">Delete
-                        </button>
-                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
-                           href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
-<!--                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"-->
-<!--                                data-toggle="modal" data-target="#ModalFBAForm">FBA-->
-<!--                        </button>-->
-                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
-                           href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-1">
+      <div class="bar-left" style="width: 3px; height: 280px; background-color:#20c997"></div>
+      <div class="bar-btn-group col-1">
+        <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+        <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+        <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+        <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+      </div>
     </div>
+    <div class="col-9">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-content-between">
+          <h5 style="padding-top: 5px;">Model: {{ object.cobra_id }}</h5>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+            <i class="fa fa-share-alt "></i>
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Share</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form>
+                    <div class="form-group row">
+                      <div class="col-12">
+                        <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary">Share</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Info</h5>
+          <div class="list-group">
+            <a href="#" class="list-group-item list-group-item-action">Cras justo odi</a>
+            <a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>
+            <a href="#" class="list-group-item list-group-item-action">Morbi leo risus</a>
+            <a href="#" class="list-group-item list-group-item-action">Porta ac consectetur ac</a>
+            <a href="#" class="list-group-item list-group-item-action">Vestibulum at eros</a>
+          </div>
+          <br>
+          <div class="row justify-content-around">
+            <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
+              data-toggle="modal" data-target="#ModalEditForm">Edit</button>
+            <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="submit">Save</button>
+            <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="submit">Save</button>
+            <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="submit">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-2">
+      <div class="list-group">
+        <li href="#" class="list-group-item list-group-item-action text-light" style="background-color:#20c997">Cras
+          justo odi</li>
+        <a href="#" class="list-group-item list-group-item-action">Dapibus ac faci</a>
+        <a href="#" class="list-group-item list-group-item-action">Morbi leo risus</a>
+        <a href="#" class="list-group-item list-group-item-action">Portac cotetac</a>
+        <a href="#" class="list-group-item list-group-item-action">Vestilum at eros</a>
+      </div>
+    </div>
+  </div>
+  <br>
+</div>
+
+{% comment %}
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-3">
+      <div class="bar-left" style="width: 3px; height: 280px; background-color:#20c997"></div>
+      <div class="bar-btn-group col-1">
+        <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+        <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+        <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+        <button type="button" class="row btn btn-sm-circle text-hover-green slide"></button>
+      </div>
+      <div class="col-11">
+        <div class="row">
+          {% for change in objects.changes.all|slice:":3" %}
+          <div class="text ml-4 bar-text">
+            {{ change }}<br>
+            {{ change.crated_time }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-content-between">
+          <h5 style="padding-top: 5px;">Model: {{ object.cobra_id }}</h5>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+            <i class="fa fa-share-alt "></i>
+          </button>
+          <!-- Modal -->
+          <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Share</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <form>
+                    <div class="form-group row">
+                      <div class="col-12">
+                        <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                  </button>
+                  <button type="button" class="btn btn-primary">Share</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">Description</h5>
+          <p>{{ object.name }}</p>
+          <h5 class="card-title">Objective</h5>
+          <p>{{ cobra_model.objective.to_json }}</p>
+          <h5 class="card-title">Reactions</h5>
+          <div class="list-group">
+            {% for reaction in cobra_model.reactions %}
+            <a href="#" class="list-group-item list-group-item-action">
+              {{ reaction.name }}[{{ reaction.id }}]
+            </a>
+            {% endfor %}
+          </div>
+          <br>
+          <div class="row justify-content-around">
+
+            <!--                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"-->
+            <!--                           href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>-->
+            <!--                        edit the model button-->
+            <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
+              data-toggle="modal" data-target="#ModalEditForm">Edit
+            </button>
+            <!--                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"-->
+            <!--                           href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>-->
+            <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
+              data-toggle="modal" data-target="#ModalDeleteForm">Delete
+            </button>
+            <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
+              href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
+            <!--                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"-->
+            <!--                                data-toggle="modal" data-target="#ModalFBAForm">FBA-->
+            <!--                        </button>-->
+            <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
+              href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- when click the `Edit`, modal show -->
 <div class="modal fade" id="ModalEditForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Model</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Model</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form method="post">
+          {% csrf_token %}
+
+
+          {% for hidden_field in form.hidden_fields %}
+          {{ hidden_field }}
+          {% endfor %}
+
+          {% for field in form.visible_fields %}
+          <div class="form-group row">
+            {{ render_field field.label_tag class="col-3 col-form-label"}}
+            <div class="col-9">
+              {% render_field field class="form-control" %}
             </div>
+            {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+          </div>
+          {% endfor %}
 
-            <div class="modal-body">
-                <form method="post">
-                    {% csrf_token %}
-
-
-                    {% for hidden_field in form.hidden_fields %}
-                    {{ hidden_field }}
-                    {% endfor %}
-
-                    {% for field in form.visible_fields %}
-                    <div class="form-group row">
-                        {{ render_field field.label_tag class="col-3 col-form-label"}}
-                        <div class="col-9">
-                            {% render_field field class="form-control" %}
-                        </div>
-                        {% if field.help_text %}
-                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-
-                    <div class="form-group row d-flex justify-content-center">
-                        <input type="submit" class="btn btn-info col-2" value="Edit">
-                    </div>
-                </form>
-            </div>
-        </div>
+          <div class="form-group row d-flex justify-content-center">
+            <input type="submit" class="btn btn-info col-2" value="Edit">
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
 <!--when click the delete btn, this modal shows-->
 <div class="modal fade" id="ModalDeleteForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Model</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Model</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
 
-            <div class="modal-body">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="row">
-                        <p class="font-weight-bold">Are you sure to delete: {{ object }}?</p>
-                    </div>
-                    <div class="form-group row d-flex justify-content-center">
-                        <input type="submit" class="btn btn-info col-2" value="Confirm">
-                    </div>
-                </form>
-            </div>
-        </div>
+      <div class="modal-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="row">
+            <p class="font-weight-bold">Are you sure to delete: {{ object }}?</p>
+          </div>
+          <div class="form-group row d-flex justify-content-center">
+            <input type="submit" class="btn btn-info col-2" value="Confirm">
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
 <!--when click fba btn, this modal shows-->
 <div class="modal fade" id="ModalFBAForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Model</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Model</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form method="post">
+          {% csrf_token %}
+
+
+          {% for hidden_field in form.hidden_fields %}
+          {{ hidden_field }}
+          {% endfor %}
+
+          {% for field in form.visible_fields %}
+          <div class="form-group row">
+            {{ render_field field.label_tag class="col-3 col-form-label"}}
+            <div class="col-9">
+              {% render_field field class="form-control" %}
             </div>
+            {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+          </div>
+          {% endfor %}
 
-            <div class="modal-body">
-                <form method="post">
-                    {% csrf_token %}
-
-
-                    {% for hidden_field in form.hidden_fields %}
-                    {{ hidden_field }}
-                    {% endfor %}
-
-                    {% for field in form.visible_fields %}
-                    <div class="form-group row">
-                        {{ render_field field.label_tag class="col-3 col-form-label"}}
-                        <div class="col-9">
-                            {% render_field field class="form-control" %}
-                        </div>
-                        {% if field.help_text %}
-                        <small class="form-text text-muted">{{ field.help_text }}</small>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-
-                    <div class="form-group row d-flex justify-content-center">
-                        <input type="submit" class="btn btn-info col-2" value="Edit">
-                    </div>
-                </form>
-            </div>
-        </div>
+          <div class="form-group row d-flex justify-content-center">
+            <input type="submit" class="btn btn-info col-2" value="Edit">
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
+
+{% endcomment %}
+
 {% endblock content %}
