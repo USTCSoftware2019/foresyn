@@ -55,11 +55,9 @@
                     <div class="card-body">
                         <h5 class="card-title">Info</h5>
                         <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action">Cras justo odi</a>
-                            <a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>
-                            <a href="#" class="list-group-item list-group-item-action">Morbi leo risus</a>
-                            <a href="#" class="list-group-item list-group-item-action">Porta ac consectetur ac</a>
-                            <a href="#" class="list-group-item list-group-item-action">Vestibulum at eros</a>
+                            {% for reaction in cobra_model.reactions %}
+                                <a href="#" class="list-group-item list-group-item-action">{{ reaction.name }}[{{reaction.id}}]</a>
+                            {% endfor %}
                         </div>
                         <br>
                         <div class="row justify-content-around">
@@ -82,11 +80,11 @@
             <div class="col-2">
                 <div class="list-group">
                     <li href="#" class="list-group-item list-group-item-action text-light"
-                        style="background-color:#20c997">Biobrick you may like
+                        style="background-color:#20c997">Biobricks
                     </li>
                     {% for biobrick in biobricks %}
-                        <a href="https://bio.biomaster-uestc.com/public/index.php/detail/{{ biobrick.part_name }}"
-                           class="list-group-item list-group-item-action">{{ biobick }}</a>
+                        <a href="http://bio.biomaster-uestc.com/public/index.php/detail/{{ biobrick.part_name }}"
+                           class="list-group-item list-group-item-action">{{ biobrick.part_name }}</a>
                     {% endfor %}
                 </div>
             </div>
