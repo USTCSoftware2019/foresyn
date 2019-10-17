@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'share',
     'bigg_database',
     'accounts',
-    'mathfilters',
 ]
 
 

@@ -124,12 +124,6 @@ class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAd
         self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(self.model_object.fba_list.all(), pk=self.kwargs['pk'])
 
-    def get_context_data(self, **kwargs):
-        context_data = super().get_context_data(**kwargs)
-        context_data['latest_fba_results'] = [json.loads(fba.result)
-                                              for fba in CobraFba.objects.filter(model=self.model_object)[:5]]
-        return context_data
-
 
 class CobraFbaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView):
     template_name_suffix = '_create_form'
