@@ -76,23 +76,28 @@
                     </div>
                     <br>
                     <div class="row justify-content-around">
+                        {% comment %}
+                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
+                           href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>
+                        {% endcomment %}
 
-                        <!--                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"-->
-                        <!--                           href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>-->
-                        <!--                        edit the model button-->
                         <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
                                 data-toggle="modal" data-target="#ModalEditForm">Edit
                         </button>
+                        {% comment %}
 <!--                        <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"-->
 <!--                           href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>-->
+                        {% endcomment %}
                         <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
                                 data-toggle="modal" data-target="#ModalDeleteForm">Delete
                         </button>
                         <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
                            href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
+                        {% comment %}
 <!--                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"-->
 <!--                                data-toggle="modal" data-target="#ModalFBAForm">FBA-->
 <!--                        </button>-->
+                        {% endcomment %}
                         <a class="col-2 btn btn-outline-light btn-side-circle text-hover-green"
                            href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
                     </div>
@@ -102,7 +107,7 @@
     </div>
 </div>
 
-<!-- when click the `Edit`, modal show -->
+{# when click the `Edit`, modal show #}
 <div class="modal fade" id="ModalEditForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -144,7 +149,7 @@
     </div>
 </div>
 
-<!--when click the delete btn, this modal shows-->
+{# when click the delete btn, this modal shows #}
 <div class="modal fade" id="ModalDeleteForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -171,7 +176,7 @@
     </div>
 </div>
 
-<!--when click fba btn, this modal shows-->
+{# when click fba btn, this modal shows #}
 <div class="modal fade" id="ModalFBAForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
