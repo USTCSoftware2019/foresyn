@@ -9,16 +9,17 @@ register = Library()
 def render_link_tag(obj):
     if obj is None:
         return '#'
-
-    if isinstance(obj.object, Model):
+    if hasattr(obj, 'object'):
+        obj = obj.object
+    if isinstance(obj, Model):
         viewname = 'bigg_database:model_detail'
-    elif isinstance(obj.object, Reaction):
+    elif isinstance(obj, Reaction):
         viewname = 'bigg_database:reaction_detail'
-    elif isinstance(obj.object, Gene):
+    elif isinstance(obj, Gene):
         viewname = 'bigg_database:gene_detail'
-    elif isinstance(obj.object, Metabolite):
+    elif isinstance(obj, Metabolite):
         viewname = 'bigg_database:metabolite_detail'
     else:
         return '#'
 
-    return reverse(viewname=viewname, args=(obj.object.id,))
+    return reverse(viewname=viewname, args=(obj.id,))
