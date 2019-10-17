@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views import View
 from django.shortcuts import redirect
 from cobra_wrapper.utils import load_sbml, dump_sbml
-from bigg_database.models import Model as DataModel, Reaction as DataReaction
+from bigg_database.models import Model as DataModel, Reaction as DataReaction, Metabolite as DataMetabolite
 from cobra_wrapper.models import CobraModel
 from .common import reaction_string_to_metabolites
 from .models import DataModel
@@ -47,8 +47,12 @@ class AddDataReactionToCobra(View):
             return redirect("/accounts/login")
         user = request.user
         try:
-            model_pk = request.POST["model_pk"]
             reaction_pk = request.POST["reaction_pk"]
+        except KeyError:
+            # return JsonResponse({"messages": "pk required"}, status=400)
+            return redirect("")
+        try:
+            model_pk = request.POST["model_pk"]
         except KeyError:
             # return JsonResponse({"messages": "pk required"}, status=400)
             return redirect("")
@@ -57,7 +61,7 @@ class AddDataReactionToCobra(View):
         except ObjectDoesNotExist:
             # return JsonResponse({"messages": "model not found"}, status=404)
             return redirect("")
-        if cobra_model_object.owner is not user:
+        if cobra_model_object.owner != user:
             return redirect("")
 
         try:
@@ -66,12 +70,16 @@ class AddDataReactionToCobra(View):
             # return JsonResponse({"messages": "reaction not found"}, status=404)
             return redirect("")
         reaction = cobra.Reaction(data_reaction_object.bigg_id)
+        reaction.name = data_reaction_object.name
         metabolites_dict = reaction_string_to_metabolites(data_reaction_object.reaction_string)
+
+        if metabolites_dict is None:
+            return JsonResponse({"messages": "Internal Error"}, status=500)
         reaction.add_metabolites(metabolites_dict)
         cobra_object = load_sbml(cobra_model_object.sbml_content)
-        reaction.gene_reaction_rule = [gene.gene_reaction_rule for gene in data_reaction_object.reactiongene_set.all()]
-        cobra_object.add_reactions([reaction])
-        sbml_content = dump_sbml(cobra_object)
-        cobra_model_object.sbml_content = sbml_content
+        reaction.gene_reaction_rule = [gene.gene_reaction_rule for gene in data_reaction_object.reactiongene_set.all()][
+            0]
+        cobra_model_object.sbml_content = dump_sbml(cobra_object)
+        cobra_model_object.save()
         # return JsonResponse({"messages": "OK"}, status=200)
-        return redirect("/cobra/models")
+        return redirect("/cobra/models/"+str(cobra_model_object.pk))

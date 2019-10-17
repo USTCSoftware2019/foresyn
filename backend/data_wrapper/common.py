@@ -2,6 +2,7 @@
 # from cobra_wrapper.models import CobraMetabolite, CobraReaction
 from bigg_database.models import Metabolite as DataMetabolite, Reaction as DataReaction
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+import cobra
 
 
 def reaction_string_to_metabolites(reaction_string):
@@ -29,4 +30,19 @@ def reaction_string_to_metabolites(reaction_string):
                 else:
                     coefficients.append(-1.0)
                 metabolites.append(index)
-    return metabolites, coefficients
+    metabolites_objects = []
+    for m in metabolites:
+        try:
+            data_metabolite_object = DataMetabolite.objects.get(bigg_id=m)
+        except ObjectDoesNotExist:
+            return None
+        bigg_id = data_metabolite_object.bigg_id
+        formula = data_metabolite_object.formulae[0]
+        name = data_metabolite_object.name
+        compartment = data_metabolite_object.bigg_id[-1]
+        new_metabolite = cobra.Metabolite(bigg_id, formula=formula,
+                                          name=name,
+                                          compartment=compartment)
+        metabolites_objects.append(new_metabolite)
+
+    return dict(zip(metabolites_objects, coefficients))
