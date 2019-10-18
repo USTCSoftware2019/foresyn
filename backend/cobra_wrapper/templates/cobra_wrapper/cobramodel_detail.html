@@ -37,7 +37,7 @@
                                         <form>
                                             <div class="form-group row">
                                                 <div class="col-12">
-                                                    <input type="password" class="form-control" id="inputPassword"
+                                                    <input type="password" class="form-control" id=""
                                                            placeholder="Password">
                                                 </div>
                                             </div>
@@ -64,8 +64,8 @@
                             <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
                                     data-toggle="modal" data-target="#ModalEditForm">Edit
                             </button>
-                            <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="submit">
-                                Save
+                            <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
+                                    data-toggle="modal" data-target="#ModalDeleteForm">Delete
                             </button>
                             <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="submit">
                                 Save
@@ -91,4 +91,67 @@
         </div>
         <br>
     </div>
+
+{%  when click the `Edit`, modal show %}
+<div class="modal fade" id="ModalEditForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Model</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="#">
+          <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="staticEmail" placeholder="Username">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
+            <div class="col-sm-10">
+              <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+            </div>
+          </div>
+          <div class="form-group row d-flex justify-content-center">
+            <input type="submit" class="btn btn-info col-2" value="Edit">
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{%  when click the `Delete`, modal show %}
+<div class="modal fade" id="ModalDeleteForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="#">
+          <div class="form-group row">
+            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-10">
+                <p>Are you sure to delete the form?</p>
+            </div>
+          </div>
+          <div class="form-group row d-flex justify-content-center">
+            <input type="submit" class="btn btn-info col-2" value="Delete">
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {% endblock content %}
