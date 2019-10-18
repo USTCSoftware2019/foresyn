@@ -38,7 +38,7 @@ before_script:
   - (cd cobra_wrapper/remote &&
     env PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds &> celery_computation.log &)
   - sleep 5  # Leave time for elasticsearch and celery workers to start
-  - echo "STATIC_ROOT = '/var/www/static'" > backend/settings.py
+  - echo "STATIC_ROOT = '/tmp/static'" >> backend/settings.py
 
 script:
   - flake8
@@ -49,7 +49,7 @@ script:
 after_script:
   - kill %1 %2
   - cat celery_backend.log
-  - cat celery_computation.log
+  - cat cobra_wrapper/remote/celery_computation.log
 
 cache:
   pip: true

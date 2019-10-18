@@ -5,7 +5,8 @@ from django.http import JsonResponse, HttpResponse
 from django.views import View
 from django.shortcuts import redirect, render
 from cobra_wrapper.utils import load_sbml, dump_sbml
-from bigg_database.models import Model as DataModel, Reaction as DataReaction, Metabolite as DataMetabolite
+# FIXME(myl7): Remove duplicated DataModel to fix flake8
+from bigg_database.models import Reaction as DataReaction, Metabolite as DataMetabolite  # , Model as DataModel
 from cobra_wrapper.models import CobraModel
 from .common import reaction_string_to_metabolites
 from .models import DataModel
