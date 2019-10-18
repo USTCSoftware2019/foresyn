@@ -28,8 +28,6 @@ service:
 before_install:
   - \[ -f ${ES_DEB_PATH} \] || curl --create-dirs -Oo ${ES_DEB_PATH} ${ES_DOWNLOAD_URL}
   - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
-  - python3 -m venv venv
-  - source venv/bin/activate
 
 install:
   - pip3 install -r requirements.txt
@@ -44,9 +42,9 @@ before_script:
 
 script:
   - flake8
-  - pytnon3 manage.py fix_pymysql
+  - python3 manage.py fix_pymysql
   - python3 manage.py migrate
-  - python3 collectstatic
+  - python3 manage.py collectstatic
 
 after_script:
   - kill %1 %2
@@ -54,6 +52,6 @@ after_script:
   - cat celery_computation.log
 
 cache:
+  pip: true
   directories:
-    - $TRAVIS_BUILD_DIR/venv
     - $HOME/.cache/elasticsearch
