@@ -33,13 +33,14 @@ Model: {{ model.bigg_id }}
         </table>
 
         <form method="post" action="{% url 'data_wrapper:add_models' %}">
-            {% csrf_token %}
-            <label>model name</label>
-            <input type="text" name="name">
-            <input type="text" name="model_bigg_id" value="{{ model.bigg_id }}" hidden>
-            <input type="submit" value="add to computation">
+          {% csrf_token %}
+          <div class="input-group mb-3">
+            <input type="text" name="name" class="form-control" placeholder="model name" aria-label="model name" aria-describedby="submit-button">
+            <div class="input-group-append">
+              <button class="btn btn-outline-light text-hover-green" type="button" id="submit-button">add to computation</button>
+            </div>
+          </div>
         </form>
-
     </div>
 
 {% endblock %}
