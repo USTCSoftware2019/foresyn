@@ -30,23 +30,26 @@ before_install:
   - sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
 
 install:
-  - pip3 install --upgrade -r requirements.txt
+  - pip3 install -r requirements.txt
 
 before_script:
   - cd backend
-  - PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results &> celery_backend.log &
+  - env PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results &> celery_backend.log &
   - (cd cobra_wrapper/remote &&
-    PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds &> celery_computation.log &)
+    env PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds &> celery_computation.log &)
   - sleep 5  # Leave time for elasticsearch and celery workers to start
+  - echo "STATIC_ROOT = '/tmp/static'" >> backend/settings.py
 
 script:
   - flake8
-  - python3 manage.py test || true  # Temperately allow failures of tests as much checking is required
+  - python3 manage.py fix_pymysql
+  - python3 manage.py migrate
+  - python3 manage.py collectstatic
 
 after_script:
   - kill %1 %2
   - cat celery_backend.log
-  - cat celery_computation.log
+  - cat cobra_wrapper/remote/celery_computation.log
 
 cache:
   pip: true

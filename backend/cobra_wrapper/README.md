@@ -35,12 +35,12 @@ Start two workers first
 
 ```bash
 cd ./remote
-PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds
+env PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds
 ```
 
 ```bash
 cd ..
-PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results
+env PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results
 ```
 
 Then start Django to use the app
