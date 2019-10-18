@@ -36,7 +36,7 @@ Model: {{ model.bigg_id }}
             {% csrf_token %}
             <label>model name</label>
             <input type="text" name="name">
-            <input type="number" name="model_bigg_id" value="{{ model.bigg_id }}" hidden>
+            <input type="text" name="model_bigg_id" value="{{ model.bigg_id }}" hidden>
             <input type="submit" value="add to computation">
         </form>
 
