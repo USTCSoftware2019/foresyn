@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}{{ object }}{% endblock title %}
 
@@ -8,16 +9,20 @@
             <div class="col-1">
                 <div class="bar-left" style="width: 3px; height: 280px; background-color:#20c997"></div>
                 <div class="bar-btn-group col-1">
-                    <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="And here's some amazing content. It's very engaging. Right?"></button>
-                    <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="And here's some amazing content. It's very engaging. Right?"></button>
-                    <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="And here's some amazing content. It's very engaging. Right?"></button>
-                    <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="And here's some amazing content. It's very engaging. Right?"></button>
+                    <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
+                            data-content="And here's some amazing content. It's very engaging. Right?"></button>
+                    <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
+                            data-content="And here's some amazing content. It's very engaging. Right?"></button>
+                    <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
+                            data-content="And here's some amazing content. It's very engaging. Right?"></button>
+                    <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
+                            data-content="And here's some amazing content. It's very engaging. Right?"></button>
                 </div>
             </div>
             <div class="col-9">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-content-between">
-                        <h5 style="padding-top: 5px;">Model: {{ object.cobra_id }}</h5>
+                        <h5 style="padding-top: 5px;">Model: {{ object.name }}</h5>
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
                             <i class="fa fa-share-alt "></i>
                         </button>
@@ -56,7 +61,8 @@
                         <h5 class="card-title">Info</h5>
                         <div class="list-group">
                             {% for reaction in cobra_model.reactions %}
-                                <a href="#" class="list-group-item list-group-item-action">{{ reaction.name }}[{{reaction.id}}]</a>
+                                <a href="#"
+                                   class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.id }}]</a>
                             {% endfor %}
                         </div>
                         <br>
@@ -68,10 +74,10 @@
                                     data-toggle="modal" data-target="#ModalDeleteForm">Delete
                             </button>
                             <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="submit">
-                                Save
+                                FBA
                             </button>
                             <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="submit">
-                                Save
+                                FVA
                             </button>
                         </div>
                     </div>
@@ -80,7 +86,8 @@
             <div class="col-2">
                 <div class="list-group">
                     <li href="#" class="list-group-item list-group-item-action text-light"
-                        style="background-color:#20c997">Biobricks
+                        style="background-color:#20c997">
+                        Biobricks
                     </li>
                     {% for biobrick in biobricks %}
                         <a href="http://bio.biomaster-uestc.com/public/index.php/detail/{{ biobrick.part_name }}"
@@ -92,66 +99,54 @@
         <br>
     </div>
 
-{%  when click the `Edit`, modal show %}
-<div class="modal fade" id="ModalEditForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Edit Model</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form action="#">
-          <div class="form-group row">
-            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
-            <div class="col-sm-10">
-              <input type="text" class="form-control" id="staticEmail" placeholder="Username">
+    <div class="modal fade" id="ModalEditForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Model</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% for form in forms %}
+                        <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <input type="submit" class="btn btn-info col-2" value="Submit">
+                        </form>
+                    {% endfor %}
+                </div>
             </div>
-          </div>
-          <div class="form-group row">
-            <label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
-            <div class="col-sm-10">
-              <input type="password" class="form-control" id="inputPassword" placeholder="Password">
-            </div>
-          </div>
-          <div class="form-group row d-flex justify-content-center">
-            <input type="submit" class="btn btn-info col-2" value="Edit">
-          </div>
-
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
-</div>
 
-{%  when click the `Delete`, modal show %}
-<div class="modal fade" id="ModalDeleteForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirm</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form action="#">
-          <div class="form-group row">
-            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
-            <div class="col-sm-10">
-                <p>Are you sure to delete the form?</p>
+    <div class="modal fade" id="ModalDeleteForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group row">
+                            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
+                            <div class="col-sm-10">
+                                <p>Are you sure to delete: {{ object }}?</p>
+                            </div>
+                        </div>
+                        <div class="form-group row d-flex justify-content-center">
+                            <input type="submit" class="btn btn-info col-2" value="Delete">
+                        </div>
+                    </form>
+                </div>
             </div>
-          </div>
-          <div class="form-group row d-flex justify-content-center">
-            <input type="submit" class="btn btn-info col-2" value="Delete">
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
-</div>
-
-
 {% endblock content %}
