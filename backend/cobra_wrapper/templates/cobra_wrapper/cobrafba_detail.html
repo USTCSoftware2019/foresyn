@@ -7,6 +7,12 @@
 {% block content %}
     <script src="{% static "javascript/jquery.min.js" %}"></script>
 
+
+    <style>
+    #status {
+        margin-left: 1em;
+    }
+    </style>
     <div class="container">
         <div class="row my-3">
             <div class="col-3">
@@ -47,17 +53,20 @@
 
                     </tbody>
                 </table>
-                <button class="btn btn-info" id="more">More</button>
+
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-6 text-center">
+        <div class="row my-3">
+            <div class="col-4 text-center">
+                <button class="btn btn-info" id="more">More</button>
+            </div>
+            <div class="col-4 text-center">
                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#fba_delete_model">
                     Delete
                 </button>
             </div>
-            <div class="col-6 text-center">
+            <div class="col-4 text-center">
                 <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}" class="btn btn-primary">Return</a>
             </div>
         </div>
