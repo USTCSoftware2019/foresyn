@@ -125,7 +125,7 @@
                         shadow_prices_data.push(data_now.shadow_prices[i].value);
                     }
 
-                    if(res_data.length === 2){
+                    if (res_data.length === 2) {
                         let data_pre = res_data[1];
                         for (let i = 0; i < len; i++) {
                             shadow_prices_data_pre.push(data_pre.shadow_prices[i].value);
@@ -144,16 +144,30 @@
             function load(num) {
                 let res_body = $('#res_body');
                 let str = '';
-                for (let i = 0; i < num; i++) {
-                    str += '<tr><td class="table-active">' + labels[i] + '</td>' +
-                        '<td class="' + Num2Class(flux_data[i]) + '">' + flux_data[i].toFixed(4) + '</td>' +
-                        '<td class="' + Num2Class(flux_data_pre[i]) + '">' + flux_data_pre[i].toFixed(4) + '</td>' +
-                        '<td class="' + Num2Class(reduced_costs_data[i]) + '">' + reduced_costs_data[i].toFixed(4) + '</td>' +
-                        '<td class="' + Num2Class(reduced_costs_data_pre[i]) + '">' + reduced_costs_data_pre[i].toFixed(4) + '</td>' +
-                        '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                        '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                        '</tr>';
+                if (res_data.length === 2) {
+                    for (let i = 0; i < num; i++) {
+                        str += '<tr><td class="table-active">' + labels[i] + '</td>' +
+                            '<td class="' + Num2Class(flux_data[i]) + '">' + flux_data[i].toFixed(4) + '</td>' +
+                            '<td class="' + Num2Class(flux_data_pre[i]) + '">' + flux_data_pre[i].toFixed(4) + '</td>' +
+                            '<td class="' + Num2Class(reduced_costs_data[i]) + '">' + reduced_costs_data[i].toFixed(4) + '</td>' +
+                            '<td class="' + Num2Class(reduced_costs_data_pre[i]) + '">' + reduced_costs_data_pre[i].toFixed(4) + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '</tr>';
+                    }
+                } else {
+                    for (let i = 0; i < num; i++) {
+                        str += '<tr><td class="table-active">' + labels[i] + '</td>' +
+                            '<td class="' + Num2Class(flux_data[i]) + '">' + flux_data[i].toFixed(4) + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + Num2Class(reduced_costs_data[i]) + '">' + reduced_costs_data[i].toFixed(4) + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '</tr>';
+                    }
                 }
+
                 res_body.html(str);
             }
 
@@ -181,20 +195,34 @@
                 loadShadowPrices();
             }
 
-            function loadShadowPrices(){
+            function loadShadowPrices() {
                 let len = shadow_labels.length;
                 let res_body = $('#res_body');
                 let str = res_body.html();
-                for (let i = 0; i < len; i++) {
-                    str += '<tr><td class="table-active">' + shadow_labels[i] + '</td>' +
-                        '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                        '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                        '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                        '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                        '<td class="' + Num2Class(shadow_prices_data[i]) + '">' + shadow_prices_data[i].toFixed(4) + '</td>' +
-                        '<td class="' + Num2Class(shadow_prices_data_pre[i]) + '">' + shadow_prices_data_pre[i].toFixed(4) + '</td>' +
-                        '</tr>';
+                if (res_data.length === 2) {
+                    for (let i = 0; i < len; i++) {
+                        str += '<tr><td class="table-active">' + shadow_labels[i] + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + Num2Class(shadow_prices_data[i]) + '">' + shadow_prices_data[i].toFixed(4) + '</td>' +
+                            '<td class="' + Num2Class(shadow_prices_data_pre[i]) + '">' + shadow_prices_data_pre[i].toFixed(4) + '</td>' +
+                            '</tr>';
+                    }
+                } else {
+                    for (let i = 0; i < len; i++) {
+                        str += '<tr><td class="table-active">' + shadow_labels[i] + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + Num2Class(shadow_prices_data[i]) + '">' + shadow_prices_data[i].toFixed(4) + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '</tr>';
+                    }
                 }
+
                 res_body.html(str);
             }
 
