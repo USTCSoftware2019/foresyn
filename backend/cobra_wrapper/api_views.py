@@ -33,6 +33,10 @@ class CobraComputationDetailJsonView(SingleObjectMixin, View):
             json.loads(fba.result)
             for fba in self.model_class.objects.filter(model=self.model_object, ok=True).exclude(pk=self.object.pk)[:1]
         ])
+        if self.backref_field == 'fba_list':
+            for result in results:
+                result['fluxes'] = [flux for flux in result['fluxes'] if flux['value'] > 1e-5]
+                result['reduced_costs'] = [flux for flux in result['reduced_costs'] if flux['value'] > 1e-5]
         return JsonResponse({'results': results})
 
 

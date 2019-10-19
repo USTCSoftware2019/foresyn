@@ -92,17 +92,16 @@ class CobraModelObjectiveUpdateForm(InstanceForm):
 
 def get_reaction_json(reaction: cobra.Reaction) -> Dict[str, Any]:
     return {
-        # 'cobra_id': reaction.id,
+        'cobra_id': reaction.id,
         'name': reaction.name,
-        # 'subsystem': reaction.subsystem,
-        # 'lower_bound': reaction.lower_bound,
-        # 'upper_bound': reaction.upper_bound,
-        # 'gene_reaction_rule': reaction.gene_reaction_rule,
-        # 'gene_name_reaction_rule': reaction.gene_name_reaction_rule,
-        # 'metabolites_with_coefficients': dict(zip(
-        #     [metabolite.id for metabolite in reaction.metabolites],
-        #     reaction.get_coefficients([metabolite.id for metabolite in reaction.metabolites])
-        # )),
+        'subsystem': reaction.subsystem,
+        'lower_bound': reaction.lower_bound,
+        'upper_bound': reaction.upper_bound,
+        'gene_reaction_rule': reaction.gene_reaction_rule,
+        'metabolites_with_coefficients': dict(zip(
+            [metabolite.id for metabolite in reaction.metabolites],
+            reaction.get_coefficients([metabolite.id for metabolite in reaction.metabolites])
+        )),
         'metabolites': [metabolite.name for metabolite in reaction.metabolites],
         'genes': [gene.name for gene in reaction.genes],
     }
@@ -125,7 +124,7 @@ class CobraModelReactionDeleteForm(InstanceForm):
                 ],
             }
             CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
-                                            pre_info=json.dumps(pre_reaction_info))
+                                            reaction_info=json.dumps(pre_reaction_info))
             cobra_model.remove_reactions(pre_reaction_id_list)
             model.sbml_content = dump_sbml(cobra_model)
             model.save()
@@ -160,7 +159,7 @@ class CobraModelReactionCreateForm(InstanceForm):
             cobra_reaction.add_metabolites(metabolites_with_coefficients_dict)
             cobra_model.add_reactions([cobra_reaction])
             CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
-                                            new_info=json.dumps(get_reaction_json(cobra_reaction)))
+                                            reaction_info=json.dumps(get_reaction_json(cobra_reaction)))
             model.sbml_content = dump_sbml(cobra_model)
             model.save()
             self.instance = model

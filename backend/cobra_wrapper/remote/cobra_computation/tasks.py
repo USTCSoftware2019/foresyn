@@ -67,11 +67,14 @@ def cobra_fba(pk, model_sbml, deleted_genes):
         error_result = report_cobra_computation_error(error)
         app.send_task(**get_result_kwargs('fba', pk, error_result, is_error=True))
         return
-    result: dict = json.loads(result_object.to_frame().to_json())
-    result['fluxes'] = [{'name': name, 'value': value} for name, value in result['fluxes'].items()]
-    result['reduced_costs'] = [{'name': name, 'value': value} for name, value in result['reduced_costs'].items()]
-    result['objective_value'] = result_object.objective_value
-    result['status'] = result_object.status
+    result = {
+        'objective_value': result_object.objective_value, 'status': result_object.status,
+        'fluxes': [{'name': name, 'value': value} for name, value in result_object.fluxes.to_dict().items()],
+        'reduced_costs': [{'name': name, 'value': value}
+                          for name, value in result_object.reduced_costs.to_dict().items()],
+        'shadow_prices': [{'name': name, 'value': value}
+                          for name, value in result_object.shadow_prices.to_dict().items()],
+    }
     app.send_task(**get_result_kwargs('fba', pk, result))
 
 
@@ -89,10 +92,12 @@ def cobra_fva(pk, model_sbml, reaction_list, loopless, fraction_of_optimum, pfba
             return
         cobra.manipulation.delete_model_genes(cobra_model, deleted_genes, cumulative_deletions=True)
     try:
-        result = json.loads(flux_variability_analysis(
+        result_frame = json.loads(flux_variability_analysis(
             cobra_model, reaction_list, loopless, fraction_of_optimum, pfba_factor).to_json())
-        result['minimum'] = [{'name': name, 'value': value} for name, value in result['minimum'].items()]
-        result['maximum'] = [{'name': name, 'value': value} for name, value in result['maximum'].items()]
+        result = {
+            'minimum': [{'name': name, 'value': value} for name, value in result_frame['minimum'].items()],
+            'maximum': [{'name': name, 'value': value} for name, value in result_frame['maximum'].items()],
+        }
     except Exception as error:
         error_result = report_cobra_computation_error(error)
         app.send_task(**get_result_kwargs('fba', pk, error_result, is_error=True))
