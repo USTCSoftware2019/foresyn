@@ -33,10 +33,9 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data['latest_changes'] = CobraModelChange.objects.filter(model=self.object)[:10]
         keywords = set()
         for reaction_dict in [
-            *[json.loads(change.new_info) for change in
-              CobraModelChange.objects.filter(model=self.object, change_type='add_reaction')[:10]],
-            *[json.loads(change.pre_info) for change in
-              CobraModelChange.objects.filter(model=self.object, change_type='del_reaction')[:10]],
+            json.loads(change.reaction_info)
+            for change in CobraModelChange.objects.filter(model=self.object,
+                                                          change_type__in=['add_reaction', 'del_reaction'])[:10]
         ]:
             keywords.update([reaction_dict['name']])
             keywords.update(reaction_dict['metabolites'])
@@ -106,20 +105,13 @@ class TemplateAddModelPkMixin:
         return context
 
 
-class TemplateAddResultMixin:
-    def get_context_data(self: DetailView, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['result'] = json.loads(self.object.result) if self.object.result else None
-        return context
-
-
 class CobraFbaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView):
     def get_queryset(self):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return model.fba_list.all()
 
 
-class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAddResultMixin, DetailView):
+class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView):
     def get_object(self, queryset=None):
         self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(self.model_object.fba_list.all(), pk=self.kwargs['pk'])
@@ -152,7 +144,9 @@ class CobraFbaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView
         return reverse('cobra_wrapper:cobrafba_list', kwargs={'model_pk': self.kwargs['model_pk']})
 
 
-class CobraFbaDeleteView(LoginRequiredMixin, TemplateAddModelPkMixin, DeleteView):
+class CobraFbaDeleteView(LoginRequiredMixin, DeletionMixin, View):
+    http_method_names = ['post']
+
     def get_object(self, queryset=None):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.fba_list.all(), pk=self.kwargs['pk'])
@@ -167,16 +161,10 @@ class CobraFvaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView):
         return model.fva_list.all()
 
 
-class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, TemplateAddResultMixin, DetailView):
+class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView):
     def get_object(self, queryset=None):
         self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(self.model_object.fva_list.all(), pk=self.kwargs['pk'])
-
-    def get_context_data(self, **kwargs):
-        context_data = super().get_context_data(**kwargs)
-        context_data['latest_fva_results'] = [json.loads(fba.result)
-                                              for fba in CobraFva.objects.filter(model=self.model_object)[:5]]
-        return context_data
 
 
 class CobraFvaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView):
@@ -210,7 +198,9 @@ class CobraFvaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView
         return reverse('cobra_wrapper:cobrafva_list', kwargs={'model_pk': self.kwargs['model_pk']})
 
 
-class CobraFvaDeleteView(LoginRequiredMixin, TemplateAddModelPkMixin, DeleteView):
+class CobraFvaDeleteView(LoginRequiredMixin, DeletionMixin, View):
+    http_method_names = ['post']
+
     def get_object(self, queryset=None):
         model = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.fva_list.all(), pk=self.kwargs['pk'])
