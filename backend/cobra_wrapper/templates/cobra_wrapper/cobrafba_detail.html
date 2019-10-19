@@ -1,35 +1,213 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% load cobra_wrapper_tags %}
 
 {% block title %}FBA Result of {{ object }}{% endblock title %}
 
 {% block content %}
-    <table>
-        <tr>
-            <td>description</td>
-            <td>{{ object.desc }}</td>
-        </tr>
-        <tr>
-            <td>start_time</td>
-            <td>{{ object.start_time }}</td>
-        </tr>
-        <tr>
-            <td>model</td>
-            <td><a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">{{ object.model }}</a></td>
-        </tr>
-    </table>
+{#    <table>#}
+{#        <tr>#}
+{#            <td>description</td>#}
+{#            <td>{{ object.desc }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>start_time</td>#}
+{#            <td>{{ object.start_time }}</td>#}
+{#        </tr>#}
+{#        <tr>#}
+{#            <td>model</td>#}
+{#            <td><a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">{{ object.model }}</a></td>#}
+{#        </tr>#}
+{#    </table>#}
 
-    <p>Status: {{ object|check_result_status }}</p>
+    <script src="{% static "javascript/chart.js" %}"></script>
+    <link href="{% static "css/chart.css" %}" rel="stylesheet">
+    <script src="{% static "javascript/jquery.min.js" %}"></script>
+    <script src="{% static "javascript/util.js" %}"></script>
 
-    {% if result %}
-        {% if result.ok %}
-            <div>{{ result }}</div>
-        {% else %}
-            <div>{{ result }}</div>
-        {% endif %}
-    {% endif %}
+    <div class="container">
+        <div class="row my-3">
+            <div class="col-3">
+                <h3>Description</h3>
+                <p>{{ object.desc }}</p>
+            </div>
+            <div class="col-3">
+                <h3>Start Time</h3>
+                <p>{{ object.start_time }}</p>
+            </div>
+            <div class="col-3">
+                <h3>Model</h3>
+                <p>Click <a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">HERE</a></p>
+            </div>
+        </div>
 
-    <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>
-    <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>
+        <div class="row my-2">
+            <div class="alert alert-info" role="alert">
+                Calculating Status: {{ object|check_result_status }}
+            </div>
+        </div>
+
+        <div class="row my-3">
+            <div class="col-12">
+                <canvas id="canvas"></canvas>
+                <br>
+                <button class="btn btn-primary" id="more">More</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}" class="btn btn-danger">Delete</a>
+            </div>
+            <div class="col-6">
+                <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}" class="btn btn-primary">Return</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            // 获取后端返回的数据, 第零号位置是这次计算的结果， 其他位置是历史记录
+            let res_data = [];
+            const NOW = 0;
+            const PREVIOUS = 1;
+
+            let labels = [];
+            let flux_data = [];
+            let reduced_costs_data = [];
+            let flux_data_pre = [];
+            let reduced_costs_data_pre = [];
+
+            let horizontalBarChartData = {};
+
+            let ctx = document.getElementById('canvas').getContext('2d');
+
+            let url = window.location.href;
+            url += '/json';
+
+            $.ajax({
+                // url: 'http://127.0.0.1:8080/api/data',
+                // api url
+                // url: 'http://127.0.0.1:8080/api/data',
+                url: url,
+                success: function (res) {
+                    res_data = JSON.parse(res);
+                    console.log(res_data);
+                    let data_now = res_data[0];
+                    let len = data_now.fluxes.length;
+                    for (let i = 0; i < len; i++) {
+                        labels.push(data_now.fluxes[i].name);
+                        flux_data.push(data_now.fluxes[i].value);
+                        reduced_costs_data.push(data_now.reduced_costs[i].value);
+                    }
+                    if(res_data.length === 2){
+                        let data_pre = res_data[1];
+                        for (let i = 0; i < len; i++) {
+                            // labels.push(data_now.fluxes[i].name);
+                            flux_data_pre.push(data_pre.fluxes[i].value);
+                            reduced_costs_data_pre.push(data_pre.reduced_costs[i].value);
+                        }
+                    }
+
+                    setHorizontalBarChartData(4);
+                    window.myHorizontalBar = new Chart(ctx, {
+                        type: 'horizontalBar',
+                        data: horizontalBarChartData,
+                        options: {
+                            // Elements options apply to all of the options unless overridden in a dataset
+                            // In this case, we are setting the border of each horizontal bar to be 2px wide
+                            elements: {
+                                rectangle: {
+                                    borderWidth: 2,
+                                }
+                            },
+                            responsive: true,
+                            legend: {
+                                position: 'right',
+                            },
+                            title: {
+                                display: true,
+                                text: 'FBA/FVA Results'
+                            }
+                    }});
+                    // window.myHorizontalBar.data = horizontalBarChartData;
+
+                },
+                error: function (err) {
+                    console.log('error when ajax.');
+                    return;
+                }
+            })
+
+            function setHorizontalBarChartData(len) {
+                horizontalBarChartData = {
+                    labels: labels.slice(0, len),
+                    datasets: [{
+                        label: 'fluxes 1',
+                        backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                        borderColor: window.chartColors.red,
+                        borderWidth: 1,
+                        data: flux_data.slice(0, len)
+                    }, {
+                        label: 'reduced costs 1',
+                        backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                        borderColor: window.chartColors.red,
+                        borderWidth: 1,
+                        data: reduced_costs_data.slice(0, len)
+                    }]
+
+                };
+
+                if(res_data.length === 2){
+                    horizontalBarChartData.datasets.push({
+                        label: 'pre: fluxes 1',
+                        backgroundColor: color(window.chartColors.blue).alpha(0.5).rgbString(),
+                        borderColor: window.chartColors.blue,
+                        borderWidth: 1,
+                        data: flux_data_pre.slice(0, len)
+                    })
+                    horizontalBarChartData.datasets.push({
+                        label: 'pre: reduced costs 1',
+                        backgroundColor: color(window.chartColors.blue).alpha(0.5).rgbString(),
+                        borderColor: window.chartColors.blue,
+                        borderWidth: 1,
+                        data: reduced_costs_data_pre.slice(0, len)
+                    })
+                }
+                console.log(horizontalBarChartData);
+            }
+
+
+            var color = Chart.helpers.color;
+
+
+            function loadAll(){
+                console.log(labels.length);
+                setHorizontalBarChartData(labels.length);
+                window.myHorizontalBar.data = horizontalBarChartData;
+                window.myHorizontalBar.update();
+            }
+
+            $('#more').on('click', loadAll);
+
+            var colorNames = Object.keys(window.chartColors);
+        });
+    </script>
+
+
+
+
+{#    <p>Status: {{ object|check_result_status }}</p>#}
+{#    {% if result %}#}
+{#        {% if result.ok %}#}
+{#            <div>{{ result }}</div>#}
+{#        {% else %}#}
+{#            <div>{{ result }}</div>#}
+{#        {% endif %}#}
+{#    {% endif %}#}
+{##}
+{#    <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>#}
+{#    <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>#}
+
 {% endblock content %}
