@@ -57,6 +57,8 @@
                         <th>Previous Fluxes Value</th>
                         <th>Reduced Costs</th>
                         <th>Previous Reduced Costs</th>
+                        <th>Shadow Price</th>
+                        <th>Previous Shadow Price</th>
                     </tr>
                     </thead>
                     <tbody id="res_body" class="text-center">
@@ -83,7 +85,6 @@
                 <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}" class="btn btn-primary">Return</a>
             </div>
         </div>
-
     </div>
 <script>
         $(document).ready(function () {
@@ -103,7 +104,7 @@
             let shadow_prices_data_pre = [];
 
             let url = window.location.href;
-            url += '/json';
+            url += 'json';
 
             $.ajax({
                 // url: 'http://127.0.0.1:8080/api/data',
@@ -116,7 +117,9 @@
                     res_data = res.results;
                     console.log(res_data);
                     let data_now = res_data[0];
+                    console.log(data_now);
                     let len = data_now.fluxes.length;
+                    console.log(len);
                     for (let i = 0; i < len; i++) {
                         labels.push(data_now.fluxes[i].name);
                         flux_data.push(data_now.fluxes[i].value);
@@ -132,7 +135,6 @@
                             shadow_prices_data_pre.push(data_pre.shadow_prices[i].value);
                         }
                     }
-
                     load(Math.floor(30));
 
                 },
@@ -186,6 +188,7 @@
 
         });
     </script>
+<<<<<<< HEAD
 
 
 
@@ -203,4 +206,17 @@
     {#    <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>#}
     {#    <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>#}
 
+=======
+{#    <p>Status: {{ object|check_result_status }}</p>#}
+{#    {% if result %}#}
+{#        {% if result.ok %}#}
+{#            <div>{{ result }}</div>#}
+{#        {% else %}#}
+{#            <div>{{ result }}</div>#}
+{#        {% endif %}#}
+{#    {% endif %}#}
+{##}
+{#    <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>#}
+{#    <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>#}
+>>>>>>> 9b6b82aa3fd76a4277d027718323bc1cb915cbd3
 {% endblock content %}
