@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'crispy_forms',  # add django template cache before deployment
 
+    'regulation',
     'biobricks',
     'data_wrapper',
     'cobra_wrapper.apps.CobraWrapperConfig',
@@ -49,7 +50,6 @@ INSTALLED_APPS = [
     'bigg_database',
     'accounts',
 ]
-
 
 if os.environ.get("USE_ELASTICSEARCH"):
     default_elasticsearch_host = '127.0.0.1'
