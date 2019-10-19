@@ -7,6 +7,12 @@
 {% block content %}
     <script src="{% static "javascript/jquery.min.js" %}"></script>
 
+
+    <style>
+    #status {
+        margin-left: 1em;
+    }
+    </style>
     <div class="container">
         <div class="row my-3">
             <div class="col-3">
@@ -24,7 +30,7 @@
         </div>
 
         <div class="row my-2">
-            <div class="alert alert-info" role="alert">
+            <div class="alert alert-info" role="alert" id="status">
                 Calculating Status: {{ object|check_result_status }}
             </div>
         </div>
@@ -47,27 +53,44 @@
 
                     </tbody>
                 </table>
-                <button class="btn btn-info" id="more">More</button>
+
             </div>
         </div>
 
         <div class="row my-3">
-            <div class="col-12">
-                <canvas id="canvas"></canvas>
-                <br>
-                <button class="btn btn-primary" id="more">More</button>
+            <div class="col-4 text-center">
+                <button class="btn btn-info" id="more">More</button>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-6">
-                <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}" class="btn btn-danger">Delete</a>
+            <div class="col-4 text-center">
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#fba_delete_model">
+                    Delete
+                </button>
             </div>
-            <div class="col-6">
+            <div class="col-4 text-center">
                 <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}" class="btn btn-primary">Return</a>
             </div>
         </div>
     </div>
+    {#    <!-- Modal -->#}
+    <div class="modal fade" id="fba_delete_model" tabindex="-1" role="dialog" aria-labelledby="fba_delete_model"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Confirm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>Are you sure to delete this FBA?</p>
+                    <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}"
+                       class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function () {
             // 获取后端返回的数据, 第零号位置是这次计算的结果， 其他位置是历史记录
@@ -97,6 +120,10 @@
                 method: 'get',
                 success: function (res) {
                     // res_data = JSON.parse(res);
+                    if (res.error) {
+                        handleError();
+                        return;
+                    }
                     res_data = res.results;
                     console.log(res_data);
                     let data_now = res_data[0];
@@ -140,6 +167,13 @@
                     return;
                 }
             });
+
+            function handleError() {
+                $('#status').html('Calculating Status: Failed!')
+                    .removeClass('alert-info')
+                    .addClass('alert-danger');
+                $('#res_table').css('display', 'none');
+            }
 
             function load(num) {
                 let res_body = $('#res_body');
@@ -222,7 +256,6 @@
                             '</tr>';
                     }
                 }
-
                 res_body.html(str);
             }
 
