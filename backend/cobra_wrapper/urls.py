@@ -10,6 +10,8 @@ urlpatterns = [
     path('models/create/', views.CobraModelCreateView.as_view(), name='cobramodel_create_form'),
     path('models/<int:pk>/delete/', views.CobraModelDeleteView.as_view(), name='cobramodel_confirm_delete'),
     path('models/<int:pk>/update/', views.CobraModelUpdateView.as_view(), name='cobramodel_update_form'),
+    path('models/<int:pk>/change/<int:change_pk>/restore/', views.CobraModelChangeRestoreView.as_view(),
+         name='cobramodel_change_restore'),
 
     path('models/<int:model_pk>/fba/', views.CobraFbaListView.as_view(), name='cobrafba_list'),
     path('models/<int:model_pk>/fba/<int:pk>/', views.CobraFbaDetailView.as_view(), name='cobrafba_detail'),

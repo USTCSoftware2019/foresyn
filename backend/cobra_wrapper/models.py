@@ -105,7 +105,7 @@ class CobraModelChange(models.Model):
         """Use the method to get shown text of the change"""
         return self.reaction_info  # TODO(myl7)
 
-    def restore(self, name: str, desc: str = ''):
+    def restore(self, name: str, desc: str = '') -> CobraModel:
         changes = CobraModelChange.objects.filter(model=self.model, created_time__gt=self.created_time)
         cobra_model = self.model.build()
         for change in changes:
@@ -115,7 +115,8 @@ class CobraModelChange(models.Model):
             elif change.change_type == 'del_reaction':
                 reactions = [restore_reaction_by_json(cobra_model, info) for info in reaction_info['reactions']]
                 cobra_model.add_reactions(reactions)
-        CobraModel.objects.create(name=name, desc=desc, sbml_content=dump_sbml(cobra_model), owner=self.model.owner)
+        return CobraModel.objects.create(name=name, desc=desc, sbml_content=dump_sbml(cobra_model),
+                                         owner=self.model.owner)
 
 
 def restore_reaction_by_json(cobra_model: cobra.Model, info: Dict[str, Any]) -> cobra.Reaction:

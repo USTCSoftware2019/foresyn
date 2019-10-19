@@ -48,12 +48,13 @@ class CleanSbmlContentMixin:
 class CobraModelCreateForm(CleanSbmlContentMixin, InstanceForm):
     sbml_content = forms.FileField()
     name = forms.CharField(max_length=200)
+    desc = forms.CharField(max_length=200)
 
     def save(self, owner=None):
         if owner:
             if not self.is_valid():
                 raise ValueError()
-            self.instance = CobraModel.objects.create(name=self.cleaned_data['name'],
+            self.instance = CobraModel.objects.create(name=self.cleaned_data['name'], desc=self.cleaned_data['desc'],
                                                       sbml_content=self.cleaned_data['sbml_content'], owner=owner)
         return super().save()
 
@@ -180,6 +181,11 @@ def clean_comma_separated_str(form, value: str) -> str:
 
 def load_comma_separated_str(value: str) -> List[str]:
     return value.split(',') if value else []
+
+
+class CobraModelChangeRestoreForm(forms.Form):
+    name = forms.CharField(max_length=200)
+    desc = forms.CharField(max_length=200)
 
 
 class CleanDeletedGenesMixin:
