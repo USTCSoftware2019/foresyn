@@ -8,7 +8,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import Form
 
 from .models import CobraModel, CobraFba, CobraFva, CobraModelChange
-from .forms import CobraModelCreateForm, cobra_model_update_forms, CobraFbaForm, CobraFvaForm, load_comma_separated_str
+from .forms import (CobraModelCreateForm, cobra_model_update_forms, CobraFbaForm, CobraFvaForm,
+                    load_comma_separated_str, CobraModelChangeRestoreForm)
 
 from backend.celery import app
 from search.internal_api import search_biobricks
@@ -96,6 +97,22 @@ class CobraModelUpdateView(LoginRequiredMixin, FormView):
 
     def get_success_url(self):
         return reverse('cobra_wrapper:cobramodel_detail', kwargs={'pk': self.object.pk})
+
+
+class CobraModelChangeRestoreView(FormView):
+    http_method_names = ['post']
+    form_class = CobraModelChangeRestoreForm
+
+    def get_object(self):
+        model_object = get_object_or_404(CobraModel, pk=self.kwargs['pk'], owner=self.request.user)
+        return get_object_or_404(CobraModelChange, pk=self.kwargs['change_pk'], model=model_object)
+
+    def form_valid(self, form: CobraModelChangeRestoreForm):
+        change = self.get_object()
+        self.new_model = change.restore(name=form.cleaned_data['name'], desc=form.cleaned_data['desc'])
+
+    def get_success_url(self):
+        return reverse(self.new_model)
 
 
 class TemplateAddModelPkMixin:
