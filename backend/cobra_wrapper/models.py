@@ -12,6 +12,7 @@ from .utils import load_sbml
 class CobraModel(models.Model):
     sbml_content = models.TextField()
     name = models.CharField(max_length=200)
+    desc = models.CharField(max_length=200, blank=True)
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
@@ -90,25 +91,10 @@ class CobraModelChange(models.Model):
     change_type = models.CharField(max_length=50, choices=[
         ('add_reaction', 'add_reaction'),
         ('del_reaction', 'del_reaction'),
-        ('sbml_content', 'sbml_content'),
-        ('name', 'name'),
-        ('objective', 'objective'),
     ])
     model = models.ForeignKey(CobraModel, on_delete=models.CASCADE, related_name='changes')
-    # pre_sbml_content = models.TextField(blank=True)  # The field may take much memory and disk space
-    # `pre_info` is deleted reaction id, pre name or pre objective
-    # The same to `new_info`, but it could also be new reaction id
-    pre_info = models.TextField(blank=True)
-    new_info = models.TextField(blank=True)
+    reaction_info = models.TextField()
     created_time = models.DateTimeField(auto_now_add=True)
-
-    SHOWN_TEXT_TEMPLATE_CHOICES = {
-        'add_reaction': 'Add reaction {new_info}',
-        'del_reaction': 'Delete reaction {pre_info}',
-        'sbml_content': 'Use new SBML file',
-        'name': 'Change name from {pre_info} to {new_info}',
-        'objective': 'Change objective to {new_info}',
-    }
 
     class Meta:
         verbose_name = 'model_change'
@@ -116,5 +102,4 @@ class CobraModelChange(models.Model):
 
     def __str__(self):
         """Use the method to get shown text of the change"""
-        return self.SHOWN_TEXT_TEMPLATE_CHOICES[self.change_type].format(
-            pre_info=self.pre_info, new_info=self.new_info)
+        return self.reaction_info  # TODO(myl7)

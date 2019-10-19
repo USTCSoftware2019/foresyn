@@ -2,8 +2,8 @@ import json
 
 from django.shortcuts import get_object_or_404, reverse, Http404
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, DeleteView, TemplateView, FormView
-from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateResponseMixin
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, TemplateView, FormView, View
+from django.views.generic.edit import DeletionMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import Form
 
@@ -23,8 +23,12 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
+    def get_update_forms(self):
+        return [form() for form in cobra_model_update_forms.values()]
+
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data()
+        context_data['forms'] = self.get_update_forms()
         context_data['cobra_model'] = self.object.build()
         context_data['latest_changes'] = CobraModelChange.objects.filter(model=self.object)[:10]
         keywords = set()
@@ -51,14 +55,16 @@ class CobraModelCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class CobraModelDeleteView(LoginRequiredMixin, DeleteView):
+class CobraModelDeleteView(LoginRequiredMixin, DeletionMixin, View):
+    http_method_names = ['post']
     success_url = reverse_lazy('cobra_wrapper:cobramodel_list')
 
     def get_object(self, queryset=None):
         return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
-class CobraModelUpdateView(LoginRequiredMixin, SingleObjectMixin, SingleObjectTemplateResponseMixin, FormView):
+class CobraModelUpdateView(LoginRequiredMixin, FormView):
+    http_method_names = ['post']
     template_name_suffix = '_update_form'
 
     def get_object(self, queryset=None):
@@ -83,12 +89,6 @@ class CobraModelUpdateView(LoginRequiredMixin, SingleObjectMixin, SingleObjectTe
             return None
         else:
             return super().get_form()
-
-    def get_context_data(self, **kwargs):
-        self.object = self.get_object()
-        context_data = super().get_context_data(**kwargs)
-        context_data['forms'] = self.get_forms()
-        return context_data
 
     def form_valid(self, form):
         self.object = self.get_object()

@@ -60,30 +60,15 @@ class CobraModelCreateForm(CleanSbmlContentMixin, InstanceForm):
 
 class CobraModelNameUpdateForm(InstanceForm):
     name = forms.CharField(max_length=200)
+    desc = forms.CharField(max_length=200)
     change_type = forms.CharField(widget=forms.HiddenInput(), initial='name')
 
     def save(self, model=None):
         if model:
             if not self.is_valid():
                 raise ValueError()
-            CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
-                                            pre_info=model.name, new_info=self.cleaned_data['name'])
             model.name = self.cleaned_data['name']
-            model.save()
-            self.instance = model
-        return super().save()
-
-
-class CobraModelSbmlContentUpdateForm(CleanSbmlContentMixin, InstanceForm):
-    sbml_content = forms.FileField(required=False)
-    change_type = forms.CharField(widget=forms.HiddenInput(), initial='sbml_content')
-
-    def save(self, model=None):
-        if model:
-            if self.errors:
-                raise ValueError()
-            CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model)
-            model.sbml_content = self.cleaned_data['sbml_content']
+            model.desc = self.cleaned_data['desc']
             model.save()
             self.instance = model
         return super().save()
@@ -97,8 +82,6 @@ class CobraModelObjectiveUpdateForm(InstanceForm):
         if model:
             if self.errors:
                 raise ValueError()
-            CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
-                                            new_info=self.cleaned_data['objective'])
             cobra_model: cobra.Model = model.build()
             cobra_model.objective = self.cleaned_data['objective']
             model.sbml_content = dump_sbml(cobra_model)
@@ -186,7 +169,6 @@ class CobraModelReactionCreateForm(InstanceForm):
 
 cobra_model_update_forms = {
     'name': CobraModelNameUpdateForm,
-    'sbml_content': CobraModelSbmlContentUpdateForm,
     'objective': CobraModelObjectiveUpdateForm,
     'del_reaction': CobraModelReactionDeleteForm,
     'add_reaction': CobraModelReactionCreateForm,
