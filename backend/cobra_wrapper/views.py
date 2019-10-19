@@ -33,14 +33,24 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data['cobra_model'] = self.object.build()
         context_data['latest_changes'] = CobraModelChange.objects.filter(model=self.object)[:10]
         keywords = set()
-        for reaction_dict in [
+        reaction_dict_list = [
             json.loads(change.reaction_info)
             for change in CobraModelChange.objects.filter(model=self.object,
                                                           change_type__in=['add_reaction', 'del_reaction'])[:10]
-        ]:
+        ]
+
+        def update_keywords(reaction_dict):
             keywords.update([reaction_dict['name']])
             keywords.update(reaction_dict['metabolites'])
             keywords.update(reaction_dict['genes'])
+
+        for reaction_dict in reaction_dict_list:
+            if 'reactions' in reaction_dict.keys():
+                for reaction in reaction_dict['reactions']:
+                    update_keywords(reaction)
+            else:
+                update_keywords(reaction_dict)
+        print(keywords)
         context_data['biobricks'] = search_biobricks(*keywords)
         return context_data
 
