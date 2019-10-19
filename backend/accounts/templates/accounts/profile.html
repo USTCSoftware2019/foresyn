@@ -1,80 +1,84 @@
 {% extends "base.html" %}
-
 {% load static %}
-
 {% block title %}
-Profile
+    Profile
 {% endblock %}
 
 {% block content %}
-<div class="banner w-100">
-  <div class="container d-flex align-items-center">
-    <div class="icon bg-info text-white d-flex justify-content-center align-items-center">
-      <i class="fa fa-user fa-2x"></i>
-    </div>
-    <div class="des ml-3">
-      <h5>My Profile</h5>
-      <div>Here contains your information.</div>
-    </div>
-  </div>
-</div>
-<div class="container">
-  <!-- Tab panes -->
-  <div class="tab-content">
-    <div id="my-profile" class="container tab-pane fade show active" style="padding: 0px"><br>
-      <div class="card">
-        <div class="card-body">
-          <form class="row" action="." method="POST">
-            {% csrf_token %}
-            <div class="col-3">
-              <img class="rounded" src="{% static "image/avatar.jpg" %}" style="height:250px;border:3px solid #EEEEEE">
+    <div class="banner w-100">
+        <div class="container d-flex align-items-center">
+            <div class="icon bg-info text-white d-flex justify-content-center align-items-center">
+                <i class="fa fa-user fa-2x"></i>
             </div>
-            <div class="col-9">
-              <div class="col-12">
-                <div class="row mt-4">
-                  <label for="validationDefault01" class="col-sm-2 col-form-label text-center">First
-                    name</label>
-                  <div class="col-sm-10">
-                    <input type="text" class="form-control" id="validationDefault01" placeholder="First name"
-                      value="{{ first }}" name="first">
-                  </div>
-                </div>
-                <div class="row mt-4">
-                  <label for="validationDefault02" class="col-sm-2 col-form-label text-center">Last
-                    name</label>
-                  <div class="col-sm-10">
-                    <input type="text" class="form-control" id="validationDefault02" placeholder="Last name"
-                      value="{{ last }}" name="last">
-                  </div>
-                </div>
-                <div class="row mt-4">
-                  <label for="validationDefaultUsername" class="col-sm-2 col-form-label text-center">Username</label>
-                  <div class="col-sm-10">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span class="input-group-text" id="inputGroupPrepend2">@</span>
-                      </div>
-                      <input type="text" disabled class="form-control" id="validationDefaultUsername"
-                        placeholder="Username" aria-describedby="inputGroupPrepend2" required value="{{ username }}">
-                    </div>
-                  </div>
-                </div>
-                <div class="row mt-4">
-                  <div class="col justify-content-around d-flex">
-                    <button class="col-4 btn btn-outline-light btn-side-circle text-hover-green" type="submit">Save
-                    </button>
-                    <a class="col-4 btn btn-outline-light btn-side-circle text-hover-green"
-                      href="{% url 'password_change' %}">Change Password
-                    </a>
-                  </div>
-                </div>
-              </div>
+            <div class="des ml-3">
+                <h5>My Profile</h5>
+                <div>Here contains your information.</div>
             </div>
-          </form>
         </div>
-      </div>
     </div>
-  </div>
-</div>
-
+    <div class="container">
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div id="my-profile" class="container tab-pane fade show active" style="padding: 0px"><br>
+                <div class="card">
+                    <div class="card-body">
+                        <form class="row" action="." method="POST">
+                            {% csrf_token %}
+                            <div class="col-3">
+                                <img class="rounded" src="{% static "image/avatar.jpg" %}"
+                                     style="height:250px;border:3px solid #EEEEEE">
+                            </div>
+                            <div class="col-9">
+                                <div class="col-12">
+                                    <div class="row mt-4">
+                                        <label for="validationDefault01" class="col-sm-2 col-form-label text-center">First
+                                            name</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" id="validationDefault01"
+                                                   placeholder="First name"
+                                                   value="{{ first }}" name="first">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-4">
+                                        <label for="validationDefault02" class="col-sm-2 col-form-label text-center">Last
+                                            name</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" id="validationDefault02"
+                                                   placeholder="Last name"
+                                                   value="{{ last }}" name="last">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-4">
+                                        <label for="validationDefaultUsername"
+                                               class="col-sm-2 col-form-label text-center">Username</label>
+                                        <div class="col-sm-10">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroupPrepend2">@</span>
+                                                </div>
+                                                <input type="text" disabled class="form-control"
+                                                       id="validationDefaultUsername"
+                                                       placeholder="Username" aria-describedby="inputGroupPrepend2"
+                                                       required value="{{ username }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-4">
+                                        <div class="col justify-content-around d-flex">
+                                            <button class="col-4 btn btn-outline-light btn-side-circle text-hover-green"
+                                                    type="submit">Save
+                                            </button>
+                                            <a class="col-4 btn btn-outline-light btn-side-circle text-hover-green"
+                                               href="{% url 'password_change' %}">Change Password
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
