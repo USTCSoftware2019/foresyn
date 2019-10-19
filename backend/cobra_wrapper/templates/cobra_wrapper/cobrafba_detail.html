@@ -23,7 +23,7 @@
     <script src="{% static "javascript/chart.js" %}"></script>
     <link href="{% static "css/chart.css" %}" rel="stylesheet">
     <script src="{% static "javascript/jquery.min.js" %}"></script>
-    <script src="{% static "javascript/util.js" %}"></script>
+    <script src="{% static "javascript/utils.js" %}"></script>
 
     <div class="container">
         <div class="row my-3">
@@ -63,7 +63,6 @@
                 <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}" class="btn btn-primary">Return</a>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -84,7 +83,7 @@
             let ctx = document.getElementById('canvas').getContext('2d');
 
             let url = window.location.href;
-            url += '/json';
+            url += 'json';
 
             $.ajax({
                 // url: 'http://127.0.0.1:8080/api/data',
@@ -92,10 +91,14 @@
                 // url: 'http://127.0.0.1:8080/api/data',
                 url: url,
                 success: function (res) {
-                    res_data = JSON.parse(res);
-                    console.log(res_data);
+                    // console.log(res);
+                    // res_data = JSON.parse(res);
+                    res_data = res.results;
+
                     let data_now = res_data[0];
+                    console.log(data_now);
                     let len = data_now.fluxes.length;
+                    console.log(len);
                     for (let i = 0; i < len; i++) {
                         labels.push(data_now.fluxes[i].name);
                         flux_data.push(data_now.fluxes[i].value);
@@ -132,7 +135,6 @@
                             }
                     }});
                     // window.myHorizontalBar.data = horizontalBarChartData;
-
                 },
                 error: function (err) {
                     console.log('error when ajax.');
@@ -178,9 +180,7 @@
                 console.log(horizontalBarChartData);
             }
 
-
             var color = Chart.helpers.color;
-
 
             function loadAll(){
                 console.log(labels.length);
@@ -194,10 +194,6 @@
             var colorNames = Object.keys(window.chartColors);
         });
     </script>
-
-
-
-
 {#    <p>Status: {{ object|check_result_status }}</p>#}
 {#    {% if result %}#}
 {#        {% if result.ok %}#}
@@ -209,5 +205,4 @@
 {##}
 {#    <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>#}
 {#    <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>#}
-
 {% endblock content %}

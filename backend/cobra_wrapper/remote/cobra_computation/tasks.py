@@ -68,6 +68,8 @@ def cobra_fba(pk, model_sbml, deleted_genes):
         app.send_task(**get_result_kwargs('fba', pk, error_result, is_error=True))
         return
     result: dict = json.loads(result_object.to_frame().to_json())
+    result['fluxes'] = [{'name': name, 'value': value} for name, value in result['fluxes'].items()]
+    result['reduced_costs'] = [{'name': name, 'value': value} for name, value in result['reduced_costs'].items()]
     result['objective_value'] = result_object.objective_value
     result['status'] = result_object.status
     app.send_task(**get_result_kwargs('fba', pk, result))
@@ -89,6 +91,8 @@ def cobra_fva(pk, model_sbml, reaction_list, loopless, fraction_of_optimum, pfba
     try:
         result = json.loads(flux_variability_analysis(
             cobra_model, reaction_list, loopless, fraction_of_optimum, pfba_factor).to_json())
+        result['minimum'] = [{'name': name, 'value': value} for name, value in result['minimum'].items()]
+        result['maximum'] = [{'name': name, 'value': value} for name, value in result['maximum'].items()]
     except Exception as error:
         error_result = report_cobra_computation_error(error)
         app.send_task(**get_result_kwargs('fba', pk, error_result, is_error=True))
