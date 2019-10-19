@@ -45,15 +45,25 @@
                         <th>Previous Fluxes Value</th>
                         <th>Reduced Costs</th>
                         <th>Previous Reduced Costs</th>
-                        <th>Shadow Price</th>
-                        <th>Previous Shadow Price</th>
                     </tr>
                     </thead>
                     <tbody id="res_body" class="text-center">
 
                     </tbody>
                 </table>
+                <div class="mt-2"></div>
+                <table class="table table-bordered table-hover d-none" id="shadow_table">
+                    <thead class="text-center table-active">
+                    <tr>
+                        <th>Name</th>
+                        <th>Shadow Prices</th>
+                        <th>Previous Shadow Prices</th>
+                    </tr>
+                    </thead>
+                    <tbody id="shadow_body" class="text-center">
 
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -185,8 +195,6 @@
                             '<td class="' + Num2Class(flux_data_pre[i]) + '">' + flux_data_pre[i].toFixed(4) + '</td>' +
                             '<td class="' + Num2Class(reduced_costs_data[i]) + '">' + reduced_costs_data[i].toFixed(4) + '</td>' +
                             '<td class="' + Num2Class(reduced_costs_data_pre[i]) + '">' + reduced_costs_data_pre[i].toFixed(4) + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '</tr>';
                     }
                 } else {
@@ -196,12 +204,9 @@
                             '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '<td class="' + Num2Class(reduced_costs_data[i]) + '">' + reduced_costs_data[i].toFixed(4) + '</td>' +
                             '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '</tr>';
                     }
                 }
-
                 res_body.html(str);
             }
 
@@ -231,15 +236,11 @@
 
             function loadShadowPrices() {
                 let len = shadow_labels.length;
-                let res_body = $('#res_body');
-                let str = res_body.html();
+                let res_body = $('#shadow_body');
+                let str = '';
                 if (res_data.length === 2) {
                     for (let i = 0; i < len; i++) {
                         str += '<tr><td class="table-active">' + shadow_labels[i] + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '<td class="' + Num2Class(shadow_prices_data[i]) + '">' + shadow_prices_data[i].toFixed(4) + '</td>' +
                             '<td class="' + Num2Class(shadow_prices_data_pre[i]) + '">' + shadow_prices_data_pre[i].toFixed(4) + '</td>' +
                             '</tr>';
@@ -247,15 +248,12 @@
                 } else {
                     for (let i = 0; i < len; i++) {
                         str += '<tr><td class="table-active">' + shadow_labels[i] + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '<td class="' + Num2Class(shadow_prices_data[i]) + '">' + shadow_prices_data[i].toFixed(4) + '</td>' +
                             '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '</tr>';
                     }
                 }
+                res_body.removeClass('d-none');
                 res_body.html(str);
             }
 
