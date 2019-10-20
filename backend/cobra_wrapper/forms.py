@@ -1,26 +1,14 @@
 import json
 import re
-from typing import List, Dict, Any
+from typing import List
 
 from django import forms
 import cobra
 
 from . import models
-from .utils import dump_sbml
+from .utils import dump_sbml, get_reaction_json
 
-
-class InstanceForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        instance = kwargs.pop('instance', None)
-        super().__init__(*args, **kwargs)
-        self.instance = instance
-
-    def save(self):
-        try:
-            self.instance.save()
-        except AttributeError:
-            pass
-        return self.instance
+# TODO(myl7): Validation layer
 
 
 class CleanSbmlContentMixin:
@@ -45,128 +33,97 @@ class CleanSbmlContentMixin:
         return cleaned_data
 
 
-class CobraModelCreateForm(CleanSbmlContentMixin, InstanceForm):
+class CobraModelCreateForm(CleanSbmlContentMixin, forms.Form):
     sbml_content = forms.FileField()
-    name = forms.CharField(max_length=200)
-    desc = forms.CharField(max_length=200)
+    name = forms.CharField(max_length=200, min_length=1)
+    desc = forms.CharField(max_length=200, required=False)
 
-    def save(self, owner=None):
-        if owner:
-            if not self.is_valid():
-                raise ValueError()
-            self.instance = models.CobraModel.objects.create(name=self.cleaned_data['name'],
-                                                             desc=self.cleaned_data['desc'],
-                                                             sbml_content=self.cleaned_data['sbml_content'],
-                                                             owner=owner)
-        return super().save()
+    def save(self, owner):
+        if not self.is_valid():
+            raise ValueError()
+        return models.CobraModel.objects.create(name=self.cleaned_data['name'], desc=self.cleaned_data['desc'],
+                                                sbml_content=self.cleaned_data['sbml_content'], owner=owner)
 
 
-class CobraModelNameUpdateForm(InstanceForm):
-    name = forms.CharField(max_length=200)
-    desc = forms.CharField(max_length=200)
+class CobraModelNameUpdateForm(forms.Form):
+    name = forms.CharField(max_length=200, min_length=1)
+    desc = forms.CharField(max_length=200, required=False)
     change_type = forms.CharField(widget=forms.HiddenInput(), initial='name')
 
-    def save(self, model=None):
-        if model:
-            if not self.is_valid():
-                raise ValueError()
-            model.name = self.cleaned_data['name']
-            model.desc = self.cleaned_data['desc']
-            model.save()
-            self.instance = model
-        return super().save()
+    def save(self, model):
+        if not self.is_valid():
+            raise ValueError()
+        model.name = self.cleaned_data['name']
+        model.desc = self.cleaned_data['desc']
+        model.save()
+        return model
 
 
-class CobraModelObjectiveUpdateForm(InstanceForm):
-    objective = forms.CharField()
+class CobraModelObjectiveUpdateForm(forms.Form):
+    objective = forms.CharField(min_length=1)
     change_type = forms.CharField(widget=forms.HiddenInput(), initial='objective')
 
-    def save(self, model=None):
-        if model:
-            if self.errors:
-                raise ValueError()
-            cobra_model: cobra.Model = model.build()
-            cobra_model.objective = self.cleaned_data['objective']
-            model.sbml_content = dump_sbml(cobra_model)
-            model.save()
-            self.instance = model
-        return super().save()
+    def save(self, model):
+        if self.errors:
+            raise ValueError()
+        cobra_model: cobra.Model = model.build()
+        cobra_model.objective = self.cleaned_data['objective']
+        model.sbml_content = dump_sbml(cobra_model)
+        model.save()
+        return model
 
 
-def get_reaction_json(reaction: cobra.Reaction) -> Dict[str, Any]:
-    return {
-        'cobra_id': reaction.id,
-        'name': reaction.name,
-        'subsystem': reaction.subsystem,
-        'lower_bound': reaction.lower_bound,
-        'upper_bound': reaction.upper_bound,
-        'gene_reaction_rule': reaction.gene_reaction_rule,
-        'metabolites_with_coefficients': dict(zip(
-            [metabolite.id for metabolite in reaction.metabolites],
-            reaction.get_coefficients([metabolite.id for metabolite in reaction.metabolites])
-        )),
-        'metabolites': [metabolite.name for metabolite in reaction.metabolites],
-        'genes': [gene.name for gene in reaction.genes],
-    }
-
-
-class CobraModelReactionDeleteForm(InstanceForm):
-    pre_reaction_id = forms.CharField()
+class CobraModelReactionDeleteForm(forms.Form):
+    deleted_reaction_id = forms.CharField(min_length=1)
     change_type = forms.CharField(widget=forms.HiddenInput(), initial='del_reaction')
 
-    def save(self, model=None):
-        if model:
-            if self.errors:
-                raise ValueError()
-            cobra_model: cobra.Model = model.build()
-            pre_reaction_id_list = self.cleaned_data['pre_reaction_id'].split(',')
-            pre_reaction_info = {
-                'reactions': [
-                    get_reaction_json(cobra_model.reactions.get_by_id(reaction_id))
-                    for reaction_id in pre_reaction_id_list
-                ],
-            }
-            models.CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
-                                                   reaction_info=json.dumps(pre_reaction_info))
-            cobra_model.remove_reactions(pre_reaction_id_list)
-            model.sbml_content = dump_sbml(cobra_model)
-            model.save()
-            self.instance = model
-        return super().save()
+    def save(self, model):
+        if self.errors:
+            raise ValueError()
+        cobra_model: cobra.Model = model.build()
+        deleted_reaction_id_list = self.cleaned_data['deleted_reaction_id'].split(',')
+        deleted_reaction_info = {
+            'reactions': [
+                get_reaction_json(cobra_model.reactions.get_by_id(reaction_id))
+                for reaction_id in deleted_reaction_id_list
+            ],
+        }
+        models.CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
+                                               reaction_info=json.dumps(deleted_reaction_info))
+        cobra_model.remove_reactions(deleted_reaction_id_list)
+        model.sbml_content = dump_sbml(cobra_model)
+        model.save()
+        return model
 
 
-class CobraModelReactionCreateForm(InstanceForm):
+class CobraModelReactionCreateForm(forms.Form):
     cobra_id = forms.CharField(max_length=600)
     name = forms.CharField(max_length=600)
     subsystem = forms.CharField(max_length=200)
     lower_bound = forms.FloatField(initial=0.0)
     upper_bound = forms.FloatField(initial=1000.0)
+    reaction_str = forms.CharField()
     gene_reaction_rule = forms.CharField()
-    metabolites_with_coefficients = forms.CharField()
     change_type = forms.CharField(widget=forms.HiddenInput(), initial='add_reaction')
 
-    def save(self, model=None):
-        if model:
-            if self.errors:
-                raise ValueError()
-            cobra_model: cobra.Model = model.build()
-            metabolites_with_coefficients_dict = {
-                cobra_model.metabolites.get_by_id(metabolite_id): coefficient
-                for metabolite_id, coefficient in
-                json.loads(self.cleaned_data['metabolites_with_coefficients']).items()
-            }
-            cobra_reaction = cobra.Reaction(id=self.cleaned_data['cobra_id'], name=self.cleaned_data['name'],
-                                            subsystem=self.cleaned_data['subsystem'],
-                                            lower_bound=self.cleaned_data['lower_bound'],
-                                            upper_bound=self.cleaned_data['upper_bound'])
-            cobra_reaction.add_metabolites(metabolites_with_coefficients_dict)
-            cobra_model.add_reactions([cobra_reaction])
-            models.CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
-                                                   reaction_info=json.dumps(get_reaction_json(cobra_reaction)))
-            model.sbml_content = dump_sbml(cobra_model)
-            model.save()
-            self.instance = model
-        return super().save()
+    def save(self, model):
+        if self.errors:
+            raise ValueError()
+        cobra_model: cobra.Model = model.build()
+        cobra_reaction = cobra.Reaction(id=self.cleaned_data['cobra_id'], name=self.cleaned_data['name'],
+                                        subsystem=self.cleaned_data['subsystem'],
+                                        lower_bound=self.cleaned_data['lower_bound'],
+                                        upper_bound=self.cleaned_data['upper_bound'])
+        cobra_model.add_reactions([cobra_reaction])
+        cobra_reaction.reaction = self.cleaned_data['reaction_str']
+        cobra_reaction.gene_reaction_rule = self.cleaned_data['gene_reaction_rule']
+        models.CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
+                                               reaction_info=json.dumps({
+                                                   'reactions': [get_reaction_json(cobra_reaction)],
+                                               }))
+        model.sbml_content = dump_sbml(cobra_model)
+        model.save()
+        return model
 
 
 cobra_model_update_forms = {
@@ -186,8 +143,8 @@ def load_comma_separated_str(value: str) -> List[str]:
 
 
 class CobraModelChangeRestoreForm(forms.Form):
-    name = forms.CharField(max_length=200)
-    desc = forms.CharField(max_length=200)
+    name = forms.CharField(max_length=200, min_length=1)
+    desc = forms.CharField(max_length=200, required=False)
 
 
 class CleanDeletedGenesMixin:

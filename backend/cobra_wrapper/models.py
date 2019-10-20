@@ -7,7 +7,7 @@ from django.shortcuts import reverse
 from django.core.exceptions import ValidationError
 import cobra
 
-from .utils import load_sbml, dump_sbml
+from .utils import load_sbml, dump_sbml, restore_reaction_by_json
 
 
 class CobraModel(models.Model):
@@ -138,15 +138,3 @@ class CobraModelChange(models.Model):
                 cobra_model.add_reactions(reactions)
         return CobraModel.objects.create(name=name, desc=desc, sbml_content=dump_sbml(cobra_model),
                                          owner=self.model.owner)
-
-
-def restore_reaction_by_json(cobra_model: cobra.Model, info: Dict[str, Any]) -> cobra.Reaction:
-    reaction = cobra.Reaction(id=info['cobra_id'], name=info['name'], subsystem=info['subsystem'],
-                              lower_bound=info['lower_bound'], upper_bound=info['upper_bound'])
-    reaction.gene_reaction_rule = info['gene_reaction_rule']
-    metabolites_with_coefficients = {
-        cobra_model.metabolites.get_by_id(metabolite): coefficient
-        for metabolite, coefficient in info['metabolites_with_coefficients'].items()
-    }
-    reaction.add_metabolites(metabolites_with_coefficients)
-    return reaction

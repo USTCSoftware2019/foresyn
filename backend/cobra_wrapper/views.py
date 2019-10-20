@@ -30,25 +30,20 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data['forms'] = self.get_update_forms()
         context_data['cobra_model'] = self.object.build()
         context_data['latest_changes'] = models.CobraModelChange.objects.filter(model=self.object)[:10]
+
         keywords = set()
         reaction_dict_list = [
             json.loads(change.reaction_info)
-            for change in models.CobraModelChange.objects.filter(model=self.object,
-                                                                 change_type__in=['add_reaction', 'del_reaction'])[:10]
+            for change in models.CobraModelChange.objects.filter(
+                model=self.object, change_type__in=['add_reaction', 'del_reaction'])[:10]
         ]
-
-        def update_keywords(reaction_dict):
-            keywords.update([reaction_dict['name']])
-            keywords.update(reaction_dict['metabolites'])
-            keywords.update(reaction_dict['genes'])
-
         for reaction_dict in reaction_dict_list:
-            if 'reactions' in reaction_dict.keys():
-                for reaction in reaction_dict['reactions']:
-                    update_keywords(reaction)
-            else:
-                update_keywords(reaction_dict)
+            for reaction in reaction_dict['reactions']:
+                keywords.add(reaction['name'])
+                keywords.update(reaction['metabolites'])
+                keywords.update(reaction['genes'])
         context_data['biobricks'] = search_biobricks(*keywords)
+
         return context_data
 
 
@@ -66,7 +61,7 @@ class CobraModelDeleteView(LoginRequiredMixin, DeletionMixin, View):
     http_method_names = ['post']
     success_url = reverse_lazy('cobra_wrapper:cobramodel_list')
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         return get_object_or_404(models.CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
 
@@ -74,7 +69,7 @@ class CobraModelUpdateView(LoginRequiredMixin, FormView):
     http_method_names = ['post']
     template_name_suffix = '_update_form'
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         return get_object_or_404(models.CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
     def get_forms(self):
