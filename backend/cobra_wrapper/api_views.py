@@ -43,7 +43,7 @@ class CobraFbaDetailJsonView(CobraComputationDetailJsonView):
     model_class = models.CobraFba
     backref_field = 'fba_list'
 
-    COENZYMES = ['NADN', 'NAD', 'NADPH', 'NADP', 'ATP', 'FMN', 'FMNH', 'FAD', 'FADH2']
+    COENZYMES = ['NADN', 'NAD', 'NADPH', 'NADP', 'ATP', 'FMN', 'FMNH2', 'FAD', 'FADH2']
 
     def get(self, request, *arg, **kwargs):
         result_dict = self.get_result_dict()
