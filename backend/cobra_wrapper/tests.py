@@ -16,8 +16,6 @@ class CobraWrapperViewTests(TestCase):
                                                sbml_content=dump_sbml(cobra.test.create_test_model()), owner=self.user)
         self.client.login(username='test', password='test123456')
 
-    # TODO(myl7): `setUp` now is OK, but all tests are required to be recheck
-
     def test_models_list(self):
         response = self.client.get('/cobra/models/')
         self.assertTemplateUsed(response, 'cobra_wrapper/cobramodel_list.html')

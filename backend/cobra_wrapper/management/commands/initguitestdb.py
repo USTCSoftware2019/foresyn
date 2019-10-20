@@ -17,7 +17,9 @@ def main():
         pass
     subprocess.run([os.path.join(BASE_DIR, 'manage.py'), 'migrate'], env=os.environ)
     user = User.objects.create_superuser('test', '', 'test123456')
-    CobraModel.objects.create(name='example', sbml_content=dump_sbml(cobra.test.create_test_model()), owner=user)
+    cobra_model = cobra.test.create_test_model()
+    model = CobraModel.objects.create(name='example', sbml_content=dump_sbml(cobra_model), owner=user)
+    model.cache(cobra_model)
 
 
 class Command(BaseCommand):

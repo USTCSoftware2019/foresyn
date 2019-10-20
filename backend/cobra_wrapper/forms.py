@@ -1,14 +1,10 @@
 import json
-import re
-from typing import List
 
 from django import forms
 import cobra
 
 from . import models
-from .utils import dump_sbml, get_reaction_json
-
-# TODO(myl7): Validation layer
+from .utils import dump_sbml, get_reaction_json, clean_comma_separated_str
 
 
 class CleanSbmlContentMixin:
@@ -41,8 +37,10 @@ class CobraModelCreateForm(CleanSbmlContentMixin, forms.Form):
     def save(self, owner):
         if not self.is_valid():
             raise ValueError()
-        return models.CobraModel.objects.create(name=self.cleaned_data['name'], desc=self.cleaned_data['desc'],
-                                                sbml_content=self.cleaned_data['sbml_content'], owner=owner)
+        model = models.CobraModel.objects.create(name=self.cleaned_data['name'], desc=self.cleaned_data['desc'],
+                                                 sbml_content=self.cleaned_data['sbml_content'], owner=owner)
+        model.cache(model.build())
+        return model
 
 
 class CobraModelNameUpdateForm(forms.Form):
@@ -93,6 +91,7 @@ class CobraModelReactionDeleteForm(forms.Form):
         cobra_model.remove_reactions(deleted_reaction_id_list)
         model.sbml_content = dump_sbml(cobra_model)
         model.save()
+        model.cache(cobra_model)
         return model
 
 
@@ -123,6 +122,7 @@ class CobraModelReactionCreateForm(forms.Form):
                                                }))
         model.sbml_content = dump_sbml(cobra_model)
         model.save()
+        model.cache(cobra_model)
         return model
 
 
@@ -134,24 +134,32 @@ cobra_model_update_forms = {
 }
 
 
-def clean_comma_separated_str(form, value: str) -> str:
-    return ','.join([item.strip() for item in value.split(',') if re.fullmatch(r'[a-zA-Z0-9_-]+', item.strip())])
-
-
-def load_comma_separated_str(value: str) -> List[str]:
-    return value.split(',') if value else []
-
-
 class CobraModelChangeRestoreForm(forms.Form):
     name = forms.CharField(max_length=200, min_length=1)
     desc = forms.CharField(max_length=200, required=False)
 
 
 class CleanDeletedGenesMixin:
-    def clean(self):
+    def clean(self: forms.Form):
         cleaned_data = super().clean()
         cleaned_data['deleted_genes'] = clean_comma_separated_str(self, cleaned_data.get('deleted_genes', ''))
+        genes = [gene['cobra_id'] for gene in json.loads(self.model_object.genes)]
+        for gene in cleaned_data['deleted_genes']:
+            if gene not in genes:
+                self.add_error('deleted_genes', '{} can not be found in the model'.format(gene))
         return cleaned_data
+
+
+class CobraFbaForm(CleanDeletedGenesMixin, forms.ModelForm):
+    class Meta:
+        model = models.CobraFba
+        fields = ['desc', 'deleted_genes']
+
+
+class CobraRgeFbaForm(CleanDeletedGenesMixin, forms.ModelForm):
+    class Meta:
+        model = models.CobraRgeFba
+        fields = ['desc', 'deleted_genes']
 
 
 class CobraFvaForm(CleanDeletedGenesMixin, forms.ModelForm):
@@ -162,4 +170,8 @@ class CobraFvaForm(CleanDeletedGenesMixin, forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         cleaned_data['reaction_list'] = clean_comma_separated_str(self, cleaned_data.get('reaction_list', ''))
+        reactions = [reaction['cobra_id'] for reaction in json.loads(self.model.reactions)]
+        for reaction in cleaned_data['reaction_list']:
+            if reaction not in reactions:
+                self.add_error('reaction_list', '{} can not be found in the model'.format(reaction))
         return cleaned_data

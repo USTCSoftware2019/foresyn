@@ -1,5 +1,4 @@
 import json
-from typing import Dict, Any
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -17,6 +16,9 @@ class CobraModel(models.Model):
 
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
+    reactions = models.TextField(blank=True)
+    metabolites = models.TextField(blank=True)
+    genes = models.TextField(blank=True)
 
     class Meta:
         verbose_name = 'model'
@@ -32,6 +34,14 @@ class CobraModel(models.Model):
         cobra_model: cobra.Model = load_sbml(self.sbml_content)
         cobra_model.name = self.name
         return cobra_model
+
+    def cache(self, cobra_model: cobra.Model):
+        self.reactions = json.dumps([{'cobra_id': reaction.id, 'name': reaction.name}
+                                     for reaction in cobra_model.reactions])
+        self.metabolites = json.dumps([{'cobra_id': metabolite.id, 'name': metabolite.name}
+                                       for metabolite in cobra_model.metabolites])
+        self.genes = json.dumps([{'cobra_id': gene.id, 'name': gene.name} for gene in cobra_model.genes])
+        self.save()
 
 
 def validate_json_str_or_blank_str(value):
@@ -124,7 +134,11 @@ class CobraModelChange(models.Model):
 
     def __str__(self):
         """Use the method to get shown text of the change"""
-        return self.reaction_info  # TODO(myl7)
+        reactions = json.loads(self.reaction_info)['reactions']
+        return '{} {} {}'.format(
+            ', '.join([reaction.name for reaction in reactions]),
+            'are' if len(reactions) > 1 else 'is',
+            'added' if self.change_type == 'add_reaction' else 'deleted')
 
     def restore(self, name: str, desc: str = '') -> CobraModel:
         changes = CobraModelChange.objects.filter(model=self.model, created_time__gt=self.created_time)

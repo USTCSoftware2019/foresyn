@@ -1,4 +1,5 @@
 import io
+import re
 from typing import List, Dict, Any
 
 import cobra
@@ -45,3 +46,11 @@ def ensure_model_metabolites(cobra_model: cobra.Model, checked_metabolites: List
         if value not in metabolite_id_list:
             return False
     return True
+
+
+def clean_comma_separated_str(form, value: str) -> str:
+    return ','.join([item.strip() for item in value.split(',') if re.fullmatch(r'[a-zA-Z0-9_-]+', item.strip())])
+
+
+def load_comma_separated_str(value: str) -> List[str]:
+    return value.split(',') if value else []

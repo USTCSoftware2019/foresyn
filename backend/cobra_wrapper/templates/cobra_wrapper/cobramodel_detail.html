@@ -60,9 +60,9 @@
                     <div class="card-body">
                         <h5 class="card-title">Info</h5>
                         <div class="list-group">
-                            {% for reaction in cobra_model.reactions %}
+                            {% for reaction in reactions %}
                                 <a href="#"
-                                   class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.id }}]</a>
+                                   class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.cobra_id }}]</a>
                             {% endfor %}
                         </div>
                         <br>

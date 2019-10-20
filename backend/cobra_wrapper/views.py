@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import Form
 
 from . import models, forms
+from .utils import load_comma_separated_str
 
 from backend.celery import app
 from search.internal_api import search_biobricks
@@ -28,7 +29,9 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data()
         context_data['forms'] = self.get_update_forms()
-        context_data['cobra_model'] = self.object.build()
+        context_data['reactions'] = json.loads(self.object.reactions)
+        context_data['metabolites'] = json.loads(self.object.metabolites)
+        context_data['genes'] = json.loads(self.object.genes)
         context_data['latest_changes'] = models.CobraModelChange.objects.filter(model=self.object)[:10]
 
         keywords = set()
@@ -47,14 +50,16 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         return context_data
 
 
-class CobraModelCreateView(LoginRequiredMixin, CreateView):
-    template_name_suffix = '_create_form'
-    model = models.CobraModel
+class CobraModelCreateView(LoginRequiredMixin, FormView):
+    template_name = 'cobra_wrapper/cobramodel_create_form.html'
     form_class = forms.CobraModelCreateForm
 
     def form_valid(self, form: forms.CobraModelCreateForm):
-        form.save(self.request.user)
+        self.new_model = form.save(self.request.user)
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return self.new_model.get_absolute_url()
 
 
 class CobraModelDeleteView(LoginRequiredMixin, DeletionMixin, View):
@@ -124,6 +129,14 @@ class TemplateAddModelPkMixin:
         return context
 
 
+class InsertModelForFormMixin:
+    def get_form(self: FormView, form_class=None):
+        self.model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        form = super().get_form()
+        form.model_object = self.model_object
+        return form
+
+
 class CobraFbaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView):
     def get_queryset(self):
         model = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
@@ -136,28 +149,26 @@ class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView
         return get_object_or_404(self.model_object.fba_list.all(), pk=self.kwargs['pk'])
 
 
-class CobraFbaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView):
+class CobraFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, CreateView):
     template_name_suffix = '_create_form'
     model = models.CobraFba
-    fields = ['desc', 'deleted_genes']
+    form_class = forms.CobraFbaForm
 
     def form_valid(self, form: Form):
-        model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
-        form.instance.model = model_object
-        response = super().form_valid(form)
+        form.instance.model = self.model_object
         result = app.send_task(
             'cobra_computation.tasks.cobra_fba',
             kwargs={
                 'pk': self.object.pk,
-                'model_sbml': model_object.sbml_content,
-                'deleted_genes': forms.load_comma_separated_str(form.cleaned_data['deleted_genes']),
+                'model_sbml': self.model_object.sbml_content,
+                'deleted_genes': load_comma_separated_str(form.cleaned_data['deleted_genes']),
             },
             queue='cobra_feeds',
             routing_key='cobra_feed.fba',
         )
         self.object.task_id = result.id
         self.object.save()
-        return response
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrafba_list', kwargs={'model_pk': self.kwargs['model_pk']})
@@ -166,7 +177,7 @@ class CobraFbaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView
 class CobraFbaDeleteView(LoginRequiredMixin, DeletionMixin, View):
     http_method_names = ['post']
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         model = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.fba_list.all(), pk=self.kwargs['pk'])
 
@@ -186,28 +197,25 @@ class CobraRgeFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailV
         return get_object_or_404(self.model_object.rgefba_list.all(), pk=self.kwargs['pk'])
 
 
-class CobraRgeFbaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView):
-    template_name_suffix = '_create_form'
-    model = models.CobraRgeFba
-    fields = ['desc', 'deleted_genes']
+class CobraRgeFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, FormView):
+    template_name = 'cobra_wrapper/cobrargefba_create_form.html'
+    form_class = forms.CobraRgeFbaForm
 
     def form_valid(self, form: Form):
-        model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
-        form.instance.model = model_object
-        response = super().form_valid(form)
+        form.instance.model = self.model_object
         result = app.send_task(
             'cobra_computation.tasks.cobra_rge_fba',
             kwargs={
                 'pk': self.object.pk,
-                'model_sbml': model_object.sbml_content,
-                'deleted_genes': forms.load_comma_separated_str(form.cleaned_data['deleted_genes']),
+                'model_sbml': self.model_object.sbml_content,
+                'deleted_genes': load_comma_separated_str(form.cleaned_data['deleted_genes']),
             },
             queue='cobra_feeds',
             routing_key='cobra_feed.rge_fba',
         )
         self.object.task_id = result.id
         self.object.save()
-        return response
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrargefba_list', kwargs={'model_pk': self.kwargs['model_pk']})
@@ -216,7 +224,7 @@ class CobraRgeFbaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateV
 class CobraRgeFbaDeleteView(LoginRequiredMixin, DeletionMixin, View):
     http_method_names = ['post']
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         model = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.rgefba_list.all(), pk=self.kwargs['pk'])
 
@@ -236,32 +244,29 @@ class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView
         return get_object_or_404(self.model_object.fva_list.all(), pk=self.kwargs['pk'])
 
 
-class CobraFvaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView):
-    template_name_suffix = '_create_form'
-    model = models.CobraFva
+class CobraFvaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, FormView):
+    template_name = 'cobra_wrapper/cobrafva_create_form.html'
     form_class = forms.CobraFvaForm
 
     def form_valid(self, form: Form):
-        model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
-        form.instance.model = model_object
-        response = super().form_valid(form)
+        form.instance.model = self.model_object
         result = app.send_task(
             'cobra_computation.tasks.cobra_fva',
             kwargs={
                 'pk': self.object.pk,
-                'model_sbml': model_object.sbml_content,
-                'reaction_list': forms.load_comma_separated_str(form.cleaned_data['reaction_list']),
+                'model_sbml': self.model_object.sbml_content,
+                'reaction_list': load_comma_separated_str(form.cleaned_data['reaction_list']),
                 'loopless': form.cleaned_data['loopless'],
                 'fraction_of_optimum': form.cleaned_data['fraction_of_optimum'],
                 'pfba_factor': form.cleaned_data['pfba_factor'],
-                'deleted_genes': forms.load_comma_separated_str(form.cleaned_data['deleted_genes']),
+                'deleted_genes': load_comma_separated_str(form.cleaned_data['deleted_genes']),
             },
             queue='cobra_feeds',
             routing_key='cobra_feed.fva',
         )
         self.object.task_id = result.id
         self.object.save()
-        return response
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrafva_list', kwargs={'model_pk': self.kwargs['model_pk']})
@@ -270,7 +275,7 @@ class CobraFvaCreateView(LoginRequiredMixin, TemplateAddModelPkMixin, CreateView
 class CobraFvaDeleteView(LoginRequiredMixin, DeletionMixin, View):
     http_method_names = ['post']
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         model = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(model.fva_list.all(), pk=self.kwargs['pk'])
 
