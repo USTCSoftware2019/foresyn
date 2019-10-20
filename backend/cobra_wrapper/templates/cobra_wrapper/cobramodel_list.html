@@ -22,10 +22,10 @@
         <div class="col-4">
             <div class="card text-center">
                 <h5 class="card-header" style="background-color: #d4edda; color: #155724">
-                    {{ object.cobra_id }}
+                    {{ object.name }}
                 </h5>
                 <div class="card-body">
-                    <p class="card-text">{{ object.name }}</p>
+                    <p class="card-text">{{ object.desc }}</p>
                     <a href="{% url 'cobra_wrapper:cobramodel_detail' object.pk %}"
                        class="btn btn-outline-light btn-side-circle text-hover-green">Detail</a>
                 </div>

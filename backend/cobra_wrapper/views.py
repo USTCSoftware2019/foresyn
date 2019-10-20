@@ -48,7 +48,6 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
                     update_keywords(reaction)
             else:
                 update_keywords(reaction_dict)
-        print(keywords)
         context_data['biobricks'] = search_biobricks(*keywords)
         return context_data
 

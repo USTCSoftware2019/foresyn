@@ -26,19 +26,30 @@ class CobraComputationDetailJsonView(SingleObjectMixin, View):
         self.model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(getattr(self.model_object, self.backref_field).all(), pk=self.kwargs['pk'])
 
-    def get(self, request, *args, **kwargs):
+    def get_result_dict(self):
         self.object = self.get_object()
         results = [json.loads(self.object.result)]
         results.extend([
             json.loads(fba.result)
             for fba in self.model_class.objects.filter(model=self.model_object, ok=True).exclude(pk=self.object.pk)[:1]
         ])
-        return JsonResponse({'results': results})
+        return {'results': results}
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse(self.get_result_dict())
 
 
 class CobraFbaDetailJsonView(CobraComputationDetailJsonView):
     model_class = models.CobraFba
     backref_field = 'fba_list'
+
+    COENZYMES = ['NADN', 'NAD', 'NADPH', 'NADP', 'ATP', 'FMN', 'FMNH', 'FAD', 'FADH2']
+
+    def get(self, request, *arg, **kwargs):
+        result_dict = self.get_result_dict()
+        for result in result_dict['results']:
+            result['coenzymes'] = [flux for flux in result['fluxes'] if flux['name'] in self.COENZYMES]
+        return JsonResponse(result_dict)
 
 
 class CobraRgeFbaDetailJsonView(CobraComputationDetailJsonView):
