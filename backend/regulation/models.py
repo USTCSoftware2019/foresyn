@@ -5,8 +5,8 @@ from django.db import models
 class Regulation(models.Model):
     bNum = models.CharField(max_length=15, unique=True)
     gene = models.CharField(max_length=15, unique=True)
-    rule = models.CharField(max_length=127)
-    reference = models.CharField(max_length=127)
+    rule = models.CharField(max_length=127, null=True)
+    reference = models.CharField(max_length=127, null=True)
 
     def __str__(self):
-        return self.bNum
+        return self.gene
