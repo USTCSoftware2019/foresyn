@@ -84,7 +84,11 @@
         <form method="post" action="{% url 'data_wrapper:add_reactions' %}">
           {% csrf_token %}
           <div class="input-group mb-3">
-            <input type="number" name="model_pk" class="form-control" placeholder="model_pk" aria-label="model_pk" aria-describedby="submit-button">
+            <select class="form-control">
+                {% for user_model in user_models %}
+                <option value="{{ user_model.id }}">{{ user_model.name }}</option>
+                {% endfor %}
+            </select>
             <input type="hidden" name="reaction_pk" value="{{ reaction.id }}">
             <div class="input-group-append">
               <button class="btn btn-outline-light text-hover-green" type="submit" id="submit-button">add to your model</button>

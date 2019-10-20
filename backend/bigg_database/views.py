@@ -18,6 +18,8 @@ from .common import TopKHeap
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
                      Reaction, ReactionGene, ReactionMetabolite)
 
+from cobra_wrapper.models import CobraModel
+
 
 class ModelDetailView(DetailView):
     model = Model
@@ -32,6 +34,14 @@ class MetaboliteDetailView(DetailView):
 class ReactionDetailView(DetailView):
     model = Reaction
     context_object_name = 'reaction'
+    
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        if self.request.user.is_authenticated:
+            context['user_models'] = self.request.user.cobramodel_set.all()
+
+        return context
 
 
 class GeneDetailView(DetailView):
