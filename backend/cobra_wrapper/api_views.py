@@ -5,12 +5,12 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 import cobra
 
-from .models import CobraModel, CobraFba, CobraFva
+from . import models
 
 
 class CobraModelDetailJsonView(SingleObjectMixin, View):
     def get_object(self, queryset=None):
-        return get_object_or_404(CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
+        return get_object_or_404(models.CobraModel, owner=self.request.user, pk=self.kwargs['pk'])
 
     def get(self, request, pk):
         self.kwargs['pk'] = pk
@@ -23,7 +23,7 @@ class CobraComputationDetailJsonView(SingleObjectMixin, View):
     backref_field = None
 
     def get_object(self, queryset=None):
-        self.model_object = get_object_or_404(CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
+        self.model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return get_object_or_404(getattr(self.model_object, self.backref_field).all(), pk=self.kwargs['pk'])
 
     def get(self, request, *args, **kwargs):
@@ -37,10 +37,15 @@ class CobraComputationDetailJsonView(SingleObjectMixin, View):
 
 
 class CobraFbaDetailJsonView(CobraComputationDetailJsonView):
-    model_class = CobraFba
+    model_class = models.CobraFba
     backref_field = 'fba_list'
 
 
+class CobraRgeFbaDetailJsonView(CobraComputationDetailJsonView):
+    model_class = models.CobraRgeFba
+    backref_field = 'rgefba_list'
+
+
 class CobraFvaDetailJsonView(CobraComputationDetailJsonView):
-    model_class = CobraFva
+    model_class = models.CobraFva
     backref_field = 'fva_list'

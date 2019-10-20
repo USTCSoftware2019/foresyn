@@ -79,6 +79,27 @@ def cobra_fba(pk, model_sbml, deleted_genes):
 
 
 @app.task
+def cobra_rge_fba(pk, model_sbml, deleted_genes):
+    cobra_model = load_sbml(model_sbml)
+    if len(deleted_genes) > 0:
+        checking_result = check_cobra_model_component_available(cobra_model, 'genes', deleted_genes)
+        if checking_result is not None:
+            app.send_task(**get_result_kwargs('rge_fba', pk, checking_result, is_error=True))
+            return
+        cobra.manipulation.delete_model_genes(cobra_model, deleted_genes, cumulative_deletions=True)
+    try:
+        result_object = cobra_model.optimize()
+    except Exception as error:
+        error_result = report_cobra_computation_error(error)
+        app.send_task(**get_result_kwargs('rge_fba', pk, error_result, is_error=True))
+        return
+    result = {'shadow_prices': result_object.shadow_prices.to_dict()}
+    result_kwargs = get_result_kwargs('rge_fba', pk, result)
+    # TODO(myl7): Connect to another server to continue
+    app.send_task(**result_kwargs)
+
+
+@app.task
 def cobra_fva(pk, model_sbml, reaction_list, loopless, fraction_of_optimum, pfba_factor, deleted_genes):
     cobra_model = load_sbml(model_sbml)
     checking_result = check_cobra_model_component_available(cobra_model, 'reactions', reaction_list)
