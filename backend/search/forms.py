@@ -107,6 +107,9 @@ class BiggOptimizedSearchForm(ModifiedModelSearchForm):
         data = []
         for ins in model.objects.all():
             score = fuzz.partial_ratio(ins.bigg_id, keyword)
+            if hasattr(ins, 'name'):
+                score_name = fuzz.partial_ratio(ins.name, keyword)
+                score = max(score, score_name)
             if score >= self.Score_Threshold:
                 heapq.heappush(data, (score, ins.id, ins))
         data_len = len(data)

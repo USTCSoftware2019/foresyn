@@ -9,13 +9,17 @@ task_routes = {
         'queue': 'cobra_feeds',
         'routing_key': 'cobra_feed.fba',
     },
-    'cobra_computation.tasks.cobra_fva': {
-        'queue': 'cobra_feeds',
-        'routing_key': 'cobra_feed.fva',
-    },
     'cobra_wrapper.tasks.cobra_fba_save': {
         'queue': 'cobra_results',
         'routing_key': 'cobra_result.fba',
+    },
+    'cobra_computation.tasks.cobra_rge_fba': {
+        'queue': 'cobra_feeds',
+        'routing_key': 'cobra_feed.rge_fba',
+    },
+    'cobra_computation.tasks.cobra_fva': {
+        'queue': 'cobra_feeds',
+        'routing_key': 'cobra_feed.fva',
     },
     'cobra_wrapper.tasks.cobra_fva_save': {
         'queue': 'cobra_results',

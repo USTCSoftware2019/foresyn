@@ -63,6 +63,27 @@ class CobraFba(models.Model):
         return reverse('cobra_wrapper:cobrafba_detail', kwargs={'model_pk': self.model.pk, 'pk': self.pk})
 
 
+class CobraRgeFba(models.Model):
+    desc = models.CharField(max_length=600, blank=True)
+    deleted_genes = models.TextField(blank=True)
+
+    model = models.ForeignKey(CobraModel, on_delete=models.CASCADE, related_name='rgefba_list')
+    start_time = models.DateTimeField(auto_now_add=True)
+    task_id = models.UUIDField(null=True, blank=True, default=None)
+    result = models.TextField(blank=True, validators=[validate_json_str_or_blank_str])
+    ok = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'rge_fba'
+        ordering = ['-start_time']
+
+    def __str__(self):
+        return '{}[fba]'.format(self.desc)
+
+    def get_absolute_url(self):
+        return reverse('cobra_wrapper:cobrargefba_detail', kwargs={'model_pk': self.model.pk, 'pk': self.pk})
+
+
 class CobraFva(models.Model):
     desc = models.CharField(max_length=600, blank=True)
     reaction_list = models.TextField()

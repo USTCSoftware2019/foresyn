@@ -2,15 +2,15 @@
 {% load static %}
 {% load cobra_wrapper_tags %}
 
-{% block title %}FBA Result of {{ object }}{% endblock title %}
+{% block title %}RGE FBA Result of {{ object }}{% endblock title %}
 
 {% block content %}
     <script src="{% static "javascript/jquery.min.js" %}"></script>
 
     <style>
-        #status {
-            margin-left: 1em;
-        }
+    #status {
+        margin-left: 1em;
+    }
     </style>
     <div class="container">
         <div class="row my-3">
@@ -36,21 +36,7 @@
 
         <div class="row">
             <div class="col">
-                <p><b>Coenzyme</b></p>
-                <table class="table table-bordered table-hover" id="coenzyme_table">
-                    <thead class="text-center table-active">
-                    <tr>
-                        <th>Name</th>
-                        <th>Fluxes Value</th>
-                        <th>Previous Fluxes Value</th>
-                    </tr>
-                    </thead>
-                    <tbody id="coenzyme_body" class="text-center">
-
-                    </tbody>
-                </table>
-                <div class="mt-2"></div>
-                <table class="table table-bordered table-hover d-none" id="res_table">
+                <table class="table table-bordered table-hover" id="res_table">
                     <thead class="text-center table-active">
                     <tr>
                         <th>Name</th>
@@ -58,25 +44,15 @@
                         <th>Previous Fluxes Value</th>
                         <th>Reduced Costs</th>
                         <th>Previous Reduced Costs</th>
+                        <th>Shadow Price</th>
+                        <th>Previous Shadow Price</th>
                     </tr>
                     </thead>
                     <tbody id="res_body" class="text-center">
 
                     </tbody>
                 </table>
-                <div class="mt-2"></div>
-                <table class="table table-bordered table-hover d-none" id="shadow_table">
-                    <thead class="text-center table-active">
-                    <tr>
-                        <th>Name</th>
-                        <th>Shadow Prices</th>
-                        <th>Previous Shadow Prices</th>
-                    </tr>
-                    </thead>
-                    <tbody id="shadow_body" class="text-center">
 
-                    </tbody>
-                </table>
             </div>
         </div>
 
@@ -85,17 +61,17 @@
                 <button class="btn btn-info" id="more">More</button>
             </div>
             <div class="col-4 text-center">
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#fba_delete_model">
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#rge_fba_delete_model">
                     Delete
                 </button>
             </div>
             <div class="col-4 text-center">
-                <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}" class="btn btn-primary">Return</a>
+                <a href="{% url 'cobra_wrapper:cobrargefba_list' model_pk %}" class="btn btn-primary">Return</a>
             </div>
         </div>
     </div>
     {#    <!-- Modal -->#}
-    <div class="modal fade" id="fba_delete_model" tabindex="-1" role="dialog" aria-labelledby="fba_delete_model"
+    <div class="modal fade" id="rge_fba_delete_model" tabindex="-1" role="dialog" aria-labelledby="rge_fba_delete_model"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -106,11 +82,9 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form action="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}" method="post">
-                        {% csrf_token %}
-                        <p>Are you sure to delete this FBA?</p>
-                        <input type="submit" class="btn btn-danger" value="Delete">
-                    </form>
+                    <p>Are you sure to delete this RGE FBA?</p>
+                    <a href="{% url 'cobra_wrapper:cobrargefba_confirm_delete' model_pk object.pk %}"
+                       class="btn btn-danger">Delete</a>
                 </div>
             </div>
         </div>
@@ -133,11 +107,6 @@
             let reduced_costs_data_pre = [];
             let shadow_prices_data = [];
             let shadow_prices_data_pre = [];
-
-
-            let coenzyme_labels = [];
-            let coenzyme_data = [];
-            let coenzyme_data_pre = [];
 
             let url = window.location.href;
             url += 'json';
@@ -187,23 +156,7 @@
                         }
                     }
 
-                    console.log(data_now);
-                    len = data_now.coenzyme.length;
-                    for (let i = 0; i < len; i++) {
-                        coenzyme_labels.push(data_now.coenzyme[i].name);
-                        coenzyme_data.push(data_now.coenzyme[i].value);
-                    }
-
-                    if (res_data.length === 2) {
-                        let data_pre = res_data[1];
-                        for (let i = 0; i < len; i++) {
-                            coenzyme_data_pre.push(data_pre.coenzyme[i].value);
-                        }
-                    }
-
-                    loadCoenzyme(len);
-
-                    // load(Math.floor(30));
+                    load(Math.floor(30));
 
                 },
                 error: function (err) {
@@ -219,27 +172,6 @@
                 $('#res_table').css('display', 'none');
             }
 
-            function loadCoenzyme(num) {
-                let coenzyme_body = $('#coenzyme_body');
-                let str = '';
-                if (res_data.length === 2) {
-                    for (let i = 0; i < num; i++) {
-                        str += '<tr><td class="table-active">' + coenzyme_labels[i] + '</td>' +
-                            '<td class="' + Num2Class(coenzyme_data[i]) + '">' + coenzyme_data[i].toFixed(4) + '</td>' +
-                            '<td class="' + Num2Class(coenzyme_data_pre[i]) + '">' + coenzyme_data_pre[i].toFixed(4) + '</td>' +
-                            '</tr>';
-                    }
-                } else {
-                    for (let i = 0; i < num; i++) {
-                        str += '<tr><td class="table-active">' + coenzyme_labels[i] + '</td>' +
-                            '<td class="' + Num2Class(coenzyme_data[i]) + '">' + coenzyme_data[i].toFixed(4) + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '</tr>';
-                    }
-                }
-                coenzyme_body.html(str);
-            }
-
             function load(num) {
                 let res_body = $('#res_body');
                 let str = '';
@@ -250,6 +182,8 @@
                             '<td class="' + Num2Class(flux_data_pre[i]) + '">' + flux_data_pre[i].toFixed(4) + '</td>' +
                             '<td class="' + Num2Class(reduced_costs_data[i]) + '">' + reduced_costs_data[i].toFixed(4) + '</td>' +
                             '<td class="' + Num2Class(reduced_costs_data_pre[i]) + '">' + reduced_costs_data_pre[i].toFixed(4) + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '</tr>';
                     }
                 } else {
@@ -259,10 +193,12 @@
                             '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '<td class="' + Num2Class(reduced_costs_data[i]) + '">' + reduced_costs_data[i].toFixed(4) + '</td>' +
                             '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '</tr>';
                     }
                 }
-                $('#res_table').removeClass('d-none');
+
                 res_body.html(str);
             }
 
@@ -292,11 +228,15 @@
 
             function loadShadowPrices() {
                 let len = shadow_labels.length;
-                let res_body = $('#shadow_body');
-                let str = '';
+                let res_body = $('#res_body');
+                let str = res_body.html();
                 if (res_data.length === 2) {
                     for (let i = 0; i < len; i++) {
                         str += '<tr><td class="table-active">' + shadow_labels[i] + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '<td class="' + Num2Class(shadow_prices_data[i]) + '">' + shadow_prices_data[i].toFixed(4) + '</td>' +
                             '<td class="' + Num2Class(shadow_prices_data_pre[i]) + '">' + shadow_prices_data_pre[i].toFixed(4) + '</td>' +
                             '</tr>';
@@ -304,12 +244,15 @@
                 } else {
                     for (let i = 0; i < len; i++) {
                         str += '<tr><td class="table-active">' + shadow_labels[i] + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '<td class="' + Num2Class(shadow_prices_data[i]) + '">' + shadow_prices_data[i].toFixed(4) + '</td>' +
                             '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
                             '</tr>';
                     }
                 }
-                $('#shadow_table').removeClass('d-none');
                 res_body.html(str);
             }
 

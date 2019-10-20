@@ -47,16 +47,17 @@ Model: {{ model.bigg_id }}
           </button>
         </div>
         <div class="modal-body">
-          <form method="post" action="{% url 'data_wrapper:add_models' %}">
+          <form id="addModelForm" method="post" action="{% url 'data_wrapper:add_models' %}">
             {% csrf_token %}
             <div class="input-group mb-3">
               <input type="text" name="name" class="form-control">
+              <input type="hidden" name="model_bigg_id" value="{{ model.bigg_id }}" class="form-control">
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-outline-light text-hover-green">Add</button>
+          <button type="submit" class="btn btn-outline-light text-hover-green" form="addModelForm">Add</button>
         </div>
       </div>
     </div>
