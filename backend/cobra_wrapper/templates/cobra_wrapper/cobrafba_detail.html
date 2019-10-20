@@ -8,9 +8,9 @@
     <script src="{% static "javascript/jquery.min.js" %}"></script>
 
     <style>
-    #status {
-        margin-left: 1em;
-    }
+        #status {
+            margin-left: 1em;
+        }
     </style>
     <div class="container">
         <div class="row my-3">
@@ -92,9 +92,11 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <p>Are you sure to delete this FBA?</p>
-                    <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}"
-                       class="btn btn-danger">Delete</a>
+                    <form action="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}" method="post">
+                        {% csrf_token %}
+                        <p>Are you sure to delete this FBA?</p>
+                        <input type="submit" class="btn btn-danger" value="Delete">
+                    </form>
                 </div>
             </div>
         </div>
