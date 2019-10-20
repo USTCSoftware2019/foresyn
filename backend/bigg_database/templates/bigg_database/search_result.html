@@ -2,6 +2,8 @@
 {% load render_list_tag %}
 {% load calc_index_display_tag %}
 {% load render_link_tag %}
+{% load favorite_tag %}
+{% load static %}
 
 {% block title %}
 Search result - {{ query }}
@@ -58,7 +60,8 @@ Search result - {{ query }}
                 {{ search_result.bigg_id }}
               </h5>
             </a>
-            <i class="fa fa-star-o mr-2"></i>
+            {% favorite_button search_result %}
+{#            <i class="fa fa-star-o mr-2"></i>#}
           </div>
           <p class="mb-1">
             {% ifequal search_model 'Model' %}
@@ -79,4 +82,5 @@ Search result - {{ query }}
   </div>
 </div>
 
+<script src="{% static "javascript/favorite_button.js" %}"></script>
 {% endblock %}

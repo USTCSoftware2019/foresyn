@@ -1,6 +1,7 @@
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -14,8 +15,9 @@ from django.views.generic import View, CreateView
 from .forms import UserSignUpForm
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
-from .models import PackModel, PackReaction, PackGene, PackMetabolite, PackComputationalModel
-
+# from .models import PackModel, PackReaction, PackGene, PackMetabolite, PackComputationalModel
+from .models import Favorite
+from django.apps import apps
 
 class UserSignUp(CreateView):
     template_name = 'accounts/signup.html'
@@ -96,29 +98,31 @@ class UserProfile(LoginRequiredMixin, View):
 
 @method_decorator(csrf_exempt, name='dispatch')  # temporary workaround
 class UserPack(LoginRequiredMixin, View):
-    def get_obj(self, user, obj_type, pk):
-        if obj_type == "model":
-            return PackModel.objects.filter(user=user, model=pk)
-        elif obj_type == "usermodel":
-            return PackComputationalModel.objects.filter(user=user, model=pk)  # FIXME
-        elif obj_type == "reaction":
-            return PackReaction.objects.filter(user=user, reaction=pk)
-        elif obj_type == "gene":
-            return PackGene.objects.filter(user=user, gene=pk)
-        elif obj_type == "metabolite":
-            return PackMetabolite.objects.filter(user=user, metabolite=pk)
-        elif obj_type == "biobrick":
-            raise NotImplementedError()
-
+    pass
+    # def get_obj(self, user, obj_type, pk):
+    #     if obj_type == "model":
+    #         return PackModel.objects.filter(user=user, model=pk)
+    #     elif obj_type == "usermodel":
+    #         return PackComputationalModel.objects.filter(user=user, model=pk)  # FIXME
+    #     elif obj_type == "reaction":
+    #         return PackReaction.objects.filter(user=user, reaction=pk)
+    #     elif obj_type == "gene":
+    #         return PackGene.objects.filter(user=user, gene=pk)
+    #     elif obj_type == "metabolite":
+    #         return PackMetabolite.objects.filter(user=user, metabolite=pk)
+    #     elif obj_type == "biobrick":
+    #         raise NotImplementedError()
+    #
     def get(self, request):
         obj_type = request.POST.get("type")
 
         counts = {
-            "model": PackModel.objects.filter(user=request.user).count(),
-            "usermodel": PackComputationalModel.objects.filter(user=request.user).count(),
-            "reaction": PackReaction.objects.filter(user=request.user).count(),
-            "gene": PackGene.objects.filter(user=request.user).count(),
-            "metabolite": PackMetabolite.objects.filter(user=request.user).count()
+            "model": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='bigg_database', model='model')).count(),
+            "usermodel": 1,
+            "reaction": 1,
+            "gene": 1,
+            "metabolite": 1
         }
 
         if not obj_type:
@@ -126,17 +130,16 @@ class UserPack(LoginRequiredMixin, View):
 
         queryset = None
         if obj_type == "model":
-            queryset = PackModel.objects.filter(user=request.user)
-        elif obj_type == "usermodel":
-            queryset = PackComputationalModel.objects.filter(user=request.user)
-        elif obj_type == "reaction":
-            queryset = PackReaction.objects.filter(user=request.user)
-        elif obj_type == "gene":
-            queryset = PackGene.objects.filter(user=request.user)
-        elif obj_type == "metabolite":
-            queryset = PackMetabolite.objects.filter(user=request.user)
-        elif obj_type == "biobrick":
-            raise NotImplementedError()
+            queryset = Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='bigg_database', model='model'))
+        # elif obj_type == "usermodel":
+        #     queryset = PackComputationalModel.objects.filter(user=request.user)
+        # elif obj_type == "reaction":
+        #     queryset = PackReaction.objects.filter(user=request.user)
+        # elif obj_type == "gene":
+        #     queryset = PackGene.objects.filter(user=request.user)
+        # elif obj_type == "metabolite":
+        #     queryset = PackMetabolite.objects.filter(user=request.user)
 
         return render(request, "accounts/pack.html", {
             "type": obj_type,
@@ -144,36 +147,29 @@ class UserPack(LoginRequiredMixin, View):
             "this_cnt": queryset.count(),
             "queryset": queryset
         })
-
+    # this favorite implementation uses django-favorite
     def post(self, request):
-        obj_type = request.POST.get("type")
-        action = request.POST.get("action")
-        pk = request.POST.get("pk")
-        obj = self.get_obj(request.user, obj_type, pk)
-        if action == "query":
-            if not obj:
-                return JsonResponse({"result": 0})
-            else:
-                return JsonResponse({"result": 1})
-            pass
-        elif action == "add":
-            if not obj:
-                if obj_type == "model":
-                    return PackModel.objects.create(user=request.user, model=pk)
-                elif obj_type == "usermodel":
-                    return PackComputationalModel.objects.create(user=request.user, model=pk)  # FIXME
-                elif obj_type == "reaction":
-                    return PackReaction.objects.filter(user=request.user, reaction=pk)
-                elif obj_type == "gene":
-                    return PackGene.objects.filter(user=request.user, gene=pk)
-                elif obj_type == "metabolite":
-                    return PackMetabolite.objects.filter(user=request.user, metabolite=pk)
-                elif obj_type == "biobrick":
-                    raise NotImplementedError()
-        elif action == "delete":
-            if obj:
-                obj.delete()
-        else:
-            return HttpResponse("error")
+        user = request.user
+        target_model = apps.get_model(app_label=request.POST['target_app'],
+                                      model_name=request.POST['target_name'])
+        target_content_type = ContentType.objects.get_for_model(target_model)
+        target_object_id = request.POST['target_object_id']
 
-        return HttpResponse("ok")
+        # delete it if it's already a favorite
+        if user.favorite_set.filter(target_content_type=target_content_type,
+                                    target_object_id=target_object_id):
+            user.favorite_set.get(target_content_type=target_content_type,
+                                  target_object_id=target_object_id).delete()
+            status = 'deleted'
+
+        # otherwise, create it
+        else:
+            user.favorite_set.create(target_content_type=target_content_type,
+                                     target_object_id=target_object_id)
+            status = 'added'
+
+        response = {'status': status,
+                    'fav_count': Favorite.objects.filter(target_content_type=target_content_type,
+                                                         target_object_id=target_object_id).count()}
+
+        return JsonResponse(response)
