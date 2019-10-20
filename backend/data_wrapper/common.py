@@ -1,7 +1,5 @@
-# FIXME(myl7): Remove metabolites and reactions
-# from cobra_wrapper.models import CobraMetabolite, CobraReaction
-from bigg_database.models import Metabolite as DataMetabolite, Reaction as DataReaction
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from bigg_database.models import Metabolite as DataMetabolite
+from django.core.exceptions import ObjectDoesNotExist
 import cobra
 
 
