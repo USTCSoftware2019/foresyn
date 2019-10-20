@@ -36,47 +36,70 @@
 
         <div class="row">
             <div class="col">
-                <p><b>Coenzyme</b></p>
-                <table class="table table-bordered table-hover" id="coenzyme_table">
-                    <thead class="text-center table-active">
-                    <tr>
-                        <th>Name</th>
-                        <th>Fluxes Value</th>
-                        <th>Previous Fluxes Value</th>
-                    </tr>
-                    </thead>
-                    <tbody id="coenzyme_body" class="text-center">
+                <div id="coenzyme_table">
+                    <h2 class="text-center my-5">Coenzymes</h2>
+                    <table class="table table-bordered table-hover">
+                        <thead class="text-center table-active">
+                        <tr>
+                            <th>Name</th>
+                            <th>Fluxes Value</th>
+                            <th>Previous Fluxes Value</th>
+                        </tr>
+                        </thead>
+                        <tbody id="coenzyme_body" class="text-center">
 
-                    </tbody>
-                </table>
-                <div class="mt-2"></div>
-                <table class="table table-bordered table-hover d-none" id="res_table">
-                    <thead class="text-center table-active">
-                    <tr>
-                        <th>Name</th>
-                        <th>Fluxes Value</th>
-                        <th>Previous Fluxes Value</th>
-                        <th>Reduced Costs</th>
-                        <th>Previous Reduced Costs</th>
-                    </tr>
-                    </thead>
-                    <tbody id="res_body" class="text-center">
+                        </tbody>
+                    </table>
+                    <div class="text-center">
+                        <button class="btn btn-primary" id="show_coenzyme" style="width:100px;">
+                            More
+                        </button>
+                    </div>
+                </div>
 
-                    </tbody>
-                </table>
-                <div class="mt-2"></div>
-                <table class="table table-bordered table-hover d-none" id="shadow_table">
-                    <thead class="text-center table-active">
-                    <tr>
-                        <th>Name</th>
-                        <th>Shadow Prices</th>
-                        <th>Previous Shadow Prices</th>
-                    </tr>
-                    </thead>
-                    <tbody id="shadow_body" class="text-center">
+                <div id="res_table" class="d-none">
+                    <h2 class="text-center my-5">Fluxes & Reduced Costs</h2>
+                    <table class="table table-bordered table-hover">
+                        <thead class="text-center table-active">
+                        <tr>
+                            <th>Name</th>
+                            <th>Fluxes Value</th>
+                            <th>Previous Fluxes Value</th>
+                            <th>Reduced Costs</th>
+                            <th>Previous Reduced Costs</th>
+                        </tr>
+                        </thead>
+                        <tbody id="res_body" class="text-center">
 
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                    <div class="text-center">
+                        <button class="btn btn-primary" id="show_fluxes" style="width:100px;">
+                            More
+                        </button>
+                    </div>
+                </div>
+
+                <div id="shadow_table" class="d-none">
+                    <h2 class="text-center my-5">Shadow Prices</h2>
+                    <table class="table table-bordered table-hover">
+                        <thead class="text-center table-active">
+                        <tr>
+                            <th>Name</th>
+                            <th>Shadow Prices</th>
+                            <th>Previous Shadow Prices</th>
+                        </tr>
+                        </thead>
+                        <tbody id="shadow_body" class="text-center">
+
+                        </tbody>
+                    </table>
+                    <div class="text-center">
+                        <button class="btn btn-primary" id="show_shadow" style="width:100px;">
+                            More
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -219,7 +242,7 @@
                 $('#res_table').css('display', 'none');
             }
 
-            function loadCoenzyme(num) {
+            function loadCoenzyme(num = coenzyme_labels.length) {
                 let coenzyme_body = $('#coenzyme_body');
                 let str = '';
                 if (res_data.length === 2) {
@@ -240,7 +263,7 @@
                 coenzyme_body.html(str);
             }
 
-            function load(num) {
+            function load(num = labels.length) {
                 let res_body = $('#res_body');
                 let str = '';
                 if (res_data.length === 2) {
@@ -290,7 +313,7 @@
                 loadShadowPrices();
             }
 
-            function loadShadowPrices() {
+            function loadShadowPrices(num = shadow_labels.length) {
                 let len = shadow_labels.length;
                 let res_body = $('#shadow_body');
                 let str = '';
@@ -314,6 +337,21 @@
             }
 
             $('#more').on('click', loadAll);
+
+            $('#show_coenzyme').on('click', function () {
+                loadCoenzyme(coenzyme_labels.length);
+                $(this).addClass('btn-secondary');
+            });
+
+            $('#show_fluxes').on('click', function () {
+                load(labels.length);
+                $(this).addClass('btn-secondary');
+            });
+
+            $('#show_shadow').on('click', function () {
+                loadShadowPrices(shadow_labels.length);
+                $(this).addClass('btn-secondary');
+            });
         });
     </script>
 
