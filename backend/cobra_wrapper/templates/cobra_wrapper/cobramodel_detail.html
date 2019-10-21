@@ -11,8 +11,11 @@
                      style="width: 3px; height: {{ change_line_len }}px; background-color:#20c997"></div>
                 <div class="bar-btn-group col-1">
                     {% for change in latest_changes %}
-                        <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
-                                data-content="{{ change }}"></button>
+                        {# <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="{{ change }}"></button> #}
+                        <form method="post" action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
+                        {% csrf_token %}
+                        <input type="submit" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="{{ change }}">
+                        </form>
                     {% endfor %}
                 </div>
                 <script>
@@ -27,11 +30,6 @@
                                 {{ change.get_type_name }}<br>
                                 {{ change.created_time.date|date:"Y-m-d" }}<br>
                                 {{ change.created_time.time|date:"H:i:s" }}<br>
-                                <form method="post"
-                                      action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
-                                    {% csrf_token %}
-                                    <input type="submit" class="btn btn-info" value="Revert">
-                                </form>
                             </div>
                         {% endfor %}
                     </div>
