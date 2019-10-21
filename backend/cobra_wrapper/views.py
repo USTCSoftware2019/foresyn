@@ -225,6 +225,11 @@ class CobraRgeFbaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView)
         model = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return model.rgefba_list.all()
 
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['form'] = forms.CobraRgeFbaForm()
+        return context_data
+
 
 class CobraRgeFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView):
     def get_object(self, queryset=None):
@@ -274,6 +279,11 @@ class CobraFvaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView):
     def get_queryset(self):
         model = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return model.fva_list.all()
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['form'] = forms.CobraFvaForm()
+        return context_data
 
 
 class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView):
