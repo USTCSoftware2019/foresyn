@@ -18,6 +18,11 @@ class CobraModelListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return models.CobraModel.objects.filter(owner=self.request.user)
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context_data = super().get_context_data(object_list=object_list, **kwargs)
+        context_data['form'] = forms.CobraModelCreateForm()
+        return context_data
+
 
 class CobraModelDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset=None):
@@ -55,7 +60,8 @@ class CobraModelMapView(LoginRequiredMixin, TemplateView):
 
 
 class CobraModelCreateView(LoginRequiredMixin, FormView):
-    template_name = 'cobra_wrapper/cobramodel_create_form.html'
+    http_method_names = ['post']
+    template_name = 'cobra_wrapper/cobramodel_list.html'
     form_class = forms.CobraModelCreateForm
 
     def form_valid(self, form: forms.CobraModelCreateForm):
@@ -99,10 +105,12 @@ class CobraModelUpdateView(LoginRequiredMixin, FormView):
         if self.form_class is None:
             return None
         else:
-            return super().get_form()
+            form = super().get_form()
+            self.object = self.get_object()
+            form.model_object = self.object
+            return form
 
     def form_valid(self, form):
-        self.object = self.get_object()
         form.save(self.object)
         return super().form_valid(form)
 
@@ -146,6 +154,11 @@ class CobraFbaListView(LoginRequiredMixin, TemplateAddModelPkMixin, ListView):
         model = get_object_or_404(models.CobraModel, pk=self.kwargs['model_pk'], owner=self.request.user)
         return model.fba_list.all()
 
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['form'] = forms.CobraFbaForm()
+        return context_data
+
 
 class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView):
     def get_object(self, queryset=None):
@@ -154,7 +167,8 @@ class CobraFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView
 
 
 class CobraFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, CreateView):
-    template_name_suffix = '_create_form'
+    http_method_names = ['post']
+    template_name = 'cobra_wrapper/cobrafba_list.html'
     model = models.CobraFba
     form_class = forms.CobraFbaForm
 
@@ -203,7 +217,8 @@ class CobraRgeFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailV
 
 
 class CobraRgeFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, CreateView):
-    template_name_suffix = '_create_form'
+    http_method_names = ['post']
+    template_name = 'cobra_wrapper/cobrargefba_list.html'
     model = models.CobraRgeFba
     form_class = forms.CobraRgeFbaForm
 
@@ -252,7 +267,8 @@ class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView
 
 
 class CobraFvaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, CreateView):
-    template_name_suffix = '_create_form'
+    http_method_names = ['post']
+    template_name = 'cobra_wrapper/cobrafva_list.html'
     model = models.CobraFva
     form_class = forms.CobraFvaForm
 
