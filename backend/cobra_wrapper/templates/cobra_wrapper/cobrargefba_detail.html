@@ -6,11 +6,14 @@
 
 {% block content %}
     <script src="{% static "javascript/jquery.min.js" %}"></script>
+    <script src="{% static "javascript/popper.min.js" %}"></script>
+    <script src="{% static "javascript/bootstrap.min.js" %}"></script>
+
 
     <style>
-    #status {
-        margin-left: 1em;
-    }
+        .status {
+            margin-left: 1em;
+        }
     </style>
     <div class="container">
         <div class="row my-3">
@@ -29,39 +32,142 @@
         </div>
 
         <div class="row my-2">
-            <div class="alert alert-info" role="alert" id="status">
-                Calculating Status: {{ object|check_result_status }}
+            <div class="alert alert-info status" role="alert">
+                Calculating Status: {{ object| check_result_status }}
+            </div>
+            <div class="alert alert-success status" role="alert" id="obj_value">
+                Objective Values: {{ object.objective_value }}
             </div>
         </div>
 
-        <div class="row">
-            <div class="col">
-                <table class="table table-bordered table-hover" id="res_table">
-                    <thead class="text-center table-active">
-                    <tr>
-                        <th>Name</th>
-                        <th>Fluxes Value</th>
-                        <th>Previous Fluxes Value</th>
-                        <th>Reduced Costs</th>
-                        <th>Previous Reduced Costs</th>
-                        <th>Shadow Price</th>
-                        <th>Previous Shadow Price</th>
-                    </tr>
-                    </thead>
-                    <tbody id="res_body" class="text-center">
 
-                    </tbody>
-                </table>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+                   aria-selected="true">Coenzymes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                   aria-controls="profile"
+                   aria-selected="false">Fluxes of Reaction</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab"
+                   aria-controls="contact"
+                   aria-selected="false">Metabolites</a>
+            </li>
+        </ul>
 
+
+        <div class="tab-content" id="myTabContent">
+            <!-- 关键酶 Coenzymes -->
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="mt-4"></div>
+                <div id="coenzyme_table">
+                    <table class="table  table-hover table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Flux Value</th>
+                            <th>Previous Flux Value</th>
+                        </tr>
+                        </thead>
+                        <tbody id="coenzyme_body">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row my-5">
+                    <button class="btn btn-primary mr-5 ml-3" id="coen-ascend" data-toggle="tooltip"
+                            data-placement="top"
+                            title="the genes that you can try to overexpress" data-control="coenzyme">Ascending
+                    </button>
+                    <button class="btn btn-primary mr-5" id="coen-descend" data-toggle="tooltip" data-placement="top"
+                            title="the genes that you can try to reduce it's expression" data-control="coenzyme">
+                        Descending
+                    </button>
+                    <button class="btn btn-primary mr-5" id="coen-diff" data-toggle="tooltip" data-placement="top"
+                            title="the genes that you can knock out" data-control="coenzyme">Difference
+                    </button>
+                    <button class="btn btn-primary mr-5" id="coen-more" data-toggle="tooltip" data-placement="top"
+                            title="all the results" data-control="coenzyme">More
+                    </button>
+                </div>
+            </div>
+            <!-- 关键 Reaction  Fluxes-->
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="mt-4"></div>
+                <div id="res_table">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Flux Value</th>
+                            <th>Previous Flux Value</th>
+                        </tr>
+                        </thead>
+                        <tbody id="res_body">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row my-5">
+                    <button class="btn btn-primary mr-5 ml-3" id="res-ascend" data-toggle="tooltip" data-placement="top"
+                            title="the genes that you can try to overexpress" data-control="flux">Ascending
+                    </button>
+                    <button class="btn btn-primary mr-5" id="res-descend" data-toggle="tooltip" data-placement="top"
+                            title="the genes that you can try to reduce it's expression" data-control="flux">Descending
+                    </button>
+                    <button class="btn btn-primary mr-5" id="res-diff" data-toggle="tooltip" data-placement="top"
+                            title="the genes that you can knock out" data-control="flux">Difference
+                    </button>
+                    <button class="btn btn-primary mr-5" id="res-more" data-toggle="tooltip" data-placement="top"
+                            title="all the results" data-control="coenzyme">More
+                    </button>
+                </div>
+            </div>
+            <!-- 代谢物 shadow prices -->
+            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                <div class="mt-4"></div>
+                <div id="shadow_table">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Flux Value</th>
+                            <th>Previous Flux Value</th>
+                        </tr>
+                        </thead>
+                        <tbody id="shadow_body">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row my-5">
+                    <button class="btn btn-primary mr-5 ml-3" id="shadow-ascend" data-toggle="tooltip"
+                            data-placement="top"
+                            title="the genes that you can try to overexpress" data-control="shadow">Ascending
+                    </button>
+                    <button class="btn btn-primary mr-5" id="shadow-descend" data-toggle="tooltip" data-placement="top"
+                            title="the genes that you can try to reduce it's expression" data-control="shadow">
+                        Descending
+                    </button>
+                    <button class="btn btn-primary mr-5" id="shadow-diff" data-toggle="tooltip" data-placement="top"
+                            title="the genes that you can knock out" data-control="shadow">Difference
+                    </button>
+                    <button class="btn btn-primary mr-5" id="shadow-more" data-toggle="tooltip" data-placement="top"
+                            title="all the results" data-control="coenzyme">More
+                    </button>
+                </div>
             </div>
         </div>
 
         <div class="row my-3">
+{#            <div class="col-4 text-center">#}
+{#                <button class="btn btn-info" id="more">More</button>#}
+{#            </div>#}
             <div class="col-4 text-center">
-                <button class="btn btn-info" id="more">More</button>
-            </div>
-            <div class="col-4 text-center">
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#rge_fba_delete_model">
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#fba_delete_model">
                     Delete
                 </button>
             </div>
@@ -71,7 +177,7 @@
         </div>
     </div>
     {#    <!-- Modal -->#}
-    <div class="modal fade" id="rge_fba_delete_model" tabindex="-1" role="dialog" aria-labelledby="rge_fba_delete_model"
+    <div class="modal fade" id="fba_delete_model" tabindex="-1" role="dialog" aria-labelledby="fba_delete_model"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -82,17 +188,24 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <p>Are you sure to delete this RGE FBA?</p>
-                    <a href="{% url 'cobra_wrapper:cobrargefba_confirm_delete' model_pk object.pk %}"
-                       class="btn btn-danger">Delete</a>
+                    <form action="{% url 'cobra_wrapper:cobrargefba_confirm_delete' model_pk object.pk %}" method="post">
+                        {% csrf_token %}
+                        <p>Are you sure to delete this RFBA?</p>
+                        <input type="submit" class="btn btn-danger" value="Delete">
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+
         $(document).ready(function () {
-            // 获取后端返回的数据, 第零号位置是这次计算的结果， 其他位置是历史记录
+            // init tooltip
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+
             let res_data = [];
             const NOW = 0;
             const PREVIOUS = 1;
@@ -108,39 +221,43 @@
             let shadow_prices_data = [];
             let shadow_prices_data_pre = [];
 
+            let horizontalBarChartData = {};
+
+            let coenzyme_labels = [];
+            let coenzyme_data = [];
+            let coenzyme_data_pre = [];
+
+            let coenzyme_obj_arr = [];
+            let shadow_obj_arr = [];
+            let flux_obj_arr = [];
+
             let url = window.location.href;
             url += 'json';
 
             $.ajax({
                 // url: 'http://127.0.0.1:8080/api/data',
                 // api url
-                // url: 'http://127.0.0.1:8080/api/data',
                 url: url,
-                method: 'get',
+                // method: 'get',
                 success: function (res) {
+                    // console.log(res);
                     // res_data = JSON.parse(res);
-                    if (res.error) {
-                        handleError();
-                        return;
-                    }
                     res_data = res.results;
-                    console.log(res_data);
+                    $('#obj_value').html('Objective Values: ' + res_data[0].objective_value);
+                    // console.log(res_data);
                     let data_now = res_data[0];
                     let len = data_now.fluxes.length;
                     for (let i = 0; i < len; i++) {
                         labels.push(data_now.fluxes[i].name);
                         flux_data.push(data_now.fluxes[i].value);
                         reduced_costs_data.push(data_now.reduced_costs[i].value);
-                        // shadow_prices_data.push(data_now.shadow_prices[i].value);
                     }
-
                     if (res_data.length === 2) {
                         let data_pre = res_data[1];
                         for (let i = 0; i < len; i++) {
                             // labels.push(data_now.fluxes[i].name);
                             flux_data_pre.push(data_pre.fluxes[i].value);
                             reduced_costs_data_pre.push(data_pre.reduced_costs[i].value);
-                            // shadow_prices_data_pre.push(data_pre.shadow_prices[i].value);
                         }
                     }
                     len = data_now.shadow_prices.length;
@@ -155,8 +272,29 @@
                             shadow_prices_data_pre.push(data_pre.shadow_prices[i].value);
                         }
                     }
+                    console.log(data_now);
+                    len = data_now.coenzymes.length;
+                    for (let i = 0; i < len; i++) {
+                        coenzyme_labels.push(data_now.coenzymes[i].name);
+                        coenzyme_data.push(data_now.coenzymes[i].value);
+                    }
 
-                    load(Math.floor(30));
+                    if (res_data.length === 2) {
+                        let data_pre = res_data[1];
+                        for (let i = 0; i < len; i++) {
+                            coenzyme_data_pre.push(data_pre.coenzymes[i].value);
+                        }
+                    }
+
+                    fullCoenzymeArr();
+                    fullFluxesArr();
+                    fullShadowArr();
+
+                    loadCoenzyme(len);
+                    load(15 < labels.length ? 15 : labels.length);
+                    loadShadowPrices(15 < labels.length ? 15 : labels.length);
+
+                    // load(Math.floor(20));
 
                 },
                 error: function (err) {
@@ -165,99 +303,234 @@
                 }
             });
 
-            function handleError() {
-                $('#status').html('Calculating Status: Failed!')
-                    .removeClass('alert-info')
-                    .addClass('alert-danger');
-                $('#res_table').css('display', 'none');
+            function fullCoenzymeArr() {
+
+                for (let i = 0; i < coenzyme_labels.length; i++) {
+                    let obj = {};
+                    obj.lable = coenzyme_labels[i];
+                    obj.data = coenzyme_data[i];
+                    obj.data_pre = coenzyme_data_pre[i];
+                    coenzyme_obj_arr.push(obj);
+                }
+                console.log(coenzyme_obj_arr);
+            }
+
+            function fullFluxesArr() {
+
+                for (let i = 0; i < labels.length; i++) {
+                    let obj = {};
+                    obj.lable = labels[i];
+                    obj.data = flux_data[i];
+                    obj.data_pre = flux_data_pre[i];
+                    flux_obj_arr.push(obj);
+                }
+                console.log(flux_obj_arr);
+            }
+
+            function fullShadowArr() {
+
+                for (let i = 0; i < shadow_labels.length; i++) {
+                    let obj = {};
+                    obj.lable = shadow_labels[i];
+                    obj.data = shadow_prices_data[i];
+                    obj.data_pre = shadow_prices_data_pre[i];
+                    shadow_obj_arr.push(obj);
+                }
+                console.log(shadow_obj_arr);
+            }
+
+            function cmpAsc(obj1, obj2) {
+                let num1 = obj1.data - obj1.data_pre;
+                let num2 = obj2.data - obj2.data_pre;
+
+                if (num1 < num2) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+
+            function cmpDes(obj1, obj2) {
+                let num1 = obj1.data_pre - obj1.data;
+                let num2 = obj2.data_pre - obj2.data;
+
+                if (num1 < num2) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+
+            function cmpDiff(obj1, obj2) {
+                let num1 = Math.abs(obj1.data_pre);
+                let num2 = Math.abs(obj2.data_pre);
+                let num3 = Math.abs(obj1.data);
+                let num4 = Math.abs(obj2.data);
+                if (num1 < num2) {
+                    return -1;
+                } else if(num1 === num2) {
+                    if(num3 < num4){
+                        return 1;
+                    }else if(num3 > num4){
+                        return -1;
+                    }
+                } else {
+                    return 1;
+                }
+            }
+
+            function sortByAscending(objs) {
+                if (objs[0].data_pre === undefined) {
+                    return;
+                }
+                objs.sort(cmpAsc);
+            }
+
+            function sortByDescending(objs) {
+                if (objs[0].data_pre === undefined) {
+                    return;
+                }
+                objs.sort(cmpDes);
+            }
+
+            function sortByDifference(objs) {
+                if (objs[0].data_pre === undefined) {
+                    return;
+                }
+                objs.sort(cmpDiff);
+            }
+
+
+            function loadCoenzyme(num) {
+                let coenzyme_body = $('#coenzyme_body');
+                let str = '';
+                if (res_data.length === 2) {
+                    for (let i = 0; i < num; i++) {
+                        str += '<tr><td>' + coenzyme_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + coenzyme_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + coenzyme_obj_arr[i].data_pre.toFixed(8) + '</td>' +
+                            '</tr>';
+                    }
+                } else {
+                    for (let i = 0; i < num; i++) {
+                        str += '<tr><td>' + coenzyme_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + coenzyme_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + 'None' + '</td>' +
+                            '</tr>';
+                    }
+                }
+                coenzyme_body.html(str);
             }
 
             function load(num) {
                 let res_body = $('#res_body');
                 let str = '';
+
                 if (res_data.length === 2) {
                     for (let i = 0; i < num; i++) {
-                        str += '<tr><td class="table-active">' + labels[i] + '</td>' +
-                            '<td class="' + Num2Class(flux_data[i]) + '">' + flux_data[i].toFixed(4) + '</td>' +
-                            '<td class="' + Num2Class(flux_data_pre[i]) + '">' + flux_data_pre[i].toFixed(4) + '</td>' +
-                            '<td class="' + Num2Class(reduced_costs_data[i]) + '">' + reduced_costs_data[i].toFixed(4) + '</td>' +
-                            '<td class="' + Num2Class(reduced_costs_data_pre[i]) + '">' + reduced_costs_data_pre[i].toFixed(4) + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                        str += '<tr><td>' + flux_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + flux_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + flux_obj_arr[i].data_pre.toFixed(8) + '</td>' +
                             '</tr>';
                     }
                 } else {
                     for (let i = 0; i < num; i++) {
-                        str += '<tr><td class="table-active">' + labels[i] + '</td>' +
-                            '<td class="' + Num2Class(flux_data[i]) + '">' + flux_data[i].toFixed(4) + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + Num2Class(reduced_costs_data[i]) + '">' + reduced_costs_data[i].toFixed(4) + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '</tr>';
-                    }
-                }
-
-                res_body.html(str);
-            }
-
-            function Num2Class(num) {
-                let absnum = Math.abs(num);
-                let res = '';
-                if (absnum < 1) {
-                    res = COLOR[0];
-                } else if (absnum < 3) {
-                    res = COLOR[1];
-                } else if (absnum < 7) {
-                    res = COLOR[2];
-                } else if (absnum < 13) {
-                    res = COLOR[3];
-                } else if (absnum < 17) {
-                    res = COLOR[4];
-                } else {
-                    res = COLOR[5];
-                }
-                return res;
-            }
-
-            function loadAll() {
-                load(labels.length);
-                loadShadowPrices();
-            }
-
-            function loadShadowPrices() {
-                let len = shadow_labels.length;
-                let res_body = $('#res_body');
-                let str = res_body.html();
-                if (res_data.length === 2) {
-                    for (let i = 0; i < len; i++) {
-                        str += '<tr><td class="table-active">' + shadow_labels[i] + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + Num2Class(shadow_prices_data[i]) + '">' + shadow_prices_data[i].toFixed(4) + '</td>' +
-                            '<td class="' + Num2Class(shadow_prices_data_pre[i]) + '">' + shadow_prices_data_pre[i].toFixed(4) + '</td>' +
-                            '</tr>';
-                    }
-                } else {
-                    for (let i = 0; i < len; i++) {
-                        str += '<tr><td class="table-active">' + shadow_labels[i] + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
-                            '<td class="' + Num2Class(shadow_prices_data[i]) + '">' + shadow_prices_data[i].toFixed(4) + '</td>' +
-                            '<td class="' + 'table-active' + '">' + 'None' + '</td>' +
+                        str += '<tr><td>' + flux_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + flux_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + 'None' + '</td>' +
                             '</tr>';
                     }
                 }
                 res_body.html(str);
             }
 
-            $('#more').on('click', loadAll);
+            function loadShadowPrices(num = shadow_labels.length) {
+                // let len = shadow_labels.length;
+                let len = num;
+                let res_body = $('#shadow_body');
+                let str = '';
+                if (res_data.length === 2) {
+                    for (let i = 0; i < len; i++) {
+                        str += '<tr><td class="">' + shadow_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + shadow_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + shadow_obj_arr[i].data_pre.toFixed(8) + '</td>' +
+                            '</tr>';
+                    }
+                } else {
+                    for (let i = 0; i < len; i++) {
+                        str += '<tr><td>' + shadow_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + shadow_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + 'None' + '</td>' +
+                            '</tr>';
+                    }
+                }
+                res_body.html(str);
+            }
+
+
+            $('#coen-ascend').on('click', function () {
+                sortByAscending(coenzyme_obj_arr);
+                loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
+            });
+
+            $('#coen-descend').on('click', function () {
+                sortByDescending(coenzyme_obj_arr);
+                loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
+            });
+
+            $('#coen-diff').on('click', function () {
+                sortByDifference(coenzyme_obj_arr);
+                loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
+            });
+
+            $('#coen-more').on('click', function () {
+                loadCoenzyme(coenzyme_obj_arr.length);
+            });
+
+            $('#res-ascend').on('click', function () {
+                sortByAscending(flux_obj_arr);
+                load(Math.min(flux_obj_arr.length, 20));
+            });
+
+            $('#res-descend').on('click', function () {
+                sortByDescending(flux_obj_arr);
+                load(Math.min(flux_obj_arr.length, 20));
+            });
+
+            $('#res-diff').on('click', function () {
+                sortByDifference(flux_obj_arr);
+                load(Math.min(flux_obj_arr.length, 20));
+            });
+
+            $('#res-more').on('click', function () {
+                load(flux_obj_arr.length);
+            });
+
+            $('#shadow-ascend').on('click', function () {
+                sortByAscending(shadow_obj_arr);
+                loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
+            });
+
+            $('#shadow-descend').on('click', function () {
+                sortByDescending(shadow_obj_arr);
+                loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
+            });
+
+            $('#shadow-diff').on('click', function () {
+                sortByDifference(shadow_obj_arr);
+                loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
+            });
+
+            $('#shadow-more').on('click', function () {
+                loadShadowPrices(shadow_obj_arr.length);
+            });
+
+
+
+
+
         });
+
     </script>
 
 {% endblock content %}
