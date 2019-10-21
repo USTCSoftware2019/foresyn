@@ -6,7 +6,6 @@
 }
 .btn-side-circle {
     border-radius: 30px !important;
-    background-color: #20c997;
 }
 .btn-circle {
     width: 50px;
@@ -57,13 +56,22 @@
     border-color: #20c997;
     background-color:  #f8f9fa;
 }
+.text-hover-red {
+    color: #ffffff;
+    background-color:  #ff6e6e;
+}
+.text-hover-red:hover {
+    color: #ff6e6e !important;
+    border-color: #ff6e6e;
+    background-color:  #f8f9fa;
+}
 .btn-group-fixed {
     position: fixed;
     bottom: 50px;
     right: 70px;
 }
 
-div.banner {background: url('../image/') !important;}
+div.banner {background: url('../image/title_bg.jpg') !important;}
 div.banner div.container {height: 120px;}
 div.banner div.icon {height: 60px; width: 60px; box-sizing: border-box; padding: 6px; border-radius: 3px;}
 div.banner div.des div {color: #B6B4B4; }
