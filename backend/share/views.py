@@ -26,7 +26,7 @@ class CreateShareLinkView(View):
         shared_model_object = ShareModel.objects.create(sbml_content=cobra_model.sbml_content,
                                                         owner=self.owner,
                                                         name=cobra_model.name,
-                                                        desc=cobra_model.desc,
+                                                        desc=desc,
                                                         reactions=cobra_model.reactions,
                                                         metabolites=cobra_model.metabolites,
                                                         genes=cobra_model.genes
@@ -42,10 +42,7 @@ class CreateShareLinkView(View):
         try:
             object_id = request.POST['model_id']
         except KeyError:
-            return JsonResponse({
-                'err': 1,
-                'msg': 'Field public, can_edit and id is required'
-            })
+            return HttpResponse("required model_id", status=400)
         try:
             desc = request.POST['desc']
         except KeyError:
