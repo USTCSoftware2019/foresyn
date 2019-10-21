@@ -19,6 +19,7 @@ from .models import Favorite
 from django.apps import apps
 from django.core.paginator import Paginator
 
+
 class UserSignUp(CreateView):
     template_name = 'accounts/signup.html'
     form_class = UserSignUpForm
@@ -142,7 +143,8 @@ class UserPack(LoginRequiredMixin, View):
             "type": obj_type,
             "counts": counts,
             "this_cnt": queryset.count(),
-            "queryset": items,
+            "page_obj": items,
+            "paginator": paginator,
             "is_paginated": False if queryset.count() <= 10 else True
         })
 

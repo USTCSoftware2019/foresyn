@@ -6,7 +6,6 @@
 }
 .btn-side-circle {
     border-radius: 30px !important;
-    background-color: #20c997;
 }
 .btn-circle {
     width: 50px;
@@ -55,6 +54,15 @@
 .text-hover-green:hover {
     color: #20c997 !important;
     border-color: #20c997;
+    background-color:  #f8f9fa;
+}
+.text-hover-red {
+    color: #ffffff;
+    background-color:  #ff6e6e;
+}
+.text-hover-red:hover {
+    color: #ff6e6e !important;
+    border-color: #ff6e6e;
     background-color:  #f8f9fa;
 }
 .btn-group-fixed {

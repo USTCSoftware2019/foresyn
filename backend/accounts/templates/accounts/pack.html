@@ -25,7 +25,7 @@
                     <a {% if counts.gene != 0 %} href="?type=gene" {% else %} href="#" {% endif %}
                                                  class="list-group-item {% if type == "gene" %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">Gene<span
                             class="badge badge-info badge-search">{{ counts.gene }}</span></a>
-                    <a {% if counts.reaction != 0 %} href="?type=reactionn" {% else %} href="#" {% endif %}
+                    <a {% if counts.reaction != 0 %} href="?type=reaction" {% else %} href="#" {% endif %}
                                                      class="list-group-item {% if type == "reaction" %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">Reaction<span
                             class="badge badge-info badge-search">{{ counts.reaction }}</span></a>
                     <a {% if counts.metabolite != 0 %} href="?type=metabolite" {% else %} href="#" {% endif %}
@@ -43,14 +43,13 @@
 
                 <h5 class="result_num">{{ this_cnt }} results</h5>
                 <div class="list-group list-group-flush mb-5">
-                    {% for item in queryset %}
-                        <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+                    {% for item in page_obj %}
+                        <div href="#" class="list-group-item">
                             <div class="d-flex w-100 justify-content-between">
                                 <a class="mb-1" href="{% render_link_tag item %}"><h5>{{ item|get_object_name }}</h5></a>
                                 {% pack_favorite_button item %}
                             </div>
-                            <p class="mb-1">Some basic information here. For example, its ID, function and
-                                chromosome.</p>
+                            <p class="mb-1">{{ item|get_object_description }}</p>
                             <small>{{ item|get_object_source }}</small>
                         </div>
                     {% endfor %}

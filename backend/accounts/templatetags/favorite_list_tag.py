@@ -14,9 +14,22 @@ def get_object_name(fav_obj):
     obj = tp.objects.get(pk=pk)
     return obj.bigg_id
 
+
 @register.filter
 def get_object_source(fav_obj):
     return fav_obj.target_content_type
+
+
+@register.filter
+def get_object_description(fav_obj):
+    tp = fav_obj.target_content_type.model_class()
+    if tp != Model:
+        pk = fav_obj.target_object_id
+        obj = tp.objects.get(pk=pk)
+        return obj.name
+    else:
+        return ""
+
 
 @register.simple_tag
 def pack_favorite_button(fav_obj):
@@ -28,7 +41,8 @@ def pack_favorite_button(fav_obj):
                              'target_object_id': fav_obj.target_object_id,
                              'undo': True})
 
-@register.simple_tag()
+
+@register.simple_tag
 def render_link_tag(obj):
     if obj is None:
         return '#'
