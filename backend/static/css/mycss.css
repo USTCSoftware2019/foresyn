@@ -71,7 +71,7 @@
     right: 70px;
 }
 
-div.banner {background: url('../image/') !important;}
+div.banner {background: url('../image/title_bg.jpg') !important;}
 div.banner div.container {height: 120px;}
 div.banner div.icon {height: 60px; width: 60px; box-sizing: border-box; padding: 6px; border-radius: 3px;}
 div.banner div.des div {color: #B6B4B4; }
