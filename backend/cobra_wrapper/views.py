@@ -39,7 +39,7 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data['metabolites'] = json.loads(self.object.metabolites)
         context_data['genes'] = json.loads(self.object.genes)
         context_data['latest_changes'] = models.CobraModelChange.objects.filter(model=self.object)[:10]
-        context_data['change_line_len'] = (context_data['latest_changes'].count() - 1) * 95
+        context_data['change_line_len'] = context_data['latest_changes'].count() * 95
 
         keywords = set()
         reaction_dict_list = [
@@ -146,7 +146,7 @@ class CobraModelChangeRestoreView(View):
     def post(self, request, *args, **kwargs):
         change = self.get_object()
         new_model = change.restore('Restored from {}'.format(change.model.name),
-                                   timezone.now().strftime('%Y-%m-%d %H:%i:%s'))
+                                   timezone.now().strftime('%Y-%m-%d %H:%M:%S'))
         return redirect(new_model)
 
 
