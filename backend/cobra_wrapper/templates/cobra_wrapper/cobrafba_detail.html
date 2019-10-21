@@ -144,18 +144,18 @@
                     </table>
                 </div>
                 <div class="row my-5">
-                    <button class="btn btn-primary mr-5 ml-3" id="shadow-ascend" data-toggle="tooltip"
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" id="shadow-ascend" data-toggle="tooltip"
                             data-placement="top"
                             title="previous value minus current value" data-control="shadow">Ascending
                     </button>
-                    <button class="btn btn-primary mr-5" id="shadow-descend" data-toggle="tooltip" data-placement="top"
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" id="shadow-descend" data-toggle="tooltip" data-placement="top"
                             title="current value minus previous value" data-control="shadow">
                         Descending
                     </button>
 {#                    <button class="btn btn-primary mr-5" id="shadow-diff" data-toggle="tooltip" data-placement="top"#}
 {#                            title="the genes that you can knock out" data-control="shadow">Difference#}
 {#                    </button>#}
-                    <button class="btn btn-primary mr-5" id="shadow-more" data-toggle="tooltip" data-placement="top"
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" id="shadow-more" data-toggle="tooltip" data-placement="top"
                             title="all the results" data-control="coenzyme">More
                     </button>
                 </div>
@@ -167,12 +167,12 @@
 {#                <button class="btn btn-info" id="more">More</button>#}
 {#            </div>#}
             <div class="col-4 text-center">
-                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#fba_delete_model">
+                <button type="button" class="col-2 btn btn-outline-light btn-side-circle text-hover-red" data-toggle="modal" data-target="#fba_delete_model">
                     Delete
                 </button>
             </div>
             <div class="col-4 text-center">
-                <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}" class="btn btn-primary">Return</a>
+                <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}" class="col-2 btn btn-outline-light btn-side-circle text-hover-green">Return</a>
             </div>
         </div>
     </div>
