@@ -243,7 +243,7 @@
                     // console.log(res);
                     // res_data = JSON.parse(res);
                     res_data = res.results;
-                    $('#obj_value').html('Objective Values: ' + res.objective_value);
+                    $('#obj_value').html('Objective Values: ' + res_data[0].objective_value);
                     // console.log(res_data);
                     let data_now = res_data[0];
                     let len = data_now.fluxes.length;
