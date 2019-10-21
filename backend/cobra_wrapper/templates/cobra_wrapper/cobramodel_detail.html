@@ -26,7 +26,12 @@
                             <div class="text ml-4 bar-text text-muted">
                                 {{ change.get_type_name }}<br>
                                 {{ change.created_time.date|date:"Y-m-d" }}<br>
-                                {{ change.created_time.time|date:"H:i:s" }}
+                                {{ change.created_time.time|date:"H:i:s" }}<br>
+                                <form method="post"
+                                      action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
+                                    {% csrf_token %}
+                                    <input type="submit" class="btn btn-info" value="Revert">
+                                </form>
                             </div>
                         {% endfor %}
                     </div>

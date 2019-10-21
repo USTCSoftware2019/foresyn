@@ -156,5 +156,7 @@ class CobraModelChange(models.Model):
             elif change.change_type == 'del_reaction':
                 reactions = [restore_reaction_by_json(cobra_model, info) for info in reaction_info['reactions']]
                 cobra_model.add_reactions(reactions)
-        return CobraModel.objects.create(name=name, desc=desc, sbml_content=dump_sbml(cobra_model),
-                                         owner=self.model.owner)
+        new_model = CobraModel.objects.create(name=name, desc=desc, sbml_content=dump_sbml(cobra_model),
+                                              owner=self.model.owner)
+        new_model.cache(cobra_model)
+        return new_model
