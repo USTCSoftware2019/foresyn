@@ -21,7 +21,7 @@ class CleanSbmlContentMixin:
 
         try:
             cobra.io.validate_sbml_model(sbml_content)
-        except cobra.io.sbml.CobraSBMLError:
+        except Exception:
             self.add_error('sbml_content', 'validation for SBML file failed')
             return cleaned_data
 
@@ -74,6 +74,16 @@ class CobraModelObjectiveUpdateForm(forms.Form):
 class CobraModelReactionDeleteForm(forms.Form):
     deleted_reaction_id = forms.CharField(min_length=1)
     change_type = forms.CharField(widget=forms.HiddenInput(), initial='del_reaction')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_data['deleted_reaction_id'] = load_comma_separated_str(
+            clean_comma_separated_str(self, cleaned_data.get('deleted_reaction_id', '')))
+        reactions = [reaction['cobra_id'] for reaction in json.loads(self.model_object.reactions)]
+        for reaction in cleaned_data['reaction_list']:
+            if reaction not in reactions:
+                self.add_error('reaction_list', '{} can not be found in the model'.format(reaction))
+        return cleaned_data
 
     def save(self, model):
         if self.errors:
