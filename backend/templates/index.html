@@ -15,15 +15,17 @@
 <div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;background: url(/static/image/background.jpg);background-size: cover;">
   <div class="card" style=" width: 24rem;height: 236px;border-radius: 20px;position: relative;bottom: 0px;display:none;z-index:1">
     <div class="card-body" style="padding-top: 70px;">
-      <form action="#">
+      <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="Username">
+          <input type="text" class="form-control" name="username" placeholder="Username">
         </div>
         <div class="form-group">
-          <input type="password" class="form-control" placeholder="Password">
+          <input type="password" class="form-control" name="password" placeholder="Password">
         </div>
+        <input type="hidden" name="next" value="{{ next }}">
+        <input type="submit" class="btn btn-outline-light btn-side-circle text-hover-green" style="width: 100%;" placeholder="Login">
       </form>
-      <button type="button" class="btn btn-outline-light btn-side-circle text-hover-green" style="width: 100%;">Login</button>
     </div>
   </div>
 </div>
