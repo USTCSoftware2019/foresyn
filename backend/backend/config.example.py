@@ -14,6 +14,10 @@ CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
 
 USE_EMAIL = False
 # if USE_EMAIL is False, email will output on console
+EMAIL_HOST = None
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "username"
+EMAIL_HOST_PASSWORD = "password"
 
 STATIC_ROOT = "/var/www/static/"
 # if you are just testing, set it to None is ok.
