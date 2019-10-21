@@ -6,11 +6,7 @@
 {% block content %}
     <div class="container mt-4">
         <div class="row">
-            <div class="col-2">
-
-
-            </div>
-            <div class="col-8">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-content-between">
                         <h5 style="padding-top: 5px;">Model: {{ object.name }}</h5>
@@ -23,6 +19,8 @@
                         </div>
                     </div>
                     <div class="card-body">
+                        <h5 class="card-title">Description</h5>
+                        <p>sdafdgsfhgfgfa<br>dsafgafs<br>sadf</p>>
                         <h5 class="card-title">Info</h5>
                         <div class="list-group">
                             {% for reaction in reactions %}
