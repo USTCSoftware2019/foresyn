@@ -46,7 +46,7 @@
                     {% for item in queryset %}
                         <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
                             <div class="d-flex w-100 justify-content-between">
-                                <a class="mb-1" href="#"><h5>{{ item|get_object_name }}</h5></a>
+                                <a class="mb-1" href="{% render_link_tag item %}"><h5>{{ item|get_object_name }}</h5></a>
                                 {% pack_favorite_button item %}
                             </div>
                             <p class="mb-1">Some basic information here. For example, its ID, function and
