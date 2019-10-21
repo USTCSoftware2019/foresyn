@@ -178,7 +178,13 @@ else:
         "http://127.0.0.1:8080"  # for testing purpose (vue-cli project)
     ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # for email debug
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' \
+    if config.USE_EMAIL else 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = config.EMAIL_HOST
+EMAIL_PORT = config.EMAIL_PORT
+EMAIL_HOST_USER = config.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = config.EMAIL_HOST_PASSWORD
+
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 CELERY_BROKER_URL = config.CELERY_BROKER_URL
