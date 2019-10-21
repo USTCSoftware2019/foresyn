@@ -35,7 +35,6 @@ def restore_reaction_by_json(cobra_model: cobra.Model, info: Dict[str, Any]) -> 
     reaction = cobra.Reaction(id=info['cobra_id'], name=info['name'], subsystem=info['subsystem'],
                               lower_bound=info['lower_bound'], upper_bound=info['upper_bound'])
     cobra_model.add_reactions([reaction])
-
     reaction.gene_reaction_rule = info['gene_reaction_rule']
     return reaction
 

@@ -7,11 +7,12 @@
     <div class="container mt-4">
         <div class="row">
             <div class="col-2">
-                <div class="bar-left" style="width: 3px; height: 285px; background-color:#20c997"></div>
+                <div class="bar-left"
+                     style="width: 3px; height: {{ change_line_len }}px; background-color:#20c997"></div>
                 <div class="bar-btn-group col-1">
-                    {% for change in object.latest_change %}
+                    {% for change in latest_changes %}
                         <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
-                                data-content="{{ object.change }}"></button>
+                                data-content="{{ change }}"></button>
                     {% endfor %}
                 </div>
                 <script>
@@ -21,21 +22,18 @@
                 </script>
                 <div class="col-12">
                     <div class="row">
-                        <div class="text ml-4 bar-text text-muted">
-                            Edit<br>
-                            2019 May 1st<br>
-                            20:45:01
-                        </div>
-                        <div class="text ml-4 bar-text text-muted">
-                            Edit<br>
-                            2019-12-01<br>
-                            20:45:01
-                        </div>
-                        <div class="text ml-4 bar-text text-muted">
-                            Edit<br>
-                            2019-12-01<br>
-                            20:45:01
-                        </div>
+                        {% for change in latest_changes %}
+                            <div class="text ml-4 bar-text text-muted">
+                                {{ change.get_type_name }}<br>
+                                {{ change.created_time.date|date:"Y-m-d" }}<br>
+                                {{ change.created_time.time|date:"H:i:s" }}<br>
+                                <form method="post"
+                                      action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
+                                    {% csrf_token %}
+                                    <input type="submit" class="btn btn-info" value="Revert">
+                                </form>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -64,7 +62,6 @@
                                             <div class="form-group row">
                                                 <div class="col-12">
                                                     <label>description</label>
-
                                                     <input type="number" name="model_id" value="{{ object.pk }}" hidden>
                                                     <input type="text" class="form-control" name="desc">
                                                     <div class="modal-footer">
@@ -77,7 +74,6 @@
                                             </div>
                                         </form>
                                     </div>
-
                                 </div>
                             </div>
                         </div>

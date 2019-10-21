@@ -33,59 +33,40 @@
                     </div>
                 </div>
             </div>
-
         </div>
-        <br>
-    </div>
-
-    <div class="modal fade" id="ModalEditForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Model</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    {% for form in forms %}
-                        <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
-                            {% csrf_token %}
-                            {{ form|crispy }}
-                            <input type="submit" class="btn btn-info col-2" value="Submit">
-                        </form>
-                    {% endfor %}
-                </div>
+        <div class="btn-group-fixed">
+            <div class="row">
+                <button class="btn btn-outline-light btn-circle text-hover-green" data-toggle="modal"
+                        data-target="#ModalAdd">
+                    <i class="fa fa-folder-o" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
-    </div>
-
-    <div class="modal fade" id="ModalDeleteForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <!-- Modal -->
+        <div class="modal fade" id="ModalAdd" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirm</h5>
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Model: Name</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <form action="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.id %}" method="post">
+                <form action="{% url 'cobra_wrapper:cobramodel_create_form' %}" method="post"
+                        enctype="multipart/form-data">
+                    <div class="modal-body">
                         {% csrf_token %}
-                        <div class="form-group row">
-                            <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
-                            <div class="col-sm-10">
-                                <p>Are you sure to delete: {{ object }}?</p>
-                            </div>
-                        </div>
-                        <div class="form-group row d-flex justify-content-center">
-                            <input type="submit" class="btn btn-info col-2" value="Delete">
-                        </div>
-                    </form>
-                </div>
+                        {{ form|crispy }}
+                    </div>
+                    <div class="modal-footer">
+                        <input type="reset" class="btn btn-secondary" value="Cancel">
+                        <input type="submit" class="btn btn-outline-light text-hover-green" value="Add to my models">
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+
+
 {% endblock content %}

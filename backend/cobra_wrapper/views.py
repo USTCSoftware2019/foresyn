@@ -1,11 +1,12 @@
 import json
 
-from django.shortcuts import get_object_or_404, reverse, Http404
+from django.shortcuts import get_object_or_404, reverse, Http404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, TemplateView, FormView, View
 from django.views.generic.edit import DeletionMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import Form
+from django.utils import timezone
 
 from . import models, forms
 from .utils import load_comma_separated_str
@@ -38,6 +39,7 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data['metabolites'] = json.loads(self.object.metabolites)
         context_data['genes'] = json.loads(self.object.genes)
         context_data['latest_changes'] = models.CobraModelChange.objects.filter(model=self.object)[:10]
+        context_data['change_line_len'] = (context_data['latest_changes'].count() - 1) * 95
 
         keywords = set()
         reaction_dict_list = [
@@ -118,20 +120,34 @@ class CobraModelUpdateView(LoginRequiredMixin, FormView):
         return reverse('cobra_wrapper:cobramodel_detail', kwargs={'pk': self.object.pk})
 
 
-class CobraModelChangeRestoreView(FormView):
+# class CobraModelChangeRestoreView(FormView):
+#     http_method_names = ['post']
+#     form_class = forms.CobraModelChangeRestoreForm
+#
+#     def get_object(self):
+#         model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['pk'], owner=self.request.user)
+#         return get_object_or_404(models.CobraModelChange, pk=self.kwargs['change_pk'], model=model_object)
+#
+#     def form_valid(self, form: forms.CobraModelChangeRestoreForm):
+#         change = self.get_object()
+#         self.new_model = change.restore(name=form.cleaned_data['name'], desc=form.cleaned_data['desc'])
+#
+#     def get_success_url(self):
+#         return reverse(self.new_model)
+
+
+class CobraModelChangeRestoreView(View):
     http_method_names = ['post']
-    form_class = forms.CobraModelChangeRestoreForm
 
     def get_object(self):
         model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['pk'], owner=self.request.user)
         return get_object_or_404(models.CobraModelChange, pk=self.kwargs['change_pk'], model=model_object)
 
-    def form_valid(self, form: forms.CobraModelChangeRestoreForm):
+    def post(self, request, *args, **kwargs):
         change = self.get_object()
-        self.new_model = change.restore(name=form.cleaned_data['name'], desc=form.cleaned_data['desc'])
-
-    def get_success_url(self):
-        return reverse(self.new_model)
+        new_model = change.restore('Restored from {}'.format(change.model.name),
+                                   timezone.now().strftime('%Y-%m-%d %H:%i:%s'))
+        return redirect(new_model)
 
 
 class TemplateAddModelPkMixin:
