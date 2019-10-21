@@ -36,7 +36,7 @@ class AddDataModelToCobra(View):
             name = "new model"
         cobra_model_object.name = name
         cobra_model_object.save()
-        cobra_model_object.cache()
+        cobra_model_object.cache(load_sbml(cobra_model_object.sbml_content))
         # return JsonResponse({"messages": "OK"}, status=200)
         return redirect("/cobra/models")
 
@@ -77,6 +77,6 @@ class AddDataReactionToCobra(View):
             0]
         cobra_model_object.sbml_content = dump_sbml(cobra_object)
         cobra_model_object.save()
-        cobra_model_object.cache()
+        cobra_model_object.cache(load_sbml(cobra_model_object.sbml_content))
         # return JsonResponse({"messages": "OK"}, status=200)
         return redirect("/cobra/models/" + str(cobra_model_object.pk))
