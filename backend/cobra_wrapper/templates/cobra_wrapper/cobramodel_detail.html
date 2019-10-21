@@ -6,7 +6,7 @@
 {% block content %}
     <div class="container mt-4">
         <div class="row">
-            <div class="col-1">
+            <div class="col-2">
                 <div class="bar-left" style="width: 3px; height: 280px; background-color:#20c997"></div>
                 <div class="bar-btn-group col-1">
                     <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
@@ -18,8 +18,27 @@
                     <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
                             data-content="And here's some amazing content. It's very engaging. Right?"></button>
                 </div>
+                <div class="col-12">
+                  <div class="row">
+                    <div class="text ml-4 bar-text text-muted">
+                      Edit<br>
+                      2019 May 1st<br>
+                      20:45:01
+                    </div>
+                    <div class="text ml-4 bar-text text-muted">
+                      Edit<br>
+                      2019-12-01<br>
+                      20:45:01
+                    </div>
+                    <div class="text ml-4 bar-text text-muted">
+                      Edit<br>
+                      2019-12-01<br>
+                      20:45:01
+                    </div>
+                  </div>
+                </div>
             </div>
-            <div class="col-9">
+            <div class="col-8">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-content-between">
                         <h5 style="padding-top: 5px;">Model: {{ object.name }}</h5>

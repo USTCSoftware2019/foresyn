@@ -14,6 +14,8 @@ import os
 
 from kombu import Queue
 
+from . import config
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,10 +23,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '2&d=ko3=#s2@fgxy1y@s9k%yp#4--)m&k&*c35*qlfbl_#y++a'
+SECRET_KEY = config.SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config.DEBUG
 
 ALLOWED_HOSTS = ['*']
 
@@ -51,9 +53,9 @@ INSTALLED_APPS = [
     'accounts',
 ]
 
-if os.environ.get("USE_ELASTICSEARCH"):
+if config.USE_ELASTICSEARCH:
     default_elasticsearch_host = '127.0.0.1'
-    elasticsearch_host = os.environ.get("ELASTICSEARCH_HOST") or default_elasticsearch_host
+    elasticsearch_host = config.ELASTICSEARCH_HOST or default_elasticsearch_host
     HAYSTACK_CONNECTIONS = {
         'default': {
             'ENGINE': 'bigg_database.haystack_engine.FuzzyEngine',
@@ -104,19 +106,19 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-if os.environ.get('USE_MYSQL'):
+if config.USE_MYSQL:
     mysql_host = "127.0.0.1"
-    if os.environ.get("MYSQL_HOST"):
-        mysql_host = os.environ.get("MYSQL_HOST")
+    if config.MYSQL_HOST:
+        mysql_host = config.MYSQL_HOST
     # Testing mysql
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'igem_backend',
-            'USER': 'root',
-            'PASSWORD': 'mysql_pwd',
+            'USER': config.MYSQL_USER,
+            'PASSWORD': config.MYSQL_PASSWORD,
             'HOST': mysql_host,
-            'PORT': '3306',
+            'PORT': config.MYSQL_PORT,
         }
     }
 else:
@@ -166,6 +168,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+STATIC_ROOT = config.STATIC_ROOT
 
 if DEBUG:
     CORS_ORIGIN_ALLOW_ALL = True
@@ -175,10 +178,17 @@ else:
         "http://127.0.0.1:8080"  # for testing purpose (vue-cli project)
     ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # for email debug
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' \
+    if config.USE_EMAIL else 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = config.EMAIL_HOST
+EMAIL_PORT = config.EMAIL_PORT
+EMAIL_HOST_USER = config.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = config.EMAIL_HOST_PASSWORD
+DEFAULT_FROM_EMAIL = config.DEFAULT_FROM_EMAIL
+
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
+CELERY_BROKER_URL = config.CELERY_BROKER_URL
 CELERY_RESULT_BACKEND = 'rpc://'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_ROUTES = {
@@ -226,3 +236,19 @@ CELERY_TASK_IGNORE_RESULT = True
 # }
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARNING'),
+        },
+    },
+}

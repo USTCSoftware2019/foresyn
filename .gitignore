@@ -16,3 +16,6 @@ __pycache__/
 .env
 env/
 venv/
+
+# production config
+backend/backend/config.py

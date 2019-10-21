@@ -15,9 +15,9 @@ from django.views.generic import View, CreateView
 from .forms import UserSignUpForm
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
-# from .models import PackModel, PackReaction, PackGene, PackMetabolite, PackComputationalModel
 from .models import Favorite
 from django.apps import apps
+from django.core.paginator import Paginator
 
 class UserSignUp(CreateView):
     template_name = 'accounts/signup.html'
@@ -99,7 +99,8 @@ class UserProfile(LoginRequiredMixin, View):
 @method_decorator(csrf_exempt, name='dispatch')  # temporary workaround
 class UserPack(LoginRequiredMixin, View):
     def get(self, request):
-        obj_type = request.POST.get("type")
+        obj_type = request.GET.get("type")
+        page = request.GET.get("page", 1)
 
         counts = {
             "model": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
@@ -134,11 +135,15 @@ class UserPack(LoginRequiredMixin, View):
             queryset = Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
                 app_label='bigg_database', model='metabolite'))
 
+        paginator = Paginator(queryset, 10)
+        items = paginator.get_page(page)
+
         return render(request, "accounts/pack.html", {
             "type": obj_type,
             "counts": counts,
             "this_cnt": queryset.count(),
-            "queryset": queryset
+            "queryset": items,
+            "is_paginated": False if queryset.count() <= 10 else True
         })
 
     # this favorite implementation uses django-favorite

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load favorite_list_tag %}
 {% load static %}
+{% load calc_index_display_tag %}
 {% block title %}
     My Pack
 {% endblock %}
@@ -24,16 +25,16 @@
                     <a {% if counts.gene != 0 %} href="?type=gene" {% else %} href="#" {% endif %}
                                                  class="list-group-item {% if type == "gene" %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">Gene<span
                             class="badge badge-info badge-search">{{ counts.gene }}</span></a>
-                    <a {% if counts.reaction != 0 %} href="?type=gene" {% else %} href="#" {% endif %}
+                    <a {% if counts.reaction != 0 %} href="?type=reactionn" {% else %} href="#" {% endif %}
                                                      class="list-group-item {% if type == "reaction" %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">Reaction<span
                             class="badge badge-info badge-search">{{ counts.reaction }}</span></a>
-                    <a {% if counts.metabolite != 0 %} href="?type=gene" {% else %} href="#" {% endif %}
+                    <a {% if counts.metabolite != 0 %} href="?type=metabolite" {% else %} href="#" {% endif %}
                                                        class="list-group-item {% if type == "metabolite" %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">Metabolite<span
                             class="badge badge-info badge-search">{{ counts.metabolite }}</span></a>
-                    <a {% if counts.model != 0 %} href="?type=gene" {% else %} href="#" {% endif %}
+                    <a {% if counts.model != 0 %} href="?type=model" {% else %} href="#" {% endif %}
                                                   class="list-group-item {% if type == "model" %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">Model (Database)<span
                             class="badge badge-info badge-search">{{ counts.model }}</span></a>
-                    <a {% if counts.model != 0 %} href="?type=gene" {% else %} href="#" {% endif %}
+                    <a {% if counts.model != 0 %} href="?type=usermodel" {% else %} href="#" {% endif %}
                                                   class="list-group-item {% if type == "usermodel" %} chosen {% endif %} {% if counts.usermodel == 0 %} disabled {% endif %}">Model (User)<span
                             class="badge badge-info badge-search">{{ counts.usermodel }}</span></a>
                 </ul>
@@ -54,22 +55,9 @@
                         </div>
                     {% endfor %}
                 </div>
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-center mb-5">
-                        <li class="page-item">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
-                        </li>
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item active"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="#">99</a></li>
-                        <li class="page-item"><a class="page-link" href="#">100</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+                  {% if is_paginated %}
+                  {% calc_index_display_tag %}
+                  {% endif %}
             </div>
         </div>
     </div>
