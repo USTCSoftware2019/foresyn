@@ -367,15 +367,15 @@
                 let num3 = Math.abs(obj1.data);
                 let num4 = Math.abs(obj2.data);
                 if (num1 < num2) {
-                    return 1;
+                    return -1;
                 } else if(num1 === num2) {
                     if(num3 < num4){
-                        return -1;
-                    }else if(num3 > num4){
                         return 1;
+                    }else if(num3 > num4){
+                        return -1;
                     }
                 } else {
-                    return -1
+                    return 1;
                 }
             }
 
