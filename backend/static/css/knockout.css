@@ -1,0 +1,82 @@
+/* knockout.css - styles for knockout demo
+
+   Copyright (C) 2018 The Regents of the University of California.
+
+   This program is free software: you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free Software
+   Foundation, either version 2 of the License, or (at your option) any later
+   version.
+
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+   PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along with
+   this program.  If not, see <http://www.gnu.org/licenses/>
+
+ */
+
+body {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-family: "Source Sans Pro",Calibri,Candara,Arial,sans-serif;
+  font-size: 16px;
+}
+
+#knockout-bottom {
+  z-index: 1000;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+#knockout-status {
+  flex: 0 0 auto;
+  padding: 10px;
+  font-size: 24px;
+  color: red;
+  background-color: white;
+}
+
+#knockout-buttons {
+  flex: 0 0 auto;
+  padding: 10px;
+}
+
+.demo-button {
+  display: inline-block;
+  color: white!important;
+  border: 1px solid #2E2F2F;
+  background-image: linear-gradient(#4F5151, #474949 6%, #3F4141);
+  background-color: white;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 3px;
+  padding: 5px;
+  font-size: 18px;
+  font-family: "Source Sans Pro",Calibri,Candara,Arial,sans-serif;
+}
+
+.demo-button:active {
+  background-image: linear-gradient(#3F4141, #474949 6%, #4F5151);
+  text-decoration: none;
+}
+
+.label {
+  cursor: inherit !important;
+}
+
+@media (max-width: 850px) {
+  #knockout-buttons {
+    right: null;
+    left: 5px;
+  }
+}
