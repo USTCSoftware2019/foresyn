@@ -35,12 +35,12 @@ $('.favorite').click(function() {
         },
         success: function(response) {
                 if (response.status === 'added') {
-                    $obj.children().removeClass('f-star-o').addClass('f-star');
+                    $obj.removeClass('fa-star-o').addClass('fa-star');
                 }
                 else {
-                    $obj.children().removeClass('f-star').addClass('f-star-o');
+                    $obj.removeClass('fa-star').addClass('fa-star-o');
                 }
-                $obj.parent('.favorite').children('.fav-count').text(response.fav_count);
+                // $obj.parent('.favorite').children('.fav-count').text(response.fav_count);
                 $obj.prop('disabled', false);
         }
     });

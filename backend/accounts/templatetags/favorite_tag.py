@@ -14,10 +14,16 @@ def favorite_button(context, target):
     if not user.is_authenticated:
         return ''
 
-    target_app = target._meta.app_label
-    target_name = target._meta.object_name
-    target_content_type = ContentType.objects.get_for_model(target)
-    target_object_id = target.id
+    if not target._meta:
+        target_app = target.app_label
+        target_name = target.model_name
+        target_content_type = ContentType.objects.get(app_label=target_app, model=target_name)
+        target_object_id = target.pk
+    else:
+        target_app = target._meta.app_label
+        target_name = target._meta.object_name
+        target_content_type = ContentType.objects.get_for_model(target)
+        target_object_id = target.id
     undo = False
     if user.favorite_set.filter(target_content_type=target_content_type,
                                 target_object_id=target_object_id):

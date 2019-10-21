@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load favorite_list_tag %}
+{% load static %}
 {% block title %}
     My Pack
 {% endblock %}
@@ -43,12 +45,12 @@
                     {% for item in queryset %}
                         <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
                             <div class="d-flex w-100 justify-content-between">
-                                <a class="mb-1" href="#"><h5>Gene Name</h5></a>
-                                <a class="fa fa-star mr-2" href="#"></a>
+                                <a class="mb-1" href="#"><h5>{{ item|get_object_name }}</h5></a>
+                                {% pack_favorite_button item %}
                             </div>
                             <p class="mb-1">Some basic information here. For example, its ID, function and
                                 chromosome.</p>
-                            <small>Where it from?</small>
+                            <small>{{ item|get_object_source }}</small>
                         </div>
                     {% endfor %}
                 </div>
@@ -71,4 +73,6 @@
             </div>
         </div>
     </div>
+
+    <script src="{% static "javascript/favorite_button.js" %}"></script>
 {% endblock %}

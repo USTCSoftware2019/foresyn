@@ -98,31 +98,20 @@ class UserProfile(LoginRequiredMixin, View):
 
 @method_decorator(csrf_exempt, name='dispatch')  # temporary workaround
 class UserPack(LoginRequiredMixin, View):
-    pass
-    # def get_obj(self, user, obj_type, pk):
-    #     if obj_type == "model":
-    #         return PackModel.objects.filter(user=user, model=pk)
-    #     elif obj_type == "usermodel":
-    #         return PackComputationalModel.objects.filter(user=user, model=pk)  # FIXME
-    #     elif obj_type == "reaction":
-    #         return PackReaction.objects.filter(user=user, reaction=pk)
-    #     elif obj_type == "gene":
-    #         return PackGene.objects.filter(user=user, gene=pk)
-    #     elif obj_type == "metabolite":
-    #         return PackMetabolite.objects.filter(user=user, metabolite=pk)
-    #     elif obj_type == "biobrick":
-    #         raise NotImplementedError()
-    #
     def get(self, request):
         obj_type = request.POST.get("type")
 
         counts = {
             "model": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
                 app_label='bigg_database', model='model')).count(),
-            "usermodel": 1,
-            "reaction": 1,
-            "gene": 1,
-            "metabolite": 1
+            "usermodel": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='cobra_wrapper', model='cobramodel')).count(),
+            "reaction": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='bigg_database', model='reaction')).count(),
+            "gene": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='bigg_database', model='gene')).count(),
+            "metabolite": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='bigg_database', model='metabolite')).count()
         }
 
         if not obj_type:
@@ -132,14 +121,18 @@ class UserPack(LoginRequiredMixin, View):
         if obj_type == "model":
             queryset = Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
                 app_label='bigg_database', model='model'))
-        # elif obj_type == "usermodel":
-        #     queryset = PackComputationalModel.objects.filter(user=request.user)
-        # elif obj_type == "reaction":
-        #     queryset = PackReaction.objects.filter(user=request.user)
-        # elif obj_type == "gene":
-        #     queryset = PackGene.objects.filter(user=request.user)
-        # elif obj_type == "metabolite":
-        #     queryset = PackMetabolite.objects.filter(user=request.user)
+        elif obj_type == "usermodel":
+            queryset = Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='cobra_wrapper', model='cobramodel'))
+        elif obj_type == "reaction":
+            queryset = Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='bigg_database', model='reaction'))
+        elif obj_type == "gene":
+            queryset = Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='bigg_database', model='gene'))
+        elif obj_type == "metabolite":
+            queryset = Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
+                app_label='bigg_database', model='metabolite'))
 
         return render(request, "accounts/pack.html", {
             "type": obj_type,
@@ -147,6 +140,7 @@ class UserPack(LoginRequiredMixin, View):
             "this_cnt": queryset.count(),
             "queryset": queryset
         })
+
     # this favorite implementation uses django-favorite
     def post(self, request):
         user = request.user
