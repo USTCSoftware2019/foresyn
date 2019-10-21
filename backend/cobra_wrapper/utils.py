@@ -54,3 +54,13 @@ def clean_comma_separated_str(form, value: str) -> str:
 
 def load_comma_separated_str(value: str) -> List[str]:
     return value.split(',') if value else []
+
+
+COENZYME_PREFIXES = ['nadn', 'nad', 'nadph', 'nadp', 'atp', 'fmn', 'fmnh2', 'fad', 'fadh2']
+
+
+def is_coenzyme(name: str):
+    for coenzyme_prefix in COENZYME_PREFIXES:
+        if re.match(r'^{}(?:$|_)'.format(coenzyme_prefix), name):
+            return True
+    return False
