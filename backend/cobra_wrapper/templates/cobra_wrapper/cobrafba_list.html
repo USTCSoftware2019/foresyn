@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load cobra_wrapper_tags %}
+{% load crispy_forms_tags %}
 
 {% block title %}All FBA{% endblock title %}
 
@@ -50,24 +51,49 @@
         {% endfor %}
         <div class="btn-group-fixed">
             <div class="row changeable">
-                <a role="button" class="btn btn-outline-light btn-circle text-hover-green text-light"
-                   href="{% url 'cobra_wrapper:cobrafba_create_form' model_pk %}">
-                    <i class="fa fa-plus" aria-hidden="true"></i>
-                </a>
+                <button class="btn btn-outline-light btn-circle text-hover-green" data-toggle="modal"
+                        data-target="#ModalPlus">
+                    <i class="fa fa-plus" aria-hidden="true" style="line-height: 38px;"></i>
+                </button>
+            </div>
+            <div class="row">
+                <button type="button" class="btn btn-outline-light btn-circle text-hover-green"
+                        href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">
+                    <i class="fa fa-reply" aria-hidden="true"></i>
+                </button>
             </div>
             <div class="row">
                 <button type="button" class="btn btn-outline-light btn-circle text-hover-green slide">
                     <i class="fa fa fa-chevron-down" aria-hidden="true"></i>
                 </button>
             </div>
-            <div class="row">
-                <button type="button" class="btn btn-outline-light btn-circle text-hover-green slide"
-                        href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">
-                    <i class="fa fa-reply" aria-hidden="true"></i>
-                </button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalPlus" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Create a new FBA</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{% url 'cobra_wrapper:cobrafba_create_form' model_pk %}" method="post">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                    </div>
+                    <div class="modal-footer">
+                        <input type="reset" class="btn btn-secondary" value="Reset">
+                        <input type="submit" class="btn btn-outline-light text-hover-green" value="Create">
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+
     <script>
         $('button.slide').click(function () {
             if ($('.btn-group-fixed div.changeable').css('display') === 'none') {
@@ -93,6 +119,12 @@
                 $('div.show_plain').css('display', 'none');
                 $('.change_icon').removeClass('fa-th').addClass('fa-th-list');
             }
-        })
+        });
+        {% if form.errors %}
+            $(document).ready(function () {
+                $("#ModalPlus").modal('toggle');
+            });
+            $(".invalid-feedback").show();
+        {% endif %}
     </script>
 {% endblock content %}

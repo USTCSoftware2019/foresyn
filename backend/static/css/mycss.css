@@ -35,7 +35,7 @@
 .bar-left {
     position: absolute;
     left: 10px;
-    top: 10px;
+    top: 7px;
 }
 .bar-btn-group {
     position: absolute;
@@ -45,7 +45,7 @@
 }
 .bar-text {
     height: 80px;
-    margin: 15px 0px 0px 0px;
+    margin: 0px 0px 15px 0px;
 }
 .text-hover-green {
     color: #ffffff;
@@ -93,4 +93,16 @@ div.banner div.des div {color: #B6B4B4; }
 
 .table td {
     word-wrap: break-word;
+}
+
+@keyframes move-gene
+{
+    from {bottom: -30px;}
+    to {bottom: 150px;}
+}
+
+@keyframes jump-gene
+{
+    from {bottom: -50px;}
+    to {bottom: 0px;}
 }
