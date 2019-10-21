@@ -462,32 +462,32 @@
 
       $('#res-ascend').on('click', function(){
         sortByAscending(flux_obj_arr);
-        loadCoenzyme(flux_obj_arr.length);
+        load(flux_obj_arr.length);
       });
 
       $('#res-descend').on('click', function(){
         sortByDescending(flux_obj_arr);
-        loadCoenzyme(flux_obj_arr.length);
+        load(flux_obj_arr.length);
       });
 
       $('#res-diff').on('click', function(){
         sortByDifference(flux_obj_arr);
-        loadCoenzyme(flux_obj_arr.length);
+        load(flux_obj_arr.length);
       });
 
       $('#shadow-ascend').on('click', function(){
         sortByAscending(shadow_obj_arr);
-        loadCoenzyme(shadow_obj_arr.length);
+        loadShadowPrices(shadow_obj_arr.length);
       });
 
       $('#shadow-descend').on('click', function(){
         sortByDescending(shadow_obj_arr);
-        loadCoenzyme(shadow_obj_arr.length);
+        loadShadowPrices(shadow_obj_arr.length);
       });
 
       $('#shadow-diff').on('click', function(){
         sortByDifference(shadow_obj_arr);
-        loadCoenzyme(shadow_obj_arr.length);
+        loadShadowPrices(shadow_obj_arr.length);
       });
 
 
