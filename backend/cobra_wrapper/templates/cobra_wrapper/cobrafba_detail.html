@@ -259,16 +259,16 @@
             }
           }
           console.log(data_now);
-          len = data_now.coenzyme.length;
+          len = data_now.coenzymes.length;
           for (let i = 0; i < len; i++) {
-            coenzyme_labels.push(data_now.coenzyme[i].name);
-            coenzyme_data.push(data_now.coenzyme[i].value);
+            coenzyme_labels.push(data_now.coenzymes[i].name);
+            coenzyme_data.push(data_now.coenzymes[i].value);
           }
 
           if (res_data.length === 2) {
             let data_pre = res_data[1];
             for (let i = 0; i < len; i++) {
-              coenzyme_data_pre.push(data_pre.coenzyme[i].value);
+              coenzyme_data_pre.push(data_pre.coenzymes[i].value);
             }
           }
 
