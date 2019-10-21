@@ -6,6 +6,7 @@ from django.views.generic import ListView, DetailView, CreateView, TemplateView,
 from django.views.generic.edit import DeletionMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import Form
+from django.utils import timezone
 
 from . import models, forms
 from .utils import load_comma_separated_str
@@ -142,13 +143,11 @@ class CobraModelChangeRestoreView(View):
         model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['pk'], owner=self.request.user)
         return get_object_or_404(models.CobraModelChange, pk=self.kwargs['change_pk'], model=model_object)
 
-    def get_success_url(self):
-        return reverse(self.new_model)
-
     def post(self, request, *args, **kwargs):
         change = self.get_object()
-        new_model = change.restore()
-        return redirect(self.get_success_url())
+        new_model = change.restore('Restored from {}'.format(change.model.name),
+                                   timezone.now().strftime('%Y-%m-%d %H:%i:%s'))
+        return redirect(new_model)
 
 
 class TemplateAddModelPkMixin:

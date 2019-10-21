@@ -136,7 +136,7 @@ class CobraModelChange(models.Model):
         """Use the method to get shown text of the change"""
         reactions = json.loads(self.reaction_info)['reactions']
         return '{} {} {}'.format(
-            ', '.join([reaction['name'] for reaction in reactions]),
+            ', '.join(['"' + reaction['name'] + '"' for reaction in reactions]),
             'are' if len(reactions) > 1 else 'is',
             'added' if self.change_type == 'add_reaction' else 'deleted')
 
