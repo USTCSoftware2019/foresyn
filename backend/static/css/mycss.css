@@ -49,6 +49,7 @@
     margin: 15px 0px 0px 0px;
 }
 .text-hover-green {
+    color: #ffffff;
     background-color:  #20c997;
 }
 .text-hover-green:hover {
