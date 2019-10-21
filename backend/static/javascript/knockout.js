@@ -5,21 +5,21 @@
  glp_get_obj_val, glp_get_num_cols */
 
 // load everything
-load_builder(function (builder) {
-  load_model(model => {
-    var old_model = escher.utils.clone(model);
-    optimize_loop(builder, model);
-    escher.libs.d3_select('#reset-button')
-      .on('click', () => {
-        model = escher.utils.clone(old_model);
-        optimize_loop(builder, model);
-      });
-  });
-});
+// load_builder(function (builder) {
+//   load_model(model => {
+//     var old_model = escher.utils.clone(model);
+//     optimize_loop(builder, model);
+//     escher.libs.d3_select('#reset-button')
+//       .on('click', () => {
+//         model = escher.utils.clone(old_model);
+//         optimize_loop(builder, model);
+//       });
+//   });
+// });
 
 function load_builder (callback) {
   // load the Builder
-  escher.libs.d3_json('e_coli_core.Core metabolism.json', function(e, data) {
+  escher.libs.d3_json('http://igem.myl107.top/static/map.json', function(e, data) {
     if (e) console.warn(e);
     var options = {
       menu: 'all',
@@ -35,8 +35,8 @@ function load_builder (callback) {
 }
 
 
-function load_model(callback) {
-  escher.libs.d3_json('iG2583_1286.json', function(e, data) {
+function load_model(callback, model_json='e_coli_core.json') {
+  escher.libs.d3_json(model_json, function(e, data) {
     if (e) console.warn(e);
     callback(data);
   });
