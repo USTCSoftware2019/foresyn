@@ -7,6 +7,8 @@ iGEM project by USTC Software 2019.
 
 Assuming that you are using Debian Buster and Python 3.7.
 
+### Initialization
+
 1. Install MySQL (or MariaDB), RabbitMQ and ElasticSearch 2.4.6.
 
    ```shell
@@ -51,6 +53,25 @@ Assuming that you are using Debian Buster and Python 3.7.
 
    ```shell
    (venv) $ python manage.py rebuild_index
+   ```
+
+
+### Run This Project
+
+1. Load Celery computation tasks.
+
+   ```shell
+   (venv) $ cd backend/cobra_wrapper/remote/
+   (venv) $ env PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds
+   (a new shell)
+   (venv) $ cd backend
+   (venv) $ env PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results
+   ```
+
+2. Run this project.
+
+   ```shell
+   (venv) $ python manage.py runserver
    ```
 
    
