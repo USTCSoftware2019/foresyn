@@ -6,6 +6,7 @@ app_name = 'cobra_wrapper'
 urlpatterns = [
     path('models/', views.CobraModelListView.as_view(), name='cobramodel_list'),
     path('models/<int:pk>/', views.CobraModelDetailView.as_view(), name='cobramodel_detail'),
+    path('models/<int:pk>/map/', views.CobraModelMapView.as_view(), name='cobramodel_map'),
     path('models/<int:pk>/json/', api_views.CobraModelDetailJsonView.as_view(), name='cobramodel_detail_json'),
     path('models/create/', views.CobraModelCreateView.as_view(), name='cobramodel_create_form'),
     path('models/<int:pk>/delete/', views.CobraModelDeleteView.as_view(), name='cobramodel_confirm_delete'),

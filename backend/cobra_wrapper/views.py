@@ -50,6 +50,10 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         return context_data
 
 
+class CobraModelMapView(LoginRequiredMixin, TemplateView):
+    template_name = 'cobra_wrapper/cobramodel_map.html'
+
+
 class CobraModelCreateView(LoginRequiredMixin, FormView):
     template_name = 'cobra_wrapper/cobramodel_create_form.html'
     form_class = forms.CobraModelCreateForm
@@ -156,6 +160,7 @@ class CobraFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAd
 
     def form_valid(self, form: Form):
         form.instance.model = self.model_object
+        response = super().form_valid(form)
         result = app.send_task(
             'cobra_computation.tasks.cobra_fba',
             kwargs={
@@ -168,7 +173,7 @@ class CobraFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAd
         )
         self.object.task_id = result.id
         self.object.save()
-        return super().form_valid(form)
+        return response
 
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrafba_list', kwargs={'model_pk': self.kwargs['model_pk']})
@@ -197,12 +202,14 @@ class CobraRgeFbaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailV
         return get_object_or_404(self.model_object.rgefba_list.all(), pk=self.kwargs['pk'])
 
 
-class CobraRgeFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, FormView):
-    template_name = 'cobra_wrapper/cobrargefba_create_form.html'
+class CobraRgeFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, CreateView):
+    template_name_suffix = '_create_form'
+    model = models.CobraRgeFba
     form_class = forms.CobraRgeFbaForm
 
     def form_valid(self, form: Form):
         form.instance.model = self.model_object
+        response = super().form_valid(form)
         result = app.send_task(
             'cobra_computation.tasks.cobra_rge_fba',
             kwargs={
@@ -215,7 +222,7 @@ class CobraRgeFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, Templat
         )
         self.object.task_id = result.id
         self.object.save()
-        return super().form_valid(form)
+        return response
 
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrargefba_list', kwargs={'model_pk': self.kwargs['model_pk']})
@@ -244,12 +251,14 @@ class CobraFvaDetailView(LoginRequiredMixin, TemplateAddModelPkMixin, DetailView
         return get_object_or_404(self.model_object.fva_list.all(), pk=self.kwargs['pk'])
 
 
-class CobraFvaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, FormView):
-    template_name = 'cobra_wrapper/cobrafva_create_form.html'
+class CobraFvaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAddModelPkMixin, CreateView):
+    template_name_suffix = '_create_form'
+    model = models.CobraFva
     form_class = forms.CobraFvaForm
 
     def form_valid(self, form: Form):
         form.instance.model = self.model_object
+        response = super().form_valid(form)
         result = app.send_task(
             'cobra_computation.tasks.cobra_fva',
             kwargs={
@@ -266,7 +275,7 @@ class CobraFvaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAd
         )
         self.object.task_id = result.id
         self.object.save()
-        return super().form_valid(form)
+        return response
 
     def get_success_url(self):
         return reverse('cobra_wrapper:cobrafva_list', kwargs={'model_pk': self.kwargs['model_pk']})
