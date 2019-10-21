@@ -1,5 +1,5 @@
 # Foresyn
-[![Build Status](https://travis-ci.com/taoky/backend.svg?token=9jooK4Qfof8h4FFgpnEK&branch=master)](https://travis-ci.com/taoky/backend)
+[![Build Status](https://travis-ci.com/USTCSoftware2019/foresyn.svg?branch=master)](https://travis-ci.com/USTCSoftware2019/foresyn)
 
 iGEM project by USTC Software 2019. 
 
