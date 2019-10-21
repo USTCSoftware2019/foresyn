@@ -6,7 +6,7 @@
     <div class="container">
       <!-- Brand -->
       <span class="navbar-brand">
-        Foresyn
+        <img src="{% static "image/logo.png" %}" style="height:30px">
       </span>
       <form class="form-inline" action="{% url "bigg_database:search" %}">
         <input class="form-control form-control-sm mr-sm-2 form-circle" type="search" placeholder="Search" aria-label="Search" name="q" value="{% if request.GET.q %}{{ request.GET.q }}{% endif %}">
