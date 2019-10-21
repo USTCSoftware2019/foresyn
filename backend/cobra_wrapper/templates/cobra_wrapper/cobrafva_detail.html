@@ -76,7 +76,7 @@
                 success: function (res) {
                     // console.log(res);
                     // res_data = JSON.parse(res);
-                    res_data = res.components;
+                    res_data = res.results[0].components;
                     // console.log(res_data);
                     loadRes(Math.min(res_data.length, 20));
 
