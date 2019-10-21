@@ -18,6 +18,7 @@ EMAIL_HOST = None
 EMAIL_PORT = 587
 EMAIL_HOST_USER = "username"
 EMAIL_HOST_PASSWORD = "password"
+DEFAULT_FROM_EMAIL = "no-reply@mail.foresyn.tech"
 
 STATIC_ROOT = "/var/www/static/"
 # if you are just testing, set it to None is ok.
