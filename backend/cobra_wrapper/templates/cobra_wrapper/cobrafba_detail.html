@@ -80,15 +80,15 @@
                 <div class="row my-5">
                     <button class="btn btn-primary mr-5 ml-3" id="coen-ascend" data-toggle="tooltip"
                             data-placement="top"
-                            title="the genes that you can try to overexpress" data-control="coenzyme">Ascending
+                            title="previous value minus current value " data-control="coenzyme">Ascending
                     </button>
                     <button class="btn btn-primary mr-5" id="coen-descend" data-toggle="tooltip" data-placement="top"
-                            title="the genes that you can try to reduce it's expression" data-control="coenzyme">
+                            title="current value minus previous value" data-control="coenzyme">
                         Descending
                     </button>
-                    <button class="btn btn-primary mr-5" id="coen-diff" data-toggle="tooltip" data-placement="top"
-                            title="the genes that you can knock out" data-control="coenzyme">Difference
-                    </button>
+{#                    <button class="btn btn-primary mr-5" id="coen-diff" data-toggle="tooltip" data-placement="top"#}
+{#                            title="the genes that you can knock out" data-control="coenzyme">Difference#}
+{#                    </button>#}
                     <button class="btn btn-primary mr-5" id="coen-more" data-toggle="tooltip" data-placement="top"
                             title="all the results" data-control="coenzyme">More
                     </button>
@@ -113,13 +113,13 @@
                 </div>
                 <div class="row my-5">
                     <button class="btn btn-primary mr-5 ml-3" id="res-ascend" data-toggle="tooltip" data-placement="top"
-                            title="the genes that you can try to overexpress" data-control="flux">Ascending
+                            title="previous value minus current value" data-control="flux">Ascending
                     </button>
                     <button class="btn btn-primary mr-5" id="res-descend" data-toggle="tooltip" data-placement="top"
-                            title="the genes that you can try to reduce it's expression" data-control="flux">Descending
+                            title="current value minus previous value" data-control="flux">Descending
                     </button>
                     <button class="btn btn-primary mr-5" id="res-diff" data-toggle="tooltip" data-placement="top"
-                            title="the genes that you can knock out" data-control="flux">Difference
+                            title="the reactions that you can knock out" data-control="flux">Difference
                     </button>
                     <button class="btn btn-primary mr-5" id="res-more" data-toggle="tooltip" data-placement="top"
                             title="all the results" data-control="coenzyme">More
@@ -146,15 +146,15 @@
                 <div class="row my-5">
                     <button class="btn btn-primary mr-5 ml-3" id="shadow-ascend" data-toggle="tooltip"
                             data-placement="top"
-                            title="the genes that you can try to overexpress" data-control="shadow">Ascending
+                            title="previous value minus current value" data-control="shadow">Ascending
                     </button>
                     <button class="btn btn-primary mr-5" id="shadow-descend" data-toggle="tooltip" data-placement="top"
-                            title="the genes that you can try to reduce it's expression" data-control="shadow">
+                            title="current value minus previous value" data-control="shadow">
                         Descending
                     </button>
-                    <button class="btn btn-primary mr-5" id="shadow-diff" data-toggle="tooltip" data-placement="top"
-                            title="the genes that you can knock out" data-control="shadow">Difference
-                    </button>
+{#                    <button class="btn btn-primary mr-5" id="shadow-diff" data-toggle="tooltip" data-placement="top"#}
+{#                            title="the genes that you can knock out" data-control="shadow">Difference#}
+{#                    </button>#}
                     <button class="btn btn-primary mr-5" id="shadow-more" data-toggle="tooltip" data-placement="top"
                             title="all the results" data-control="coenzyme">More
                     </button>
@@ -364,8 +364,8 @@
             function cmpDiff(obj1, obj2) {
                 let num1 = Math.abs(obj1.data_pre);
                 let num2 = Math.abs(obj2.data_pre);
-                let num3 = Math.abs(obj1.data);
-                let num4 = Math.abs(obj2.data);
+                let num3 = obj1.data;
+                let num4 = obj2.data;
                 if (num3 < num4) {
                     return -1;
                 } else if(num3 === num4) {
