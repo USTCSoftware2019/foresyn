@@ -1,0 +1,60 @@
+{% load static %}
+
+
+<html lang="en">
+<title>Model Analysis</title>
+<!-- 新 Bootstrap4 核心 CSS 文件 -->
+<link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="{% static "javascript/jquery.min.js" %}"></script>
+<!-- popper.min.js 用于弹窗、提示、下拉菜单 -->
+<script src="{% static "javascript/popper.min.js" %}"></script>
+<!-- 最新的 Bootstrap4 核心 JavaScript 文件 -->
+<script src="{% static "javascript/bootstrap.min.js" %}"></script>
+
+<!-- Escher -->
+<script src="{% static "javascript/escher.min.js" %}"></script>
+
+<!-- LP Solver -->
+<script src="{% static "javascript/glpk.min.js" %}"></script>
+
+<!-- Knockout CSS -->
+<link rel="stylesheet" href="{% static "css/knockout.css" %}"/>
+
+<meta charset="utf-8"/>
+<meta name="viewport"
+      content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui"/>
+
+<body>
+<div id="map_container"></div>
+<div id="knockout-bottom">
+    <div id="knockout-status"></div>
+    <div id="knockout-buttons">
+        <button id="reset-button" class="btn btn-info" style="margin-right:3em;">
+            Reset
+        </button>
+    </div>
+</div>
+</body>
+
+<!-- Code -->
+<script src="{% static "javascript/knockout.js" %}"></script>
+
+<script>
+    let url = window.location.href;
+    url = url.slice(0, url.length - 4);
+    url += 'json';
+    load_builder(function (builder) {
+        load_model(model => {
+            var old_model = escher.utils.clone(model);
+            optimize_loop(builder, model);
+            escher.libs.d3_select('#reset-button')
+                .on('click', () => {
+                    model = escher.utils.clone(old_model);
+                    optimize_loop(builder, model);
+                });
+        }, url);
+    });
+</script>
+
+</html>

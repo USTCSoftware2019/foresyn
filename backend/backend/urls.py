@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
+from django.contrib.staticfiles.views import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,5 +28,6 @@ urlpatterns = [
     path('share/', include('share.urls')),
     path('', TemplateView.as_view(template_name='index.html', extra_context={
         "ignore_header": True
-    }), name='index')
+    }), name='index'),
+    path('favicon.ico', serve, {'path': 'icon/favicon.ico'}),
 ]

@@ -25,7 +25,7 @@
                     <a {% if counts.gene != 0 %} href="?type=gene" {% else %} href="#" {% endif %}
                                                  class="list-group-item {% if type == "gene" %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">Gene<span
                             class="badge badge-info badge-search">{{ counts.gene }}</span></a>
-                    <a {% if counts.reaction != 0 %} href="?type=reactionn" {% else %} href="#" {% endif %}
+                    <a {% if counts.reaction != 0 %} href="?type=reaction" {% else %} href="#" {% endif %}
                                                      class="list-group-item {% if type == "reaction" %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">Reaction<span
                             class="badge badge-info badge-search">{{ counts.reaction }}</span></a>
                     <a {% if counts.metabolite != 0 %} href="?type=metabolite" {% else %} href="#" {% endif %}

@@ -19,39 +19,39 @@
                             data-content="And here's some amazing content. It's very engaging. Right?"></button>
                 </div>
                 <script>
-                $(function () {
-                  $('[data-toggle="hover"]').popover({trigger: 'hover'})
-                })
+                    $(function () {
+                        $('[data-toggle="hover"]').popover({trigger: 'hover'})
+                    })
                 </script>
                 <div class="col-12">
-                  <div class="row">
-                    <div class="text ml-4 bar-text text-muted">
-                      Edit<br>
-                      2019 May 1st<br>
-                      20:45:01
+                    <div class="row">
+                        <div class="text ml-4 bar-text text-muted">
+                            Edit<br>
+                            2019 May 1st<br>
+                            20:45:01
+                        </div>
+                        <div class="text ml-4 bar-text text-muted">
+                            Edit<br>
+                            2019-12-01<br>
+                            20:45:01
+                        </div>
+                        <div class="text ml-4 bar-text text-muted">
+                            Edit<br>
+                            2019-12-01<br>
+                            20:45:01
+                        </div>
                     </div>
-                    <div class="text ml-4 bar-text text-muted">
-                      Edit<br>
-                      2019-12-01<br>
-                      20:45:01
-                    </div>
-                    <div class="text ml-4 bar-text text-muted">
-                      Edit<br>
-                      2019-12-01<br>
-                      20:45:01
-                    </div>
-                  </div>
                 </div>
             </div>
             <div class="col-8">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-content-between">
                         <h5 style="padding-top: 5px;">Model: {{ object.name }}</h5>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#shareModal">
                             <i class="fa fa-share-alt "></i>
                         </button>
                         <!-- Modal -->
-                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+                        <div class="modal fade" id="shareModal" tabindex="-1" role="dialog"
                              aria-labelledby="exampleModalLabel"
                              aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -84,6 +84,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Info</h5>
                         <div class="list-group">
+                            <a href="{% url 'cobra_wrapper:cobramodel_map' object.pk %}" class="btn btn-info">Metabolic Map</a>
                             {% for reaction in reactions %}
                                 <a href="#"
                                    class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.cobra_id }}]</a>
@@ -97,10 +98,12 @@
                             <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
                                     data-toggle="modal" data-target="#ModalDeleteForm">Delete
                             </button>
-                            <a href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}" class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
+                            <a href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}"
+                               class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
                                 FBA
                             </a>
-                            <a href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}" class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
+                            <a href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}"
+                               class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
                                 FVA
                             </a>
                         </div>
@@ -173,4 +176,7 @@
             </div>
         </div>
     </div>
+    <script>
+
+    </script>
 {% endblock content %}

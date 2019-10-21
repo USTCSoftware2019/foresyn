@@ -4,7 +4,7 @@ from django import forms
 import cobra
 
 from . import models
-from .utils import dump_sbml, get_reaction_json, clean_comma_separated_str
+from .utils import dump_sbml, get_reaction_json, clean_comma_separated_str, load_comma_separated_str
 
 
 class CleanSbmlContentMixin:
@@ -142,7 +142,8 @@ class CobraModelChangeRestoreForm(forms.Form):
 class CleanDeletedGenesMixin:
     def clean(self: forms.Form):
         cleaned_data = super().clean()
-        cleaned_data['deleted_genes'] = clean_comma_separated_str(self, cleaned_data.get('deleted_genes', ''))
+        cleaned_data['deleted_genes'] = load_comma_separated_str(
+            clean_comma_separated_str(self, cleaned_data.get('deleted_genes', '')))
         genes = [gene['cobra_id'] for gene in json.loads(self.model_object.genes)]
         for gene in cleaned_data['deleted_genes']:
             if gene not in genes:
@@ -169,8 +170,9 @@ class CobraFvaForm(CleanDeletedGenesMixin, forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_data['reaction_list'] = clean_comma_separated_str(self, cleaned_data.get('reaction_list', ''))
-        reactions = [reaction['cobra_id'] for reaction in json.loads(self.model.reactions)]
+        cleaned_data['reaction_list'] = load_comma_separated_str(
+            clean_comma_separated_str(self, cleaned_data.get('reaction_list', '')))
+        reactions = [reaction['cobra_id'] for reaction in json.loads(self.model_object.reactions)]
         for reaction in cleaned_data['reaction_list']:
             if reaction not in reactions:
                 self.add_error('reaction_list', '{} can not be found in the model'.format(reaction))
