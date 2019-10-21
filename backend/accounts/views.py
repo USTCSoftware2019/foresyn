@@ -19,6 +19,7 @@ from .models import Favorite
 from django.apps import apps
 from django.core.paginator import Paginator
 
+
 class UserSignUp(CreateView):
     template_name = 'accounts/signup.html'
     form_class = UserSignUpForm
