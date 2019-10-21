@@ -6,37 +6,39 @@ from bigg_database.models import Gene, Model
 from cobra_wrapper.utils import load_sbml, dump_sbml
 from celery import shared_task
 from backend.celery import app
+from cobra_wrapper.models import CobraModel
 from tt import BooleanExpression
 
 
 @shared_task
-def gene_regulation(pk, task_id, model_sbml, shadow_price):
-    cobra_model = load_sbml(model_sbml)
-    shadow_price = json.loads(shadow_price)
+def gene_regulation(pk, task_id, model_pk, shadow_prices):
+    cobra_model = CobraModel.objects.get(pk=model_pk).build()
     for gene in cobra_model.genes:
         gene_name = __get_gene_name(gene.id, cobra_model.id)
         try:
             regulation = Regulation.objects.get(gene=gene_name)
         except ObjectDoesNotExist:
             continue
-        if not __check(regulation, cobra_model, shadow_price):
+        if not __check(regulation, cobra_model, shadow_prices):
             gene.knock_out()
     app.send_task(
-        name='',
+        'cobra_computation.tasks.cobra_fba',
         kwargs={
             'pk': pk,
+            'model_sbml': dump_sbml(cobra_model),
+            'deleted_genes': [],
+            'computation_type': 'regular_again',
             'task_id': task_id,
-            'model_sbml': model_sbml,
         },
-        queue='',
-        routing_key='',
+        queue='cobra_feeds',
+        routing_key='cobra_feed.fba',
     )
 
 
 def __check(regulation, cobra_model, shadow_price):
     try:
         exp = BooleanExpression(regulation.rule)
-    except:
+    except Exception:
         return True
     tokens = exp.symbols
     value = []

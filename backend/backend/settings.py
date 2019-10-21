@@ -200,14 +200,6 @@ CELERY_TASK_ROUTES = {
         'queue': 'cobra_results',
         'routing_key': 'cobra_result.fba',
     },
-    'cobra_computation.tasks.cobra_rge_fba': {
-        'queue': 'cobra_feeds',
-        'routing_key': 'cobra_feed.rge_fba',
-    },
-    'cobra_wrapper.tasks.cobra_rge_fba_save': {
-        'queue': 'cobra_results',
-        'routing_key': 'cobra_result.rge_fba',
-    },
     'cobra_computation.tasks.cobra_fva': {
         'queue': 'cobra_feeds',
         'routing_key': 'cobra_feed.fva',
@@ -216,11 +208,16 @@ CELERY_TASK_ROUTES = {
         'queue': 'cobra_results',
         'routing_key': 'cobra_result.fva',
     },
+    'regulation.tasks.gene_regulation': {
+        'queue': 'cobra_locals',
+        'routing_key': 'cobra_local.regulation',
+    },
 }
 CELERY_TASK_QUEUES = (
     Queue('default', routing_key='task.#'),
     Queue('cobra_feeds', routing_key='cobra_feed.#'),
     Queue('cobra_results', routing_key='cobra_result.#'),
+    Queue('cobra_locals', routing_key='cobra_local.#'),
 )
 CELERY_TASK_DEFAULT_EXCHANGE = 'tasks'
 CELERY_TASK_DEFAULT_EXCHANGE_TYPE = 'topic'

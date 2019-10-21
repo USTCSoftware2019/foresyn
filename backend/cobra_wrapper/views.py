@@ -197,6 +197,7 @@ class CobraFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, TemplateAd
                 'pk': self.object.pk,
                 'model_sbml': self.model_object.sbml_content,
                 'deleted_genes': load_comma_separated_str(form.cleaned_data['deleted_genes']),
+                'computation_type': 'normal',
             },
             queue='cobra_feeds',
             routing_key='cobra_feed.fba',
@@ -247,11 +248,12 @@ class CobraRgeFbaCreateView(LoginRequiredMixin, InsertModelForFormMixin, Templat
         form.instance.model = self.model_object
         response = super().form_valid(form)
         result = app.send_task(
-            'cobra_computation.tasks.cobra_rge_fba',
+            'cobra_computation.tasks.cobra_fba',
             kwargs={
                 'pk': self.object.pk,
                 'model_sbml': self.model_object.sbml_content,
                 'deleted_genes': load_comma_separated_str(form.cleaned_data['deleted_genes']),
+                'computation_type': 'regular',
             },
             queue='cobra_feeds',
             routing_key='cobra_feed.rge_fba',
