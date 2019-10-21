@@ -348,10 +348,12 @@
       }
 
       function cmpDiff(obj1, obj2) {
-        if(obj1.data < obj2.data){
-          return 1;
+        let num1 = Math.abs(obj1.data - obj1.data_pre);
+        let num2 = Math.abs(obj2.data - obj2.data_pre);
+        if(num1 < num2){
+            return 1;
         }else{
-          return obj1.data_pre < obj2.data_pre;
+            return -1;
         }
       }
 
@@ -447,47 +449,47 @@
 
       $('#coen-ascend').on('click', function(){
         sortByAscending(coenzyme_obj_arr);
-        loadCoenzyme(coenzyme_obj_arr.length);
+        loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
       });
 
       $('#coen-descend').on('click', function(){
         sortByDescending(coenzyme_obj_arr);
-        loadCoenzyme(coenzyme_obj_arr.length);
+        loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
       });
 
       $('#coen-diff').on('click', function(){
         sortByDifference(coenzyme_obj_arr);
-        loadCoenzyme(coenzyme_obj_arr.length);
+        loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
       });
 
       $('#res-ascend').on('click', function(){
         sortByAscending(flux_obj_arr);
-        load(flux_obj_arr.length);
+        load(Math.min(flux_obj_arr.length, 20));
       });
 
       $('#res-descend').on('click', function(){
         sortByDescending(flux_obj_arr);
-        load(flux_obj_arr.length);
+        load(Math.min(flux_obj_arr.length, 20));
       });
 
       $('#res-diff').on('click', function(){
         sortByDifference(flux_obj_arr);
-        load(flux_obj_arr.length);
+        load(Math.min(flux_obj_arr.length, 20));
       });
 
       $('#shadow-ascend').on('click', function(){
         sortByAscending(shadow_obj_arr);
-        loadShadowPrices(shadow_obj_arr.length);
+        loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
       });
 
       $('#shadow-descend').on('click', function(){
         sortByDescending(shadow_obj_arr);
-        loadShadowPrices(shadow_obj_arr.length);
+        loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
       });
 
       $('#shadow-diff').on('click', function(){
         sortByDifference(shadow_obj_arr);
-        loadShadowPrices(shadow_obj_arr.length);
+        loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
       });
 
 
