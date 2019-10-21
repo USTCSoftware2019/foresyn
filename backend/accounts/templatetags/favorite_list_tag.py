@@ -1,5 +1,8 @@
 from django import template
 from django.template.loader import render_to_string
+from bigg_database.models import Model, Reaction, Gene, Metabolite
+from django.urls import reverse
+
 
 register = template.Library()
 
@@ -31,14 +34,14 @@ def render_link_tag(obj):
         return '#'
     if hasattr(obj, 'object'):
         obj = obj.object
-    model = fav_obj.target_content_type.model_class()
-    if isinstance(model, Model):
+    model = obj.target_content_type.model_class()
+    if model == Model:
         viewname = 'bigg_database:model_detail'
-    elif isinstance(model, Reaction):
+    elif model == Reaction:
         viewname = 'bigg_database:reaction_detail'
-    elif isinstance(model, Gene):
+    elif model == Gene:
         viewname = 'bigg_database:gene_detail'
-    elif isinstance(model, Metabolite):
+    elif model == Metabolite:
         viewname = 'bigg_database:metabolite_detail'
     else:
         return '#'
