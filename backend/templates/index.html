@@ -7,6 +7,40 @@
 {% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="/static/css/mycss.css">
+<link rel="stylesheet" href="/static/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/css/animate.min.css">
+<div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;background: url(/static/image/background.jpg);background-size: cover;">
+  <div class="card" style=" width: 24rem;height: 236px;border-radius: 20px;position: relative;bottom: 0px;display:none;z-index:1">
+    <div class="card-body" style="padding-top: 70px;">
+      <form action="#">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Username">
+        </div>
+        <div class="form-group">
+          <input type="password" class="form-control" placeholder="Password">
+        </div>
+      </form>
+      <button type="button" class="btn btn-outline-light btn-side-circle text-hover-green" style="width: 100%;">Login</button>
+    </div>
+  </div>
+</div>
+<div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;">
+  <img src="/static/image/hand.png" style="width: 24rem; position: relative;top:170px">
+</div>
+<div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;">
+  <img src="/static/image/gene.png" class="animated infinite bounce slow gene" style="width: 12rem; position: relative;bottom:-50px;z-index:2">
+</div>
+<script>
+	$('img.gene').click(function () {
+		$(this).removeClass('animated infinite bounce slow')
+		$(this).css('animation', 'move-gene 1s')
+		$(this).css('bottom', '150px')
+		$('div.card').addClass('animated fadeInUp')
+		$('div.card').css('display', 'inline')
+	});
+</script>
+{% comment %}
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
 
 
@@ -215,4 +249,5 @@
             previousPage();
         })
     </script>
+{% endcomment %}
 {% endblock %}
