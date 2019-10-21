@@ -6,6 +6,9 @@
 
 {% block content %}
     <script src="{% static "javascript/jquery.min.js" %}"></script>
+    <script src="{% static "javascript/popper.min.js" %}"></script>
+    <script src="{% static "javascript/bootstrap.min.js" %}"></script>
+
 
     <style>
         #status {
@@ -225,7 +228,8 @@
         // method: 'get',
         success: function (res) {
           // console.log(res);
-          res_data = JSON.parse(res);
+          // res_data = JSON.parse(res);
+            res_data = res.results;
           // console.log(res_data);
           let data_now = res_data[0];
           let len = data_now.fluxes.length;
@@ -379,14 +383,14 @@
         if (res_data.length === 2) {
           for (let i = 0; i < num; i++) {
             str += '<tr><td>' + coenzyme_obj_arr[i].lable + '</td>' +
-              '<td class="' + '' + '">' + coenzyme_obj_arr[i].data.toFixed(4) + '</td>' +
-              '<td class="' + '' + '">' + coenzyme_obj_arr[i].data_pre.toFixed(4) + '</td>' +
+              '<td class="' + '' + '">' + coenzyme_obj_arr[i].data.toFixed(8) + '</td>' +
+              '<td class="' + '' + '">' + coenzyme_obj_arr[i].data_pre.toFixed(8) + '</td>' +
               '</tr>';
           }
         } else {
           for (let i = 0; i < num; i++) {
             str += '<tr><td>' + coenzyme_obj_arr[i].lable + '</td>' +
-              '<td class="' + '' + '">' + coenzyme_obj_arr[i].data.toFixed(4) + '</td>' +
+              '<td class="' + '' + '">' + coenzyme_obj_arr[i].data.toFixed(8) + '</td>' +
               '<td class="' + '' + '">' + 'None' + '</td>' +
               '</tr>';
           }
@@ -401,14 +405,14 @@
         if (res_data.length === 2) {
           for (let i = 0; i < num; i++) {
             str += '<tr><td>' + flux_obj_arr[i].lable + '</td>' +
-              '<td class="' + '' + '">' + flux_obj_arr[i].data.toFixed(4) + '</td>' +
-              '<td class="' + '' + '">' + flux_obj_arr[i].data_pre.toFixed(4) + '</td>' +
+              '<td class="' + '' + '">' + flux_obj_arr[i].data.toFixed(8) + '</td>' +
+              '<td class="' + '' + '">' + flux_obj_arr[i].data_pre.toFixed(8) + '</td>' +
               '</tr>';
           }
         } else {
           for (let i = 0; i < num; i++) {
             str += '<tr><td>' + flux_obj_arr[i].lable + '</td>' +
-              '<td class="' + '' + '">' + flux_obj_arr[i].data.toFixed(4) + '</td>' +
+              '<td class="' + '' + '">' + flux_obj_arr[i].data.toFixed(8) + '</td>' +
               '<td class="' + '' + '">' + 'None' + '</td>' +
               '</tr>';
           }
@@ -424,14 +428,14 @@
         if (res_data.length === 2) {
           for (let i = 0; i < len; i++) {
             str += '<tr><td class="">' + shadow_obj_arr[i].lable + '</td>' +
-              '<td class="' + '' + '">' + shadow_obj_arr[i].data.toFixed(4) + '</td>' +
-              '<td class="' + '' + '">' + shadow_obj_arr[i].data_pre.toFixed(4) + '</td>' +
+              '<td class="' + '' + '">' + shadow_obj_arr[i].data.toFixed(8) + '</td>' +
+              '<td class="' + '' + '">' + shadow_obj_arr[i].data_pre.toFixed(8) + '</td>' +
               '</tr>';
           }
         } else {
           for (let i = 0; i < len; i++) {
             str += '<tr><td>' + shadow_obj_arr[i].lable + '</td>' +
-              '<td class="' + '' + '">' + shadow_obj_arr[i].data.toFixed(4) + '</td>' +
+              '<td class="' + '' + '">' + shadow_obj_arr[i].data.toFixed(8) + '</td>' +
               '<td class="' + '' + '">' + 'None' + '</td>' +
               '</tr>';
           }
