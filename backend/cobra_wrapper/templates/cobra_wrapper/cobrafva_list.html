@@ -77,12 +77,12 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">Create a new FBA</h5>
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Create a new FVA</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="{% url 'cobra_wrapper:cobrafba_create_form' model_pk %}" method="post">
+                <form action="{% url 'cobra_wrapper:cobrafva_create_form' model_pk %}" method="post">
                     <div class="modal-body">
                         {% csrf_token %}
                         {{ form|crispy }}
