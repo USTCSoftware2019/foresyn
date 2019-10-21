@@ -19,7 +19,9 @@
     </div>
     <div id="my-models" class="container" style="padding: 0px"><br>
         {% for object in object_list %}
+        {% if forloop.counter0|divisibleby:3 %}
             <div class="row show_card pt-3">
+        {% endif %}
                 <div class="col-4">
                     <div class="card text-center">
                         <div class="card-header" style="background-color: #d4edda; color: #155724">
@@ -48,7 +50,9 @@
                         </div>
                     </div>
                 </div>
+                {% if forloop.counter0|add:1|divisibleby:3 %}
             </div>
+        {% endif %}
         {% endfor %}
         <div class="btn-group-fixed">
             <div class="row changeable">
