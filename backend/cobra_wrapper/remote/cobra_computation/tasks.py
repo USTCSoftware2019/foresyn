@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any, Optional
 
 import cobra.manipulation
 import cobra.exceptions
@@ -24,21 +24,6 @@ def get_result_kwargs(computation_type: str, pk: int, dict_result: Optional[Dict
     }
 
 
-def check_cobra_model_component_available(cobra_model: cobra.Model, component_name: str,
-                                          checked_list: List[str]) -> Optional[Dict[str, Any]]:
-    allowed_list = [component.id for component in getattr(cobra_model, component_name, ())]
-    for value in checked_list:
-        if value not in allowed_list:
-            return {
-                'error': '{component_name} {value} is not in the cobra model'.format(
-                    component_name=component_name, value=value),
-                'kwargs': {
-                    'name': component_name,
-                    'value': value,
-                }
-            }
-
-
 def report_cobra_computation_error(error: Exception) -> Dict[str, Any]:
     if isinstance(error, (cobra.exceptions.OptimizationError, cobra.exceptions.SolverNotFound)):
         error_name = error.__name__
@@ -53,13 +38,9 @@ def report_cobra_computation_error(error: Exception) -> Dict[str, Any]:
 
 
 @app.task
-def cobra_fba(pk, model_sbml, deleted_genes):
+def cobra_fba(pk, model_sbml, deleted_genes, computation_type, task_id=None):
     cobra_model = load_sbml(model_sbml)
     if len(deleted_genes) > 0:
-        checking_result = check_cobra_model_component_available(cobra_model, 'genes', deleted_genes)
-        if checking_result is not None:
-            app.send_task(**get_result_kwargs('fba', pk, checking_result, is_error=True))
-            return
         cobra.manipulation.delete_model_genes(cobra_model, deleted_genes, cumulative_deletions=True)
     try:
         result_object = cobra_model.optimize()
@@ -75,49 +56,29 @@ def cobra_fba(pk, model_sbml, deleted_genes):
         'shadow_prices': [{'name': name, 'value': value}
                           for name, value in result_object.shadow_prices.to_dict().items()],
     }
-    app.send_task(**get_result_kwargs('fba', pk, result))
-
-
-@app.task
-def cobra_rge_fba(pk, model_sbml, deleted_genes):
-    cobra_model = load_sbml(model_sbml)
-    if len(deleted_genes) > 0:
-        checking_result = check_cobra_model_component_available(cobra_model, 'genes', deleted_genes)
-        if checking_result is not None:
-            app.send_task(**get_result_kwargs('rge_fba', pk, checking_result, is_error=True))
-            return
-        cobra.manipulation.delete_model_genes(cobra_model, deleted_genes, cumulative_deletions=True)
-    try:
-        result_object = cobra_model.optimize()
-    except Exception as error:
-        error_result = report_cobra_computation_error(error)
-        app.send_task(**get_result_kwargs('rge_fba', pk, error_result, is_error=True))
-        return
-    result = {'shadow_prices': result_object.shadow_prices.to_dict()}
-    result_kwargs = get_result_kwargs('rge_fba', pk, result)
-    # TODO(myl7): Connect to another server to continue
+    result_kwargs = get_result_kwargs('fba', pk, result)
+    result_kwargs['kwargs']['computation_type'] = computation_type
+    if task_id:
+        result_kwargs['kwargs']['task_id'] = task_id
     app.send_task(**result_kwargs)
 
 
 @app.task
 def cobra_fva(pk, model_sbml, reaction_list, loopless, fraction_of_optimum, pfba_factor, deleted_genes):
     cobra_model = load_sbml(model_sbml)
-    checking_result = check_cobra_model_component_available(cobra_model, 'reactions', reaction_list)
-    if checking_result is not None:
-        app.send_task(**get_result_kwargs('fva', pk, checking_result, is_error=True))
-        return
     if len(deleted_genes) > 0:
-        checking_result = check_cobra_model_component_available(cobra_model, 'genes', deleted_genes)
-        if checking_result is not None:
-            app.send_task(**get_result_kwargs('fva', pk, checking_result, is_error=True))
-            return
         cobra.manipulation.delete_model_genes(cobra_model, deleted_genes, cumulative_deletions=True)
     try:
         result_frame = json.loads(flux_variability_analysis(
             cobra_model, reaction_list, loopless, fraction_of_optimum, pfba_factor).to_json())
         result = {
-            'minimum': [{'name': name, 'value': value} for name, value in result_frame['minimum'].items()],
-            'maximum': [{'name': name, 'value': value} for name, value in result_frame['maximum'].items()],
+            'components': [
+                {
+                    'name': name,
+                    'minimum': result_frame['minimum'][name],
+                    'maximum': result_frame['maximum'][name],
+                } for name in result_frame['minimum'].keys()
+            ],
         }
     except Exception as error:
         error_result = report_cobra_computation_error(error)

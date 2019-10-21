@@ -10,9 +10,13 @@
                 <div class="bar-left"
                      style="width: 3px; height: {{ change_line_len }}px; background-color:#20c997"></div>
                 <div class="bar-btn-group col-1">
+                    <button class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="Created"></button>
                     {% for change in latest_changes %}
-                        <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
-                                data-content="{{ change }}"></button>
+                        {# <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="{{ change }}"></button> #}
+                        <form method="post" action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
+                        {% csrf_token %}
+                        <input type="submit" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="{{ change }}">
+                        </form>
                     {% endfor %}
                 </div>
                 <script>
@@ -22,16 +26,16 @@
                 </script>
                 <div class="col-12">
                     <div class="row">
+                        <div class="text ml-4 bar-text text-muted">
+                            Created<br>
+                            {{ object.created_time.date|date:"Y-m-d" }}<br>
+                            {{ object.created_time.time|date:"H:i:s" }}<br>
+                        </div>
                         {% for change in latest_changes %}
                             <div class="text ml-4 bar-text text-muted">
                                 {{ change.get_type_name }}<br>
                                 {{ change.created_time.date|date:"Y-m-d" }}<br>
                                 {{ change.created_time.time|date:"H:i:s" }}<br>
-                                <form method="post"
-                                      action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
-                                    {% csrf_token %}
-                                    <input type="submit" class="btn btn-info" value="Revert">
-                                </form>
                             </div>
                         {% endfor %}
                     </div>
@@ -80,7 +84,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">Info</h5>
+                        <h5 class="card-title">Information</h5>
                         <div class="list-group">
                             <a href="{% url 'cobra_wrapper:cobramodel_map' object.pk %}" class="btn btn-info">Metabolic
                                 Map</a>
@@ -101,6 +105,10 @@
                             <a href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}"
                                class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
                                 FBA
+                            </a>
+                            <a href="{% url 'cobra_wrapper:cobrargefba_list' object.pk %}"
+                               class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
+                                RFBA
                             </a>
                             <a href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}"
                                class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
