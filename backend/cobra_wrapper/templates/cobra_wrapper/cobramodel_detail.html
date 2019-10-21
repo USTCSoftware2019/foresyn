@@ -84,8 +84,8 @@
                             <a href="{% url 'cobra_wrapper:cobramodel_map' object.pk %}" class="btn btn-info">Metabolic
                                 Map</a>
                             {% for reaction in reactions %}
-                                <a href="#"
-                                   class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.cobra_id }}]</a>
+                                <li
+                                   class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.cobra_id }}]</li>
                             {% endfor %}
                         </div>
                         <br>
