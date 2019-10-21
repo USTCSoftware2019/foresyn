@@ -121,8 +121,8 @@ class CobraModelReactionCreateForm(forms.Form):
         cobra_model: cobra.Model = model.build()
         cobra_reaction = cobra.Reaction(id=self.cleaned_data['cobra_id'], name=self.cleaned_data['name'],
                                         subsystem=self.cleaned_data['subsystem'],
-                                        lower_bound=self.cleaned_data['lower_bound'],
-                                        upper_bound=self.cleaned_data['upper_bound'])
+                                        lower_bound=float(self.cleaned_data['lower_bound']),
+                                        upper_bound=float(self.cleaned_data['upper_bound']))
         cobra_model.add_reactions([cobra_reaction])
         cobra_reaction.reaction = self.cleaned_data['reaction_str']
         cobra_reaction.gene_reaction_rule = self.cleaned_data['gene_reaction_rule']
@@ -134,6 +134,17 @@ class CobraModelReactionCreateForm(forms.Form):
         model.save()
         model.cache(cobra_model)
         return model
+
+
+class CobraModelReactionUpdateForm(forms.Form):
+    cobra_id = forms.CharField(max_length=600, required=False)
+    name = forms.CharField(max_length=600, required=False)
+    subsystem = forms.CharField(max_length=200, required=False)
+    lower_bound = forms.FloatField(initial=0.0, required=False)
+    upper_bound = forms.FloatField(initial=1000.0, required=False)
+    reaction_str = forms.CharField(required=False)
+    gene_reaction_rule = forms.CharField(required=False)
+    change_type = forms.CharField(widget=forms.HiddenInput(), initial='update_reaction')
 
 
 cobra_model_update_forms = {
