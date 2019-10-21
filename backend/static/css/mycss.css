@@ -100,3 +100,9 @@ div.banner div.des div {color: #B6B4B4; }
     from {bottom: -20px;}
     to {bottom: 200px;}
 }
+
+@keyframes jump-gene
+{
+    from {bottom: -30px;}
+    to {bottom: 0px;}
+}
