@@ -94,3 +94,9 @@ div.banner div.des div {color: #B6B4B4; }
 .table td {
     word-wrap: break-word;
 }
+
+@keyframes move-gene
+{
+    from {bottom: -20px;}
+    to {bottom: 200px;}
+}
