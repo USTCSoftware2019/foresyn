@@ -6,6 +6,9 @@
 
 {% block content %}
     <script src="{% static "javascript/jquery.min.js" %}"></script>
+    <script src="{% static "javascript/popper.min.js" %}"></script>
+    <script src="{% static "javascript/bootstrap.min.js" %}"></script>
+
 
     <style>
         #status {
@@ -225,7 +228,8 @@
         // method: 'get',
         success: function (res) {
           // console.log(res);
-          res_data = JSON.parse(res);
+          // res_data = JSON.parse(res);
+            res_data = res.results;
           // console.log(res_data);
           let data_now = res_data[0];
           let len = data_now.fluxes.length;
