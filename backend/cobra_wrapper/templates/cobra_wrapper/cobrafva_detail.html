@@ -5,61 +5,110 @@
 {% block title %}FVA Result of {{ object }}{% endblock title %}
 
 {% block content %}
-    <table>
-        <tr>
-            <td>description</td>
-            <td>{{ object.desc }}</td>
-        </tr>
-        <tr>
-            <td>start_time</td>
-            <td>{{ object.start_time }}</td>
-        </tr>
-        <tr>
-            <td>model</td>
-            <td><a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">{{ object.model }}</a></td>
-        </tr>
-    </table>
 
-    <table>
-        <tr>
-            <th>argument name</th>
-            <th>argument value</th>
-        </tr>
-        <tr>
-            <td>reaction_list</td>
-            <td>
-                [
-                {% for reaction in object.reaction_list|split_with_comma %}
-                    {% if not forloop.counter == 1 %},{% endif %}
-                    {{ reaction }}
-                {% endfor %}
-                ]
-            </td>
-        </tr>
-        <tr>
-            <td>loopless</td>
-            <td>{{ object.loopless }}</td>
-        </tr>
-        <tr>
-            <td>fraction_of_optimum</td>
-            <td>{{ object.fraction_of_optimum }}</td>
-        </tr>
-        <tr>
-            <td>pfba_factor</td>
-            <td>{{ object.pfba_factor|default_if_none:"None" }}</td>
-        </tr>
-    </table>
+    <script src="{% static "javascript/jquery.min.js" %}"></script>
+    <script src="{% static "javascript/popper.min.js" %}"></script>
+    <script src="{% static "javascript/bootstrap.min.js" %}"></script>
 
-    <p>Status: {{ object|check_result_status }}</p>
+    <style>
+        #status {
+            margin-left: 1em;
+        }
+    </style>
 
-    {% if result %}
-        {% if result.ok %}
-            <div>{{ result }}</div>
-        {% else %}
-            <div>{{ result }}</div>
-        {% endif %}
-    {% endif %}
+    <div class="container">
+        <div class="row my-3">
+            <div class="col-3">
+                <h3>Description</h3>
+                <p>{{ object.desc }}</p>
+            </div>
+            <div class="col-3">
+                <h3>Start Time</h3>
+                <p>{{ object.start_time }}</p>
+            </div>
+            <div class="col-3">
+                <h3>Model</h3>
+                <p>Click <a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">HERE</a></p>
+            </div>
+        </div>
 
-    <a href="{% url 'cobra_wrapper:cobrafva_confirm_delete' model_pk object.pk %}">Delete</a>
-    <a href="{% url 'cobra_wrapper:cobrafva_list' model_pk %}">Return</a>
+        <div class="row my-2">
+            <div class="alert alert-info" role="alert" id="status">
+                Calculating Status: {{ object|check_result_status }}
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table  table-hover table-bordered">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Min Value</th>
+                    <th>Max Value</th>
+                </tr>
+                </thead>
+                <tbody id="res_body">
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" id="more">More</button>
+            <a href="{% url 'cobra_wrapper:cobrafva_confirm_delete' model_pk object.pk %}" class="btn btn-primary">Delete</a>
+            <a href="{% url 'cobra_wrapper:cobrafva_list' model_pk %}" class="btn btn-primary">Return</a>
+        </div>
+
+    </div>
+
+    <script>
+        $(document).ready(function () {
+
+            let res_data = [];
+            let url = window.location.href;
+            url += 'json';
+            $.ajax({
+                // url: 'http://127.0.0.1:8080/api/data',
+                // api url
+                url: url,
+                // method: 'get',
+                success: function (res) {
+                    // console.log(res);
+                    // res_data = JSON.parse(res);
+                    res_data = res.components;
+                    // console.log(res_data);
+                    loadRes(Math.min(res_data.length, 20));
+
+
+                },
+                error: function (err) {
+                    console.log('error when ajax.');
+                    return;
+                }
+            });
+
+            function loadRes(num = res_data.length) {
+                let res_body = $('#res_body');
+                let str = '';
+
+                for (let i = 0; i < num; i++) {
+                    str += '<tr><td>' + res_data[i].name + '</td>' +
+                            '<td class="' + '' + '">' + res_data[i].min.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + res_data[i].max.toFixed(8) + '</td>' +
+                            '</tr>';
+                }
+
+                res_body.html(str);
+            }
+
+            $('#more').on('click', function () {
+                loadRes(res_data.length);
+            });
+
+        });
+    </script>
+
+
+
+
 {% endblock content %}
