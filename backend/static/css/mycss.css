@@ -97,12 +97,12 @@ div.banner div.des div {color: #B6B4B4; }
 
 @keyframes move-gene
 {
-    from {bottom: -20px;}
-    to {bottom: 200px;}
+    from {bottom: -30px;}
+    to {bottom: 150px;}
 }
 
 @keyframes jump-gene
 {
-    from {bottom: -30px;}
+    from {bottom: -50px;}
     to {bottom: 0px;}
 }
