@@ -34,7 +34,7 @@ class MetaboliteDetailView(DetailView):
 class ReactionDetailView(DetailView):
     model = Reaction
     context_object_name = 'reaction'
-    
+
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
 
