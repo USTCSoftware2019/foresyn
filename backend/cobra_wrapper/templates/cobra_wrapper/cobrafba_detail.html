@@ -449,47 +449,47 @@
 
       $('#coen-ascend').on('click', function(){
         sortByAscending(coenzyme_obj_arr);
-        loadCoenzyme(Math.max(coenzyme_obj_arr.length, 20));
+        loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
       });
 
       $('#coen-descend').on('click', function(){
         sortByDescending(coenzyme_obj_arr);
-        loadCoenzyme(Math.max(coenzyme_obj_arr.length, 20));
+        loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
       });
 
       $('#coen-diff').on('click', function(){
         sortByDifference(coenzyme_obj_arr);
-        loadCoenzyme(Math.max(coenzyme_obj_arr.length, 20));
+        loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
       });
 
       $('#res-ascend').on('click', function(){
         sortByAscending(flux_obj_arr);
-        load(Math.max(flux_obj_arr.length, 20));
+        load(Math.min(flux_obj_arr.length, 20));
       });
 
       $('#res-descend').on('click', function(){
         sortByDescending(flux_obj_arr);
-        load(Math.max(flux_obj_arr.length, 20));
+        load(Math.min(flux_obj_arr.length, 20));
       });
 
       $('#res-diff').on('click', function(){
         sortByDifference(flux_obj_arr);
-        load(Math.max(flux_obj_arr.length, 20));
+        load(Math.min(flux_obj_arr.length, 20));
       });
 
       $('#shadow-ascend').on('click', function(){
         sortByAscending(shadow_obj_arr);
-        loadShadowPrices(Math.max(shadow_obj_arr.length, 20));
+        loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
       });
 
       $('#shadow-descend').on('click', function(){
         sortByDescending(shadow_obj_arr);
-        loadShadowPrices(Math.max(shadow_obj_arr.length, 20));
+        loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
       });
 
       $('#shadow-diff').on('click', function(){
         sortByDifference(shadow_obj_arr);
-        loadShadowPrices(Math.max(shadow_obj_arr.length, 20));
+        loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
       });
 
 
