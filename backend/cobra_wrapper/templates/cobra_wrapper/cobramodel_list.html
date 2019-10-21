@@ -78,43 +78,6 @@
 								<i class="fa fa-plus" aria-hidden="true" style="line-height: 38px;"></i>
             	</button>
 						</div>
-						<!-- Modal -->
-						<div class="modal fade" id="ModalPlus" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-							<div class="modal-dialog modal-dialog-centered" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title" id="exampleModalCenterTitle">Modal title</h5>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										</button>
-									</div>
-									<div class="modal-body">
-										<form>
-											<div class="form-group">
-												<label>Sbml content:</label>
-												<div class="custom-file">
-													<input type="file" class="custom-file-input">
-													<label class="custom-file-label">Choose file</label>
-												</div>
-											</div>
-											<div class="form-group">
-												<label>Name:</label>
-												<input type="text" class="form-control">
-											</div>
-											<div class="form-group">
-												<label>Desc:</label>
-												<textarea class="form-control"></textarea>
-											</div>
-										</form>
-									</div>
-									<div class="modal-footer">
-										<button type="button" class="btn btn-secondary">Return</button>
-										<button type="button" class="btn btn-secondary">Reset</button>
-										<button type="button" class="btn btn-outline-light text-hover-green">Create</button>
-									</div>
-								</div>
-							</div>
-						</div>
             {#            <div class="row changeable">#}
             {#                <button type="button" class="btn btn-outline-light btn-circle text-hover-green change">#}
             {#                    <i class="fa fa-th-list change_icon" aria-hidden="true"></i>#}
@@ -128,7 +91,44 @@
                 </button>
             </div>
         </div>
-    </div>
+		</div>
+		<!-- Modal -->
+		<div class="modal fade" id="ModalPlus" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalCenterTitle">Modal title</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<form>
+							<div class="form-group">
+								<label>Sbml content:</label>
+								<div class="custom-file">
+									<input type="file" class="custom-file-input">
+									<label class="custom-file-label">Choose file</label>
+								</div>
+							</div>
+							<div class="form-group">
+								<label>Name:</label>
+								<input type="text" class="form-control">
+							</div>
+							<div class="form-group">
+								<label>Desc:</label>
+								<textarea class="form-control"></textarea>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary">Return</button>
+						<button type="button" class="btn btn-secondary">Reset</button>
+						<button type="button" class="btn btn-outline-light text-hover-green">Create</button>
+					</div>
+				</div>
+			</div>
+		</div>
     <script>
         $('button.slide').click(function () {
             if ($('.btn-group-fixed div.changeable').css('display') === 'none') {
