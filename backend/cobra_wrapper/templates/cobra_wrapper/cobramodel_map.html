@@ -42,6 +42,7 @@
 
 <script>
     let url = window.location.href;
+    url = url.slice(0, url.length - 4);
     url += 'json';
     load_builder(function (builder) {
         load_model(model => {
