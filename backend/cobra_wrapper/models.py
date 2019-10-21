@@ -136,9 +136,15 @@ class CobraModelChange(models.Model):
         """Use the method to get shown text of the change"""
         reactions = json.loads(self.reaction_info)['reactions']
         return '{} {} {}'.format(
-            ', '.join([reaction.name for reaction in reactions]),
+            ', '.join([reaction['name'] for reaction in reactions]),
             'are' if len(reactions) > 1 else 'is',
             'added' if self.change_type == 'add_reaction' else 'deleted')
+
+    def get_type_name(self):
+        return {
+            'del_reaction': 'Delete reactions',
+            'add_reaction': 'Add reactions',
+        }[self.change_type]
 
     def restore(self, name: str, desc: str = '') -> CobraModel:
         changes = CobraModelChange.objects.filter(model=self.model, created_time__gt=self.created_time)
