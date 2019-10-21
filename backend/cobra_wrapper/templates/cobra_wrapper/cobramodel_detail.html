@@ -56,7 +56,7 @@
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                    <div class="modal-body">
+                                    <div class="modal-body" id="share-modal-body">
                                         <form method="post" action="{% url 'share:create_share' %}">
                                             {% csrf_token %}
                                             <div class="form-group row">
@@ -68,7 +68,7 @@
                                                         <button type="button" class="btn btn-secondary"
                                                                 data-dismiss="modal">Close
                                                         </button>
-                                                        <button type="submit" class="btn btn-primary">Share</button>
+                                                        <button type="button" class="btn btn-primary" id="share">Share</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -175,6 +175,17 @@
         </div>
     </div>
     <script>
-
+    $('#share').on('click', function(){
+        $.ajax({
+            url: '/share/create',
+            method: 'post',
+            success: function (res) {
+                $('#share-modal-body').html('Share successfully!');
+            },
+            error: function (err) {
+                console.log('ajax err.')
+            }
+        })
+    });
     </script>
 {% endblock content %}
