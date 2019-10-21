@@ -143,7 +143,8 @@ class UserPack(LoginRequiredMixin, View):
             "type": obj_type,
             "counts": counts,
             "this_cnt": queryset.count(),
-            "queryset": items,
+            "page_obj": items,
+            "paginator": paginator,
             "is_paginated": False if queryset.count() <= 10 else True
         })
 
