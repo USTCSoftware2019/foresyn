@@ -252,3 +252,6 @@ LOGGING = {
         },
     },
 }
+
+LOGIN_URL = "/"
+
