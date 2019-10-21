@@ -68,7 +68,8 @@
                                                         <button type="button" class="btn btn-secondary"
                                                                 data-dismiss="modal">Close
                                                         </button>
-                                                        <button type="button" class="btn btn-primary" id="share">Share</button>
+                                                        <button type="button" class="btn btn-primary" id="share">Share
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -85,7 +86,8 @@
                                 Map</a>
                             {% for reaction in reactions %}
                                 <li
-                                   class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.cobra_id }}]</li>
+                                        class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.cobra_id }}]
+                                </li>
                             {% endfor %}
                         </div>
                         <br>
@@ -175,17 +177,21 @@
         </div>
     </div>
     <script>
-    $('#share').on('click', function(){
-        $.ajax({
-            url: '/share/create',
-            method: 'post',
-            success: function (res) {
-                $('#share-modal-body').html('Share successfully!');
-            },
-            error: function (err) {
-                console.log('ajax err.')
-            }
-        })
-    });
+        $('#share').on('click', function () {
+            var token = $('input[name="csrfToken"]').attr('value');
+            $.ajax({
+                url: '/share/create',
+                method: 'post',
+                headers: {
+                    'X-CSRF-Token': token
+                },
+                success: function (res) {
+                    $('#share-modal-body').html('Share successfully!');
+                },
+                error: function (err) {
+                    console.log('ajax err.')
+                }
+            })
+        });
     </script>
 {% endblock content %}
