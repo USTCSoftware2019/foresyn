@@ -4,7 +4,7 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import DetailView, View
 from django.core.exceptions import ObjectDoesNotExist
-from share.models import ShareModel
+from .models import ShareModel
 from cobra_wrapper.models import CobraModel
 from cobra_wrapper.utils import load_sbml
 
@@ -65,33 +65,34 @@ class ModelShareView(DetailView):
         context_data['genes'] = json.loads(self.object.genes)
         context_data['username'] = self.object.owner.username
         context_data["desc"] = self.object.desc
+        context_data["id"] = self.object.id
         return context_data
 
 
 class AddToMyModel(View):
     def post(self, request):
         if not request.user.is_authenticated:
-            # return JsonResponse({"messages": "login required"}, status=401)
             return redirect("/accounts/login")
         user = request.user
         try:
             model_id = request.POST["id"]
         except KeyError:
-            # return JsonResponse({"messages": "bigg_id required"}, status=400)
             return HttpResponse("id required", status=400)
         try:
             share_model = ShareModel.objects.get(id=model_id)
         except ObjectDoesNotExist:
             return HttpResponse("No such model found", status=404)
-        cobra_model_object = CobraModel()
-        cobra_model_object.sbml_content = share_model.sbml_content
-        cobra_model_object.owner = user
         try:
             name = request.POST["name"]
         except KeyError:
             name = "new model"
+        cobra_model_object = CobraModel()
+        cobra_model_object.sbml_content = share_model.sbml_content
+        cobra_model_object.owner = user
+
+        print(cobra_model_object)
         cobra_model_object.name = name
         cobra_model_object.save()
-        cobra_model_object.cache(load_sbml(cobra_model_object.sbml_content))
+        # cobra_model_object.cache(load_sbml(cobra_model_object.sbml_content))
         # return JsonResponse({"messages": "OK"}, status=200)
         return redirect("/cobra/models")
