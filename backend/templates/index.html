@@ -7,253 +7,53 @@
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
-<link rel="stylesheet" href="{% static "css/animate.min.css" %}">
-<link rel="stylesheet" href="{% static "css/mycss.css" %}">
-<script src="{% static "javascript/jquery.min.js" %}"></script>
-<script src="{% static "javascript/bootstrap.min.js" %}"></script>
-<div style="position: fixed;height: 100%;width: 100%;background: #f1fafe;"></div>
-<div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;background: url(/static/image/background.jpg);background-size: contain;background-position:center;">
-  <div class="card" style=" width: 24rem;height: 236px;border-radius: 20px;position: relative;bottom: 0px;display:none;z-index:1">
-    <div class="card-body" style="padding-top: 70px;">
-      <form action="{% url 'login' %}" method="post">
-        {% csrf_token %}
-        <div class="form-group">
-          <input type="text" class="form-control" name="username" placeholder="Username">
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "css/animate.min.css" %}">
+    <link rel="stylesheet" href="{% static "css/mycss.css" %}">
+    <script src="{% static "javascript/jquery.min.js" %}"></script>
+    <script src="{% static "javascript/bootstrap.min.js" %}"></script>
+    <div style="position: fixed;height: 100%;width: 100%;background: #f1fafe;"></div>
+    <div class="d-flex justify-content-center align-items-center"
+         style="position: absolute;height: 100%;width: 100%;background: url(/static/image/background.jpg);background-size: contain;background-position:center;">
+        <div class="card"
+             style=" width: 24rem;height: 250px;border-radius: 20px;position: relative;bottom: 0px;display:none;z-index:1">
+            <div class="card-body" style="padding-top: 70px;">
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="username" placeholder="Username">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="password" placeholder="Password">
+                    </div>
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <input type="submit" class="btn btn-outline-light btn-side-circle text-hover-green"
+                           style="width: 100%;" value="Login">
+
+                    <div>
+                <span><a href="{% url 'accounts:signup' %}">Don't have an account?</a></span>
+                <span class="float-right"><a href="{% url 'password_reset' %}">Lost password?</a></span>
+            </div>
+                </form>
+
+            </div>
         </div>
-        <div class="form-group">
-          <input type="password" class="form-control" name="password" placeholder="Password">
-        </div>
-        <input type="hidden" name="next" value="{{ next }}">
-        <input type="submit" class="btn btn-outline-light btn-side-circle text-hover-green" style="width: 100%;" value="Login">
-      </form>
     </div>
-  </div>
-</div>
-<div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;">
-  <img src="{% static "image/hand.png" %}" style="width: 24rem; position: relative;top:170px">
-</div>
-<div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;">
-    <img src="{% static "image/gene.png" %}" class="animated infinite bounce slow gene" style="width: 12rem; position: relative;bottom:-50px;
+    <div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;">
+        <img src="{% static "image/hand.png" %}" style="width: 24rem; position: relative;top:170px">
+    </div>
+    <div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;">
+        <img src="{% static "image/gene.png" %}" class="animated infinite bounce slow gene" style="width: 12rem; position: relative;bottom:-50px;
     z-index:2;animation: jump-gene 1s;animation-iteration-count: infinite;animation-direction: alternate;cursor:pointer;">
-</div>
-<script>
-	$('img.gene').click(function () {
-		$(this).removeClass('animated infinite bounce slow')
-		$(this).css('animation', 'move-gene 1s')
-		$(this).css('bottom', '150px')
-		$('div.card').addClass('animated fadeInUp')
-		$('div.card').css('display', 'inline')
-	});
-</script>
-{% comment %}
-    <link rel="stylesheet" href="{% static 'css/index.css' %}">
-
-
-    <div id="content" class="w-100 h-100">
-        <div class="scroll_bar position-fixed">
-            <div class="dot first_page_bar"></div>
-            <div class="dot second_page_bar mt-3"></div>
-        </div>
-        <div class="first_page w-100 h-100 position-relative">
-            <div class="w-100 h-100">
-                <div class="login_box">
-                    <div class="w-100">
-                        <img src="{% static "image/logo.png" %}" alt class="w-75 m-auto d-block">
-                    </div>
-                    <div class="mt-3 describe text-center font-weight-bold text-white">
-                        <p class="mb-1">What We Do</p>
-                        <p class="mb-1">More Than We Do</p>
-                    </div>
-                    <div class="start w-100">
-                        <a class="btn btn-primary w-100 mt-4" href="
-                            {% if not user.is_authenticated %}
-                                {% url 'login' %}
-                            {% else %}
-                                {% url 'cobra_wrapper:cobramodel_list' %}
-                            {% endif %}
-                        ">START</a>
-                    </div>
-                    {#                    <div class="login w-100">#}
-                    {#                        <div class="btn btn-success w-100 mt-4">LOGIN</div>#}
-                    {#                    </div>#}
-                    {#                    <div class="login_form mt-4 ">#}
-                    {#                        <form action="#">#}
-                    {#                            <div class="form-group">#}
-                    {#                                <input type="text" class="form-control" placeholder="Username">#}
-                    {#                            </div>#}
-                    {#                            <div class="form-group">#}
-                    {#                                <input type="password" class="form-control" placeholder="Password">#}
-                    {#                            </div>#}
-                    {##}
-                    {#                        </form>#}
-                    {#                    </div>#}
-
-
-                </div>
-            </div>
-            <div class="first_page_footer">
-                <hr/>
-                <p class="text-center text-white font-weight-bold next_page">
-                    What's Our Project?
-                </p>
-            </div>
-        </div>
-        <div class="second_page w-100 h-100">
-            <div class="container h-100 d-flex justify-content-center align-items-center flex-column">
-                <div class="head text-white mb-5">
-                    <h2>Foresyn</h2>
-                    <h6>An useful and efficient tool.</h6>
-                </div>
-                <div class="w-100 d-flex">
-                    <div class="row w-100">
-                        <div class="col-4 mb-4">
-                            <div class="icon d-flex bg-light justify-content-center align-items-center">
-                                <img src="{% static 'image/icon-swagger.png' %}" alt="">
-                            </div>
-                            <h3 class="text-center text-white">Feature</h3>
-                            <p class="text-light text-center">Some description, some soem description.</p>
-                        </div>
-                        <div class="col-4 mb-4">
-                            <div class="icon d-flex bg-light justify-content-center align-items-center">
-                                <img src="{% static 'image/icon-swagger.png' %}" alt="">
-                            </div>
-                            <h3 class="text-center text-white">Feature</h3>
-                            <p class="text-light text-center">Some description, some soem description.</p>
-                        </div>
-                        <div class="col-4  mb-4">
-                            <div class="icon d-flex bg-light justify-content-center align-items-center">
-                                <img src="{% static 'image/icon-swagger.png' %}" alt="">
-                            </div>
-                            <h3 class="text-center text-white">Feature</h3>
-                            <p class="text-light text-center">Some description, some soem description.</p>
-                        </div>
-                        <div class="col-4 mb-4">
-                            <div class="icon d-flex bg-light justify-content-center align-items-center">
-                                <img src="{% static 'image/icon-swagger.png' %}" alt="">
-                            </div>
-                            <h3 class="text-center text-white">Feature</h3>
-                            <p class="text-light text-center">Some description, some soem description.</p>
-                        </div>
-                        <div class="col-4 mb-4">
-                            <div class="icon d-flex bg-light justify-content-center align-items-center">
-                                <img src="{% static 'image/icon-swagger.png' %}" alt="">
-                            </div>
-                            <h3 class="text-center text-white">Feature</h3>
-                            <p class="text-light text-center">Some description, some soem description.</p>
-                        </div>
-                        <div class="col-4 mb-4">
-                            <div class="icon d-flex bg-light justify-content-center align-items-center">
-                                <img src="{% static 'image/icon-swagger.png' %}" alt="">
-                            </div>
-                            <h3 class="text-center text-white">Feature</h3>
-                            <p class="text-light text-center">Some description, some soem description.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="second_page_footer w-100">
-                <hr/>
-                <p class="text-center text-white font-weight-bold previous_page">
-                    Back To Login
-                </p>
-            </div>
-        </div>
     </div>
     <script>
-        // dot
-        function check() {
-            if ($(".first_page").css("display") === "block") {
-                $(".first_page_bar").css("background-color", "white");
-                $(".second_page_bar").css("background-color", "transparent");
-            } else {
-                $(".first_page_bar").css("background-color", "transparent");
-                $(".second_page_bar").css("background-color", "white");
-            }
-        }
-
-        check();
-
-        // stop propagation
-        $(".first_page div.login_box").click(function (ev) {
-            ev.stopPropagation();
+        $('img.gene').click(function () {
+            $(this).removeClass('animated infinite bounce slow')
+            $(this).css('animation', 'move-gene 1s')
+            $(this).css('bottom', '150px')
+            $('div.card').addClass('animated fadeInUp')
+            $('div.card').css('display', 'inline')
         });
-
-        // when click start btn
-        {#$(".start").click(function () {#}
-        {#    $(".start").animate({#}
-        {#        marginTop: "-40px",#}
-        {#        opacity: "0"#}
-        {#    }, "fast", "swing", function () {#}
-        {#        $(".start").css("display", "none");#}
-        {#        $(".login, .login_form").css("display", "block");#}
-        {#        $(".login").animate({#}
-        {#            "marginTop": "0",#}
-        {#            "opacity": "1"#}
-        {#        });#}
-        {#        $(".login_form").animate({#}
-        {#            "left": "0",#}
-        {#            "opacity": "1"#}
-        {#        });#}
-        {#    });#}
-        {#);#}
-
-        $(".first_page").click(function () {
-            $(".login_form").animate({
-                left: "-90px",
-                opacity: "0"
-            }, function () {
-                $(".login_form").css("display", "none");
-            });
-            $(".login").animate({
-                marginTop: "40px",
-                opacity: "0"
-            }, function () {
-                $(".login").css("display", "none");
-                $(".start").css("display", "block");
-                $(".start").animate({
-                    marginTop: "0",
-                    opacity: "1"
-                })
-            });
-
-
-        });
-
-        function nextPage() {
-            $(".first_page").animate({
-                bottom: "100%",
-                opacity: "0"
-            }, "normal", "swing", function () {
-                $(".first_page").css("display", "none");
-                $(".second_page").css("display", "block");
-                $(".second_page").css("opacity", "1");
-                check();
-            });
-        }
-
-        function previousPage() {
-            $(".second_page").animate({
-                opacity: "0"
-            }, "normal", "swing", function () {
-                $(".second_page").css("display", "none");
-                $(".first_page").css("display", "block");
-                $(".first_page").animate({
-                    bottom: "0",
-                    opacity: "1"
-                });
-                check();
-            });
-        }
-
-        // page change
-        $(".next_page, .second_page_bar").click(function () {
-            nextPage();
-        });
-
-        $(".previous_page, .first_page_bar").click(function () {
-            previousPage();
-        })
     </script>
-{% endcomment %}
+
 {% endblock %}
