@@ -4,74 +4,81 @@
 {% load static %}
 
 {% block title %}
-Model: {{ model.bigg_id }}
+    Model: {{ model.bigg_id }}
 {% endblock %}
 
 {% block content %}
-<div id="content" class="container mt-4">
-  <div class="w-100 d-flex justify-content-between">
+    <div id="content" class="container mt-4">
+        <div class="w-100 d-flex justify-content-between">
             <h4>Model {{ model.bigg_id }} contains</h4>
             {% if user.is_authenticated %}
                 <a href="#" data-toggle="modal" data-target="#exampleModal">
                     <h5>{% favorite_button model %}</h5>
                 </a>
             {% endif %}
-    </div>
-  <table class="table table-hover table-bordered mt-3">
-    <thead>
-      <tr>
-        <th>Component</th>
-        <th>Count</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Row clickable or count clickable? -->
-      <tr>
-        <td>Reactions</td>
-        <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a></td>
-      </tr>
-      <tr>
-        <td>Metabolites</td>
-        <td><a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a></td>
-      </tr>
-      <tr>
-        <td>Genes</td>
-        <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
-      </tr>
-    </tbody>
-  </table>
-  <!-- Button trigger modal -->
-  <button type="button" class="btn btn-outline-light text-hover-green" data-toggle="modal" data-target="#ModalCenter">
-    add to computation
-  </button>
-  <!-- Modal -->
-  <div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="ModalCenterTitle">Modal title</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
         </div>
-        <div class="modal-body">
-          <form id="addModelForm" method="post" action="{% url 'data_wrapper:add_models' %}">
-            {% csrf_token %}
-            <div class="input-group mb-3">
-              <input type="text" name="name" class="form-control">
-              <input type="hidden" name="model_bigg_id" value="{{ model.bigg_id }}" class="form-control">
+        <table class="table table-hover table-bordered mt-3">
+            <thead>
+            <tr>
+                <th>Component</th>
+                <th>Count</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Row clickable or count clickable? -->
+            <tr>
+                <td>Reactions</td>
+                <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Metabolites</td>
+                <td>
+                    <a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Genes</td>
+                <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
+            </tr>
+            </tbody>
+        </table>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-outline-light text-hover-green" data-toggle="modal"
+                data-target="#ModalCenter">
+            add to computation
+        </button>
+        <!-- Modal -->
+        <div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalCenterTitle">Modal title</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addModelForm" method="post" action="{% url 'data_wrapper:add_models' %}">
+                            {% csrf_token %}
+                            <div class="input-group mb-3">
+                                <input type="text" name="name" class="form-control">
+                                <input type="text" name="desc" class="form-control">
+                                <input type="hidden" name="model_bigg_id" value="{{ model.bigg_id }}"
+                                       class="form-control">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-outline-light text-hover-green" form="addModelForm">Add
+                        </button>
+                    </div>
+                </div>
             </div>
-          </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-outline-light text-hover-green" form="addModelForm">Add</button>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 
     <script src="{% static "javascript/favorite_button.js" %}"></script>
 
