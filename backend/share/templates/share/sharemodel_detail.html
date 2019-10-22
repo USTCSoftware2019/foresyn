@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load favorite_tag %}
 
 {% block title %}{{ object }}{% endblock title %}
 
@@ -9,7 +10,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-content-between">
-                        <h5 style="padding-top: 5px;">Model: {{ object.name }}</h5>
+                        <h5 style="padding-top: 5px;">Model: {{ object.name }} {% favorite_button object %}</h5>
                         <h5 style="padding-top: 5px;">From: {{ username }}</h5>
                         <!-- Modal -->
                         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"

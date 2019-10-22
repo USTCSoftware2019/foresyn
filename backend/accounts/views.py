@@ -107,7 +107,7 @@ class UserPack(LoginRequiredMixin, View):
             "model": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
                 app_label='bigg_database', model='model')).count(),
             "usermodel": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
-                app_label='cobra_wrapper', model='cobramodel')).count(),
+                app_label='share', model='sharemodel')).count(),
             "reaction": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
                 app_label='bigg_database', model='reaction')).count(),
             "gene": Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
@@ -125,7 +125,7 @@ class UserPack(LoginRequiredMixin, View):
                 app_label='bigg_database', model='model'))
         elif obj_type == "usermodel":
             queryset = Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
-                app_label='cobra_wrapper', model='cobramodel'))
+                app_label='share', model='sharemodel'))
         elif obj_type == "reaction":
             queryset = Favorite.objects.filter(user=request.user, target_content_type=ContentType.objects.get(
                 app_label='bigg_database', model='reaction'))
