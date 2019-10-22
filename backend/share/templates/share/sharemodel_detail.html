@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 {% load favorite_tag %}
+{% load static %}
 
 {% block title %}{{ object }}{% endblock title %}
 
@@ -69,5 +70,5 @@
         </div>
     </div>
 
-
+<script src="{% static "javascript/favorite_button.js" %}"></script>
 {% endblock content %}
