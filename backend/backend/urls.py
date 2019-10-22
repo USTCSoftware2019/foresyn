@@ -23,7 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', auth_views.LoginView.as_view(template_name='index.html', extra_context={
         "ignore_header": True
-    }), name='login'),
+    }, redirect_authenticated_user=True), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
     path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
