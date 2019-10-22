@@ -10,12 +10,15 @@
                 <div class="bar-left"
                      style="width: 3px; height: {{ change_line_len }}px; background-color:#20c997"></div>
                 <div class="bar-btn-group col-1">
-                    <button class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="Created"></button>
+                    <button class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
+                            data-content="Created"></button>
                     {% for change in latest_changes %}
                         {# <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="{{ change }}"></button> #}
-                        <form method="post" action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
-                        {% csrf_token %}
-                        <input type="submit" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="{{ change }}">
+                        <form method="post"
+                              action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
+                            {% csrf_token %}
+                            <input type="button" class="row btn btn-sm-circle text-hover-green slide"
+                                   data-toggle="hover" data-content="{{ change }}">
                         </form>
                     {% endfor %}
                 </div>
@@ -61,12 +64,13 @@
                                         </button>
                                     </div>
                                     <div class="modal-body" id="share-modal-body">
-                                        <form method="post" action="{% url 'share:create_share' %}">
-                                            {% csrf_token %}
+                                        <form method="post" action="{% url 'share:create_share' %}" onsubmit="return false">
+
                                             <div class="form-group row">
                                                 <div class="col-12">
                                                     <label>description</label>
                                                     <input type="number" name="model_id" value="{{ object.pk }}" hidden>
+                                                    {% csrf_token %}
                                                     <input type="text" class="form-control" name="desc">
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary"
@@ -217,16 +221,32 @@
         </div>
     </div>
     <script>
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        var token = $('input[name="csrfmiddlewaretoken"]').attr('value');
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", token);
+                }
+            }
+        });
         $('#share').on('click', function () {
-            var token = $('input[name="csrfToken"]').attr('value');
+
+            var token = $('input[name="csrfmiddlewaretoken"]').attr('value');
             $.ajax({
                 url: '/share/create',
                 method: 'post',
-                headers: {
-                    'X-CSRF-Token': token
+                data: {
+                    "model_id": {{ object.pk }},
+                    "desc" : $('input[name="desc"]').attr('value')
                 },
+
                 success: function (res) {
-                    $('#share-modal-body').html('Share successfully!');
+                    console.log(res);
+                    $('#share-modal-body').html('Share successfully! Url: ' + res.url);
                 },
                 error: function (err) {
                     console.log('ajax err.')
