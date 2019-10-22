@@ -29,7 +29,7 @@
             <a class="nav-link {% if 'cobra' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'cobra_wrapper:cobramodel_list' %}">My Models</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == "guide" %}active{% endif %}" href="{% url 'accounts:guide' %}">Guide Book</a>
+            <a class="nav-link" href="https://2019.igem.org/Team:USTC-Software/Demonstrate">Guide Book</a>
           </li>
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == "pack" %}active{% endif %}" href="{% url 'accounts:pack' %}">My Pack</a>
