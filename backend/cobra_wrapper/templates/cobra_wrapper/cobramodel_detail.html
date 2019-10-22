@@ -17,8 +17,8 @@
                         <form method="post"
                               action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
                             {% csrf_token %}
-                            <input type="button" class="row btn btn-sm-circle text-hover-green slide"
-                                   data-toggle="hover" data-content="{{ change }}">
+                            <input type="submit" class="row btn btn-sm-circle text-hover-green slide"
+                                   data-toggle="hover" data-content="{{ change }}" value>
                         </form>
                     {% endfor %}
                 </div>
