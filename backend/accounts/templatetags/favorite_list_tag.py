@@ -61,6 +61,8 @@ def render_link_tag(obj):
         viewname = 'bigg_database:gene_detail'
     elif model == Metabolite:
         viewname = 'bigg_database:metabolite_detail'
+    elif model == ShareModel:
+        viewname = 'share:shared_cobra_model'
     else:
         return '#'
 
