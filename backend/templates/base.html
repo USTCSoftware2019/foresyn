@@ -48,11 +48,13 @@
 <body>
     {% if not ignore_header %}
     {% include "header.html" %}
-    <br><br>
     {% endif %}
     {#    <div id="content">#}
     {% block content %}{% endblock %}
     {#    </div>#}
+    {% if not ignore_header %}
+    <br><br>
+    {% endif %}
     {% include "footer.html" %}
 </body>
 
