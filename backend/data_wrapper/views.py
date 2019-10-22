@@ -34,6 +34,11 @@ class AddDataModelToCobra(View):
             name = request.POST["name"]
         except KeyError:
             name = "new model"
+        try:
+            desc = request.POST['desc']
+        except KeyError:
+            desc = "A new model"
+        cobra_model_object.desc = desc
         cobra_model_object.name = name
         cobra_model_object.save()
         cobra_model_object.cache(load_sbml(cobra_model_object.sbml_content))
