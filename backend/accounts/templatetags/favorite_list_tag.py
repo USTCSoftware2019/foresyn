@@ -1,6 +1,7 @@
 from django import template
 from django.template.loader import render_to_string
 from bigg_database.models import Model, Reaction, Gene, Metabolite
+from share.models import ShareModel
 from django.urls import reverse
 
 
@@ -12,7 +13,10 @@ def get_object_name(fav_obj):
     tp = fav_obj.target_content_type.model_class()
     pk = fav_obj.target_object_id
     obj = tp.objects.get(pk=pk)
-    return obj.bigg_id
+    if tp != ShareModel:
+        return obj.bigg_id
+    else:
+        return obj.name
 
 
 @register.filter
