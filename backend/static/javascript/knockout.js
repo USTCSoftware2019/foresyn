@@ -19,7 +19,7 @@
 
 function load_builder (callback) {
   // load the Builder
-  escher.libs.d3_json('http://igem.myl107.top/static/map.json', function(e, data) {
+  escher.libs.d3_json('https://foresyn.tech/static/map.json', function(e, data) {
     if (e) console.warn(e);
     var options = {
       menu: 'all',
