@@ -1,12 +1,12 @@
 from django.urls import path
 
-from search.views import DatabaseSearchView
+from search.views import BiGGDatabaseSearchView
 from . import views
 from . import api_views
 
 app_name = 'bigg_database'
 urlpatterns = [
-    path('search', DatabaseSearchView.as_view(),
+    path('search', BiGGDatabaseSearchView.as_view(),
          name='search'),
     path('model/<int:pk>', views.ModelDetailView.as_view(),
          name='model_detail'),

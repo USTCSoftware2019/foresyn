@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'haystack',
     'corsheaders',
     'crispy_forms',  # add django template cache before deployment
+    'mathfilters',
 
     'regulation',
     'biobricks',
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
     'share',
     'bigg_database',
     'accounts',
+    'search'
 ]
 
 if config.USE_ELASTICSEARCH:
@@ -128,6 +130,16 @@ else:
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
+
+# Postgresql Database
+# Used for search
+PSQL_DATABASE = {
+    'USER': 'igem',
+    'PASSWORD': 'igem',
+    'NAME': 'igem_backend',
+    'HOST': os.environ.get("PSQL_HOST") or "127.0.0.1"
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

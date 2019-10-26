@@ -8,6 +8,17 @@ from haystack.query import SQ
 from bigg_database.models import Gene, Reaction
 
 
+class BareSearchForm(forms.Form):
+    q = forms.CharField(required=False, label='Search')
+    MODEL_CHOICES = [
+        ('model', 'Model'),
+        ('reaction', 'Reaction'),
+        ('metabolite', 'Metabolite'),
+        ('gene', 'Gene')
+    ]
+    model = forms.ChoiceField(choices=MODEL_CHOICES, required=False)
+
+
 class ModifiedModelSearchForm(ModelSearchForm):
     q = forms.CharField(required=True, label='Search',
                         widget=forms.TextInput(attrs={'type': 'search'}))
