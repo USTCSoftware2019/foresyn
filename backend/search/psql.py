@@ -34,31 +34,24 @@ class Gene(Base):
 Base.metadata.create_all(engine)
 
 
-def apply_limit_offset(query, sort_column_object=None, page=None, size=None):
+def apply_order(query, sort_column_object=None):
     # Always descending
     if type(sort_column_object) is list:
         query = query.order_by(*[desc(x) for x in sort_column_object])
     else:
         query = query.order_by(desc(sort_column_object))
 
-    if page and size:
-        page = int(page)
-        size = int(size)
-        offset = page * size
-        query = query.limit(size).offset(offset)
-
     return query
 
 
 def search_model(query_string, bigg_id_sim_cutoff=0.2, page=None, size=None):
     sim_bigg_id = func.similarity(Model.bigg_id, query_string)
-    # sort_column_object = Model.bigg_id
+    sort_column_object = Model.bigg_id
     query = (session
              .query(Model.bigg_id, Model.django_orm_id)
              .filter(sim_bigg_id >= bigg_id_sim_cutoff)
              )
-    # query = apply_limit_offset(query, sort_column_object)
-    # return [{'bigg_id': o[0]} for o in query]
+    query = apply_order(query, sort_column_object)
     return query
 
 
@@ -79,7 +72,7 @@ def search(query_string, model,
     sim_bigg_id = func.similarity(model.bigg_id, query_string)
     sim_name = func.similarity(model.name, query_string)
 
-    # sort_column_object = func.greatest(sim_bigg_id, sim_name)
+    sort_column_object = func.greatest(sim_bigg_id, sim_name)
 
     # Always order by the greater similarity
     query = (session
@@ -89,9 +82,8 @@ def search(query_string, model,
                               model.name != '')))
              )
 
-    # query = apply_limit_offset(query, sort_column_object, page, size)
+    query = apply_order(query, sort_column_object)
 
-    # return [{'bigg_id': o[0], 'name':[1]} for o in query]
     return query
 
 
