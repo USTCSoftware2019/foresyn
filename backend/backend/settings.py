@@ -134,10 +134,10 @@ else:
 # Postgresql Database
 # Used for search
 PSQL_DATABASE = {
-    'USER': 'igem',
-    'PASSWORD': 'igem',
+    'USER': config.PSQL_USER,
+    'PASSWORD': config.PSQL_PASSWORD,
     'NAME': 'igem_backend',
-    'HOST': os.environ.get("PSQL_HOST") or "127.0.0.1"
+    'HOST': config.PSQL_HOST
 }
 
 
@@ -263,4 +263,3 @@ LOGGING = {
 }
 
 LOGIN_URL = "/"
-
