@@ -15,8 +15,6 @@ view_map = {
 def render_link_tag(obj, search_model):
     if obj is None:
         return '#'
-    print(search_model)
-    print(obj)
     viewname = view_map.get(search_model)
     if not viewname:
         return '#'
