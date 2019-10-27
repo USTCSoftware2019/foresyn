@@ -47,32 +47,29 @@ class BiGGDatabaseSearchView(MultipleObjectMixin, FormView):
         else:
             return self.form_invalid(form)
 
+    def construct_query(self, query_string, model, append_django_orm_id=False, apply_order=False):
+        sq = SimilarityQuery()
+        sq = sq.query(query_string)
+        sq = sq.entities(model.bigg_id) \
+            .entities(model.name if hasattr(model, 'name') else None) \
+            .entities(model.django_orm_id if append_django_orm_id else None)
+        sq = sq.apply_filter_or(model.bigg_id, 0.2) \
+            .apply_filter_or(model.name if hasattr(model, 'name') else None, 0.3)
+        if apply_order:
+            sq = sq.apply_order()
+        return sq
+
     def form_valid(self, form):
         query_string = form.cleaned_data['q']
         search_model = form.cleaned_data.get('model') or 'model'
         model = self.model_map[search_model]
 
-        sq = (SimilarityQuery()
-              .query(query_string)
-              # Bad way to special judge Model
-              .entities(model.bigg_id)
-              .entities(model.name if hasattr(model, 'name') else None)
-              .entities(model.django_orm_id)
-              # Different entities should have different threshold
-              .apply_filter_or(model.bigg_id, 0.2)
-              .apply_filter_or(model.name if hasattr(model, 'name') else None, 0.3)
-              .apply_order()
-              )
+        sq = self.construct_query(query_string, model, append_django_orm_id=True, apply_order=True)
         object_list = sq.load_query()
 
         total_number = {
-            model_name: (SimilarityQuery()
-                         .query(query_string)
-                         # Bad way to special judge Model
-                         .entities(model_cls.bigg_id)
-                         .entities(model_cls.name if hasattr(model_cls, 'name') else None)
-                         .apply_filter_or(model_cls.bigg_id, 0.2)
-                         .apply_filter_or(model_cls.name if hasattr(model_cls, 'name') else None, 0.3)
+            model_name: (self.construct_query(query_string, model_cls,
+                                              append_django_orm_id=False, apply_order=False)
                          .count()
                          )
             for model_name, model_cls in self.model_map.items()
