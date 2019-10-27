@@ -24,20 +24,20 @@ Search result - {{ query }}
   <div class="row">
     <div class="left_index col-3">
       <ul class="list-group text-primary">
-        <a href="?q={{ query }}&model=model"
+        <a {% if counts.model != 0 %} href="?q={{ query }}&model=model" {% else %} href="#" {%endif%}
           class="list-group-item {% if search_model == 'Model' %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">
           Model<span class="badge badge-info badge-search">{{ counts.model }}{% if search_model != "model" %}{% endif %}</span>
         </a>
 
-        <a href="?q={{ query }}&model=reaction"
+        <a {% if counts.reaction != 0 %} href="?q={{ query }}&model=reaction" {% else %} href="#" {%endif%}
           class="list-group-item {% if search_model == 'Reaction' %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">
           Reaction<span class="badge badge-info badge-search">{{ counts.reaction }}{% if search_model != "reaction" %}{% endif %}</span>
         </a>
-        <a href="?q={{ query }}&model=metabolite"
+        <a {% if counts.metabolite != 0 %} href="?q={{ query }}&model=metabolite" {% else %} href="#" {%endif%}
           class="list-group-item {% if search_model == 'Metabolite' %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">
           Metabolite<span class="badge badge-info badge-search">{{ counts.metabolite }}{% if search_model != "metabolite" %}{% endif %}</span>
         </a>
-        <a href="?q={{ query }}&model=gene"
+        <a {% if counts.gene != 0 %} href="?q={{ query }}&model=gene" {% else %} href="#" {%endif%}
           class="list-group-item {% if search_model == 'Gene' %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">
           Gene<span class="badge badge-info badge-search">{{ counts.gene }}{% if search_model != "gene" %}{% endif %}</span>
         </a>
@@ -60,8 +60,7 @@ Search result - {{ query }}
                 {{ search_result.bigg_id }}
               </h5>
             </a>
-            {% favorite_button search_result %}
-{#            <i class="fa fa-star-o mr-2"></i>#}
+            {% favorite_button search_result app_label='bigg_database' model_name=search_model %}
           </div>
           <p class="mb-1">
             {% ifequal search_model 'model' %}

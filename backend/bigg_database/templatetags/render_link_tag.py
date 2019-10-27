@@ -19,4 +19,4 @@ def render_link_tag(obj, search_model):
     if not viewname:
         return '#'
 
-    return reverse(viewname=viewname, args=(obj[-1],))
+    return reverse(viewname=viewname, args=(obj.django_orm_id,))

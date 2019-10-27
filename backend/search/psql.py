@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, and_, desc, func, or_
+from sqlalchemy import Column, Integer, String, desc, func
 
 from backend.psql import Base, DBSession, engine
 
@@ -21,9 +21,7 @@ class SimilarityQuery:
     def query(self, *query_strings):
         clone = self._clone()
 
-        for query_string in query_strings:
-            clone.query_strings.append(query_string)
-
+        clone.query_strings.extend(query_strings)
         return clone
 
     def entities(self, *stuff):
