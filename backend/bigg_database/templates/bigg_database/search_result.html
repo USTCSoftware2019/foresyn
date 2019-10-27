@@ -24,22 +24,22 @@ Search result - {{ query }}
   <div class="row">
     <div class="left_index col-3">
       <ul class="list-group text-primary">
-        <a href="?q={{ query }}&model=bigg_database.Model"
+        <a {% if counts.model != 0 %} href="?q={{ query }}&model=model" {% else %} href="#" {%endif%}
           class="list-group-item {% if search_model == 'Model' %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">
-          Model<span class="badge badge-info badge-search">{{ counts.Model }}{% if search_model != "Model" %}+{% endif %}</span>
+          Model<span class="badge badge-info badge-search">{{ counts.model }}{% if search_model != "model" %}{% endif %}</span>
         </a>
 
-        <a href="?q={{ query }}&model=bigg_database.Reaction"
+        <a {% if counts.reaction != 0 %} href="?q={{ query }}&model=reaction" {% else %} href="#" {%endif%}
           class="list-group-item {% if search_model == 'Reaction' %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">
-          Reaction<span class="badge badge-info badge-search">{{ counts.Reaction }}{% if search_model != "Reaction" %}+{% endif %}</span>
+          Reaction<span class="badge badge-info badge-search">{{ counts.reaction }}{% if search_model != "reaction" %}{% endif %}</span>
         </a>
-        <a href="?q={{ query }}&model=bigg_database.Metabolite"
+        <a {% if counts.metabolite != 0 %} href="?q={{ query }}&model=metabolite" {% else %} href="#" {%endif%}
           class="list-group-item {% if search_model == 'Metabolite' %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">
-          Metabolite<span class="badge badge-info badge-search">{{ counts.Metabolite }}{% if search_model != "Metabolite" %}+{% endif %}</span>
+          Metabolite<span class="badge badge-info badge-search">{{ counts.metabolite }}{% if search_model != "metabolite" %}{% endif %}</span>
         </a>
-        <a href="?q={{ query }}&model=bigg_database.Gene"
+        <a {% if counts.gene != 0 %} href="?q={{ query }}&model=gene" {% else %} href="#" {%endif%}
           class="list-group-item {% if search_model == 'Gene' %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">
-          Gene<span class="badge badge-info badge-search">{{ counts.Gene }}{% if search_model != "Gene" %}+{% endif %}</span>
+          Gene<span class="badge badge-info badge-search">{{ counts.gene }}{% if search_model != "gene" %}{% endif %}</span>
         </a>
 
       </ul>
@@ -47,7 +47,7 @@ Search result - {{ query }}
     <div class="right_content col-9">
 
       <h5 class="result_num">{{ search_result_count }} result{% if search_result_count <= 1 %}{% else %}s{% endif %} in
-        {{ search_model }}, {{ total_count }} result{% if total_count <= 1 %}{% else %}s{% endif %}+ in total</h5>
+        {{ search_model }}, {{ total_count }} result{% if total_count <= 1 %}{% else %}s{% endif %} in total</h5>
       <div class="list-group list-group-flush mb-5">
         {% if search_result_count == 0 %}
         <h3>No results.</h3>
@@ -55,16 +55,15 @@ Search result - {{ query }}
         {% for search_result in object_list %}
         <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
           <div class="d-flex w-100 justify-content-between">
-            <a class="mb-1" href="{% render_link_tag search_result %}">
+            <a class="mb-1" href="{% render_link_tag search_result search_model %}">
               <h5>
                 {{ search_result.bigg_id }}
               </h5>
             </a>
-            {% favorite_button search_result %}
-{#            <i class="fa fa-star-o mr-2"></i>#}
+            {% favorite_button search_result app_label='bigg_database' model_name=search_model %}
           </div>
           <p class="mb-1">
-            {% ifequal search_model 'Model' %}
+            {% ifequal search_model 'model' %}
             {# **Please determine what to put here** #}
             {% else %}
             {{ search_result.name }}

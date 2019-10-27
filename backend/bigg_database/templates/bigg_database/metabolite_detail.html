@@ -47,14 +47,14 @@ Metabolite: {{ meta.bigg_id }}
             {% endif %}
             <tr>
                 <td><a href="{% url 'bigg_database:metabolite_from_reactions' meta.id %}">
-                    Reactions Containing {{ gene.bigg_id }}</a></td>
+                    Reactions Containing {{ meta.bigg_id }}</a></td>
                 <td>
                     {% render_list_tag meta.reactions.all 'reaction' 'reaction_metabolite_relationship_detail' id=meta.id reverse=True %}
                 </td>
             </tr>
             <tr>
                 <td><a href="{% url 'bigg_database:metabolites_in_model' meta.id %}">
-                    Models Containing {{ gene.bigg_id }}</a></td>
+                    Models Containing {{ meta.bigg_id }}</a></td>
                 <td>
                     {% render_list_tag meta.models.all 'model' 'model_metabolite_relationship_detail' id=meta.id reverse=True %}
                 </td>

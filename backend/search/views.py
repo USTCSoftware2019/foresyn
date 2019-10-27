@@ -1,23 +1,42 @@
-from django.shortcuts import render, redirect, reverse
-from django.views.generic import FormView
-from haystack.generic_views import SearchMixin
+from django.shortcuts import redirect, render, reverse
+from django.views.generic import FormView, View
+from django.views.generic.edit import FormMixin
+from django.views.generic.list import MultipleObjectMixin
 
-from bigg_database.models import Gene as BiggGene
-from bigg_database.models import Metabolite as BiggMetabolite
-from bigg_database.models import Model as BiggModel
-from bigg_database.models import Reaction as BiggReaction
+from .forms import BareSearchForm
+from .models import Gene as psqlGene
+from .models import Metabolite as psqlMetabolite
+from .models import Model as psqlModel
+from .models import Reaction as psqlReaction
+from .psql import SimilarityQuery
 
-from .forms import ModifiedModelSearchForm, BiggOptimizedSearchForm
 
+class BiGGDatabaseSearchView(MultipleObjectMixin, FormView):
+    form_class = BareSearchForm
+    template_name = 'bigg_database/search_result.html'
+    paginate_by = 10
+    model_map = {
+        'model': psqlModel,
+        'reaction': psqlReaction,
+        'metabolite': psqlMetabolite,
+        'gene': psqlGene
+    }
 
-class BaseSearchView(SearchMixin, FormView):
-    form_class = ModifiedModelSearchForm
-    models = None
+    def get_form_kwargs(self):
+        """
+        Returns the keyword arguments for instantiating the form.
+        """
+        kwargs = {'initial': self.get_initial()}
+        if self.request.method == 'GET':
+            kwargs.update({
+                'data': self.request.GET,
+            })
+        return kwargs
 
     def get_form(self, form_class=None):
         if form_class is None:
             form_class = self.get_form_class()
-        return form_class(self.models, **self.get_form_kwargs())
+        return form_class(**self.get_form_kwargs())
 
     def get(self, request, *args, **kwargs):
         form_class = self.get_form_class()
@@ -28,33 +47,46 @@ class BaseSearchView(SearchMixin, FormView):
         else:
             return self.form_invalid(form)
 
+    def construct_query(self, query_string, model, append_django_orm_id=False, apply_order=False):
+        sq = SimilarityQuery()
+        sq = sq.query(query_string)
+        sq = sq.entities(model.bigg_id) \
+            .entities(getattr(model, 'name', None)) \
+            .entities(model.django_orm_id if append_django_orm_id else None)
+        sq = sq.apply_filter_or(model.bigg_id, 0.2) \
+            .apply_filter_or(getattr(model, 'name', None), 0.3)
+        if apply_order:
+            sq = sq.apply_order()
+        return sq
+
     def form_valid(self, form):
-        self.queryset = form.search()
+        query_string = form.cleaned_data['q']
+        search_model = form.cleaned_data.get('model') or 'model'
+        model = self.model_map[search_model]
+
+        sq = self.construct_query(query_string, model, append_django_orm_id=True, apply_order=True)
+        object_list = sq.load_query()
+
+        total_number = {
+            model_name: (self.construct_query(query_string, model_cls,
+                                              append_django_orm_id=False, apply_order=False)
+                         .count()
+                         )
+            for model_name, model_cls in self.model_map.items()
+            if model_cls != model
+        }
+        total_number[search_model] = object_list.count()
+
         context = {
-            self.form_name: form,
+            'form': form,
             'query': form.cleaned_data['q'],
-            'object_list': self.queryset,
-            'search_model': form.search_model._meta.verbose_name,
-            'search_result_count': len(self.queryset)
+            'object_list': object_list,
+            'search_model': search_model,
+            'search_result_count': object_list.count(),
+            'total_count': sum([c for _, c in total_number.items()]),
+            'counts': total_number
         }
-        return context
 
-
-class DatabaseSearchView(BaseSearchView):
-    form_class = BiggOptimizedSearchForm
-    models = [BiggModel, BiggReaction, BiggMetabolite, BiggGene]
-    template_name = 'bigg_database/search_result.html'
-    paginate_by = 10
-
-    def form_valid(self, form):
-        context = super().form_valid(form)
-
-        total_number = form.additional_model_count()
-        context = {
-            'total_count': sum(count for _, count in total_number.items()),
-            'counts': total_number,
-            **context
-        }
         context = self.get_context_data(**context)
         return self.render_to_response(context)
 

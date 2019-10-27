@@ -40,9 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'haystack',
     'corsheaders',
     'crispy_forms',  # add django template cache before deployment
+    'mathfilters',
 
     'regulation',
     'biobricks',
@@ -51,24 +51,8 @@ INSTALLED_APPS = [
     'share',
     'bigg_database',
     'accounts',
+    'search'
 ]
-
-if config.USE_ELASTICSEARCH:
-    default_elasticsearch_host = '127.0.0.1'
-    elasticsearch_host = config.ELASTICSEARCH_HOST or default_elasticsearch_host
-    HAYSTACK_CONNECTIONS = {
-        'default': {
-            'ENGINE': 'bigg_database.haystack_engine.FuzzyEngine',
-            'URL': 'http://{}:9200/'.format(elasticsearch_host),
-            'INDEX_NAME': 'haystack',
-        },
-    }
-else:
-    HAYSTACK_CONNECTIONS = {
-        'default': {
-            'ENGINE': 'haystack.backends.simple_backend.SimpleEngine'
-        }
-    }
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -129,6 +113,16 @@ else:
         }
     }
 
+# Postgresql Database
+# Used for search
+PSQL_DATABASE = {
+    'USER': config.PSQL_USER,
+    'PASSWORD': config.PSQL_PASSWORD,
+    'NAME': 'igem_backend',
+    'HOST': config.PSQL_HOST
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
@@ -185,8 +179,6 @@ EMAIL_PORT = config.EMAIL_PORT
 EMAIL_HOST_USER = config.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = config.EMAIL_HOST_PASSWORD
 DEFAULT_FROM_EMAIL = config.DEFAULT_FROM_EMAIL
-
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 CELERY_BROKER_URL = config.CELERY_BROKER_URL
 CELERY_RESULT_BACKEND = 'rpc://'
@@ -251,4 +243,3 @@ LOGGING = {
 }
 
 LOGIN_URL = "/"
-

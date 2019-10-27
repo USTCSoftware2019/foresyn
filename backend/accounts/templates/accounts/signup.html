@@ -20,7 +20,7 @@ Sign up
     <div class="container mt-4">
 <form method="post" action="{% url 'accounts:signup' %}">
     {% csrf_token %}
-    {{ form|crispy }}
+    {% crispy form %}
     <input type="submit" value="Submit" class="btn btn-primary">
 </form>
     </div>

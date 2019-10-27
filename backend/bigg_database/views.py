@@ -11,10 +11,7 @@ from django.shortcuts import Http404, redirect, render, reverse
 from django.utils.translation import gettext as _
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.detail import SingleObjectMixin
-from haystack.generic_views import SearchView as HaystackSearchView
-from haystack.query import SQ, SearchQuerySet
 
-from .common import TopKHeap
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
                      Reaction, ReactionGene, ReactionMetabolite)
 
