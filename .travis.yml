@@ -24,11 +24,12 @@ install:
 
 before_script:
   - cd backend
-  - cp backend/config.py.example backend/config.py
+  - cp backend/config.example.py backend/config.py
   - env PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results &> celery_backend.log &
   - (cd cobra_wrapper/remote &&
     env PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds &> celery_computation.log &)
-  - psql -c 'create database igm_backend;' -U postgres
+  - psql -c "create database igm_backend;" -U postgres
+  - psql -c "echo \"CREATE USER igem WITH PASSWORD 'igem';\" | psql" -U postgres
   - echo "STATIC_ROOT = '/tmp/static'" >> backend/settings.py
 
 script:
