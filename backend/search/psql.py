@@ -11,17 +11,19 @@ Base.metadata.create_all(engine)
 
 
 class SimilarityQuery:
-    def __init__(self, query_string='', query_list=None, filter_list=None, ordered_query=False, limit=0):
-        self.query_string = query_string
+    def __init__(self, query_strings=None, query_list=None, filter_list=None, ordered_query=False, limit=0):
+        self.query_strings = query_strings or []
         self.query_list = query_list or []
         self.filter_list = filter_list or []
         self.ordered_query = ordered_query
         self.size_limit = limit
 
-    def query(self, query_string):
+    def query(self, *query_strings):
         clone = self._clone()
 
-        clone.query_string = query_string
+        for query_string in query_strings:
+            clone.query_strings.append(query_string)
+
         return clone
 
     def entities(self, *stuff):
@@ -58,16 +60,20 @@ class SimilarityQuery:
         filter_query = None
         sim_obj_list = []
         query = session.query(*self.query_list)
+        query_strings = self.query_strings or ['']
+
         for entity, threshold in self.filter_list:
-            sim_entity = func.similarity(entity, self.query_string)
-            sim_obj_list.append(sim_entity)
-            if filter_query is None:
-                filter_query = (sim_entity >= threshold) & (entity != '')
-            else:
-                filter_query = filter_query | \
-                    (sim_entity >= threshold) & (entity != '')
+            for query_string in query_strings:
+                sim_entity = func.similarity(entity, query_string)
+                sim_obj_list.append(sim_entity)
+                if filter_query is None:
+                    filter_query = (sim_entity >= threshold) & (entity != '')
+                else:
+                    filter_query = filter_query | \
+                        (sim_entity >= threshold) & (entity != '')
 
         query = query.filter(filter_query)
+        print(sim_obj_list)
         if self.ordered_query:
             query = query.order_by(desc(func.greatest(*sim_obj_list)))
         if self.size_limit:
@@ -78,6 +84,6 @@ class SimilarityQuery:
         if klass is None:
             klass = self.__class__
 
-        clone = klass(self.query_string, self.query_list,
+        clone = klass(self.query_strings, self.query_list,
                       self.filter_list, self.ordered_query, self.size_limit)
         return clone
