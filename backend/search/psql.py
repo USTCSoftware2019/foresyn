@@ -73,7 +73,6 @@ class SimilarityQuery:
                         (sim_entity >= threshold) & (entity != '')
 
         query = query.filter(filter_query)
-        print(sim_obj_list)
         if self.ordered_query:
             query = query.order_by(desc(func.greatest(*sim_obj_list)))
         if self.size_limit:
