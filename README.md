@@ -38,6 +38,7 @@ Assuming that you are using Debian Buster and Python 3.7.
    ```shell
    $ echo "CREATE DATABASE igem_backend CHARACTER SET utf8 COLLATE utf8_bin;" | sudo mysql # Create database with name "igem_backend" for mysql
    $ sudo su postgres -c "echo \"CREATE DATABASE igem_backend\" | psql" # Create database with name "igem_backend" for PostgreSQL
+   $ sudo su postgres -c "echo \"CREATE EXTENSION pg_trgm\" | psql --dbname=igem_backend" # Add extension to calculate similarity
    $ sudo su postgres -c "echo \"CREATE USER igem WITH PASSWORD 'igem';\" | psql" # Create a new user "igem" with password "igem" for PostgreSQL
    (venv) $ python manage.py migrate
    $ echo "SET GLOBAL max_allowed_packet=107374182;" | sudo mysql # ensure the large dump imported successfully
