@@ -6,10 +6,10 @@ from bigg_database.models import Gene as mysqlGene
 from bigg_database.models import Metabolite as mysqlMetabolite
 from bigg_database.models import Model as mysqlModel
 from bigg_database.models import Reaction as mysqlReaction
-from search.psql import Gene as psqlGene
-from search.psql import Metabolite as psqlMetabolite
-from search.psql import Model as psqlModel
-from search.psql import Reaction as psqlReaction
+from search.models import Gene as psqlGene
+from search.models import Metabolite as psqlMetabolite
+from search.models import Model as psqlModel
+from search.models import Reaction as psqlReaction
 
 
 def main():
