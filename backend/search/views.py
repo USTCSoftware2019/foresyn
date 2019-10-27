@@ -51,10 +51,10 @@ class BiGGDatabaseSearchView(MultipleObjectMixin, FormView):
         sq = SimilarityQuery()
         sq = sq.query(query_string)
         sq = sq.entities(model.bigg_id) \
-            .entities(model.name if hasattr(model, 'name') else None) \
+            .entities(getattr(model, 'name', None)) \
             .entities(model.django_orm_id if append_django_orm_id else None)
         sq = sq.apply_filter_or(model.bigg_id, 0.2) \
-            .apply_filter_or(model.name if hasattr(model, 'name') else None, 0.3)
+            .apply_filter_or(getattr(model, 'name', None), 0.3)
         if apply_order:
             sq = sq.apply_order()
         return sq
