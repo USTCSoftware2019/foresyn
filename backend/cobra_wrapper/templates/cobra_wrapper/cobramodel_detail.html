@@ -242,9 +242,8 @@
                 method: 'POST',
                 data: {
                     "model_id": {{ object.pk }},
-                    "desc" : $('input[name="desc"]').attr('value')
+                    "desc": $('input[name="desc"]').attr('value')
                 },
-
                 success: function (res) {
                     console.log(res);
                     $('#share-modal-body').html('Share successfully! Url: ' + res.url);
