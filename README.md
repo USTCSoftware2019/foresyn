@@ -9,19 +9,13 @@ Assuming that you are using Debian Buster and Python 3.7.
 
 ### Initialization
 
-1. Install MySQL (or MariaDB), RabbitMQ and ElasticSearch 2.4.6.
+1. Install MySQL (or MariaDB), PostgreSQL and RabbitMQ.
 
    ```shell
-   # apt install mariadb-server rabbitmq-server p7zip-full
-   # apt install apt-transport-https ca-certificates wget dirmngr gnupg software-properties-common  # setting up openjdk8, as buster no longer provides it
-   # wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
-   # add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
-   # apt update
-   # apt install adoptopenjdk-8-hotspot
-   # wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.6/elasticsearch-2.4.6.deb
-   # dpkg --install elasticsearch-2.4.6.deb
-   # mysql_secure_installation  # setting mysql/mariadb
-   # mysql  
+   $ apt update && apt upgrade
+   $ apt install mariadb-server rabbitmq-server p7zip-full python3-psycopg2 libpq-dev postgresql postgresql-contrib
+   $ mysql_secure_installation  # setting mysql/mariadb
+   $ mysql  
    (and then type `GRANT ALL ON *.* TO 'set_your_admin_user_name_here'@'localhost' IDENTIFIED BY 'set_your_admin_password_here' WITH GRANT OPTION;` and `FLUSH PRIVILEGES;` inside, to let our project access mysql database)
    ```
 
@@ -44,15 +38,15 @@ Assuming that you are using Debian Buster and Python 3.7.
    ```shell
    $ echo "CREATE DATABASE igem_backend CHARACTER SET utf8 COLLATE utf8_bin;" | sudo mysql
    (venv) $ python manage.py migrate
-   $ sudo mysql
-   (and then type `SET GLOBAL max_allowed_packet=107374182;`, to ensure the large dump imported successfully)
+   $ echo "SET GLOBAL max_allowed_packet=107374182;" | sudo mysql # ensure the large dump imported successfully
    $ sudo mysql < data/all.sql
+   $ sudo su postgres -c "echo 'CREATE DATABASE igem_backend' | psql" # Create database with name of igem_backend for PostgreSQL
    ```
 
-6. Initialize ElasticSearch by typing:
+6. Import data to PostgreSQL by typing:
 
    ```shell
-   (venv) $ python manage.py rebuild_index
+   (venv) $ python manage.py migrate_to_psql
    ```
 
 
