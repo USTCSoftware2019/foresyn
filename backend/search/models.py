@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Text
 
 from backend.psql import Base, DBSession, engine
 
@@ -33,6 +33,14 @@ class Gene(Base):
     django_orm_id = Column(Integer, unique=True, primary_key=True)
     bigg_id = Column(String(127), unique=True, index=True)
     name = Column(String(127))
+
+
+class Biobrick(Base):
+    __tablename__ = 'biobrick'
+    django_orm_id = Column(Integer, unique=True, primary_key=True)
+    partname = Column(String(127))
+    description = Column(Text)
+    keywords = Column(Text)
 
 
 # Create the models above this line

@@ -6,10 +6,12 @@ from bigg_database.models import Gene as mysqlGene
 from bigg_database.models import Metabolite as mysqlMetabolite
 from bigg_database.models import Model as mysqlModel
 from bigg_database.models import Reaction as mysqlReaction
+from biobricks.models import Biobrick as mysqlBiobrick
 from search.models import Gene as psqlGene
 from search.models import Metabolite as psqlMetabolite
 from search.models import Model as psqlModel
 from search.models import Reaction as psqlReaction
+from search.models import Biobrick as psqlBiobrick
 
 
 def main():
@@ -17,6 +19,7 @@ def main():
     print('Migrating Model')
     current_process = 0
     total_count = mysqlModel.objects.count()
+
     for obj in mysqlModel.objects.all():
         print_progressbar(current_process, total_count)
         new_obj = psqlModel(django_orm_id=obj.id, bigg_id=obj.bigg_id)
@@ -41,6 +44,17 @@ def main():
             session.add(new_obj)
             current_process += 1
         print_progressbar(total_count, total_count)
+
+    print('Migrating Biobrick')
+    current_process = 0
+    total_count = mysqlBiobrick.objects.count()
+    for obj in mysqlBiobrick.objects.all():
+        print_progressbar(current_process, total_count)
+        new_obj = psqlBiobrick(django_orm_id=obj.id, partname=obj.part_name, description=obj.description, keywords=obj.keywords)
+        session.add(new_obj)
+        current_process += 1
+    print_progressbar(total_count, total_count)
+
     session.commit()
     session.close()
 
