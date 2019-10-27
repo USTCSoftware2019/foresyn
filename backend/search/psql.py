@@ -1,101 +1,83 @@
-from sqlalchemy import Column, String, func, or_, and_, desc, Integer
-from backend.psql import DBSession, Base, engine
+from sqlalchemy import Column, Integer, String, and_, desc, func, or_
+
+from backend.psql import Base, DBSession, engine
+
+from .models import Model
 
 session = DBSession()
-
-
-class Model(Base):
-    __tablename__ = 'model'
-    django_orm_id = Column(Integer, unique=True, primary_key=True)
-    bigg_id = Column(String(127), unique=True, index=True)
-
-
-class Reaction(Base):
-    __tablename__ = 'reaction'
-    django_orm_id = Column(Integer, unique=True, primary_key=True)
-    bigg_id = Column(String(127), unique=True, index=True)
-    name = Column(String(255))
-
-
-class Metabolite(Base):
-    __tablename__ = 'metabolite'
-    django_orm_id = Column(Integer, unique=True, primary_key=True)
-    bigg_id = Column(String(127), unique=True, index=True)
-    name = Column(String(511))
-
-
-class Gene(Base):
-    __tablename__ = 'gene'
-    django_orm_id = Column(Integer, unique=True, primary_key=True)
-    bigg_id = Column(String(127), unique=True, index=True)
-    name = Column(String(127))
 
 
 Base.metadata.create_all(engine)
 
 
-def apply_order(query, sort_column_object=None):
-    # Always descending
-    if type(sort_column_object) is list:
-        query = query.order_by(*[desc(x) for x in sort_column_object])
-    else:
-        query = query.order_by(desc(sort_column_object))
+class SimilarityQuery:
+    def __init__(self, query_string='', query_list=None, filter_list=None, ordered_query=False, limit=0):
+        self.query_string = query_string
+        self.query_list = query_list or []
+        self.filter_list = filter_list or []
+        self.ordered_query = ordered_query
+        self.size_limit = limit
 
-    return query
+    def query(self, query_string):
+        clone = self._clone()
 
+        clone.query_string = query_string
+        return clone
 
-def search_model(query_string, bigg_id_sim_cutoff=0.2, page=None, size=None):
-    sim_bigg_id = func.similarity(Model.bigg_id, query_string)
-    sort_column_object = Model.bigg_id
-    query = (session
-             .query(Model.bigg_id, Model.django_orm_id)
-             .filter(sim_bigg_id >= bigg_id_sim_cutoff)
-             )
-    query = apply_order(query, sort_column_object)
-    return query
+    def entities(self, *stuff):
+        clone = self._clone()
 
+        stuff = filter(None, stuff)
+        clone.query_list.extend(stuff)
+        return clone
 
-def count_search_model_result(query_string, bigg_id_sim_cutoff):
-    sim_bigg_id = func.similarity(Model.bigg_id, query_string)
-    query = (session
-             .query(Model.bigg_id)
-             .filter(sim_bigg_id >= bigg_id_sim_cutoff)
-             )
-    return query.count()
+    def apply_filter_or(self, entity, threshold=0.2):
+        clone = self._clone()
 
+        if entity:
+            clone.filter_list.append((entity, threshold))
+        return clone
 
-def search(query_string, model,
-           bigg_id_sim_cutoff=0.2, name_sim_cutoff=0.3,
-           page=None, size=None):
-    if model.__name__ == 'Model':  # Model.__name__:
-        return search_model(query_string, bigg_id_sim_cutoff, page, size)
-    sim_bigg_id = func.similarity(model.bigg_id, query_string)
-    sim_name = func.similarity(model.name, query_string)
+    def apply_order(self):
+        clone = self._clone()
 
-    sort_column_object = func.greatest(sim_bigg_id, sim_name)
+        clone.ordered_query = True
+        return clone
 
-    # Always order by the greater similarity
-    query = (session
-             .query(model.bigg_id, model.name, model.django_orm_id)
-             .filter(or_(sim_bigg_id >= bigg_id_sim_cutoff,
-                         and_(sim_name >= name_sim_cutoff,
-                              model.name != '')))
-             )
+    def apply_limit(self, limit):
+        clone = self._clone()
 
-    query = apply_order(query, sort_column_object)
+        clone.limit = limit
+        return clone
 
-    return query
+    def count(self):
+        query = self.load_query()
+        return query.count()
 
+    def load_query(self):
+        filter_query = None
+        sim_obj_list = []
+        query = session.query(*self.query_list)
+        for entity, threshold in self.filter_list:
+            sim_entity = func.similarity(entity, self.query_string)
+            sim_obj_list.append(sim_entity)
+            if filter_query is None:
+                filter_query = (sim_entity >= threshold) & (entity != '')
+            else:
+                filter_query = filter_query | \
+                    (sim_entity >= threshold) & (entity != '')
 
-def count_search_result(query_string, model, bigg_id_sim_cutoff=0.2, name_sim_cutoff=0.3):
-    if model.__name__ == 'Model':  # Model.__name__:
-        return count_search_model_result(query_string, bigg_id_sim_cutoff)
-    sim_bigg_id = func.similarity(model.bigg_id, query_string)
-    sim_name = func.similarity(model.name, query_string)
-    query = (session
-             .query(model.bigg_id, model.name)
-             .filter(or_(sim_bigg_id >= bigg_id_sim_cutoff,
-                         and_(sim_name >= name_sim_cutoff,
-                              model.name != '')))
-             )
-    return query.count()
+        query = query.filter(filter_query)
+        if self.ordered_query:
+            query = query.order_by(desc(func.greatest(*sim_obj_list)))
+        if self.size_limit:
+            query = query.limit(self.size_limit)
+        return query
+
+    def _clone(self, klass=None):
+        if klass is None:
+            klass = self.__class__
+
+        clone = klass(self.query_string, self.query_list,
+                      self.filter_list, self.ordered_query, self.size_limit)
+        return clone

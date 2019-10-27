@@ -4,12 +4,11 @@ from django.views.generic.edit import FormMixin
 from django.views.generic.list import MultipleObjectMixin
 
 from .forms import BareSearchForm
-from .psql import Gene as psqlGene
-from .psql import Metabolite as psqlMetabolite
-from .psql import Model as psqlModel
-from .psql import Reaction as psqlReaction
-from .psql import count_search_result as psql_count_search_result
-from .psql import search as psql_search
+from .models import Gene as psqlGene
+from .models import Metabolite as psqlMetabolite
+from .models import Model as psqlModel
+from .models import Reaction as psqlReaction
+from .psql import SimilarityQuery
 
 
 class BiGGDatabaseSearchView(MultipleObjectMixin, FormView):
@@ -49,13 +48,33 @@ class BiGGDatabaseSearchView(MultipleObjectMixin, FormView):
             return self.form_invalid(form)
 
     def form_valid(self, form):
-        q = form.cleaned_data['q']
+        query_string = form.cleaned_data['q']
         search_model = form.cleaned_data.get('model') or 'model'
         model = self.model_map[search_model]
-        object_list = psql_search(q, model, 0.2, 0.3)
+
+        sq = (SimilarityQuery()
+              .query(query_string)
+              # Bad way to special judge Model
+              .entities(model.bigg_id)
+              .entities(model.name if hasattr(model, 'name') else None)
+              .entities(model.django_orm_id)
+              # Different entities should have different threshold
+              .apply_filter_or(model.bigg_id, 0.2)
+              .apply_filter_or(model.name if hasattr(model, 'name') else None, 0.3)
+              .apply_order()
+              )
+        object_list = sq.load_query()
 
         total_number = {
-            model_name: psql_count_search_result(q, model_cls)
+            model_name: (SimilarityQuery()
+                         .query(query_string)
+                         # Bad way to special judge Model
+                         .entities(model_cls.bigg_id)
+                         .entities(model_cls.name if hasattr(model_cls, 'name') else None)
+                         .apply_filter_or(model_cls.bigg_id, 0.2)
+                         .apply_filter_or(model_cls.name if hasattr(model_cls, 'name') else None, 0.3)
+                         .count()
+                         )
             for model_name, model_cls in self.model_map.items()
             if model_cls != model
         }

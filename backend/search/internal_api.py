@@ -1,10 +1,11 @@
-from haystack.query import SearchQuerySet, SQ
 from biobricks.models import Biobrick
 import functools
 import random
 
 
 def search_biobricks(*keywords, num=5):
+    pass
+    '''
     if Biobrick.objects.count() < num:
         return sr2obj(Biobrick.objects.all())
 
@@ -19,6 +20,7 @@ def search_biobricks(*keywords, num=5):
         return fill_in(sr2obj(sqs), num)
     else:
         return sr2obj(sqs[0:num])
+
 
 
 def fill_in(initial, num):
@@ -38,3 +40,4 @@ def fill_in(initial, num):
 
 def sr2obj(srs):
     return [sr.object for sr in srs]
+'''
