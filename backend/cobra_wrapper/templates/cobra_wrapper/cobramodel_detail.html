@@ -184,7 +184,7 @@
                     {% for form in forms %}
                         <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
                             {% csrf_token %}
-                            {{ form|crispy }}
+                            {% crispy form %}
                             <input type="submit" class="btn btn-info col-2" value="Submit">
                         </form>
                         <hr>
