@@ -59,7 +59,7 @@
                         enctype="multipart/form-data">
                     <div class="modal-body">
                         {% csrf_token %}
-                        {% crispy form %}
+                        {{ form|crispy }}
                     </div>
                     <div class="modal-footer">
                         <input type="text" name="name">
