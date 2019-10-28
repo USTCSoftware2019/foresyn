@@ -42,7 +42,7 @@
                                 <form action="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.id %}"
                                       method="post">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Modal Name</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Delete Confirm</h5>
                                     </div>
                                     <div class="modal-body">
                                         {% csrf_token %}
@@ -138,7 +138,7 @@
                       enctype="multipart/form-data">
                     <div class="modal-body">
                         {% csrf_token %}
-                        {% crispy form %}
+                        {{ form|crispy }}
                     </div>
                     <div class="modal-footer">
                         <input type="reset" class="btn btn-secondary" value="Reset">

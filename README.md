@@ -63,6 +63,9 @@ Assuming that you are using Debian Buster and Python 3.7.
    (a new shell)
    (venv) $ cd backend
    (venv) $ env PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results
+   (a new shell)
+   (venv) $ cd backend
+   (venv) $ env PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_locals
    ```
 
 2. Run this project.
@@ -71,4 +74,4 @@ Assuming that you are using Debian Buster and Python 3.7.
    (venv) $ python manage.py runserver
    ```
 
-   
+

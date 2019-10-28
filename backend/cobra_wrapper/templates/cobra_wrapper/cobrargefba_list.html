@@ -90,7 +90,7 @@
                 <form action="{% url 'cobra_wrapper:cobrargefba_create_form' model_pk %}" method="post">
                     <div class="modal-body">
                         {% csrf_token %}
-                        {% crispy form %}
+                        {{ form|crispy }}
                     </div>
                     <div class="modal-footer">
                         <input type="reset" class="btn btn-secondary" value="Reset">
