@@ -25,20 +25,20 @@ Search result - {{ query }}
     <div class="left_index col-3">
       <ul class="list-group text-primary">
         <a {% if counts.model != 0 %} href="?q={{ query }}&model=model" {% else %} href="#" {%endif%}
-          class="list-group-item {% if search_model == 'Model' %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">
+          class="list-group-item {% if search_model == 'model' %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">
           Model<span class="badge badge-info badge-search">{{ counts.model }}{% if search_model != "model" %}{% endif %}</span>
         </a>
 
         <a {% if counts.reaction != 0 %} href="?q={{ query }}&model=reaction" {% else %} href="#" {%endif%}
-          class="list-group-item {% if search_model == 'Reaction' %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">
+          class="list-group-item {% if search_model == 'reaction' %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">
           Reaction<span class="badge badge-info badge-search">{{ counts.reaction }}{% if search_model != "reaction" %}{% endif %}</span>
         </a>
         <a {% if counts.metabolite != 0 %} href="?q={{ query }}&model=metabolite" {% else %} href="#" {%endif%}
-          class="list-group-item {% if search_model == 'Metabolite' %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">
+          class="list-group-item {% if search_model == 'metabolite' %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">
           Metabolite<span class="badge badge-info badge-search">{{ counts.metabolite }}{% if search_model != "metabolite" %}{% endif %}</span>
         </a>
         <a {% if counts.gene != 0 %} href="?q={{ query }}&model=gene" {% else %} href="#" {%endif%}
-          class="list-group-item {% if search_model == 'Gene' %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">
+          class="list-group-item {% if search_model == 'gene' %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">
           Gene<span class="badge badge-info badge-search">{{ counts.gene }}{% if search_model != "gene" %}{% endif %}</span>
         </a>
 
@@ -47,7 +47,7 @@ Search result - {{ query }}
     <div class="right_content col-9">
 
       <h5 class="result_num">{{ search_result_count }} result{% if search_result_count <= 1 %}{% else %}s{% endif %} in
-        {{ search_model }}, {{ total_count }} result{% if total_count <= 1 %}{% else %}s{% endif %} in total</h5>
+        {{ search_model|capfirst }}, {{ total_count }} result{% if total_count <= 1 %}{% else %}s{% endif %} in total</h5>
       <div class="list-group list-group-flush mb-5">
         {% if search_result_count == 0 %}
         <h3>No results.</h3>
