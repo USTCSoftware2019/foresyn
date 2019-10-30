@@ -165,7 +165,7 @@
             </div>
         </div>
         <div class="col-2">
-            <div class="list-group">
+            <div class="list-group" id="biobrick_recommend">
                 <li href="#" class="list-group-item list-group-item-action text-light" style="background-color:#20c997">
                     Biobricks
                 </li>
@@ -347,6 +347,8 @@
             $('#model_reaction_list .list-group-item').slice(10).removeClass('d-none')
             $(this).addClass('disabled');
         })
+
+        $('#biobrick_recommend .list-group-item').slice(10).addClass('d-none')
 
     });
 </script>
