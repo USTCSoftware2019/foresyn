@@ -160,3 +160,12 @@ class CobraModelChange(models.Model):
                                               owner=self.model.owner)
         new_model.cache(cobra_model)
         return new_model
+
+
+class CobraBiobrick(models.Model):
+    part_name = models.CharField(unique=True, max_length=127)
+    cobra_model = models.ForeignKey(CobraModel, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'model_biobrick'
+        ordering = ['-created_time']

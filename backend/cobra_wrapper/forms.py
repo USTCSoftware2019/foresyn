@@ -6,6 +6,7 @@ import cobra
 from . import models
 from .utils import dump_sbml, get_reaction_json, clean_comma_separated_str, load_comma_separated_str, \
     add_reaction_from_string_to_model
+from search.internal_api import search_biobricks
 
 
 class CleanSbmlContentMixin:
@@ -142,6 +143,23 @@ class CobraModelReactionCreateForm(forms.Form):
         model.sbml_content = dump_sbml(cobra_model)
         model.save()
         model.cache(cobra_model)
+        keywords = set()
+        reaction_dict_list = [
+            json.loads(change.reaction_info)
+            for change in models.CobraModelChange.objects.filter(
+                model=model, change_type='add_reaction')[:10]
+        ]
+        for reaction_dict in reaction_dict_list:
+            for reaction in reaction_dict['reactions']:
+                keywords.add(reaction['name'])
+                keywords.update(reaction['metabolites'])
+                keywords.update(reaction['genes'])
+        biobricks = search_biobricks(*keywords)
+        for bb in biobricks:
+            biobrick = models.CobraBiobrick()
+            biobrick.part_name = bb.part_name
+            biobrick.cobra_model = model
+            biobrick.save()
         return model
 
 
