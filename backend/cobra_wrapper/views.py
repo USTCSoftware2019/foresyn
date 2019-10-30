@@ -41,19 +41,22 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data['latest_changes'] = models.CobraModelChange.objects.filter(model=self.object)[:10]
         context_data['change_line_len'] = context_data['latest_changes'].count() * 95
 
-        keywords = set()
-        reaction_dict_list = [
-            json.loads(change.reaction_info)
-            for change in models.CobraModelChange.objects.filter(
-                model=self.object, change_type='add_reaction')[:10]
-        ]
-        for reaction_dict in reaction_dict_list:
-            for reaction in reaction_dict['reactions']:
-                keywords.add(reaction['name'])
-                keywords.update(reaction['metabolites'])
-                keywords.update(reaction['genes'])
-        context_data['biobricks'] = search_biobricks(*keywords)
+        # keywords = set()
+        # reaction_dict_list = [
+        #     json.loads(change.reaction_info)
+        #     for change in models.CobraModelChange.objects.filter(
+        #         model=self.object, change_type='add_reaction')[:10]
+        # ]
+        # for reaction_dict in reaction_dict_list:
+        #     for reaction in reaction_dict['reactions']:
+        #         keywords.add(reaction['name'])
+        #         keywords.update(reaction['metabolites'])
+        #         keywords.update(reaction['genes'])
 
+        # context_data['biobricks'] = search_biobricks(*keywords)
+
+        biobricks = models.CobraBiobrick.objects.filter(cobra_model=self.object)
+        context_data['biobricks'] = biobricks
         return context_data
 
 
