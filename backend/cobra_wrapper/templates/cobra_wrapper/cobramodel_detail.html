@@ -85,14 +85,28 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <h5 class="card-title">Information</h5>
+                    <div class="row">
+                        <div class="col-12 d-flex justify-content-between align-items-center">
+                            <div><h5>Information</h5></div>
+                            <div><a href="{% url 'cobra_wrapper:cobramodel_map' object.pk %}" class="btn btn-info">Metabolic Map</a></div>
+                        </div>
+                    </div>
                     <div class="list-group">
-                        <a href="{% url 'cobra_wrapper:cobramodel_map' object.pk %}" class="btn btn-info">Metabolic
+
+                        {% comment %}
+                        <a href="{% url 'cobra_wrapper:cobramodel_map' object.pk %}" class="btn btn-info ">Metabolic
                             Map</a>
+                        {% endcomment %}
+
                         {% for reaction in reactions %}
                         <li class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.cobra_id }}]
                         </li>
                         {% endfor %}
+                        <div class="row">
+                            <div class="col-12 d-flex justify-content-center">
+                                <button class="btn btn-info" id="list-more">More</button>
+                            </div>
+                        </div>
                     </div>
                     <br>
                     <div class="btn-group-fixed" style="z-index:100">
@@ -323,6 +337,12 @@
         console.log('going to add class...')
         $('input[type="text"]').addClass('form-control')
         $('input[type="number"]').addClass('form-control')
+
+        $('.list-group-item').slice(10).addClass('d-none')
+        $('button#list-more').on('click', function(){
+            $('.list-group-item').slice(10).removeClass('d-none')
+            $(this).addClass('disabled');
+        })
     });
 </script>
 
