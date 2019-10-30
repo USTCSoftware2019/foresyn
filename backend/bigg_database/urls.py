@@ -1,8 +1,8 @@
 from django.urls import path
 
 from search.views import BiGGDatabaseSearchView
-from . import views
-from . import api_views
+
+from . import api_views, views
 
 app_name = 'bigg_database'
 urlpatterns = [

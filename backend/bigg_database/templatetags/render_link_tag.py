@@ -1,22 +1,26 @@
 from django.template import Library
 from django.urls import reverse
 
-register = Library()
+from bigg_database.models import Gene, Metabolite, Model, Reaction
 
-view_map = {
-    'model': 'bigg_database:model_detail',
-    'reaction': 'bigg_database:reaction_detail',
-    'gene': 'bigg_database:gene_detail',
-    'metabolite': 'bigg_database:metabolite_detail'
-}
+register = Library()
 
 
 @register.simple_tag()
 def render_link_tag(obj, search_model):
     if obj is None:
         return '#'
-    viewname = view_map.get(search_model)
-    if not viewname:
+    if hasattr(obj, 'object'):
+        obj = obj.object
+    if isinstance(obj, Model):
+        viewname = 'bigg_database:model_detail'
+    elif isinstance(obj, Reaction):
+        viewname = 'bigg_database:reaction_detail'
+    elif isinstance(obj, Gene):
+        viewname = 'bigg_database:gene_detail'
+    elif isinstance(obj, Metabolite):
+        viewname = 'bigg_database:metabolite_detail'
+    else:
         return '#'
 
-    return reverse(viewname=viewname, args=(obj.django_orm_id,))
+    return reverse(viewname=viewname, args=(obj.id,))
