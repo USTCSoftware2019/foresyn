@@ -9,17 +9,26 @@ Assuming that you are using Debian Buster and Python 3.7.
 
 ### Initialization
 
-1. Install MySQL (or MariaDB), PostgreSQL and RabbitMQ.
+1. Use `git` to clone this project to your computer.
+
+>   After cloning the repo, use this command to fetch the submodule
+>   ```shell
+>   git submodule update --init
+>   ```
+
+2. Install MySQL (or MariaDB), PostgreSQL and RabbitMQ.
 
    ```shell
    $ apt update && apt upgrade
-   $ apt install mariadb-server rabbitmq-server p7zip-full python3-psycopg2 libpq-dev postgresql postgresql-contrib
+   $ apt install mariadb-server rabbitmq-server p7zip-full libmysqlclient-dev
    $ mysql_secure_installation  # setting mysql/mariadb
    $ mysql  
    (and then type `GRANT ALL ON *.* TO 'set_your_admin_user_name_here'@'localhost' IDENTIFIED BY 'set_your_admin_password_here' WITH GRANT OPTION;` and `FLUSH PRIVILEGES;` inside, to let our project access mysql database)
+   $ cd my_trgm # Configure the 3-gram algorithm implment for MySQL for searching
+   $ gcc -o my_trgm.so -fPIC -shared my_trgm.c `mysql_config --include` # Compile the shared library for MySQL
+   $ cp my_trgm.so `mysql_config --plugindir` # Copy the shared library to the MySQL plugin folder. Maybe sudo required
+   $ echo "CREATE FUNCTION trgm_similarity RETURNS REAL SONAME \"my_trgm.so\";" | sudo mysql
    ```
-
-2. Use `git` to clone this project to your computer.
 
 3. Enter into project folder, create a Python virtual environment by:
 
@@ -37,21 +46,10 @@ Assuming that you are using Debian Buster and Python 3.7.
 
    ```shell
    $ echo "CREATE DATABASE igem_backend CHARACTER SET utf8 COLLATE utf8_bin;" | sudo mysql # Create database with name "igem_backend" for mysql
-   $ sudo su postgres -c "echo \"CREATE DATABASE igem_backend\" | psql" # Create database with name "igem_backend" for PostgreSQL
-   $ sudo su postgres -c "echo \"CREATE EXTENSION pg_trgm\" | psql --dbname=igem_backend" # Add extension to calculate similarity
-   $ sudo su postgres -c "echo \"CREATE USER igem WITH PASSWORD 'igem';\" | psql" # Create a new user "igem" with password "igem" for PostgreSQL
    (venv) $ python manage.py migrate
    $ echo "SET GLOBAL max_allowed_packet=107374182;" | sudo mysql # ensure the large dump imported successfully
    $ sudo mysql < data/all.sql
-
    ```
-
-6. Import data to PostgreSQL by typing:
-
-   ```shell
-   (venv) $ python manage.py migrate_to_psql
-   ```
-
 
 ### Run This Project
 
