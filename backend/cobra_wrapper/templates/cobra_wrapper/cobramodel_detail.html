@@ -190,9 +190,9 @@
                         </form>
                     {% endfor %}
                     {% endcomment %}
-                    {% for index, form in enumerate(forms) %}
-                        <hr><p>index is {{ index }}</p>
-                        {% if index == 0 %}
+                    {% for form in forms %}
+                        <hr><p>index is {{ forloop.counter0 }}</p>
+                        {% if forloop.counter0 == 0 %}
                         <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
                             {% csrf_token %}
                             <div class="form-group row">
@@ -218,11 +218,11 @@
                             </div>                             
                             <input type="submit" class="btn btn-info col-2" value="Submit">
                         </form>
-                        {% elif index == 1 %}
-                        
-                        {% elif index == 2 %}
+                        {% elif forloop.counter0 == 1 %}
 
-                        {% elif index == 3 %}
+                        {% elif forloop.counter0 == 2 %}
+
+                        {% elif forloop.counter0 == 3 %}
 
                         {% endif %}
 
