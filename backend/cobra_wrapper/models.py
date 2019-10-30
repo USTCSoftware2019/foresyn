@@ -168,4 +168,3 @@ class CobraBiobrick(models.Model):
 
     class Meta:
         verbose_name = 'model_biobrick'
-        ordering = ['-created_time']
