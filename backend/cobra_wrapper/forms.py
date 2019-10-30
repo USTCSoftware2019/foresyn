@@ -126,7 +126,7 @@ class CobraModelReactionCreateForm(forms.Form):
         if self.errors:
             raise ValueError()
         cobra_model: cobra.Model = model.build()
-        add_reaction_from_string_to_model(model, self.cleaned_data['reaction_str'])
+        add_reaction_from_string_to_model(cobra_model, self.cleaned_data['reaction_str'])
         cobra_reaction = cobra.Reaction(id=self.cleaned_data['cobra_id'], name=self.cleaned_data['name'],
                                         subsystem=self.cleaned_data['subsystem'],
                                         lower_bound=float(self.cleaned_data['lower_bound']),
