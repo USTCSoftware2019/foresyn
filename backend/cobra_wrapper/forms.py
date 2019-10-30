@@ -157,7 +157,7 @@ class CobraModelReactionCreateForm(forms.Form):
         biobricks = search_biobricks(*keywords)
         for bb in biobricks:
             biobrick = models.CobraBiobrick()
-            biobrick.part_name = bb.part_name
+            biobrick.part_name = bb.partname
             biobrick.cobra_model = model
             biobrick.save()
         return model
