@@ -169,10 +169,14 @@
                 <li href="#" class="list-group-item list-group-item-action text-light" style="background-color:#20c997">
                     Biobricks
                 </li>
+                {% if biobricks %}
                 {% for biobrick in biobricks %}
                 <a href="http://bio.biomaster-uestc.com/public/index.php/detail/{{ biobrick.partname }}"
                     class="list-group-item list-group-item-action">{{ biobrick.partname }}</a>
                 {% endfor %}
+                {% else %}
+                <li class="list-group-item list-group-item-action">No Recommendation</li>
+                {% endif %}
             </div>
         </div>
     </div>
