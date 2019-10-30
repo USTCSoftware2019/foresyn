@@ -19,3 +19,6 @@ venv/
 
 # production config
 backend/backend/config.py
+
+# front-end test file
+test.html
