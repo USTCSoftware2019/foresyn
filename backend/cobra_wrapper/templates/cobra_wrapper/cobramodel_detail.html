@@ -187,7 +187,7 @@
                 {% endcomment %}
                 {% for form in forms %}
                 {% if forloop.counter0 == 0 %}
-                <p class="text-center txet-gray text-small">Change Some Basic Information</p>
+                <p class="text-center text-gray text-small">Change Some Basic Information</p>
                 <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
                     {% csrf_token %}
                     <div class="form-group row">
@@ -212,7 +212,7 @@
                     </div>
                 </form>
                 {% elif forloop.counter0 == 1 %}
-                <p class="text-center txet-gray text-small">Change the Objective Value</p>
+                <p class="text-center text-gray text-small">Change the Objective Value</p>
                 <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
                     {% csrf_token %}
                     <div class="form-group row">
@@ -232,7 +232,7 @@
                 </form>
 
                 {% elif forloop.counter0 == 2 %}
-                <p class="text-center txet-gray text-small">Delete Model Reaction</p>
+                <p class="text-center text-gray text-small">Delete Model Reaction</p>
                 <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
                     {% csrf_token %}
                     <div class="form-group row">
@@ -252,7 +252,7 @@
                 </form>
                 
                 {% elif forloop.counter0 == 3 %}
-                <p class="text-center txet-gray text-small">Add Some Model Reaction</p>
+                <p class="text-center text-gray text-small">Add Some Model Reaction</p>
                 <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
                     {% csrf_token %}
                     <div class="form-group row">
@@ -328,10 +328,11 @@
 
 <style>
 .text-gray{
-    color: #6c757d;
+    
 }
 .text-small{
-    font-size: .85em;
+    font-size: 1.05em;
+    font-weight: 500;
 }
 .modal-lg{
     max-width: 50% !important;
