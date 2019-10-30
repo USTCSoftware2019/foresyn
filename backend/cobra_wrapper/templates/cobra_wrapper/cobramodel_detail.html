@@ -342,10 +342,17 @@
         $('input[type="text"]').addClass('form-control')
         $('input[type="number"]').addClass('form-control')
 
+        let show_all = false;
         $('#model_reaction_list .list-group-item').slice(10).addClass('d-none')
         $('button#list-more').on('click', function(){
-            $('#model_reaction_list .list-group-item').slice(10).removeClass('d-none')
-            $(this).addClass('disabled');
+            if(show_all){
+                $('#model_reaction_list .list-group-item').slice(10).addClass('d-none')
+                $(this).html('More')
+            }else{
+                $('#model_reaction_list .list-group-item').slice(10).removeClass('d-none')
+                $(this).html('Less')
+            }
+            show_all = !show_all;
         })
 
         $('#biobrick_recommend .list-group-item').slice(10).addClass('d-none')
