@@ -62,19 +62,36 @@
                     <div class="modal-body">
                         <form id="addModelForm" method="post" action="{% url 'data_wrapper:add_models' %}">
                             {% csrf_token %}
-                            <div class="input-group mb-3">
-                                <input type="text" name="name" class="form-control">
-                                <input type="text" name="desc" class="form-control">
+                            <div class="form-group row">
+                                <label for="name" class="col-3 col-form-label">Name</label>
+                                <div class="col-9">
+                                    <input type="text" name="name" class="form-control" id="name">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="desc" class="col-3 col-form-label">Description</label>
+                                <div class="col-9">
+                                    <input type="text" name="desc" class="form-control" id="desc">
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <input type="hidden" name="model_bigg_id" value="{{ model.bigg_id }}"
                                        class="form-control">
                             </div>
+                            <div class="form-group row">
+                                <div class="col-12 text-center">
+                                    <input type="submit" class="btn btn-info" value="Add">
+                                </div>
+                            </div>
                         </form>
                     </div>
+                    {{ comment }}
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-outline-light text-hover-green" form="addModelForm">Add
                         </button>
                     </div>
+                    {{ endcomment }}
                 </div>
             </div>
         </div>
