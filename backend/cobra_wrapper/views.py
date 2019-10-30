@@ -55,7 +55,7 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
 
         # context_data['biobricks'] = search_biobricks(*keywords)
 
-        biobricks = models.CobraBiobrick.objects.filter(model=self.object)
+        biobricks = models.CobraBiobrick.objects.filter(cobra_model=self.object)
         context_data['biobricks'] = biobricks
         return context_data
 
