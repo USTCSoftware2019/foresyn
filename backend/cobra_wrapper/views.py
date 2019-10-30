@@ -45,7 +45,7 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         reaction_dict_list = [
             json.loads(change.reaction_info)
             for change in models.CobraModelChange.objects.filter(
-                model=self.object, change_type__in=['add_reaction', 'del_reaction'])[:10]
+                model=self.object, change_type='add_reaction')[:10]
         ]
         for reaction_dict in reaction_dict_list:
             for reaction in reaction_dict['reactions']:
