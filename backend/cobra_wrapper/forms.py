@@ -4,7 +4,8 @@ from django import forms
 import cobra
 
 from . import models
-from .utils import dump_sbml, get_reaction_json, clean_comma_separated_str, load_comma_separated_str
+from .utils import dump_sbml, get_reaction_json, clean_comma_separated_str, load_comma_separated_str, \
+    add_reaction_from_string_to_model
 
 
 class CleanSbmlContentMixin:
@@ -125,11 +126,13 @@ class CobraModelReactionCreateForm(forms.Form):
         if self.errors:
             raise ValueError()
         cobra_model: cobra.Model = model.build()
+        add_reaction_from_string_to_model(model, self.cleaned_data['reaction_str'])
         cobra_reaction = cobra.Reaction(id=self.cleaned_data['cobra_id'], name=self.cleaned_data['name'],
                                         subsystem=self.cleaned_data['subsystem'],
                                         lower_bound=float(self.cleaned_data['lower_bound']),
                                         upper_bound=float(self.cleaned_data['upper_bound']))
         cobra_model.add_reactions([cobra_reaction])
+        cobra_reaction.build_reaction_from_string(self.cleaned_data['reaction_str'])
         cobra_reaction.reaction = self.cleaned_data['reaction_str']
         cobra_reaction.gene_reaction_rule = self.cleaned_data['gene_reaction_rule']
         models.CobraModelChange.objects.create(change_type=self.cleaned_data['change_type'], model=model,
