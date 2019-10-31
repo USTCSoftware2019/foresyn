@@ -78,8 +78,11 @@ class AddDataReactionToCobra(View):
             return HttpResponse("Internal Error", status=500)
         reaction.add_metabolites(metabolites_dict)
         cobra_object = load_sbml(cobra_model_object.sbml_content)
-        reaction.gene_reaction_rule = [gene.gene_reaction_rule for gene in data_reaction_object.reactiongene_set.all()][
-            0]
+        try:
+            reaction.gene_reaction_rule = [gene.gene_reaction_rule for gene in data_reaction_object.reactiongene_set.all()][
+                0]
+        except IndexError:
+            pass
         cobra_model_object.sbml_content = dump_sbml(cobra_object)
         cobra_model_object.save()
         cobra_model_object.cache(load_sbml(cobra_model_object.sbml_content))
