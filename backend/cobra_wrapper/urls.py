@@ -11,6 +11,8 @@ urlpatterns = [
     path('models/create/', views.CobraModelCreateView.as_view(), name='cobramodel_create_form'),
     path('models/<int:pk>/delete/', views.CobraModelDeleteView.as_view(), name='cobramodel_confirm_delete'),
     path('models/<int:pk>/update/', views.CobraModelUpdateView.as_view(), name='cobramodel_update_form'),
+    path('models/<int:pk>/reaction_update_bound/', views.CobraModelReactionUpdateBoundView.as_view(),
+         name='cobramodel_reaction_update_bound_form'),
     path('models/<int:pk>/change/<int:change_pk>/restore/', views.CobraModelChangeRestoreView.as_view(),
          name='cobramodel_change_restore'),
 

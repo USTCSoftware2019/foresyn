@@ -12,7 +12,6 @@ from . import models, forms
 from .utils import load_comma_separated_str
 
 from backend.celery import app
-from search.internal_api import search_biobricks
 
 
 class CobraModelListView(LoginRequiredMixin, ListView):
@@ -36,6 +35,15 @@ class CobraModelDetailView(LoginRequiredMixin, DetailView):
         context_data = super().get_context_data()
         context_data['forms'] = self.get_update_forms()
         context_data['reactions'] = json.loads(self.object.reactions)
+
+        def form_mount_reaction_id(cobra_id: str) -> forms.CobraModelReactionUpdateBoundForm:
+            form = forms.CobraModelReactionUpdateBoundForm()
+            form.fields['cobra_id'].initial = cobra_id
+            return form
+
+        # Do not render this in template
+        # context_data['reaction_forms'] = [form_mount_reaction_id(reaction['cobra_id']) for reaction in
+        #                                   context_data['reactions']]
         context_data['metabolites'] = json.loads(self.object.metabolites)
         context_data['genes'] = json.loads(self.object.genes)
         context_data['latest_changes'] = models.CobraModelChange.objects.filter(model=self.object)[:10]
@@ -151,6 +159,24 @@ class CobraModelChangeRestoreView(View):
         new_model = change.restore('Restored from {}'.format(change.model.name),
                                    timezone.now().strftime('%Y-%m-%d %H:%M:%S'))
         return redirect(new_model)
+
+
+class CobraModelReactionUpdateBoundView(FormView):
+    http_method_names = ['post']
+    template_name = 'cobra_wrapper/cobramodel_list.html'
+    form_class = forms.CobraModelReactionUpdateBoundForm
+
+    def get_form(self, form_class=None):
+        form = super().get_form()
+        form.model_object = get_object_or_404(models.CobraModel, pk=self.kwargs['pk'])
+        return form
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('cobra_wrapper:cobramodel_detail', kwargs={'pk': self.kwargs['pk']})
 
 
 class TemplateAddModelPkMixin:

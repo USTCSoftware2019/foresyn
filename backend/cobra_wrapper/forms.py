@@ -227,3 +227,28 @@ class CobraFvaForm(CleanDeletedGenesMixin, forms.ModelForm):
                 self.add_error('reaction_list', '{} can not be found in the model'.format(reaction))
         cleaned_data['reaction_list'] = ','.join(reaction_list)
         return cleaned_data
+
+
+class CobraModelReactionUpdateBoundForm(forms.Form):
+    cobra_id = forms.CharField(max_length=600, widget=forms.HiddenInput())
+    lower_bound = forms.FloatField(initial=0.0)
+    upper_bound = forms.FloatField(initial=1000.0)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        reactions = [reaction['cobra_id'] for reaction in json.loads(self.model_object.reactions)]
+        if cleaned_data['cobra_id'] not in reactions:
+            self.add_error('cobra_id', '{} can not be found in the model'.format(cleaned_data['cobra_id']))
+        return cleaned_data
+
+    def save(self):
+        if self.errors:
+            raise ValueError()
+        cobra_model: cobra.Model = self.model_object.build()
+        cobra_reaction: cobra.Reaction = cobra_model.reactions.get_by_id(self.cleaned_data['cobra_id'])
+        cobra_reaction.lower_bound = self.cleaned_data['lower_bound']
+        cobra_reaction.upper_bound = self.cleaned_data['upper_bound']
+        self.model_object.sbml_content = dump_sbml(cobra_model)
+        self.model_object.save()
+        self.model_object.cache(cobra_model)
+        return self.model_object
