@@ -4,11 +4,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.views import View
 from django.shortcuts import redirect
-from cobra_wrapper.utils import load_sbml, dump_sbml
+from cobra_wrapper.utils import load_sbml, dump_sbml, get_reaction_json
 from bigg_database.models import Reaction as DataReaction
 from cobra_wrapper.models import CobraModel
 from .common import reaction_string_to_metabolites
 from .models import DataModel
+import json
+from cobra_wrapper import models
+from search.internal_api import search_biobricks
 
 
 class AddDataModelToCobra(View):
@@ -87,4 +90,26 @@ class AddDataReactionToCobra(View):
         cobra_model_object.save()
         cobra_model_object.cache(load_sbml(cobra_model_object.sbml_content))
         # return JsonResponse({"messages": "OK"}, status=200)
+        models.CobraModelChange.objects.create(change_type='add_reaction', model=cobra_model_object,
+                                               reaction_info=json.dumps({
+                                                   'reactions': [get_reaction_json(reaction)],
+                                               }))
+
+        keywords = set()
+        reaction_dict_list = [
+            json.loads(change.reaction_info)
+            for change in models.CobraModelChange.objects.filter(
+                model=cobra_model_object, change_type='add_reaction')[:10]
+        ]
+        for reaction_dict in reaction_dict_list:
+            for reaction in reaction_dict['reactions']:
+                keywords.add(reaction['name'])
+                keywords.update(reaction['metabolites'])
+                keywords.update(reaction['genes'])
+        biobricks = search_biobricks(*keywords)
+        for bb in biobricks:
+            biobrick = models.CobraBiobrick()
+            biobrick.part_name = bb.partname
+            biobrick.cobra_model = cobra_model_object
+            biobrick.save()
         return redirect("/cobra/models/" + str(cobra_model_object.pk))
