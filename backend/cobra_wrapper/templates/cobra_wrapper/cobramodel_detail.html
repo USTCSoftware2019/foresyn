@@ -421,16 +421,16 @@
             method: 'POST',
             data: {
                 "model_id": {{ object.pk }},
-        "desc": $('input[name="desc"]').attr('value')
-                },
-        success: function (res) {
-            console.log(res);
-            $('#share-modal-body').html('Share successfully! Url: ' + res.url);
-        },
-        error: function (err) {
-            console.log('ajax err.')
-        }
-            })
-        });
+                "desc": $('input[name="desc"]').attr('value')
+                    },
+            success: function (res) {
+                console.log(res);
+                $('#share-modal-body').html('Share successfully! Url: ' + res.url);
+            },
+            error: function (err) {
+                console.log('ajax err.')
+            }
+                })
+            });
 </script>
 {% endblock content %}

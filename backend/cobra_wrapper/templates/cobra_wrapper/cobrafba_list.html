@@ -31,11 +31,12 @@
                         <div class="card-body">
                             <table>
                                 <tbody>
-
+                                {% comment %}
                                 <tr>
                                     <td>start_time</td>
                                     <td>{{ object.start_time }}</td>
                                 </tr>
+                                {% endcomment %}
                                 <tr>
                                     <td>status</td>
                                     <td>{{ object|check_result_status }}</td>
@@ -46,7 +47,7 @@
                                class="btn btn-outline-light btn-side-circle text-hover-green">Detail</a>
                         </div>
                         <div class="card-footer text-muted">
-                            2019.9.1
+                            {{ object.start_time }}
                         </div>
                     </div>
                 </div>
