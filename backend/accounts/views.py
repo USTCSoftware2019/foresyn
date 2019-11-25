@@ -29,25 +29,25 @@ class UserSignUp(CreateView):
         form = self.form_class(request.POST)
         if form.is_valid():
             user = form.save()
-            user.is_active = False
+            user.is_active = True 
             user.save()
 
-            mail_subject = 'Activate your account'
-            current_site = get_current_site(request)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = account_activation_token.make_token(user)
-            to_email = form.cleaned_data.get('email')
-            message = render_to_string('accounts/activate_email.html', {
-                "protocol": "http",  # FIXME: protocol
-                "domain": current_site,
-                "uid": uid,
-                "token": token,
-                "email": to_email,
-            })
-            email = EmailMessage(
-                mail_subject, message, to=[to_email]
-            )
-            email.send()
+            #mail_subject = 'Activate your account'
+            #current_site = get_current_site(request)
+            #uid = urlsafe_base64_encode(force_bytes(user.pk))
+            #token = account_activation_token.make_token(user)
+            #to_email = form.cleaned_data.get('email')
+            #message = render_to_string('accounts/activate_email.html', {
+            #    "protocol": "http",  # FIXME: protocol
+            #    "domain": current_site,
+            #    "uid": uid,
+            #    "token": token,
+            #    "email": to_email,
+            #})
+            #email = EmailMessage(
+            #    mail_subject, message, to=[to_email]
+            #)
+            #email.send()
             return redirect("accounts:signup_done")
         else:
             return render(request, "accounts/signup.html", {
