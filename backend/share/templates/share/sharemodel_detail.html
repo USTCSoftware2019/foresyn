@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load favorite_tag %}
+{% load static %}
+
+{% block title %}{{ object }}{% endblock title %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-content-between">
+                        <h5 style="padding-top: 5px;">Model: {{ object.name }} {% favorite_button object %}</h5>
+                        <h5 style="padding-top: 5px;">From: {{ username }}</h5>
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+                             aria-labelledby="exampleModalLabel"
+                             aria-hidden="true">
+
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Description</h5>
+                        {{ desc }}
+                        <h5 class="card-title">Info</h5>
+                        <div class="list-group">
+                            {% for reaction in reactions %}
+                                <a href="#"
+                                   class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.cobra_id }}]</a>
+                            {% endfor %}
+                        </div>
+                        <br>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="btn-group-fixed">
+            <div class="row">
+                <button class="btn btn-outline-light btn-circle text-hover-green" data-toggle="modal"
+                        data-target="#ModalAdd">
+                    <i class="fa fa-folder-o" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="ModalAdd" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Model: {{ object.name }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{% url 'share:add_to_model' %}" method="post"
+                        enctype="multipart/form-data">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                    </div>
+                    <div class="modal-footer">
+                        <input type="text" name="name">
+                        <input type="text" name="id" value="{{ id }}" hidden>
+                        <input type="reset" class="btn btn-secondary" value="Cancel">
+                        <input type="submit" class="btn btn-outline-light text-hover-green" value="Add to my models">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script src="{% static "javascript/favorite_button.js" %}"></script>
+{% endblock content %}

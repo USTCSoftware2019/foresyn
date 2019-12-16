@@ -1,36 +1,66 @@
-{% extends 'base.html' %}
+{% extends 'bigg_database/item_base.html' %}
 {% load render_list_tag %}
+{% load favorite_tag %}
+{% load static %}
 
 {% block title %}
 Metabolite: {{ meta.bigg_id }}
 {% endblock %}
 
 {% block content %}
-
-<h1>Metabolite: {{ meta.bigg_id }}</h1>
-
-<h4>Descriptive name</h4>
-<p>{{ meta.name }}</p>
-
-<h4>Formulae</h4>
-<p>{{ meta.formulae|join:', ' }}</p>
-
-{% if meta.charges %}
-<h4>Charges</h4>
-<p>{{ meta.charges }}</p>
-{% endif %}
-
-{% if meta.database_links%}
-<h4>External database links</h4>
-{% include 'bigg_database/db_links.html' with db_links=meta.database_links only %}
-{% endif %}
-
-<h4><a href="{% url 'bigg_database:metabolites_in_model' meta.id %}">
-    Models Containing {{ meta.bigg_id }}</a></h4>
-{% render_list_tag meta.models.all 'model' 'model_metabolite_relationship_detail' id=meta.id reverse=True %}
-
-<h4><a href="{% url 'bigg_database:metabolite_from_reactions' meta.id %}">
-    Reactions Containing {{ meta.bigg_id }}</a></h4>
-{% render_list_tag meta.reactions.all 'reaction' 'reaction_metabolite_relationship_detail' id=meta.id reverse=True %}
-
+    <div id="content" class="container mt-4">
+        <div class="w-100 d-flex justify-content-between">
+            <h4>{{ meta.name }} Metabolite</h4>
+            {% if user.is_authenticated %}
+                <a href="#" data-toggle="modal" data-target="#exampleModal">
+					<h5>{% favorite_button meta %}</h5>
+				</a>
+            {% endif %}
+        </div>
+        <table class="table table-hover table-bordered mt-3">
+            <tbody>
+            <tr>
+                <td>BIGG ID</td>
+                <td>{{ meta.bigg_id }}</td>
+            </tr>
+            <tr>
+                <td>Descriptive Name</td>
+                <td>{{ meta.name }}</td>
+            </tr>
+            <tr>
+                <td>Formulae</td>
+                <td>{{ meta.formulae|join:', ' }}</td>
+            </tr>
+            {% if meta.charges %}
+            <tr>
+                <td>Charges</td>
+                <td>{{ meta.charges }}</td>
+            </tr>
+            {% endif %}
+            {% if meta.database_links %}
+                <tr>
+                    <td>External Database Links</td>
+                    <td>
+                        {% include 'bigg_database/db_links.html' with db_links=meta.database_links only %}
+                    </td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td><a href="{% url 'bigg_database:metabolite_from_reactions' meta.id %}">
+                    Reactions Containing {{ meta.bigg_id }}</a></td>
+                <td>
+                    {% render_list_tag meta.reactions.all 'reaction' 'reaction_metabolite_relationship_detail' id=meta.id reverse=True %}
+                </td>
+            </tr>
+            <tr>
+                <td><a href="{% url 'bigg_database:metabolites_in_model' meta.id %}">
+                    Models Containing {{ meta.bigg_id }}</a></td>
+                <td>
+                    {% render_list_tag meta.models.all 'model' 'model_metabolite_relationship_detail' id=meta.id reverse=True %}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+<script src="{% static "javascript/favorite_button.js" %}"></script>
 {% endblock %}

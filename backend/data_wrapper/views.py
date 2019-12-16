@@ -1,99 +1,115 @@
+import cobra
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
 from django.views import View
-from cobra_wrapper.models import CobraModel, CobraMetabolite
-from bigg_database.models import Model as DataModel, ModelReaction
-from django.http import JsonResponse
-from .common import (
-    data_metabolite_to_cobra_metabolite, data_reaction_to_cobra_reaction, reaction_string_to_metabolites
-)
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-import time
+from django.shortcuts import redirect
+from cobra_wrapper.utils import load_sbml, dump_sbml, get_reaction_json
+from bigg_database.models import Reaction as DataReaction
+from cobra_wrapper.models import CobraModel
+from .common import reaction_string_to_metabolites
+from .models import DataModel
+import json
+from cobra_wrapper import models
+from search.internal_api import search_biobricks
 
 
 class AddDataModelToCobra(View):
     def post(self, request):
         if not request.user.is_authenticated:
-            return JsonResponse({"messages": "login required"}, status=401)
+            # return JsonResponse({"messages": "login required"}, status=401)
+            return redirect("/accounts/login")
         user = request.user
         try:
-            model_pk = request.POST["model_pk"]
+            model_pk = request.POST["model_bigg_id"]
         except KeyError:
-            return JsonResponse({"messages": "pk required"}, status=400)
-        # print(time.time())
+            # return JsonResponse({"messages": "bigg_id required"}, status=400)
+            return HttpResponse("bigg_id required", status=400)
         try:
-            data_model_object = DataModel.objects.get(pk=model_pk)
+            data_model_object = DataModel.objects.get(bigg_id=model_pk)
         except ObjectDoesNotExist:
-            return JsonResponse({"messages": "No such model found"}, status=404)
+            # return JsonResponse({"messages": "No such model found"}, status=404)
+            return HttpResponse("No such model found", status=404)
         cobra_model_object = CobraModel()
-        # relationship
-        cobra_model_object.identifier = data_model_object.bigg_id
-        cobra_model_object.name = data_model_object.bigg_id
-
+        cobra_model_object.sbml_content = data_model_object.sbml_content
         cobra_model_object.owner = user
-        cobra_model_object.cobra_id = data_model_object.bigg_id
-        cobra_model_object.objective = ''
+        try:
+            name = request.POST["name"]
+        except KeyError:
+            name = "new model"
+        try:
+            desc = request.POST['desc']
+        except KeyError:
+            desc = "A new model"
+        cobra_model_object.desc = desc
+        cobra_model_object.name = name
         cobra_model_object.save()
-
-        # add reactions & metabolites
-        for data_reaction in data_model_object.reaction_set.all():
-            try:
-                data_model_reaction = ModelReaction.objects.get(model=data_model_object, reaction=data_reaction)
-            except ObjectDoesNotExist:
-                return JsonResponse({"messages": "reaction not found"}, status=500)
-            except MultipleObjectsReturned:
-                return JsonResponse({"messages": "unknown error"}, status=500)
-            cobra_reaction_object = data_reaction_to_cobra_reaction(
-                user=user,
-                data_reaction_object=data_reaction,
-                subsystem=data_model_reaction.subsystem,
-                upper_bound=data_model_reaction.upper_bound,
-                lower_bound=data_model_reaction.lower_bound
-            )
-            if cobra_reaction_object is None:
-                return JsonResponse({"messages": "cobra_reaction_object is null"}, status=500)
-            cobra_reaction_object.save()
-            cobra_model_object.reactions.add(cobra_reaction_object)
-
-        # print(time.time())
-        return JsonResponse({"messages": "OK"}, status=200)
+        cobra_model_object.cache(load_sbml(cobra_model_object.sbml_content))
+        # return JsonResponse({"messages": "OK"}, status=200)
+        return redirect("/cobra/models")
 
 
 class AddDataReactionToCobra(View):
     def post(self, request):
         if not request.user.is_authenticated:
-            return JsonResponse({"messages": "login required"}, status=401)
+            return redirect("/accounts/login")
         user = request.user
         try:
-            model_pk = request.POST["model_pk"]
             reaction_pk = request.POST["reaction_pk"]
         except KeyError:
-            return JsonResponse({"messages": "pk required"}, status=400)
-        cobra_reaction_object = data_reaction_to_cobra_reaction(key="pk", value=reaction_pk, user=user)
-        if cobra_reaction_object is None:
-            return JsonResponse({"messages": "no reactions"}, status=500)
-        cobra_reaction_object.save()
+            return HttpResponse("reaction pk required", status=400)
+        try:
+            model_pk = request.POST["model_pk"]
+        except KeyError:
+            return HttpResponse("model pk required", status=400)
         try:
             cobra_model_object = CobraModel.objects.get(pk=model_pk)
         except ObjectDoesNotExist:
-            return JsonResponse({"messages": "no model found"}, status=500)
-        cobra_model_object.reactions.add(cobra_reaction_object)
-        return JsonResponse({"messages": "OK"}, status=200)
+            return HttpResponse("No model found", status=404)
+        if cobra_model_object.owner != user:
+            return HttpResponse("Not your model", status=403)
 
-
-class AddDataMetaboliteToCobra(View):
-    def post(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({"messages": "login required"}, status=401)
-        user = request.user
         try:
-            metabolite_pk = request.POST["pk"]  # SEE: <myl7> tests.test_add_metabolite
-        except KeyError:
-            return JsonResponse({"messages": "pk required"}, status=400)
-        cobra_metabolite_object = data_metabolite_to_cobra_metabolite(key="pk", value=metabolite_pk, user=user)
-        if cobra_metabolite_object is None:
-            return JsonResponse({"messages": "no metabolite found"}, status=500)
-        # try:
-        #     CobraMetabolite.objects.get(owner_id=user.id, cobra_id=cobra_metabolite_object.cobra_id)
-        #     return JsonResponse({"messages": "metabolite already exist"}, status=200)
-        # except ObjectDoesNotExist:
-        cobra_metabolite_object.save()
-        return JsonResponse({"messages": "OK"}, status=200)
+            data_reaction_object = DataReaction.objects.get(pk=reaction_pk)
+        except ObjectDoesNotExist:
+            return HttpResponse("No reaction found", status=404)
+        reaction = cobra.Reaction(data_reaction_object.bigg_id)
+        reaction.name = data_reaction_object.name
+        metabolites_dict = reaction_string_to_metabolites(data_reaction_object.reaction_string)
+
+        if metabolites_dict is None:
+            return HttpResponse("Internal Error", status=500)
+        reaction.add_metabolites(metabolites_dict)
+        cobra_object = load_sbml(cobra_model_object.sbml_content)
+        try:
+            reaction.gene_reaction_rule = [gene.gene_reaction_rule for gene in data_reaction_object.reactiongene_set.all()][
+                0]
+        except IndexError:
+            pass
+        cobra_model_object.sbml_content = dump_sbml(cobra_object)
+        cobra_model_object.save()
+        cobra_model_object.cache(load_sbml(cobra_model_object.sbml_content))
+        # return JsonResponse({"messages": "OK"}, status=200)
+        models.CobraModelChange.objects.create(change_type='add_reaction', model=cobra_model_object,
+                                               reaction_info=json.dumps({
+                                                   'reactions': [get_reaction_json(reaction)],
+                                               }))
+
+        keywords = set()
+        reaction_dict_list = [
+            json.loads(change.reaction_info)
+            for change in models.CobraModelChange.objects.filter(
+                model=cobra_model_object, change_type='add_reaction')[:10]
+        ]
+        for reaction_dict in reaction_dict_list:
+            for reaction in reaction_dict['reactions']:
+                keywords.add(reaction['name'])
+                keywords.update(reaction['metabolites'])
+                keywords.update(reaction['genes'])
+        biobricks = search_biobricks(*keywords)
+        for bb in biobricks:
+            biobrick = models.CobraBiobrick()
+            biobrick.part_name = bb.partname
+            biobrick.cobra_model = cobra_model_object
+            biobrick.save()
+        return redirect("/cobra/models/" + str(cobra_model_object.pk))

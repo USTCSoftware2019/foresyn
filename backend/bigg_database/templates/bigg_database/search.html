@@ -1,48 +1,19 @@
 {% extends "base.html" %}
 
 {% block title %}
-Search
+    Search
 {% endblock %}
 
 {% block content %}
-<h2>Search</h2>
+    <div class="container mt-4">
+        <h2>Search</h2>
 
-<form method="get" action="{% url 'bigg_database:search' %}">
-    <p>
-        <label for="id_q">Search:</label>
-        <input id="id_q" type="search" name="q" required=true>
-    </p>
-    {% comment %}
-    <!--
-        <p><label>Search In</label></p>
-        <ul id="id_models">
-            <li>
-                <label for="id_models_model">
-                    <input id="id_models_model" type="checkbox" name="models" value="bigg_database.model">
-                    Models
-                </label>
-            </li>
-            <li>
-                <label for="id_models_reaction">
-                    <input id="id_models_reaction" type="checkbox" name="models" value="bigg_database.reaction">
-                    Reactions
-                </label>
-            </li>
-            <li>
-                <label for="id_models_metabolite">
-                    <input id="id_models_metabolite" type="checkbox" name="models" value="bigg_database.metabolite">
-                    Metabolites
-                </label>
-            </li>
-            <li>
-                <label for="id_models_gene">
-                    <input id="id_models_gene" type="checkbox" name="models" value="bigg_database.gene">
-                    Genes
-                </label>
-            </li>
-        </ul>
-    -->
-    {% endcomment %}
-    <input type="submit" value="Search">
-</form>
+        <form method="get" action="{% url 'bigg_database:search' %}">
+            <p>
+                <label for="id_q">Search:</label>
+                <input id="id_q" type="search" name="q" required>
+            </p>
+            <input type="submit" value="Search">
+        </form>
+    </div>
 {% endblock %}

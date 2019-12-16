@@ -1,51 +1,448 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}{{ object }}{% endblock title %}
 
 {% block content %}
-    <table>
-        <tbody>
-        <tr>
-            <td>id</td>
-            <td>{{ object.id }}</td>
-        </tr>
-        <tr>
-            <td>cobra_id</td>
-            <td>{{ object.cobra_id }}</td>
-        </tr>
-        <tr>
-            <td>name</td>
-            <td>{{ object.name }}</td>
-        </tr>
-        <tr>
-            <td>objective</td>
-            <td>{{ object.objective }}</td>
-        </tr>
-        <tr>
-            <td>reactions</td>
-            <td>
-                [
-                {% for reaction in object.reactions.all %}
-                    {% if not forloop.counter == 1 %},{% endif %}
-                    <a href="{% url 'cobra_wrapper:cobrareaction_detail' reaction.pk %}">{{ reaction }}</a>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-2">
+            <div class="bar-left" style="width: 3px; height: {{ change_line_len }}px; background-color:#20c997"></div>
+            <div class="bar-btn-group col-1">
+                <button class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
+                    data-content="Created"></button>
+                {% for change in latest_changes %}
+                {# <button type="button" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover" data-content="{{ change }}"></button> #}
+                <form method="post" action="{% url 'cobra_wrapper:cobramodel_change_restore' object.pk change.pk %}">
+                    {% csrf_token %}
+                    <input type="submit" class="row btn btn-sm-circle text-hover-green slide" data-toggle="hover"
+                        data-content="{{ change }}" value>
+                </form>
                 {% endfor %}
-                ]
-            </td>
-        </tr>
-        </tbody>
-    </table>
+            </div>
+            <script>
+                $(function () {
+                    $('[data-toggle="hover"]').popover({ trigger: 'hover' })
+                })
+            </script>
+            <div class="col-12">
+                <div class="row" id="history">
+                    <div class="text ml-4 bar-text text-muted">
+                        Created<br>
+                        {{ object.created_time.date|date:"Y-m-d" }}<br>
+                        {{ object.created_time.time|date:"H:i:s" }}<br>
+                    </div>
+                    {% for change in latest_changes %}
+                    <div class="text ml-4 bar-text text-muted">
+                        {{ change.get_type_name }}<br>
+                        {{ change.created_time.date|date:"Y-m-d" }}<br>
+                        {{ change.created_time.time|date:"H:i:s" }}<br>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-content-between">
+                    <h5 style="padding-top: 5px;">Model: {{ object.name }}</h5>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#shareModal">
+                        <i class="fa fa-share-alt "></i>
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="shareModal" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Share</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body" id="share-modal-body">
+                                    <form method="post" action="{% url 'share:create_share' %}" onsubmit="return false">
 
-    <ol>
-        {% for change in changes %}
-            <li>{{ change }}</li>
-        {% endfor %}
-    </ol>
+                                        <div class="form-group row">
+                                            <div class="col-12">
+                                                <label>description</label>
+                                                <input type="number" name="model_id" value="{{ object.pk }}" hidden>
+                                                {% csrf_token %}
+                                                <input type="text" class="form-control" name="desc">
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-dismiss="modal">Close
+                                                    </button>
+                                                    <button type="button" class="btn btn-primary" id="share">Share
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-12 d-flex justify-content-between align-items-center">
+                            <div><h5>Information</h5></div>
+                            <div><a href="{% url 'cobra_wrapper:cobramodel_map' object.pk %}" class="btn btn-info">Metabolic Map</a></div>
+                        </div>
+                    </div>
+                    <div class="list-group" id="model_reaction_list">
 
-    <a href="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">Edit</a>
+                        {% comment %}
+                        <a href="{% url 'cobra_wrapper:cobramodel_map' object.pk %}" class="btn btn-info ">Metabolic
+                            Map</a>
+                        {% endcomment %}
 
-    <a href="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.pk %}">Delete</a>
+                        {% for reaction in reactions %}
+                        <li class="list-group-item list-group-item-action">{{ reaction.name }}[{{ reaction.cobra_id }}]
+                        </li>
+                        {% endfor %}
+                        <div class="row mt-3">
+                            <div class="col-12 d-flex justify-content-center">
+                                <button class="btn btn-info" id="list-more">More</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="btn-group-fixed" style="z-index:100">
+                        <div class="row">
+                            <button class="col btn btn-outline-light btn-side-circle text-hover-green" type="button"
+                                data-toggle="modal" data-target="#ModalEditForm">Edit
+                            </button>
+                        </div>
+                        <div class="row">
+                            <button class="col btn btn-outline-light btn-side-circle text-hover-red" type="button"
+                                data-toggle="modal" data-target="#ModalDeleteForm">Delete
+                            </button>
+                        </div>
+                        <div class="row">
+                            <a href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}"
+                                class="col btn btn-outline-light btn-side-circle text-hover-green">
+                                FBA
+                            </a>
+                        </div>
+                        <div class="row">
+                            <a href="{% url 'cobra_wrapper:cobrargefba_list' object.pk %}"
+                                class="col btn btn-outline-light btn-side-circle text-hover-green">
+                                RFBA
+                            </a>
+                        </div>
+                        <div class="row">
+                            <a href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}"
+                                class="col btn btn-outline-light btn-side-circle text-hover-green">
+                                FVA
+                            </a>
+                        </div>
+                    </div>
+                    {% comment %}
+                    <div class="row justify-content-around">
+                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" type="button"
+                            data-toggle="modal" data-target="#ModalEditForm">Edit
+                        </button>
+                        <button class="col-2 btn btn-outline-light btn-side-circle text-hover-red" type="button"
+                            data-toggle="modal" data-target="#ModalDeleteForm">Delete
+                        </button>
+                        <a href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}"
+                            class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
+                            FBA
+                        </a>
+                        <a href="{% url 'cobra_wrapper:cobrargefba_list' object.pk %}"
+                            class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
+                            RFBA
+                        </a>
+                        <a href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}"
+                            class="col-2 btn btn-outline-light btn-side-circle text-hover-green">
+                            FVA
+                        </a>
+                    </div>
+                    {% endcomment %}
+                </div>
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="list-group" id="biobrick_recommend">
+                <li href="#" class="list-group-item list-group-item-action text-light" style="background-color:#20c997">
+                    Biobricks
+                </li>
+                {% if biobricks %}
+                {% for biobrick in biobricks %}
+                <a href="http://bio.biomaster-uestc.com/public/index.php/detail/{{ biobrick.part_name }}"
+                    class="list-group-item list-group-item-action">{{ biobrick.part_name }}</a>
+                {% endfor %}
+                {% else %}
+                <li class="list-group-item list-group-item-action">No Recommendation</li>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <br>
+</div>
 
-    <a href="{% url 'cobra_wrapper:cobrafba_list' object.pk %}">FBA</a>
+<div class="modal fade" id="ModalEditForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Model</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% comment %}
+                {% for form in forms %}
+                <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <input type="submit" class="btn btn-info col-2" value="Submit">
+                </form>
+                {% endfor %}
+                {% endcomment %}
+                {% for form in forms %}
+                {% if forloop.counter0 == 0 %}
+                <p class="text-center text-gray text-small">Change Some Basic Information</p>
+                <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <label for="{{ form.name.id_for_label }}" class="col-3 col-form-label">Name</label>
+                        <div class="col-9">
+                            {{ form.name }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ form.desc.id_for_label }}" class="col-3 col-form-label">Description</label>
+                        <div class="col-9">
+                            {{ form.desc }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        {{ form.change_type }}
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-12 text-center">
+                            <input type="submit" class="btn btn-info" value="Submit">
+                        </div>
+                    </div>
+                </form>
+                {% elif forloop.counter0 == 1 %}
+                <p class="text-center text-gray text-small">Change the Objective Value</p>
+                <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <label for="{{ form.objective.id_for_label }}" class="col-3 col-form-label">Objective</label>
+                        <div class="col-9">
+                            {{ form.objective }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        {{ form.change_type }}
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-12 text-center">
+                            <input type="submit" class="btn btn-info" value="Submit">
+                        </div>
+                    </div>
+                </form>
 
-    <a href="{% url 'cobra_wrapper:cobrafva_list' object.pk %}">FVA</a>
+                {% elif forloop.counter0 == 2 %}
+                <p class="text-center text-gray text-small">Delete Model Reaction</p>
+                <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <label for="{{ form.deleted_reaction_id.id_for_label }}" class="col-3 col-form-label">Reaction ID</label>
+                        <div class="col-9">
+                            {{ form.deleted_reaction_id }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        {{ form.change_type }}
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-12 text-center">
+                            <input type="submit" class="btn btn-info" value="Submit">
+                        </div>
+                    </div>
+                </form>
+
+                {% elif forloop.counter0 == 3 %}
+                <p class="text-center text-gray text-small">Add Some Model Reaction</p>
+                <form method="post" action="{% url 'cobra_wrapper:cobramodel_update_form' object.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <label for="{{ form.cobra_id.id_for_label }}" class="col-3 col-form-label">Cobra ID</label>
+                        <div class="col-9">
+                            {{ form.cobra_id }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ form.name.id_for_label }}" class="col-3 col-form-label">Name</label>
+                        <div class="col-9">
+                            {{ form.name }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ form.subsystem.id_for_label }}" class="col-3 col-form-label">Subsystem</label>
+                        <div class="col-9">
+                            {{ form.subsystem }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ form.lower_bound.id_for_label }}" class="col-3 col-form-label">Lower Bound</label>
+                        <div class="col-9">
+                            {{ form.lower_bound }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ form.upper_bound.id_for_label }}" class="col-3 col-form-label">Upper Bound</label>
+                        <div class="col-9">
+                            {{ form.upper_bound }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ form.reaction_str.id_for_label }}" class="col-3 col-form-label">Reaction</label>
+                        <div class="col-9">
+                            {{ form.reaction_str }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="{{ form.gene_reaction_rule.id_for_label }}" class="col-3 col-form-label">Reaction Rule</label>
+                        <div class="col-9">
+                            {{ form.gene_reaction_rule }}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        {{ form.change_type }}
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-12 text-center">
+                            <input type="submit" class="btn btn-info" value="Submit">
+                        </div>
+                    </div>
+                </form>
+
+                {% endif %}
+
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // this is for css for forms
+    $(document).ready(function () {
+        console.log('going to add class...')
+        $('input[type="text"]').addClass('form-control')
+        $('input[type="number"]').addClass('form-control')
+
+        let show_all = false;
+        $('#model_reaction_list .list-group-item').slice(10).addClass('d-none')
+        $('button#list-more').on('click', function(){
+            if(show_all){
+                $('#model_reaction_list .list-group-item').slice(10).addClass('d-none')
+                $(this).html('More')
+            }else{
+                $('#model_reaction_list .list-group-item').slice(10).removeClass('d-none')
+                $(this).html('Less')
+            }
+            show_all = !show_all;
+        })
+
+        $('#biobrick_recommend .list-group-item').slice(10).addClass('d-none')
+
+    });
+</script>
+
+<style>
+.text-gray{
+
+}
+.text-small{
+    font-size: 1.05em;
+    font-weight: 500;
+}
+.modal-lg{
+    max-width: 50% !important;
+}
+</style>
+
+<div class="modal fade" id="ModalDeleteForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
+                        <div class="col-sm-10">
+                            <p>Are you sure to delete: {{ object }}?</p>
+                        </div>
+                    </div>
+                    <div class="form-group row d-flex justify-content-center">
+                        <input type="submit" class="btn btn-info col-2" value="Delete">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    var token = $('input[name="csrfmiddlewaretoken"]').attr('value');
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", token);
+            }
+        }
+    });
+    $('#share').on('click', function () {
+
+        var token = $('input[name="csrfmiddlewaretoken"]').attr('value');
+        $.ajax({
+            url: '/share/create/',
+            method: 'POST',
+            data: {
+                "model_id": {{ object.pk }},
+                "desc": $('input[name="desc"]').attr('value')
+                    },
+            success: function (res) {
+                console.log(res);
+                $('#share-modal-body').html('Share successfully! Url: ' + res.url);
+            },
+            error: function (err) {
+                console.log('ajax err.')
+            }
+                })
+            });
+</script>
+{#  Just an example, remove this in production. And in fact do not do this, as the render is BADLY SLOW#}
+{#  Use js to implenment a similar one#}
+{#    <div>#}
+{#        {% for form in reaction_forms %}#}
+{#            <form method="post"#}
+{#                  action="{% url 'cobra_wrapper:cobramodel_reaction_update_bound_form' object.pk %}">#}
+{#                {% csrf_token %}#}
+{#                {{ form|crispy }}#}
+{#                <input type="submit" class="btn btn-info col-2" value="Submit">#}
+{#            </form>#}
+{#        {% endfor %}#}
+{#    </div>#}
 {% endblock content %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}
+Signup confirm email sent
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+    <p>We've emailed you instructions for activating your account. If they haven't arrived in a few minutes, check your spam folder.</p>
+    </div>
+{% endblock %}

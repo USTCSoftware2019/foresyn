@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% load cobra_wrapper_tags %}
+{% load crispy_forms_tags %}
+
+{% block title %}All RFBA{% endblock title %}
+
+{% block content %}
+    <div class="banner w-100">
+        <div class="container d-flex align-items-center">
+            <div class="icon bg-info text-white d-flex justify-content-center align-items-center">
+                <i class="fa fa-area-chart fa-2x"></i>
+            </div>
+            <div class="des ml-3">
+                <h5>My Models</h5>
+                <div>Here contains your computational models.</div>
+            </div>
+        </div>
+    </div>
+    <div id="my-models" class="container" style="padding: 0px"><br>
+        {% for object in object_list %}
+        {% if forloop.counter0|divisibleby:3 %}
+            <div class="row show_card pt-3">
+        {% endif %}
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-header" style="background-color: #d4edda; color: #155724">
+                                <td>desc</td>
+                                <td>{{ object.desc }}</td>
+                        </div>
+                        <div class="card-body">
+                            <table>
+                                <tbody>
+
+                                <tr>
+                                    <td>start_time</td>
+                                    <td>{{ object.start_time }}</td>
+                                </tr>
+                                <tr>
+                                    <td>status</td>
+                                    <td>{{ object|check_result_status }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <a href="{% url 'cobra_wrapper:cobrargefba_detail' model_pk object.pk %}"
+                               class="btn btn-outline-light btn-side-circle text-hover-green">Detail</a>
+                        </div>
+                        <div class="card-footer text-muted">
+                            2019.9.1
+                        </div>
+                    </div>
+                </div>
+                {% if forloop.counter0|add:1|divisibleby:3 %}
+            </div>
+        {% endif %}
+        {% endfor %}
+        <div class="btn-group-fixed">
+            <div class="row changeable">
+                <button class="btn btn-outline-light btn-circle text-hover-green" data-toggle="modal"
+                        data-target="#ModalPlus">
+                    <i class="fa fa-plus" aria-hidden="true" style="line-height: 38px;"></i>
+                </button>
+            </div>
+            <div class="row">
+                <button type="button" class="btn btn-outline-light btn-circle text-hover-green"
+                        href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">
+                    <i class="fa fa-reply" aria-hidden="true"></i>
+                </button>
+            </div>
+            {% comment %}
+            <div class="row">
+                <button type="button" class="btn btn-outline-light btn-circle text-hover-green slide">
+                    <i class="fa fa fa-chevron-down" aria-hidden="true"></i>
+                </button>
+            </div>
+            {% endcomment %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModalPlus" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Create a new RFBA</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{% url 'cobra_wrapper:cobrargefba_create_form' model_pk %}" method="post">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                    </div>
+                    <div class="modal-footer">
+                        <input type="reset" class="btn btn-secondary" value="Reset">
+                        <input type="submit" class="btn btn-outline-light text-hover-green" value="Create">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $('button.slide').click(function () {
+            if ($('.btn-group-fixed div.changeable').css('display') === 'none') {
+                $('.btn-group-fixed div.changeable').fadeIn();
+                $('button.slide').css({
+                    'transform': 'rotate(0deg)'
+                })
+            } else {
+                $('.btn-group-fixed div.changeable').fadeOut();
+                $('button.slide').css({
+                    'transform': 'rotate(180deg)'
+                })
+            }
+        });
+
+        $('button.change').click(function () {
+            if ($('div.show_card').css('display') === 'flex') {
+                $('div.show_card').css('display', 'none');
+                $('div.show_plain').css('display', 'block');
+                $('.change_icon').addClass('fa-th').removeClass('fa-th-list');
+            } else {
+                $('div.show_card').css('display', 'flex');
+                $('div.show_plain').css('display', 'none');
+                $('.change_icon').removeClass('fa-th').addClass('fa-th-list');
+            }
+        });
+        {% if form.errors %}
+            $(document).ready(function () {
+                $("#ModalPlus").modal('toggle');
+            });
+            $(".invalid-feedback").show();
+        {% endif %}
+    </script>
+{% endblock content %}

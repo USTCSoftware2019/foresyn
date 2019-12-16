@@ -4,93 +4,18 @@ from functools import reduce
 
 import django.core.exceptions
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
-from django.shortcuts import Http404, render, reverse
+from django.shortcuts import Http404, redirect, render, reverse
 from django.utils.translation import gettext as _
 from django.views.generic import DetailView, ListView, View
 from django.views.generic.detail import SingleObjectMixin
-from haystack.generic_views import SearchView as HaystackSearchView
-from haystack.query import SQ, SearchQuerySet
-from .common import TopKHeap
-from .forms import ModifiedModelSearchForm
+
 from .models import (Gene, Metabolite, Model, ModelMetabolite, ModelReaction,
                      Reaction, ReactionGene, ReactionMetabolite)
 
-
-class ModelSearchInfo:
-    search_model = Model
-    by = ['bigg_id']
-    view_name = 'model_detail'
-
-
-class MetaboliteSearchInfo:
-    search_model = Metabolite
-    by = ['bigg_id', 'name']
-    view_name = 'metabolite_detail'
-
-
-class ReactionSearchInfo:
-    search_model = Reaction
-    by = ['bigg_id', 'name']
-    view_name = 'reaction_detail'
-
-
-class GeneSearchInfo:
-    search_model = Gene
-    by = ['bigg_id', 'name']
-    view_name = 'gene_detail'
-
-# TODO
-# For now, the maximum allowed Levenshtein Edit Distance
-# is set to 2, fixed.
-# See: http://en.wikipedia.org/wiki/Levenshtein_distance
-# However, what we want is that, no matter how much difference
-# between the user's query and the data in the database, we want
-# the best match ones. Even though the similarity is extremely
-# low
-
-
-class SearchView(View):
-    def get(self, request, *args, **kwargs):
-        form = ModifiedModelSearchForm(request.GET)
-
-        if form.is_valid():
-            keyword = form.cleaned_data['q']
-            queryset = SearchQuerySet().filter(SQ(content__fuzzy=keyword)).order_by('-_score')
-
-            context = {}
-
-            # TODO
-            # The results need to paged
-
-            model_object_list = []
-            reaction_object_list = []
-            metabolite_object_list = []
-            gene_object_list = []
-            for obj in queryset:
-                if isinstance(obj.object, Model):
-                    model_object_list.append(obj.object)
-                elif isinstance(obj.object, Reaction):
-                    reaction_object_list.append(obj.object)
-                elif isinstance(obj.object, Metabolite):
-                    metabolite_object_list.append(obj.object)
-                elif isinstance(obj.object, Gene):
-                    gene_object_list.append(obj.object)
-            context['model_object_list'] = model_object_list
-            context['reaction_object_list'] = reaction_object_list
-            context['metabolite_object_list'] = metabolite_object_list
-            context['gene_object_list'] = gene_object_list
-
-            context['query'] = form.cleaned_data['q']
-
-            return render(request, 'bigg_database/search_result.html', context=context)
-        else:
-            return render(request,
-                          'bigg_database/search.html',
-                          context={
-                              'form': form
-                          })
+from cobra_wrapper.models import CobraModel
 
 
 class ModelDetailView(DetailView):
@@ -106,6 +31,14 @@ class MetaboliteDetailView(DetailView):
 class ReactionDetailView(DetailView):
     model = Reaction
     context_object_name = 'reaction'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+
+        if self.request.user.is_authenticated:
+            context['user_models'] = self.request.user.cobramodel_set.all()
+
+        return context
 
 
 class GeneDetailView(DetailView):
@@ -145,7 +78,7 @@ class RelationshipLookupView(ListView):
 
         context['to_model_name'] = self.to_model_name.replace('_set', '')
         context['from_model'] = self.object
-        context['from_model_name'] = self.from_model._meta.verbose_name
+        context['from_model_name'] = self.from_model._meta.verbose_name.lower()
 
         return context
 

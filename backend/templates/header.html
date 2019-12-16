@@ -1,57 +1,61 @@
 {% load static %}
-{#<link rel="stylesheet" href="/static/css/common.css" />#}
-{#<link rel="stylesheet" href="/static/css/default.css" />#}
-<link rel="stylesheet" href="{% static "css/header.css" %}" />
-<header class="mb-4">
-    <div class="container-fluid">
-        <nav class="navbar navbar-expand-md">
-            <h1>
-                <a class="navbar-brand" href="#">LOGO</a>
-            </h1>
-            <!-- Toggler/collapsibe Button -->
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
-                <span class="fa fa-align-justify text-white fa-fw"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="collapsibleNavbar">
-                <div class="navbar-nav ml-4 m-auto">
-                    <form action="{% url "bigg_database:search" %}" class="row form-inline">
-                        {% comment %}
-                        <select name="search_model" class="custom-select">
-                            <option value="gene">Gene</option>
-                            <option value="reaction">Reactions</option>
-                            <option value="model">Model</option>
-                            <option value="metabolite">Metabolite</option>
-                        </select>
-                        {% endcomment %}
-                        <div class="input-group">
-                            <input type="text" name="q" class="form-control bg-white col-xs-3" placeholder="Search Text">
-                            <div class="input-group-append">
-                                <input type="submit" value="Search" class="btn btn-info">
-                            </div>
-                        </div>
-                    </form>
-                </div>
 
-                <div class="header-right ">
-                    {% if user.is_authenticated %}
-                        <span class="greet mr-4 text-light">Hello, {{ user.username }}!</span>
-                        <span><a href="{% url "logout" %}" class="mr-4 btn btn-warning">Log Out</a></span>
-                    {% else %}
-                    <a href="{% url "login" %}" class="signin mr-4 btn btn-info"> Sign in</a>
-                    {% endif %}
-                </div>
+<header>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-md navbar-dark" style="background-color: #20c997">
+    <div class="container">
+      <!-- Brand -->
+      <span class="navbar-brand">
+          <a href="/">
+        <img src="{% static "image/logo.png" %}" style="height:30px">
+          </a>
+      </span>
+      <form class="form-inline" action="{% url "bigg_database:search" %}">
+        <input class="form-control form-control-sm mr-sm-2 form-circle" type="search" placeholder="  Search" aria-label="Search" name="q" value="{% if request.GET.q %}{{ request.GET.q }}{% endif %}">
+      </form>
+
+      <!-- Toggler/collapsibe Button -->
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Navbar links -->
+      <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="nav navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == "profile" %}active{% endif %}" href="{% url 'accounts:profile' %}">My Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if 'cobra' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'cobra_wrapper:cobramodel_list' %}">My Models</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://2019.igem.org/Team:USTC-Software/Demonstrate">Guide Book</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == "pack" %}active{% endif %}" href="{% url 'accounts:pack' %}">My Pack</a>
+          </li>
+          <!-- <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Dropdown
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item nav-link text-black text-center" data-toggle="tab" href="#dropdown1">dropdown1</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item nav-link text-black text-center" data-toggle="tab" href="#dropdown2">dropdown2</a>
             </div>
-        </nav>
+          </li>  -->
+        </ul>
+        <div class="ml-auto">
+          <span class="navbar-brand">
+              {% if user.is_authenticated %}
+            <img class="rounded" src="{% static "image/avatar.jpg" %}" style="height:30px">
+            <a class="btn btn-outline-light btn-sm text-hover-green" href="{% url 'logout' %}">Logout</a>
+              {% else %}
+              <a class="btn btn-outline-light btn-sm text-hover-green" href="{% url 'login' %}">Login</a>
+              {% endif %}
+          </span>
+        </div>
+      </div>
     </div>
-{#    a href="{% url 'bigg_database:search' %}">Search database</a> |#}
-{#    <a href="{% url 'cobra_wrapper:cobramodel_list' %}">Your computational models</a> |#}
-{#    <a href="{% url 'login' %}">Login your account</a>#}
+  </nav>
 </header>
-{#<style>#}
-{#    header .container-fluid {background-color: #105ae4; }#}
-{#    header nav a.navbar-brand {color: #fff; line-height: 2em; }#}
-{#    header nav div a {color: #fff; font-size: 1.2em; font-weight: 500; letter-spacing: 1px;}#}
-{#    header select.custom-select {border-radius: 3px 0 0 3px; width: 120px;}#}
-{#    header input.form-control {margin-left: -3px; border-left: 1px solid #ddd;border-radius: 1px;}#}
-{#    header button.btn {border-left: 1px solid #ddd; }#}
-{#</style>#}

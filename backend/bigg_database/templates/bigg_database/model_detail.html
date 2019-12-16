@@ -1,39 +1,103 @@
-{% extends 'base.html' %}
+{% extends 'bigg_database/item_base.html' %}
+{% load render_list_tag %}
+{% load favorite_tag %}
+{% load static %}
 
 {% block title %}
-Model: {{ model.bigg_id }}
+    Model: {{ model.bigg_id }}
 {% endblock %}
 
 {% block content %}
-<h4>Model metrics</h4>
-<table>
-    <thead>
-    <tr>
-        <th>Component</th>
-        <th>Count</th>
-    </tr>
-    </thead>
-    <tbody>
-    <!-- Row clickable or count clickable? -->
-    <tr>
-        <td>Reactions</td>
-        <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a></td>
-    </tr>
-    <tr>
-        <td>Metabolites</td>
-        <td><a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a></td>
-    </tr>
-    <tr>
-        <td>Genes</td>
-        <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
-    </tr>
-    </tbody>
-</table>
+    <div id="content" class="container mt-4">
+        <div class="w-100 d-flex justify-content-between">
+            <h4>Model {{ model.bigg_id }} contains</h4>
+            {% if user.is_authenticated %}
+                <a href="#" data-toggle="model" data-target="#exampleModal">
+                    <h5>{% favorite_button model %}</h5>
+                </a>
+            {% endif %}
+        </div>
+        <table class="table table-hover table-bordered mt-3">
+            <thead>
+            <tr>
+                <th>Component</th>
+                <th>Count</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Row clickable or count clickable? -->
+            <tr>
+                <td>Reactions</td>
+                <td><a href="{% url 'bigg_database:reactions_in_model' model.id %}">{{ model.reaction_set.count }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Metabolites</td>
+                <td>
+                    <a href="{% url 'bigg_database:metabolites_in_model' model.id %}">{{ model.metabolite_set.count }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td>Genes</td>
+                <td><a href="{% url 'bigg_database:genes_in_model' model.id %}">{{ model.gene_set.count }}</a></td>
+            </tr>
+            </tbody>
+        </table>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-outline-light text-hover-green" data-toggle="modal"
+                data-target="#ModalCenter">
+            add to computation
+        </button>
+        <!-- Modal -->
+        <div class="modal fade" id="ModalCenter" tabindex="-1" role="dialog" aria-labelledby="ModalCenterTitle"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalCenterTitle">Model</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addModelForm" method="post" action="{% url 'data_wrapper:add_models' %}">
+                            {% csrf_token %}
+                            <div class="form-group row">
+                                <label for="name" class="col-3 col-form-label">Name</label>
+                                <div class="col-9">
+                                    <input type="text" name="name" class="form-control" id="name">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="desc" class="col-3 col-form-label">Description</label>
+                                <div class="col-9">
+                                    <input type="text" name="desc" class="form-control" id="desc">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <input type="hidden" name="model_bigg_id" value="{{ model.bigg_id }}"
+                                       class="form-control">
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-12 text-center">
+                                    <input type="submit" class="btn btn-info" value="Add">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    {% comment %}
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-outline-light text-hover-green" form="addModelForm">Add
+                        </button>
+                    </div>
+                    {% endcomment %}
+                </div>
+            </div>
+        </div>
+    </div>
 
-<form method="post" action="{% url 'data_wrapper:add_models' %}">
-    {% csrf_token %}
-    <input type="number" name="model_pk" value="{{ model.id }}" hidden>
-    <input type="submit" value="add to cobra">
-</form>
+    <script src="{% static "javascript/favorite_button.js" %}"></script>
+
 
 {% endblock %}

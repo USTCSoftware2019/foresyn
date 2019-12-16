@@ -1,0 +1,3 @@
+{{object.description}}
+{{object.keywords}}
+{{object.part_name}}

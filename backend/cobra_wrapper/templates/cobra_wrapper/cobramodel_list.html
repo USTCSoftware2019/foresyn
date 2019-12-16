@@ -1,29 +1,184 @@
 {% extends 'base.html' %}
 
-{% block title %}All Models{% endblock title %}
+{% load crispy_forms_tags %}
+
+{% block title %}My Models{% endblock title %}
 
 {% block content %}
-    {% for object in object_list %}
-        <table>
-            <tbody>
-            <tr>
-                <td>id</td>
-                <td>{{ object.id }}</td>
-            </tr>
-            <tr>
-                <td>cobra_id</td>
-                <td>{{ object.cobra_id }}</td>
-            </tr>
-            <tr>
-                <td>name</td>
-                <td>{{ object.name }}</td>
-            </tr>
-            <tr>
-                <td><a href="{% url 'cobra_wrapper:cobramodel_detail' object.pk %}">Detail</a></td>
-            </tr>
-            </tbody>
-        </table>
-    {% endfor %}
+    <div class="banner w-100">
+        <div class="container d-flex align-items-center">
+            <div class="icon bg-info text-white d-flex justify-content-center align-items-center">
+                <i class="fa fa-cog fa-2x"></i>
+            </div>
+            <div class="des ml-3">
+                <h5>My Models</h5>
+                <div>Here contains your computational models.</div>
+            </div>
+        </div>
+    </div>
+    <div id="my-models" class="container" style="padding: 0px"><br>
+        {% for object in object_list %}
+            {% if forloop.counter0|divisibleby:3 %}
+                <div class="row show_card pt-3">
+            {% endif %}
+        <div class="col-4">
+            <div class="card text-center">
+                <h5 class="card-header" style="background-color: #d4edda; color: #155724">
+                    {{ object.name }}
+                </h5>
+                <div class="card-body">
+                    <p class="card-text">{{ object.desc }}</p>
+                    <a href="{% url 'cobra_wrapper:cobramodel_detail' object.pk %}"
+                       class="btn btn-outline-light btn-side-circle text-hover-green">Detail</a>
+                    <button class="btn btn-outline-light btn-side-circle text-hover-red" data-toggle="modal"
+                            data-target="#DeleteModal">
+                        <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog"
+                         aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <form action="{% url 'cobra_wrapper:cobramodel_confirm_delete' object.id %}"
+                                      method="post">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Delete Confirm</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% csrf_token %}
+                                        <p>Are you sure to delete this model?</p>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel
+                                        </button>
+                                        <input type="submit" class="btn btn-outline-light text-hover-red"
+                                               value="Delete">
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    {{ object.created_time|date:"Y-m-d H:i:s" }}
+                </div>
+            </div>
+        </div>
 
-    <a href="{% url 'cobra_wrapper:cobramodel_create_form' %}">Create</a>
+        {% if forloop.counter0|add:1|divisibleby:3 %}
+            </div>
+        {% endif %}
+        {% endfor %}
+
+        {#        <div class="show_plain" style="display: none;">#}
+        {#            <div class="list-group list-group-flush mb-5">#}
+        {#                <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">#}
+        {#                    <div class="d-flex w-100 justify-content-between">#}
+        {#                        <a class="mb-1" href="#"><h5>Feture</h5></a>#}
+        {#                    </div>#}
+        {#                    <p class="mb-1">Some basic information here. For example, its ID, function and chromosome.</p>#}
+        {#                    <small>When was it created?</small>#}
+        {#                </div>#}
+        {#                <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">#}
+        {#                    <div class="d-flex w-100 justify-content-between">#}
+        {#                        <a class="mb-1" href="#"><h5>Feture</h5></a>#}
+        {#                    </div>#}
+        {#                    <p class="mb-1">Some basic information here. For example, its ID, function and chromosome.</p>#}
+        {#                    <small>When was it created?</small>#}
+        {#                </div>#}
+        {#                <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">#}
+        {#                    <div class="d-flex w-100 justify-content-between">#}
+        {#                        <a class="mb-1" href="#"><h5>Feture</h5></a>#}
+        {#                    </div>#}
+        {#                    <p class="mb-1">Some basic information here. For example, its ID, function and chromosome.</p>#}
+        {#                    <small>When was it created?</small>#}
+        {#                </div>#}
+        {#                <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">#}
+        {#                    <div class="d-flex w-100 justify-content-between">#}
+        {#                        <a class="mb-1" href="#"><h5>Feture</h5></a>#}
+        {#                    </div>#}
+        {#                    <p class="mb-1">Some basic information here. For example, its ID, function and chromosome.</p>#}
+        {#                    <small>When was it created?</small>#}
+        {#                </div>#}
+        {#            </div>#}
+        {#        </div>#}
+        <div class="btn-group-fixed">
+            <div class="row changeable">
+                <button class="btn btn-outline-light btn-circle text-hover-green" data-toggle="modal"
+                        data-target="#ModalPlus">
+                    <i class="fa fa-plus" aria-hidden="true" style="line-height: 38px;"></i>
+                </button>
+            </div>
+            {#            <div class="row changeable">#}
+            {#                <button type="button" class="btn btn-outline-light btn-circle text-hover-green change">#}
+            {#                    <i class="fa fa-th-list change_icon" aria-hidden="true"></i>#}
+            {#                    <!--             <i class="fa fa-th" aria-hidden="true"></i> -->#}
+            {#                </button>#}
+            {#            </div>#}
+            {% comment %}
+            <div class="row">
+                <button type="button" class="btn btn-outline-light btn-circle text-hover-green slide"
+                        style="transition: all .3s ease-in-out">
+                    <i class="fa fa fa-chevron-down" aria-hidden="true"></i>
+                </button>
+            </div>
+            {% endcomment %}
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="ModalPlus" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Create a new model</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{% url 'cobra_wrapper:cobramodel_create_form' %}" method="post"
+                      enctype="multipart/form-data">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                    </div>
+                    <div class="modal-footer">
+                        <input type="reset" class="btn btn-secondary" value="Reset">
+                        <input type="submit" class="btn btn-outline-light text-hover-green" value="Create">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        $('button.slide').click(function () {
+            if ($('.btn-group-fixed div.changeable').css('display') === 'none') {
+                $('.btn-group-fixed div.changeable').fadeIn();
+                $('button.slide').css({
+                    'transform': 'rotate(0deg)'
+                })
+            } else {
+                $('.btn-group-fixed div.changeable').fadeOut();
+                $('button.slide').css({
+                    'transform': 'rotate(180deg)'
+                })
+            }
+        });
+
+        $('button.change').click(function () {
+            if ($('div.show_card').css('display') === 'flex') {
+                $('div.show_card').css('display', 'none');
+                $('div.show_plain').css('display', 'block');
+                $('.change_icon').addClass('fa-th').removeClass('fa-th-list');
+            } else {
+                $('div.show_card').css('display', 'flex');
+                $('div.show_plain').css('display', 'none');
+                $('.change_icon').removeClass('fa-th').addClass('fa-th-list');
+            }
+        });
+        {% if form.errors %}
+            $(document).ready(function () {
+                $("#ModalPlus").modal('toggle');
+            });
+            $(".invalid-feedback").show();
+        {% endif %}
+    </script>
 {% endblock content %}

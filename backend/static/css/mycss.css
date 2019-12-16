@@ -1,0 +1,108 @@
+.text-black {
+    color: black !important;
+}
+.form-circle {
+    border-radius: 30px !important;
+}
+.btn-side-circle {
+    border-radius: 30px !important;
+}
+.btn-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50% !important;
+    margin: 5px 0px;
+    background-color: #20c997;
+}
+.btn-sm-circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50% !important;
+    margin: 0px 0px 80px 0px;
+    padding: 0px;
+    background-color:white;
+    border-color:  #20c997;
+    border-width: 3px;
+}
+.btn-sm-circle:hover {
+    background-color: #20c997;
+}
+.btn-group-fixed {
+    position: fixed;
+    bottom: 50px;
+    right: 70px;
+}
+.bar-left {
+    position: absolute;
+    left: 10px;
+    top: 7px;
+}
+.bar-btn-group {
+    position: absolute;
+    left: 4px;
+    top: 0px;
+    padding: 0px;
+}
+.bar-text {
+    height: 80px;
+    margin: 0px 0px 15px 0px;
+}
+.text-hover-green {
+    color: #ffffff;
+    background-color:  #20c997;
+}
+.text-hover-green:hover {
+    color: #20c997 !important;
+    border-color: #20c997;
+    background-color:  #f8f9fa;
+}
+.text-hover-red {
+    color: #ffffff;
+    background-color:  #ff6e6e;
+}
+.text-hover-red:hover {
+    color: #ff6e6e !important;
+    border-color: #ff6e6e;
+    background-color:  #f8f9fa;
+}
+.btn-group-fixed {
+    position: fixed;
+    bottom: 50px;
+    right: 70px;
+}
+
+div.banner {background: url('../image/title_bg.jpg') !important;}
+div.banner div.container {height: 120px;}
+div.banner div.icon {height: 60px; width: 60px; box-sizing: border-box; padding: 6px; border-radius: 3px;}
+div.banner div.des div {color: #B6B4B4; }
+.left_index ul li {cursor: pointer;}
+.left_index ul li span {float: right;}
+.left_index ul li:hover {background: #f1f1f1;}
+.left_index li.chosen {background: #dddddd;}
+.left_index a.chosen {background: #dddddd;}
+.result_num {line-height: 35px;}
+.list-group div.list-group-item {padding: 2em 0;}
+
+.badge-search {
+    float: right;
+}
+
+.table {
+    table-layout: fixed;
+}
+
+.table td {
+    word-wrap: break-word;
+}
+
+@keyframes move-gene
+{
+    from {bottom: -30px;}
+    to {bottom: 150px;}
+}
+
+@keyframes jump-gene
+{
+    from {bottom: -50px;}
+    to {bottom: 0px;}
+}

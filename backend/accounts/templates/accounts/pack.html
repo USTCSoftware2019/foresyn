@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load favorite_list_tag %}
+{% load static %}
+{% load calc_index_display_tag %}
+{% block title %}
+    My Pack
+{% endblock %}
+
+{% block content %}
+    <div class="banner w-100">
+        <div class="container d-flex align-items-center">
+            <div class="icon bg-info text-white d-flex justify-content-center align-items-center">
+                <i class="fa fa-star fa-2x"></i>
+            </div>
+            <div class="des ml-3">
+                <h5>My Pack</h5>
+                <div>Here contains things you like.</div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="left_index col-3">
+                <ul class="list-group text-primary">
+                    <a {% if counts.gene != 0 %} href="?type=gene" {% else %} href="#" {% endif %}
+                                                 class="list-group-item {% if type == "gene" %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">Gene<span
+                            class="badge badge-info badge-search">{{ counts.gene }}</span></a>
+                    <a {% if counts.reaction != 0 %} href="?type=reaction" {% else %} href="#" {% endif %}
+                                                     class="list-group-item {% if type == "reaction" %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">Reaction<span
+                            class="badge badge-info badge-search">{{ counts.reaction }}</span></a>
+                    <a {% if counts.metabolite != 0 %} href="?type=metabolite" {% else %} href="#" {% endif %}
+                                                       class="list-group-item {% if type == "metabolite" %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">Metabolite<span
+                            class="badge badge-info badge-search">{{ counts.metabolite }}</span></a>
+                    <a {% if counts.model != 0 %} href="?type=model" {% else %} href="#" {% endif %}
+                                                  class="list-group-item {% if type == "model" %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">Model (Database)<span
+                            class="badge badge-info badge-search">{{ counts.model }}</span></a>
+                    <a {% if counts.model != 0 %} href="?type=usermodel" {% else %} href="#" {% endif %}
+                                                  class="list-group-item {% if type == "usermodel" %} chosen {% endif %} {% if counts.usermodel == 0 %} disabled {% endif %}">Model (User)<span
+                            class="badge badge-info badge-search">{{ counts.usermodel }}</span></a>
+                </ul>
+            </div>
+            <div class="right_content col-9">
+
+                <h5 class="result_num">{{ this_cnt }} results</h5>
+                <div class="list-group list-group-flush mb-5">
+                    {% for item in page_obj %}
+                        <div href="#" class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <a class="mb-1" href="{% render_link_tag item %}"><h5>{{ item|get_object_name }}</h5></a>
+                                {% pack_favorite_button item %}
+                            </div>
+                            <p class="mb-1">{{ item|get_object_description }}</p>
+                            <small>{{ item|get_object_source }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+                  {% if is_paginated %}
+                  {% calc_index_display_tag %}
+                  {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static "javascript/favorite_button.js" %}"></script>
+{% endblock %}

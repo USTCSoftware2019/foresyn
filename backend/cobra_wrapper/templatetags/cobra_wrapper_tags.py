@@ -4,7 +4,7 @@ register = template.Library()
 
 
 @register.filter
-def get_dict_value_with_key(dic, key):
+def access_dict(dic, key):
     return dic[key]
 
 
@@ -16,3 +16,8 @@ def check_result_status(fva_obj):
         return 'Processing'
     else:
         return 'Failed'
+
+
+@register.filter
+def split_with_comma(str_value):
+    return str_value.split(',')

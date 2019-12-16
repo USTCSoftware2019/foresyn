@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Index
+{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
+    <link rel="stylesheet" href="{% static "css/animate.min.css" %}">
+    <link rel="stylesheet" href="{% static "css/mycss.css" %}">
+    <script src="{% static "javascript/jquery.min.js" %}"></script>
+    <script src="{% static "javascript/bootstrap.min.js" %}"></script>
+    <div style="position: fixed;height: 100%;width: 100%;background: #f1fafe;"></div>
+    <div class="d-flex justify-content-center align-items-center"
+         style="position: absolute;height: 100%;width: 100%;background: url(/static/image/background.jpg);background-size: contain;background-position:center;">
+        <div class="card"
+             style=" width: 24rem;height: 250px;border-radius: 20px;position: relative;bottom: 0px;display:none;z-index:1">
+            <div class="card-body" style="padding-top: 70px;">
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="username" placeholder="Username">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" name="password" placeholder="Password">
+                    </div>
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <input type="submit" class="btn btn-outline-light btn-side-circle text-hover-green"
+                           style="width: 100%;" value="Login">
+
+                    <div>
+                <span><a href="{% url 'accounts:signup' %}">Don't have an account?</a></span>
+                <span class="float-right"><a href="{% url 'password_reset' %}">Lost password?</a></span>
+            </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;">
+        <img src="{% static "image/hand.png" %}" style="width: 24rem; position: relative;top:170px">
+    </div>
+    <div class="d-flex justify-content-center align-items-center" style="position: absolute;height: 100%;width: 100%;">
+        <img src="{% static "image/gene.png" %}" class="animated infinite bounce slow gene" style="width: 12rem; position: relative;bottom:-50px;
+    z-index:2;animation: jump-gene 1s;animation-iteration-count: infinite;animation-direction: alternate;cursor:pointer;">
+    </div>
+    <script>
+        $('img.gene').click(function () {
+            $(this).removeClass('animated infinite bounce slow')
+            $(this).css('animation', 'move-gene 1s')
+            $(this).css('bottom', '150px')
+            $('div.card').addClass('animated fadeInUp')
+            $('div.card').css('display', 'inline')
+        });
+    </script>
+
+{% endblock %}

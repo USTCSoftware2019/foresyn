@@ -1,53 +1,85 @@
 {% extends "base.html" %}
 {% load render_list_tag %}
+{% load calc_index_display_tag %}
+{% load render_link_tag %}
+{% load favorite_tag %}
+{% load static %}
 
 {% block title %}
 Search result - {{ query }}
 {% endblock %}
 
+{% block page_style %}
+.left_index ul li {cursor: pointer;}
+.left_index ul li span {float: right;}
+.left_index ul li:hover {background: #f1f1f1;}
+.left_index li.chosen {background: #dddddd;}
+.result_num {line-height: 35px;}
+.list-group div.list-group-item {padding: 2em 0;}
+.list-group div.list-group-item:hover {background: #ffffff;}
+{% endblock %}
+
 {% block content %}
+<div id="content" class="container mt-4">
+  <div class="row">
+    <div class="left_index col-3">
+      <ul class="list-group text-primary">
+        <a {% if counts.model != 0 %} href="?q={{ query }}&model=model" {% else %} href="#" {%endif%}
+          class="list-group-item {% if search_model == 'model' %} chosen {% endif %} {% if counts.model == 0 %} disabled {% endif %}">
+          Model<span class="badge badge-info badge-search">{{ counts.model }}{% if search_model != "model" %}{% endif %}</span>
+        </a>
 
-<h3>Search result for {{ query }}</h3>
+        <a {% if counts.reaction != 0 %} href="?q={{ query }}&model=reaction" {% else %} href="#" {%endif%}
+          class="list-group-item {% if search_model == 'reaction' %} chosen {% endif %} {% if counts.reaction == 0 %} disabled {% endif %}">
+          Reaction<span class="badge badge-info badge-search">{{ counts.reaction }}{% if search_model != "reaction" %}{% endif %}</span>
+        </a>
+        <a {% if counts.metabolite != 0 %} href="?q={{ query }}&model=metabolite" {% else %} href="#" {%endif%}
+          class="list-group-item {% if search_model == 'metabolite' %} chosen {% endif %} {% if counts.metabolite == 0 %} disabled {% endif %}">
+          Metabolite<span class="badge badge-info badge-search">{{ counts.metabolite }}{% if search_model != "metabolite" %}{% endif %}</span>
+        </a>
+        <a {% if counts.gene != 0 %} href="?q={{ query }}&model=gene" {% else %} href="#" {%endif%}
+          class="list-group-item {% if search_model == 'gene' %} chosen {% endif %} {% if counts.gene == 0 %} disabled {% endif %}">
+          Gene<span class="badge badge-info badge-search">{{ counts.gene }}{% if search_model != "gene" %}{% endif %}</span>
+        </a>
 
-{% if model_object_list %}
-<h4>Models</h4>
-{% render_list_tag model_object_list "model" "model_detail" %}
-{% endif %}
+      </ul>
+    </div>
+    <div class="right_content col-9">
 
-{% if reaction_object_list %}
-<h4>Reactions</h4>
-{% render_list_tag reaction_object_list "reaction" "reaction_detail" %}
-{% endif %}
-
-{% if metabolite_object_list %}
-<h4>Metabolites</h4>
-{% render_list_tag metabolite_object_list "metabolite" "metabolite_detail" %}
-{% endif %}
-
-{% if gene_object_list %}
-<h4>Genes</h4>
-{% render_list_tag gene_object_list "gene" "gene_detail" %}
-{% endif %}
-
-{% comment %}
-{% if page_obj.has_previous or page.has_next %}
-<div>
-    {% if page_obj.has_previous %}
-    <a href="?q={{ query }}&amp;page={{ page_obj.previous_page_number }}">
-        {% endif %}&laquo;Previous
-        {% if page_obj.has_previous %}
-    </a>
-    {% endif %}
-    |
-    {% if page_obj.has_next %}
-    <a href="?q={{ query }}&amp;page={{ page_obj.next_page_number }}">
+      <h5 class="result_num">{{ search_result_count }} result{% if search_result_count <= 1 %}{% else %}s{% endif %} in
+        {{ search_model|capfirst }}, {{ total_count }} result{% if total_count <= 1 %}{% else %}s{% endif %} in total</h5>
+      <div class="list-group list-group-flush mb-5">
+        {% if search_result_count == 0 %}
+        <h3>No results.</h3>
+        {% else %}
+        {% for search_result in object_list %}
+        <div href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+          <div class="d-flex w-100 justify-content-between">
+            <a class="mb-1" href="{% render_link_tag search_result search_model %}">
+              <h5>
+                {{ search_result.bigg_id }}
+              </h5>
+            </a>
+            {% favorite_button search_result app_label='bigg_database' model_name=search_model %}
+          </div>
+          <p class="mb-1">
+            {% ifequal search_model 'model' %}
+            {# **Please determine what to put here** #}
+            {% else %}
+            {{ search_result.name }}
+            {% endifequal %}</p>
+          <small>Bigg Database</small>
+        </div>
+        {% endfor %}
         {% endif %}
-        Next&raquo;
-        {% if page_obj.has_next %}
-    </a>
-    {% endif %}
-</div>
-{% endif %}
+      </div>
 
-{% endcomment %}
+      {% if is_paginated %}
+      {% calc_index_display_tag %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script src="{% static "javascript/favorite_button.js" %}"></script>
 {% endblock %}

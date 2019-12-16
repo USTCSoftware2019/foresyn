@@ -1,43 +1,77 @@
-{% extends 'base.html' %}
+{% extends 'bigg_database/item_base.html' %}
 {% load render_list_tag %}
+{% load favorite_tag %}
+{% load static %}
 
 {% block title %}
-Gene: {{ gene.bigg_id }}
+    Gene: {{ gene.bigg_id }}
 {% endblock %}
 
 {% block content %}
 
-<h1>Gene: {{ gene.bigg_id }}</h1>
-
-<h4>Descriptive name</h4>
-<p>{{ gene.name }}</p>
-
-<h4>Position</h4>
-<p>{{ gene.leftpos }} ~ {{ gene.rightpos }}</p>
-
-<h4>Strand</h4>
-<p>{{ gene.strand }}</p>
-
-<h4>Chromosome</h4>
-<p>{{ gene.chromosome_ncbi_accession }}</p>
-
-<h4>DNA Sequence</h4>
-<p>{{ gene.dna_sequence }}</p>
-
-<h4>Protein Sequence</h4>
-<p>{{ gene.protein_sequence }}</p>
-
-{% if gene.database_links %}
-<h4>External database links</h4>
-{% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
-{% endif %}
-
-<h4><a href="{% url 'bigg_database:gene_from_models' gene.id %}">
-    Models Containing {{ gene.bigg_id }}</a></h4>
-{% render_list_tag gene.models.all 'model' 'model_gene_relationship_detail' id=gene.id reverse=True %}
-
-<h4><a href="{% url 'bigg_database:gene_from_reactions' gene.id %}">
-    Reactions Containing {{ gene.bigg_id }}</a></h4>
-{% render_list_tag gene.reactions.all 'reaction' 'reaction_gene_relationship_detail' id=gene.id reverse=True %}
-
+    <div id="content" class="container mt-4">
+        <div class="w-100 d-flex justify-content-between">
+            <h4>{{ gene.name }} Gene</h4>
+            {% if user.is_authenticated %}
+                <a href="#" data-toggle="modal" data-target="#exampleModal">
+					<h5>{% favorite_button gene %}</h5>
+				</a>
+            {% endif %}
+        </div>
+        <table class="table table-hover table-bordered mt-3">
+            <tbody>
+            <tr>
+                <td>BIGG ID</td>
+                <td>{{ gene.bigg_id }}</td>
+            </tr>
+            <tr>
+                <td>Descriptive Name</td>
+                <td>{{ gene.name }}</td>
+            </tr>
+            <tr>
+                <td>Position</td>
+                <td>{{ gene.leftpos }} ~ {{ gene.rightpos }}</td>
+            </tr>
+            <tr>
+                <td>Strand</td>
+                <td>{{ gene.strand }}</td>
+            </tr>
+            <tr>
+                <td>Chromosome</td>
+                <td>{{ gene.chromosome_ncbi_accession }}</td>
+            </tr>
+            <tr>
+                <td>DNA Sequence</td>
+                <td>{{ gene.dna_sequence }}</td>
+            </tr>
+            <tr>
+                <td>Protein Sequence</td>
+                <td>{{ gene.protein_sequence }}</td>
+            </tr>
+            {% if gene.database_links %}
+                <tr>
+                    <td>External Database Links</td>
+                    <td>
+                        {% include 'bigg_database/db_links.html' with db_links=gene.database_links only %}
+                    </td>
+                </tr>
+            {% endif %}
+            <tr>
+                <td><a href="{% url 'bigg_database:gene_from_reactions' gene.id %}">
+                    Reactions Containing {{ gene.bigg_id }}</a></td>
+                <td>
+                    {% render_list_tag gene.reactions.all 'reaction' 'reaction_gene_relationship_detail' id=gene.id reverse=True %}
+                </td>
+            </tr>
+            <tr>
+                <td><a href="{% url 'bigg_database:gene_from_models' gene.id %}">
+                    Models Containing {{ gene.bigg_id }}</a></td>
+                <td>
+                    {% render_list_tag gene.models.all 'model' 'model_gene_relationship_detail' id=gene.id reverse=True %}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+<script src="{% static "javascript/favorite_button.js" %}"></script>
 {% endblock %}

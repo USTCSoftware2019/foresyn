@@ -1,85 +1,535 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% load cobra_wrapper_tags %}
 
 {% block title %}FBA Result of {{ object }}{% endblock title %}
 
-
 {% block content %}
-    <table>
-        <tr>
-            <td>id</td>
-            <td>{{ object.id }}</td>
-        </tr>
-        <tr>
-            <td>description</td>
-            <td>{{ object.desc }}</td>
-        </tr>
-        <tr>
-            <td>start_time</td>
-            <td>{{ object.start_time }}</td>
-        </tr>
-        <tr>
-            <td>model</td>
-            <td><a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">{{ object.model }}</a></td>
-        </tr>
-    </table>
+    <script src="{% static "javascript/jquery.min.js" %}"></script>
+    <script src="{% static "javascript/popper.min.js" %}"></script>
+    <script src="{% static "javascript/bootstrap.min.js" %}"></script>
 
-    <p>Status: {{ object|check_result_status }}</p>
 
-    {% if result %}
-        <table>
-            <tr>
-                <th>objective_value</th>
-                <th>status</th>
-            </tr>
-            <tr>
-                <td>{{ result.objective_value }}</td>
-                <td>{{ result.status }}</td>
-            </tr>
-        </table>
+    <style>
+        .status {
+            margin-left: 1em;
+        }
+    </style>
+    <div class="container">
+        <div class="row my-3">
+            <div class="col-3">
+                <h3>Description</h3>
+                <p>{{ object.desc }}</p>
+            </div>
+            <div class="col-3">
+                <h3>Start Time</h3>
+                <p>{{ object.start_time }}</p>
+            </div>
+            <div class="col-3">
+                <h3>Model</h3>
+                <p>Click <a href="{% url 'cobra_wrapper:cobramodel_detail' model_pk %}">HERE</a></p>
+            </div>
+        </div>
 
-        <table>
-            <thead>
-            <tr>
-                <th>fluxes</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th>name</th>
-                <th>value</th>
-            </tr>
-            {% for name, value in result.fluxes.items %}
-                <tr>
-                    <td>{{ name }}</td>
-                    <td>{{ value }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <div class="row my-2">
+            <div class="alert alert-info status" role="alert">
+                Calculating Status: {{ object| check_result_status }}
+            </div>
+            <div class="alert alert-success status" role="alert" id="obj_value">
+                Objective Values: {{ object.objective_value }}
+            </div>
+        </div>
 
-        <table>
-            <thead>
-            <tr>
-                <th>shadow_price</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <th>name</th>
-                <th>value</th>
-            </tr>
-            {% for name, value in result.shadow_prices.items %}
-                <tr>
-                    <td>{{ name }}</td>
-                    <td>{{ value }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
 
-    <a href="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}">Delete</a>
-    <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}">Return</a>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+                   aria-selected="true">Coenzymes</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                   aria-controls="profile"
+                   aria-selected="false">Fluxes of Reaction</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab"
+                   aria-controls="contact"
+                   aria-selected="false">Metabolites</a>
+            </li>
+        </ul>
+
+
+        <div class="tab-content" id="myTabContent">
+            <!-- 关键酶 Coenzymes -->
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div class="mt-4"></div>
+                <div id="coenzyme_table">
+                    <table class="table  table-hover table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Previous Flux Value</th>
+                            <th>Current Flux Value</th>
+                        </tr>
+                        </thead>
+                        <tbody id="coenzyme_body">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row d-flex mb-3">
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green pr-3" id="coen-ascend" data-toggle="tooltip"
+                            data-placement="top"
+                            title="previous value minus current value " data-control="coenzyme">Pre - Cur
+                    </button>
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" id="coen-descend" data-toggle="tooltip" data-placement="top"
+                            title="current value minus previous value" data-control="coenzyme">
+                        Cur - Pre
+                    </button>
+{#                    <button class="btn btn-primary mr-5" id="coen-diff" data-toggle="tooltip" data-placement="top"#}
+{#                            title="the genes that you can knock out" data-control="coenzyme">Difference#}
+{#                    </button>#}
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green ml-auto" id="coen-more" data-toggle="tooltip" data-placement="top"
+                            title="all the results" data-control="coenzyme">More
+                    </button>
+                </div>
+            </div>
+            <!-- 关键 Reaction  Fluxes-->
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="mt-4"></div>
+                <div id="res_table">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Previous Flux Value</th>
+                            <th>Current Flux Value</th>
+                            
+                        </tr>
+                        </thead>
+                        <tbody id="res_body">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row d-flex mb-3">
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green pr-3" id="res-ascend" data-toggle="tooltip" data-placement="top"
+                            title="previous value minus current value" data-control="flux">Pre - Cur
+                    </button>
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green pr-3" id="res-descend" data-toggle="tooltip" data-placement="top"
+                            title="current value minus previous value" data-control="flux">Cur - Pre
+                    </button>
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" id="res-diff" data-toggle="tooltip" data-placement="top"
+                            title="the reactions that you can knock out" data-control="flux">Difference
+                    </button>
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green ml-auto" id="res-more" data-toggle="tooltip" data-placement="top"
+                            title="all the results" data-control="coenzyme">More
+                    </button>
+                </div>
+            </div>
+            <!-- 代谢物 shadow prices -->
+            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                <div class="mt-4"></div>
+                <div id="shadow_table">
+                    <table class="table table-hover table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Previous Flux Value</th>
+                            <th>Current Flux Value</th>
+                            
+                        </tr>
+                        </thead>
+                        <tbody id="shadow_body">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row d-flex mb-3">
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green pr-3" id="shadow-ascend" data-toggle="tooltip"
+                            data-placement="top"
+                            title="previous value minus current value" data-control="shadow">Pre - Cur
+                    </button>
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green" id="shadow-descend" data-toggle="tooltip" data-placement="top"
+                            title="current value minus previous value" data-control="shadow">
+                        Cur - Pre
+                    </button>
+{#                    <button class="btn btn-primary mr-5" id="shadow-diff" data-toggle="tooltip" data-placement="top"#}
+{#                            title="the genes that you can knock out" data-control="shadow">Difference#}
+{#                    </button>#}
+                    <button class="col-2 btn btn-outline-light btn-side-circle text-hover-green ml-auto" id="shadow-more" data-toggle="tooltip" data-placement="top"
+                            title="all the results" data-control="coenzyme">More
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+                <button type="button" class="col-2 btn btn-outline-light btn-side-circle text-hover-red" data-toggle="modal" data-target="#fba_delete_model">
+                    Delete
+                </button>
+                <a href="{% url 'cobra_wrapper:cobrafba_list' model_pk %}" class="col-2 btn btn-outline-light btn-side-circle text-hover-green">Return</a>
+        </div>
+    </div>
+    {#    <!-- Modal -->#}
+    <div class="modal fade" id="fba_delete_model" tabindex="-1" role="dialog" aria-labelledby="fba_delete_model"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Confirm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{% url 'cobra_wrapper:cobrafba_confirm_delete' model_pk object.pk %}" method="post">
+                        {% csrf_token %}
+                        <p>Are you sure to delete this FBA?</p>
+                        <input type="submit" class="btn btn-danger" value="Delete">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        $(document).ready(function () {
+            // init tooltip
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+
+            let res_data = [];
+            const NOW = 0;
+            const PREVIOUS = 1;
+            const COLOR = ['table-primary', 'table-secondary', 'table-success',
+                'table-info', 'table-warning', 'table-danger'];
+
+            let labels = [];
+            let shadow_labels = [];
+            let flux_data = [];
+            let reduced_costs_data = [];
+            let flux_data_pre = [];
+            let reduced_costs_data_pre = [];
+            let shadow_prices_data = [];
+            let shadow_prices_data_pre = [];
+
+            let horizontalBarChartData = {};
+
+            let coenzyme_labels = [];
+            let coenzyme_data = [];
+            let coenzyme_data_pre = [];
+
+            let coenzyme_obj_arr = [];
+            let shadow_obj_arr = [];
+            let flux_obj_arr = [];
+
+            let url = window.location.href;
+            url += 'json';
+
+            $.ajax({
+                // url: 'http://127.0.0.1:8080/api/data',
+                // api url
+                url: url,
+                // method: 'get',
+                success: function (res) {
+                    // console.log(res);
+                    // res_data = JSON.parse(res);
+                    res_data = res.results;
+                    $('#obj_value').html('Objective Values: ' + res_data[0].objective_value);
+                    // console.log(res_data);
+                    let data_now = res_data[0];
+                    let len = data_now.fluxes.length;
+                    for (let i = 0; i < len; i++) {
+                        labels.push(data_now.fluxes[i].name);
+                        flux_data.push(data_now.fluxes[i].value);
+                        reduced_costs_data.push(data_now.reduced_costs[i].value);
+                    }
+                    if (res_data.length === 2) {
+                        let data_pre = res_data[1];
+                        for (let i = 0; i < len; i++) {
+                            // labels.push(data_now.fluxes[i].name);
+                            flux_data_pre.push(data_pre.fluxes[i].value);
+                            reduced_costs_data_pre.push(data_pre.reduced_costs[i].value);
+                        }
+                    }
+                    len = data_now.shadow_prices.length;
+                    for (let i = 0; i < len; i++) {
+                        shadow_labels.push(data_now.shadow_prices[i].name);
+                        shadow_prices_data.push(data_now.shadow_prices[i].value);
+                    }
+
+                    if (res_data.length === 2) {
+                        let data_pre = res_data[1];
+                        for (let i = 0; i < len; i++) {
+                            shadow_prices_data_pre.push(data_pre.shadow_prices[i].value);
+                        }
+                    }
+                    console.log(data_now);
+                    len = data_now.coenzymes.length;
+                    for (let i = 0; i < len; i++) {
+                        coenzyme_labels.push(data_now.coenzymes[i].name);
+                        coenzyme_data.push(data_now.coenzymes[i].value);
+                    }
+
+                    if (res_data.length === 2) {
+                        let data_pre = res_data[1];
+                        for (let i = 0; i < len; i++) {
+                            coenzyme_data_pre.push(data_pre.coenzymes[i].value);
+                        }
+                    }
+
+                    fullCoenzymeArr();
+                    fullFluxesArr();
+                    fullShadowArr();
+
+                    loadCoenzyme(len);
+                    load(15 < labels.length ? 15 : labels.length);
+                    loadShadowPrices(15 < labels.length ? 15 : labels.length);
+
+                    // load(Math.floor(20));
+
+                },
+                error: function (err) {
+                    console.log('error when ajax.');
+                    return;
+                }
+            });
+
+            function fullCoenzymeArr() {
+
+                for (let i = 0; i < coenzyme_labels.length; i++) {
+                    let obj = {};
+                    obj.lable = coenzyme_labels[i];
+                    obj.data = coenzyme_data[i];
+                    obj.data_pre = coenzyme_data_pre[i];
+                    coenzyme_obj_arr.push(obj);
+                }
+                console.log(coenzyme_obj_arr);
+            }
+
+            function fullFluxesArr() {
+
+                for (let i = 0; i < labels.length; i++) {
+                    let obj = {};
+                    obj.lable = labels[i];
+                    obj.data = flux_data[i];
+                    obj.data_pre = flux_data_pre[i];
+                    flux_obj_arr.push(obj);
+                }
+                console.log(flux_obj_arr);
+            }
+
+            function fullShadowArr() {
+
+                for (let i = 0; i < shadow_labels.length; i++) {
+                    let obj = {};
+                    obj.lable = shadow_labels[i];
+                    obj.data = shadow_prices_data[i];
+                    obj.data_pre = shadow_prices_data_pre[i];
+                    shadow_obj_arr.push(obj);
+                }
+                console.log(shadow_obj_arr);
+            }
+
+            function cmpAsc(obj1, obj2) {
+                let num1 = obj1.data - obj1.data_pre;
+                let num2 = obj2.data - obj2.data_pre;
+
+                if (num1 < num2) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+
+            function cmpDes(obj1, obj2) {
+                let num1 = obj1.data_pre - obj1.data;
+                let num2 = obj2.data_pre - obj2.data;
+
+                if (num1 < num2) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+
+            function cmpDiff(obj1, obj2) {
+                let num1 = obj1.data_pre;
+                let num2 = obj2.data_pre;
+                let num3 = Math.abs(obj1.data);
+                let num4 = Math.abs(obj2.data);
+
+                if (num3 < num4) {
+                    return -1;
+                } else if(num3 === num4) {
+                    if(num1 < num2){
+                        return 1;
+                    }else if(num1 > num2){
+                        return -1;
+                    }
+                } else {
+                    return 1;
+                }
+            }
+
+            function sortByAscending(objs) {
+                if (objs[0].data_pre === undefined) {
+                    return;
+                }
+                objs.sort(cmpAsc);
+            }
+
+            function sortByDescending(objs) {
+                if (objs[0].data_pre === undefined) {
+                    return;
+                }
+                objs.sort(cmpDes);
+            }
+
+            function sortByDifference(objs) {
+                if (objs[0].data_pre === undefined) {
+                    return;
+                }
+                objs.sort(cmpDiff);
+            }
+
+
+            function loadCoenzyme(num) {
+                let coenzyme_body = $('#coenzyme_body');
+                let str = '';
+                if (res_data.length === 2) {
+                    for (let i = 0; i < num; i++) {
+                        str += '<tr><td>' + coenzyme_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + coenzyme_obj_arr[i].data_pre.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + coenzyme_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '</tr>';
+                    }
+                } else {
+                    for (let i = 0; i < num; i++) {
+                        str += '<tr><td>' + coenzyme_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + 'None' + '</td>' +
+                            '<td class="' + '' + '">' + coenzyme_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '</tr>';
+                    }
+                }
+                coenzyme_body.html(str);
+            }
+
+            function load(num) {
+                let res_body = $('#res_body');
+                let str = '';
+
+                if (res_data.length === 2) {
+                    for (let i = 0; i < num; i++) {
+                        str += '<tr><td>' + flux_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + flux_obj_arr[i].data_pre.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + flux_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '</tr>';
+                    }
+                } else {
+                    for (let i = 0; i < num; i++) {
+                        str += '<tr><td>' + flux_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + 'None' + '</td>' +
+                            '<td class="' + '' + '">' + flux_obj_arr[i].data.toFixed(8) + '</td>' +
+                            
+                            '</tr>';
+                    }
+                }
+                res_body.html(str);
+            }
+
+            function loadShadowPrices(num = shadow_labels.length) {
+                // let len = shadow_labels.length;
+                let len = num;
+                let res_body = $('#shadow_body');
+                let str = '';
+                if (res_data.length === 2) {
+                    for (let i = 0; i < len; i++) {
+                        str += '<tr><td class="">' + shadow_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + shadow_obj_arr[i].data_pre.toFixed(8) + '</td>' +
+                            '<td class="' + '' + '">' + shadow_obj_arr[i].data.toFixed(8) + '</td>' +
+                            
+                            '</tr>';
+                    }
+                } else {
+                    for (let i = 0; i < len; i++) {
+                        str += '<tr><td>' + shadow_obj_arr[i].lable + '</td>' +
+                            '<td class="' + '' + '">' + 'None' + '</td>' +
+
+                            '<td class="' + '' + '">' + shadow_obj_arr[i].data.toFixed(8) + '</td>' +
+                            '</tr>';
+                    }
+                }
+                res_body.html(str);
+            }
+
+
+            $('#coen-ascend').on('click', function () {
+                sortByAscending(coenzyme_obj_arr);
+                loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
+            });
+
+            $('#coen-descend').on('click', function () {
+                sortByDescending(coenzyme_obj_arr);
+                loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
+            });
+
+            $('#coen-diff').on('click', function () {
+                sortByDifference(coenzyme_obj_arr);
+                loadCoenzyme(Math.min(coenzyme_obj_arr.length, 20));
+            });
+
+            $('#coen-more').on('click', function () {
+                loadCoenzyme(coenzyme_obj_arr.length);
+            });
+
+            $('#res-ascend').on('click', function () {
+                sortByAscending(flux_obj_arr);
+                load(Math.min(flux_obj_arr.length, 20));
+            });
+
+            $('#res-descend').on('click', function () {
+                sortByDescending(flux_obj_arr);
+                load(Math.min(flux_obj_arr.length, 20));
+            });
+
+            $('#res-diff').on('click', function () {
+                sortByDifference(flux_obj_arr);
+                load(Math.min(flux_obj_arr.length, 20));
+            });
+
+            $('#res-more').on('click', function () {
+                load(flux_obj_arr.length);
+            });
+
+            $('#shadow-ascend').on('click', function () {
+                sortByAscending(shadow_obj_arr);
+                loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
+            });
+
+            $('#shadow-descend').on('click', function () {
+                sortByDescending(shadow_obj_arr);
+                loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
+            });
+
+            $('#shadow-diff').on('click', function () {
+                sortByDifference(shadow_obj_arr);
+                loadShadowPrices(Math.min(shadow_obj_arr.length, 20));
+            });
+
+            $('#shadow-more').on('click', function () {
+                loadShadowPrices(shadow_obj_arr.length);
+            });
+
+
+
+
+
+        });
+
+    </script>
+
 {% endblock content %}

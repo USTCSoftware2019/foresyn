@@ -10,7 +10,7 @@ CREATE DATABASE igem_backend CHARACTER SET utf8 COLLATE utf8_bin;
 
 ### Temporary solution for pymysql
 
-In ```site-packages\django\db\backends\mysql\operations.py#34```
+In ```site-packages\django\db\backends\mysql\base.py#34```
 
 Comment #34, #35, #36
 

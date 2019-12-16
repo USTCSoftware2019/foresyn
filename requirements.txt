@@ -1,21 +1,25 @@
 Django>=2.2.3
 
-# cobra requires ruamel.yaml.clib>=0.1.2,
-# but in TUNA Pypi source, ruamel.yaml.clib<=0.1.0.
-# Can use official source to install it.
 cobra>=0.16.0
 celery>=4.3.0
 kombu>=4.6.3
+lxml>=4.4.1
+python-libsbml>=5.18.0
 
 pytz==2019.1
 sqlparse==0.3.0
 
 django-cors-headers==3.0.2
-django-haystack>=2.8.1
-elasticsearch>=2.0.0,<3.0.0
 
 flake8~=3.6.0
 invoke>=1.3.0
 fabric>=2.5.0
 
 pymysql>=0.9.3
+
+django-crispy-forms==1.7.2
+
+ttable==0.6.3
+psycopg2>=2.8.4
+sqlalchemy>=1.3.10
+django-mathfilters==0.4.0

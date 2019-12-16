@@ -1,4 +1,4 @@
-<table>
+<table class="table table-hover table-bordered mt-3">
     <thead>
         <tr>
             <th>BiGG ID</th>
@@ -17,7 +17,7 @@
         <tr>
             <th><a href="{{ meta.detail_url }}">{{ meta.bigg_id }}</a></th>
             <th>{{ meta.name }}</th>
-            <th>{{ meta.formulae.0 }}</th>
+            <th>{% if meta.formulae.0 %}{{ meta.formulae.0 }}{% endif %}</th>
             {% if contain_stoichiometry %}
             <th>{{ meta.stoichiometry }}</th>
             {% endif %}

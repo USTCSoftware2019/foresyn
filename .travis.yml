@@ -1,12 +1,14 @@
 language: python
 python: "3.6"
 dist: xenial
+sudo: required
 
 git:
   depth: 3
 
-env:
-  - ES_VERSION=2.4.6 ES_DOWNLOAD_URL=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.deb
+branches:
+  only:
+    - master
 
 addons:
   apt:
@@ -14,31 +16,33 @@ addons:
       - rabbitmq-server
 
 service:
-  - elasticsearch
+  - postgresql
   - rabbitmq
 
-before_install:
-  - curl -O ${ES_DOWNLOAD_URL} && sudo dpkg -i --force-confnew elasticsearch-${ES_VERSION}.deb && sudo service elasticsearch restart
 install:
-  - pip3 install --upgrade -r requirements.txt
+  - pip3 install -r requirements.txt
 
 before_script:
   - cd backend
-  - celery worker -l info -A backend -Q cobra_results &
-  - (cd cobra_wrapper/remote && celery worker -l info -A cobra_computation -Q cobra_feeds &)
-  - sleep 10  # leave time for elasticsearch and celery workers to start
+  - cp backend/config.example.py backend/config.py
+  - env PYTHONOPTIMIZE=1 celery worker -l info -A backend -Q cobra_results &> celery_backend.log &
+  - (cd cobra_wrapper/remote &&
+    env PYTHONOPTIMIZE=1 celery worker -l info -A cobra_computation -Q cobra_feeds &> celery_computation.log &)
+  - psql -c "create database igm_backend;" -U postgres
+  - psql -c "echo \"CREATE USER igem WITH PASSWORD 'igem';\" | psql" -U postgres
+  - echo "STATIC_ROOT = '/tmp/static'" >> backend/settings.py
 
 script:
   - flake8
-  - python3 manage.py test
+  - python3 manage.py fix_pymysql
+  - python3 manage.py migrate
+  - python3 manage.py migrate_to_psql
+  - python3 manage.py collectstatic
 
-before_cache:
-  - rm -rf $HOME/.cache/pip/http $HOME/.cache/pip/log
+after_script:
+  - kill %1 %2
+  - cat celery_backend.log
+  - cat cobra_wrapper/remote/celery_computation.log
+
 cache:
-  directories:
-    - $HOME/virtualenv/python3.6.*
-    - $HOME/.cache/pip
-
-branches:
-  only:
-    - master
+  pip: true
