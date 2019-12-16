@@ -1,7 +1,7 @@
 # https://stackoverflow.com/questions/50298114/django-2-how-to-register-a-user-using-email-confirmation-and-cbvs
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils import six
+import six
 
 
 class TokenGenerator(PasswordResetTokenGenerator):

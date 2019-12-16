@@ -5,16 +5,11 @@ services:
         ports:
             - "8000:8000"
         environment:
-            USE_MYSQL: "TRUE"
-            MYSQL_HOST: mysql
-            USE_ELASTICSEARCH: "TRUE"
-            ELASTICSEARCH_HOST: elasticsearch
-            CELERY_HOST: rabbitmq
             PYTHONUNBUFFERED: 1
+            CELERY_HOST: rabbitmq
         command: /run.sh 
         links:
             - mysql
-            - elasticsearch
             - rabbitmq
         volumes:
             - "./backend/:/app/"
@@ -29,12 +24,6 @@ services:
             - "./data:/docker-entrypoint-initdb.d"
         ports:
             - "3306:3306"
-    elasticsearch:
-       image: elasticsearch:2.4.6
-       volumes:
-           - "./es-data:/usr/share/elasticsearch/data"
-       ports:
-           - "9200:9200"
     rabbitmq:
         image: rabbitmq:3.7.17
         environment:

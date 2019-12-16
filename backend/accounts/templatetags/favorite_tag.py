@@ -1,7 +1,6 @@
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.loader import render_to_string
-from sqlalchemy.util._collections import AbstractKeyedTuple
 
 from accounts.models import Favorite
 
@@ -15,13 +14,6 @@ def favorite_button(context, target, **kwargs):
     # do nothing when user isn't authenticated
     if not user.is_authenticated:
         return ''
-
-    if isinstance(target, AbstractKeyedTuple):
-        # work around for search result
-        target_app = kwargs['app_label']
-        target_name = kwargs['model_name']
-        target_content_type = ContentType.objects.get(app_label=target_app, model=target_name)
-        target_object_id = target.django_orm_id
     elif not target._meta:
         target_app = target.app_label
         target_name = target.model_name

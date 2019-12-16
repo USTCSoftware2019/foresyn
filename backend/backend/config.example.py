@@ -2,16 +2,10 @@ SECRET_KEY = "This is USTC-Software 2019, replace this string with os.urandom(10
 DEBUG = False
 
 USE_MYSQL = True
-MYSQL_HOST = "127.0.0.1"
+MYSQL_HOST = "mysql"  # Used for docker
 MYSQL_USER = "root"
 MYSQL_PASSWORD = "mysql_pwd"
 MYSQL_PORT = 3306
-
-PSQL_USER = "igem"
-PSQL_PASSWORD = "igem"
-PSQL_HOST = "127.0.0.1"
-
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost//'
 
 USE_EMAIL = False
 # if USE_EMAIL is False, email will output on console

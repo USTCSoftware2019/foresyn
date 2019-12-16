@@ -113,15 +113,6 @@ else:
         }
     }
 
-# Postgresql Database
-# Used for search
-PSQL_DATABASE = {
-    'USER': config.PSQL_USER,
-    'PASSWORD': config.PSQL_PASSWORD,
-    'NAME': 'igem_backend',
-    'HOST': config.PSQL_HOST
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -180,7 +171,6 @@ EMAIL_HOST_USER = config.EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = config.EMAIL_HOST_PASSWORD
 DEFAULT_FROM_EMAIL = config.DEFAULT_FROM_EMAIL
 
-CELERY_BROKER_URL = config.CELERY_BROKER_URL
 CELERY_RESULT_BACKEND = 'rpc://'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_ROUTES = {
