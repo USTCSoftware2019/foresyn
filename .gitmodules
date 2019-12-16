@@ -1,0 +1,4 @@
+[submodule "my_trgm"]
+	path = my_trgm
+	url = git@github.com:zeyugao/my_trgm.git
+	branch = master

@@ -1,47 +1,12 @@
-from sqlalchemy import Column, Integer, String, Text
-
-from backend.psql import Base, DBSession, engine
-
-session = DBSession()
+from django.db.models import F, Func
 
 
-# The followings are the sqlalchemy model
+class TrgmSimilarity(Func):
+    function = 'trgm_similarity'
+    template = '%(function)s(%(expressions)s)'
 
+    def as_sqlite(self, *args, **kwargs):
+        raise RuntimeError('TrgmSimilarity doesn\'t support sqlite')
 
-class Model(Base):
-    __tablename__ = 'model'
-    django_orm_id = Column(Integer, unique=True, primary_key=True)
-    bigg_id = Column(String(127), unique=True, index=True)
-
-
-class Reaction(Base):
-    __tablename__ = 'reaction'
-    django_orm_id = Column(Integer, unique=True, primary_key=True)
-    bigg_id = Column(String(127), unique=True, index=True)
-    name = Column(String(255))
-
-
-class Metabolite(Base):
-    __tablename__ = 'metabolite'
-    django_orm_id = Column(Integer, unique=True, primary_key=True)
-    bigg_id = Column(String(127), unique=True, index=True)
-    name = Column(String(511))
-
-
-class Gene(Base):
-    __tablename__ = 'gene'
-    django_orm_id = Column(Integer, unique=True, primary_key=True)
-    bigg_id = Column(String(127), unique=True, index=True)
-    name = Column(String(127))
-
-
-class Biobrick(Base):
-    __tablename__ = 'biobrick'
-    django_orm_id = Column(Integer, unique=True, primary_key=True)
-    partname = Column(String(127))
-    description = Column(Text)
-    keywords = Column(Text)
-
-
-# Create the models above this line
-Base.metadata.create_all(engine)
+    def as_postgresql(self, compiler, connection):
+        return self.as_sql(compiler, connection, function='similarity')

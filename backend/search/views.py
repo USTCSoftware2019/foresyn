@@ -3,12 +3,10 @@ from django.views.generic import FormView, View
 from django.views.generic.edit import FormMixin
 from django.views.generic.list import MultipleObjectMixin
 
+from bigg_database.models import Gene, Metabolite, Model, Reaction
+
 from .forms import BareSearchForm
-from .models import Gene as psqlGene
-from .models import Metabolite as psqlMetabolite
-from .models import Model as psqlModel
-from .models import Reaction as psqlReaction
-from .psql import SimilarityQuery
+from .common import SimilarityQuery
 
 
 class BiGGDatabaseSearchView(MultipleObjectMixin, FormView):
@@ -16,10 +14,10 @@ class BiGGDatabaseSearchView(MultipleObjectMixin, FormView):
     template_name = 'bigg_database/search_result.html'
     paginate_by = 10
     model_map = {
-        'model': psqlModel,
-        'reaction': psqlReaction,
-        'metabolite': psqlMetabolite,
-        'gene': psqlGene
+        'model': Model,
+        'reaction': Reaction,
+        'metabolite': Metabolite,
+        'gene': Gene
     }
 
     def get_form_kwargs(self):
@@ -47,14 +45,12 @@ class BiGGDatabaseSearchView(MultipleObjectMixin, FormView):
         else:
             return self.form_invalid(form)
 
-    def construct_query(self, query_string, model, append_django_orm_id=False, apply_order=False):
+    def construct_query(self, query_string, model, apply_order=False):
         sq = SimilarityQuery()
         sq = sq.query(query_string)
-        sq = sq.entities(model.bigg_id) \
-            .entities(getattr(model, 'name', None)) \
-            .entities(model.django_orm_id if append_django_orm_id else None)
-        sq = sq.apply_filter_or(model.bigg_id, 0.2) \
-            .apply_filter_or(getattr(model, 'name', None), 0.3)
+        sq = sq.model(model)
+        sq = sq.apply_filter_or('bigg_id', 0.2)\
+            .apply_filter_or('name' if hasattr(model, 'name') else None, 0.3)
         if apply_order:
             sq = sq.apply_order()
         return sq
@@ -64,12 +60,11 @@ class BiGGDatabaseSearchView(MultipleObjectMixin, FormView):
         search_model = form.cleaned_data.get('model') or 'model'
         model = self.model_map[search_model]
 
-        sq = self.construct_query(query_string, model, append_django_orm_id=True, apply_order=True)
+        sq = self.construct_query(query_string, model, apply_order=True)
         object_list = sq.load_query()
 
         total_number = {
-            model_name: (self.construct_query(query_string, model_cls,
-                                              append_django_orm_id=False, apply_order=False)
+            model_name: (self.construct_query(query_string, model_cls, apply_order=False)
                          .count()
                          )
             for model_name, model_cls in self.model_map.items()
